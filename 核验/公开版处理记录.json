@@ -1,0 +1,145 @@
+{
+  "text_changes": [
+    {
+      "file": "07_缺失与纠错说明.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "00_先给新助手看.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/D02.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/D03.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/M05.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/O03.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/L04.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/M01.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/C03.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/C02.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/L01.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/O06.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/M04.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/O02.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/L05.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/M03.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/C01.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/L02.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/O05.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/M07.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/O01.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/L06.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/C05.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/M06.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/C04.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/L07.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/M02.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/L03.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/O04.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/D04.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/D01.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    },
+    {
+      "file": "原文/M08.md",
+      "change": "public notice and/or local-path, private-link, personal-schedule redaction"
+    }
+  ],
+  "withheld_images": [
+    "L02_2b6fabf5_L1285_0.webp",
+    "L02_2b6fabf5_L1285_1.webp",
+    "L02_2b6fabf5_L1285_2.webp",
+    "L02_2b6fabf5_L1285_3.webp",
+    "M06_e2d872ad_L6240_0.webp",
+    "M06_e2d872ad_L6240_1.webp"
+  ],
+  "reason": "course-player account record URLs or local filesystem paths; originals remain private",
+  "included_images": 12,
+  "topic_records": 30,
+  "selected_turns": 47,
+  "source_messages_before_public_redaction": 136
+}
