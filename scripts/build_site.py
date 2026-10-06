@@ -6,7 +6,9 @@ SUBJECTS=[('math','高等数学','01_高等数学.md','极限 · 微积分 · �
 def doc(p):
     text=p.read_text()
     heading=re.search(r'^# (.+)$',text,re.M)
-    return {'path':p.relative_to(ROOT).as_posix(),'title':heading.group(1) if heading else p.stem,'text':text,'sha256':hashlib.sha256(text.encode()).hexdigest()}
+    raw=p.read_bytes()
+    # gitSha equals the blob sha GitHub's contents API reports, so the page can tell whether its snapshot is current.
+    return {'path':p.relative_to(ROOT).as_posix(),'title':heading.group(1) if heading else p.stem,'text':text,'sha256':hashlib.sha256(text.encode()).hexdigest(),'gitSha':hashlib.sha1(b'blob %d\0'%len(raw)+raw).hexdigest()}
 def build():
     subjects=[]
     for sid,name,history,tag,prefix in SUBJECTS:

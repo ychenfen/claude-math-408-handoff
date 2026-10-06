@@ -3288,6 +3288,34 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 - 上传第23、24题作答，旧助手评价主体正确，并修正数组长度与取模下标写法。没有原手写图，本次不等于重新判卷。
 - 第25、27、08题和04～07(2)回炉题只是安排，没有当天完成证据。
 
+## 题目状态
+
+编号按王道2026第2.3节PV综合题题号，一题一个编号；题源年份照抄当天记录，未另行核对真题。状态由下方「作答记录」推出：三道有作答的题都没有注明是否独立完成，原手写图也不在本仓库，只有旧助手的判断，所以停在“作答待核实”。
+
+| 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
+|---|---|---|---|---|
+| `PV-22` 三线程复数相加（记录称2017统考） | 作答待核实 | [14:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | thread3写y用了未定义的`P(mutex_y)` → 先后获取`mutex_y1`、`mutex_y2`再写，写完两把都释放（写者要同时排除两类读者） | 闭卷重写thread3写y片段，逐把说明保护对象 |
+| `PV-23` 哲学家＋碗（记录称2019统考） | 作答待核实 | [15:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 数组未写长度 → `semaphore kuai[n]`；`kuai[i+1]%n`取模在下标外 → `kuai[(i+1)%n]`；未写信号量含义会扣分 | 闭卷重写，写出`wan`初值理由和每个信号量含义 |
+| `PV-24` 前驱关系（记录称2020统考） | 作答待核实 | [15:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 记录中没有指出错误；尚不能确认是否覆盖原图全部边 | 补原题图后逐条边核对P、V位置 |
+| `PV-25` 开关中断实现互斥（记录称2021统考） | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)、[14:58](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 只有旧助手对题型的概括，没有你的判断 | 先盖住答案，判断关中断后能否忙等，再对解析 |
+| `PV-27` swap实现临界区（记录称2023统考） | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)、[14:58](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 只有旧助手对题型的概括，没有你的判断 | 先盖住答案，判断退出区和swap原子性，再对解析 |
+| `PV-08` 纯软件两线程互斥 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)、[14:58](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 只有旧助手对题型的概括，没有你的判断 | 先盖住答案，判断是否满足忙则等待、空闲让进 |
+| `PV-04` 回炉 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
+| `PV-05` 回炉 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
+| `PV-06` 回炉 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
+| `PV-07(2)` 回炉，第(2)问 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
+| `二模-27` 时钟中断作用 | 已讨论 | [11:26](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 没有你的作答；选A是旧助手推导，PPT未给答案 | 找到原题后先自己逐项判断，再对照 |
+
+## 作答记录
+
+每次作答一行。作答方式：独立／有提示／看答案后／未注明／未作答；核对结果：正确／部分正确／错误／未核对；核对依据：原件已核／仅旧助手判断／未核对。只有“独立＋正确＋原件已核”才能升到“独立做对”，且作答内容要链接仓库里的作答全文或原图；另一天再这样通过一次才是“隔日重做通过”。脚本只检查这些字段齐不齐，不判断答案对不对。
+
+| 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
+|---|---|---|---|---|---|
+| `PV-22` | 未注明 | 手写图未入库；thread3写y片段摘录见来源 | 部分正确 | 仅旧助手判断 | [14:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) |
+| `PV-23` | 未注明 | 手写图未入库；被改的下标与声明摘录见来源 | 部分正确 | 仅旧助手判断 | [15:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) |
+| `PV-24` | 未注明 | 手写图未入库；信号量命名摘录见来源 | 正确 | 仅旧助手判断 | [15:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) |
+
 ## 知识点与适用条件
 
 ### 共享y：读读可并发，写者要排除所有读者
@@ -3332,11 +3360,15 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 
 **参考要点**：未完成前不允许C通过；A、B完成各自发V，C分别P等待两项。还应结合原图检查后继，不照搬孤立模板。
 
+### 自测：迁移｜如果读y的线程数量不固定、随时增加，还能沿用`PV-22`“每个读者一把锁”的写法吗？
+
+**参考要点**：不能直接沿用。`PV-22`的两把锁依赖“读者恰好两类、各有固定的一把锁”。读者数量不定时，写者无法预先拿全所有锁，应改用读者-写者问题的计数写法：用一个计数器记录正在读的人数，并用互斥信号量保护计数器；第一个读者封锁写者，最后一个读者释放。这里还要说明采用读者优先还是写者优先。
+
 ## 下次先做
 
-- [ ] 闭卷重写第22题写y片段，说明每一把锁保护什么。
-- [ ] 按原计划核对04、05、06、07(2)是否重做；未做就只选一题开始。
-- [ ] 把原手写图或完整题干补到对应记录，复核“全对”评价。
+- [ ] 先做`PV-22`：闭卷重写thread3写y片段，说明每一把锁保护什么；不看答案独立写完，把作答全文或照片放进当天问答，再请人对照核对；这样下次复盘才能记一行“独立＋核对结果＋原件已核”。
+- [ ] `PV-23`：闭卷重写，对照上表的两处下标／声明错误自查。
+- [ ] 把`PV-22`～`PV-24`原手写图或完整题干补到对应记录，复核“全对”评价；补不上就保持“作答待核实”。
 
 ## 来源与边界
 

@@ -6,6 +6,30 @@
   const API = 'https://api.github.com/repos/ychenfen/claude-math-408-handoff/contents/';
   let data, subject, date, tab = 'daily', generation = 0, currentText = '', storageOK = true;
   const memo = {}, synced = new Map();
+  const STATUSES = ['仅安排','已讨论','作答待核实','独立做对','隔日重做通过'];
+  const STATUS_NOTE = {'仅安排':'计划，未讨论','已讨论':'看过讲解，没有作答','作答待核实':'有作答，未达独立＋正确＋原件已核','独立做对':'独立作答，对照原件核对正确','隔日重做通过':'另一天再次独立做对'};
+  const TABS = ['daily','records','ledger','history','handoff'];
+  const ID_RE = /^[0-9A-Za-z一-鿿]+(?:[-.][0-9A-Za-z一-鿿]+)*(?:\(\d+\))?$/;
+  const section = (text,name) => { const m=text.match(new RegExp('^## '+name+'\\s*$([\\s\\S]*?)(?=^## |(?![\\s\\S]))','m')); return m?m[1]:null; };
+  const rowsOf = body => body.split('\n').filter(l=>l.trim().startsWith('|')).slice(2).map(l=>l.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim()));
+  const idOf = cell => { const ids=[...cell.matchAll(/`([^`]*)`/g)].map(m=>m[1]); return ids.length===1&&ID_RE.test(ids[0])?ids[0]:null; };
+  const qaDate = cell => [...cell.matchAll(/\]\([^)]*问答记录\/[^/]+\/(\d{4}-\d{2}-\d{2})\.md\)/g)].map(m=>m[1]).sort().pop()||'';
+  // Mirrors scripts/ledger.py: status comes from the attempt log; the table's own value is only compared.
+  function parseReview(text) {
+    const qBody=section(text||'','题目状态');if(qBody===null)return null;
+    const problems=[],questions=new Map();
+    rowsOf(qBody).forEach(c=>{const id=idOf(c[0]||'');if(!id){problems.push(`编号不合规（需一题一个编号，不能写范围）：${c[0]}`);return;}if(questions.has(id)){problems.push(`编号重复：${id}`);return;}questions.set(id,{id,title:c[0],declared:c[1],source:c[2]||'',fix:c[3]||'',next:c[4]||''});});
+    const attempts=rowsOf(section(text,'作答记录')||'').map(c=>({id:idOf(c[0]||''),mode:c[1],content:c[2]||'',result:c[3],basis:c[4],source:c[5]||'',date:qaDate(c[5]||'')})).filter(a=>a.id&&questions.has(a.id));
+    return {questions,attempts,problems};
+  }
+  const counts = a => a.mode!=='未作答';
+  const verified = a => a.mode==='独立'&&a.result==='正确'&&a.basis==='原件已核'&&/\]\(/.test(a.content);
+  function derive(attempts,discussed) {
+    const real=attempts.filter(counts);if(!real.length)return discussed?'已讨论':'仅安排';
+    const last=real[real.length-1];if(!verified(last))return '作答待核实';
+    return real.some(a=>a.date<last.date)?'隔日重做通过':'独立做对';
+  }
+  function nextAction(text) { const body=section(text||'','下次先做');const m=body&&body.match(/^- \[ \] (.+)$/m);return m?m[1].trim():''; }
   const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const encodePath = p => p.split('/').map(encodeURIComponent).join('/');
   const localDate = () => new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -32,11 +56,12 @@
       while(next && !(next.nodeType===1 && /^H[123]$/.test(next.tagName))){const move=next;next=next.nextSibling;answer.append(move);}
       box.append(answer);h.replaceWith(box);
     });
+    el.querySelectorAll('td').forEach(td=>{if(STATUSES.includes(td.textContent.trim())){td.innerHTML=`<span class="status s${STATUSES.indexOf(td.textContent.trim())}">${escape(td.textContent.trim())}</span>`;}});
     if(window.renderMathInElement)renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}],throwOnError:false,trust:false});
     return el;
   }
   function prompt() {
-    return `你负责【${subject.name}】。请先读 https://github.com/ychenfen/claude-math-408-handoff 的 AGENTS.md、每日复盘/使用说明.md 和该科历史交接。\n\n请按北京时间 ${date}，读取 问答记录/${subject.name}/${date}.md 的真实记录，总结今天实际涉及的内容、知识点及适用条件、我的具体卡点与纠正、3～5个闭卷自测和最多3项下一步动作。引用原问答；没有作答、原图或教材就标未核实，不把计划当完成、不混入其他科目。\n\n按 每日复盘/模板.md 保存到 每日复盘/${subject.name}/${date}.md。后续每次答疑追加到该科当天问答。请先给我核对公开内容；只有我授权上传时再提交GitHub，不覆盖其他助手改动。`;
+    return `你负责【${subject.name}】。请先读 https://github.com/ychenfen/claude-math-408-handoff 的 AGENTS.md、每日复盘/使用说明.md 和该科历史交接。\n\n请按北京时间 ${date}，先看本科最近一份复盘的「题目状态」和「下次先做」，再读取 问答记录/${subject.name}/${date}.md 的真实记录，总结今天实际涉及的内容、逐题状态（仅安排／已讨论／作答待核实／独立做对／隔日重做通过，沿用题目编号，没有作答证据不升级）、知识点及适用条件、我的具体卡点与纠正、3～5个闭卷自测（至少一题迁移）和最多3项下一步动作。引用原问答；没有作答、原图或教材就标未核实，不把计划当完成、不混入其他科目。\n\n按 每日复盘/模板.md 保存到 每日复盘/${subject.name}/${date}.md。后续每次答疑追加到该科当天问答。请先给我核对公开内容；只有我授权上传时再提交GitHub，不覆盖其他助手改动。`;
   }
   function summaryDoc() { return subject.summaries.find(d=>d.date===date); }
   function recordDoc() { return subject.records.find(d=>d.date===date); }
@@ -52,7 +77,8 @@
     $('#subjects').innerHTML=data.subjects.map((s,i)=>`<button class="subject" data-subject="${s.id}" aria-current="${s===subject}"><span class="num">0${i+1}</span>${escape(s.name)}${s.records.length?'<i class="dot"></i>':''}</button>`).join('');
     $('#subjects').querySelectorAll('button').forEach(b=>b.onclick=()=>select(b.dataset.subject,null,'daily'));
     const available=Boolean(summaryDoc());
-    $('#overview').innerHTML=`<div class="metric"><div class="mark">↗</div><div><b>${available?'这一天，已有复盘':recordDoc()?'已有问答 · 等待整理':'这一天，尚无记录'}</b><span>${available?'先闭卷回想，再展开参考要点':recordDoc()?'记录不是完成，先确认再归纳':'留白真实，比补写可靠'}</span></div></div><div class="metric"><strong>${subject.records.length}</strong><div><b>天问答</b><span>本科独立保存</span></div></div><div class="metric"><strong>${subject.archive.length}</strong><div><b>历史主题</b><span>不是掌握数量</span></div></div>`;
+    const next=available?nextAction(summaryDoc().text).replace(/`/g,''):'';
+    $('#overview').innerHTML=`<div class="metric"><div class="mark">↗</div><div><b>${next?'下次先做':available?'这一天，已有复盘':recordDoc()?'已有问答 · 等待整理':'这一天，尚无记录'}</b><span class="${next?'next-action':''}">${next?escape(next):available?'先闭卷回想，再展开参考要点':recordDoc()?'记录不是完成，先确认再归纳':'留白真实，比补写可靠'}</span></div></div><div class="metric"><strong>${subject.records.length}</strong><div><b>天问答</b><span>本科独立保存</span></div></div><div class="metric"><strong>${subject.archive.length}</strong><div><b>历史主题</b><span>不是掌握数量</span></div></div>`;
     document.querySelectorAll('[data-tab]').forEach(b=>{b.setAttribute('aria-selected',b.dataset.tab===tab);b.tabIndex=b.dataset.tab===tab?0:-1;});
     const reviewed=get(key('reviewed'))==='yes';$('#reviewed').textContent=reviewed?'✓ 已标记复盘 · 点击撤销':'标记本次已复盘';$('#reviewed').classList.toggle('done',reviewed);$('#reviewed').disabled=!available;
     $('#review-state').textContent=storageOK?'仅当前浏览器的自报标记，不代表掌握':'存储不可用，请导出；标记仅临时保留';
@@ -71,6 +97,37 @@
         const label=document.createElement('label');label.textContent='本科提示词（可手动选中复制）';label.htmlFor='prompt-text';pane.append(label);
         const field=document.createElement('textarea');field.id='prompt-text';field.className='search';field.rows=10;field.readOnly=true;field.value=prompt();pane.append(field);
         pane.append(renderMarkdown(data.protocol.text,data.protocol.path));currentText=prompt()+'\n\n'+data.protocol.text;
+      } else if(tab==='ledger') {
+        const docs=[...subject.summaries].sort((a,b)=>a.date.localeCompare(b.date));
+        for(const d of docs){await loadDoc(d);if(own!==generation)return;}
+        const items=new Map(),missing=[],problems=[];
+        docs.forEach(d=>{
+          const parsed=parseReview(d.text);if(parsed===null){missing.push(d.date);return;}
+          parsed.problems.forEach(x=>problems.push(`${d.date}：${x}`));
+          parsed.questions.forEach((q,id)=>{
+            const it=items.get(id)||{trail:[],attempts:[],discussed:false};
+            it.attempts.push(...parsed.attempts.filter(a=>a.id===id));it.attempts.sort((a,b)=>a.date.localeCompare(b.date));
+            it.discussed=it.discussed||q.declared==='已讨论'||it.trail.some(([,s])=>s!=='仅安排');
+            const status=derive(it.attempts,it.discussed);
+            if(q.declared!==status)problems.push(`${d.date} ${id}：表中写“${q.declared}”，作答记录只支持“${status}”，此处按证据显示`);
+            Object.assign(it,q,{status,path:d.path});it.trail.push([d.date,status]);items.set(id,it);
+          });
+        });
+        pane.innerHTML='<div class="doc-meta"><span class="badge">题目追踪</span><span>每题只显示最新状态 · 状态由逐次作答记录推出 · 只查证据是否齐全，不替你判卷</span></div>';
+        const scale=document.createElement('ol');scale.className='status-scale';scale.innerHTML=STATUSES.map((s,i)=>`<li><span class="status s${i}">${s}</span><small>${STATUS_NOTE[s]}</small></li>`).join('');pane.append(scale);
+        if(problems.length){const w=document.createElement('div');w.className='ledger-warning';w.innerHTML='<b>需要整理的记录</b>'+problems.map(x=>`<p>${escape(x)}</p>`).join('');pane.append(w);}
+        if(!items.size){const p=document.createElement('p');p.className='ledger-empty';p.textContent=docs.length?'本科复盘还没有题目状态表。助手整理复盘时按模板补上；没有作答记录的题不会被升级。':'本科还没有复盘，也就没有可追踪的题目。';pane.append(p);}
+        const rank=s=>s==='作答待核实'?-1:STATUSES.indexOf(s);
+        [...items.values()].sort((a,b)=>rank(a.status)-rank(b.status)).forEach(it=>{
+          const card=document.createElement('section');card.className='ledger-item';card.dataset.id=it.id;
+          card.innerHTML=`<header><span class="status s${STATUSES.indexOf(it.status)}">${escape(it.status)}</span><span class="trail">${it.trail.map(([d,s])=>escape(d.slice(5)+' '+s)).join(' → ')}</span></header>`;
+          const lastTry=[...it.attempts].reverse().find(counts);
+          [['',it.title],['卡点 → 更正',it.fix],['下次验证',it.next],['最近作答',lastTry?`${lastTry.date} · ${lastTry.mode} · ${lastTry.result} · ${lastTry.basis}　${lastTry.content}`:''],['来源',it.source]].forEach(([label,value])=>{if(!value||value==='—')return;const row=document.createElement('div');row.className=label?'ledger-row':'ledger-title';if(label){const b=document.createElement('b');b.textContent=label;row.append(b);}row.append(renderMarkdown(value,it.path));card.append(row);});
+          if(it.attempts.filter(counts).length>1){const more=document.createElement('details');more.className='attempts';more.innerHTML=`<summary>全部${it.attempts.filter(counts).length}次作答</summary>`+it.attempts.filter(counts).map(a=>`<p>${escape(`${a.date} · ${a.mode} · ${a.result} · ${a.basis}`)}</p>`).join('');card.append(more);}
+          pane.append(card);
+        });
+        if(missing.length){const p=document.createElement('p');p.className='ledger-missing';p.textContent=`以下复盘没有题目状态表，未计入：${missing.join('、')}。`;pane.append(p);}
+        currentText=['# '+subject.name+'｜题目追踪','','状态由作答记录推出；只检查证据是否齐全，不判断答案正确性。','',...[...items.values()].map(it=>`- ${it.id}｜${it.status}｜${it.trail.map(([d,s])=>d+' '+s).join(' → ')}｜下次：${it.next}`)].join('\n')+'\n';
       } else if(tab==='history') {
         pane.innerHTML='<div class="doc-meta"><span class="badge">历史交接</span><span>原回答可能有误，请连同边界说明阅读</span></div>';
         pane.append(renderMarkdown(subject.history.text,subject.history.path));
@@ -100,22 +157,24 @@
         return values.filter(d=>d.type==='file'&&/^\d{4}-\d{2}-\d{2}\.md$/.test(d.name)).map(d=>({path:base+'/'+d.name,date:d.name.slice(0,10),title:d.name,gitSha:d.sha})).sort((a,b)=>b.date.localeCompare(a.date));
       }));
       // A local preview may contain not-yet-published days; do not erase its evidence on 404.
-      const merge=(old,remote)=>[...new Map([...old,...remote].map(d=>[d.date,d])).values()].sort((a,b)=>b.date.localeCompare(a.date));
+      // Same blob sha → keep the snapshot text; changed or new on GitHub → use GitHub's version (fetched from Raw on demand).
+      // A file missing on GitHub is kept, so a local preview does not lose unpublished evidence.
+      const merge=(old,remote)=>{const m=new Map(old.map(d=>[d.date,d]));remote.forEach(r=>{const o=m.get(r.date);if(!o||o.gitSha!==r.gitSha)m.set(r.date,r);});return [...m.values()].sort((a,b)=>b.date.localeCompare(a.date));};
       s.records=merge(s.records,results[0]);s.summaries=merge(s.summaries,results[1]);
-      synced.set(s.id,'已检查GitHub · 合并发布快照');
+      const fresh=[...s.records,...s.summaries].filter(d=>d.text===undefined).length;synced.set(s.id,fresh?`已检查GitHub · ${fresh}个文件比快照新`:'已检查GitHub · 与发布快照一致');
       if(s===subject){await render();}
     } catch {synced.set(s.id,'GitHub未连通／限流 · 使用发布快照');if(s===subject)$('#sync-state').textContent=synced.get(s.id);}
   }
   async function copyPrompt() {try {await navigator.clipboard.writeText(prompt());notify('本科每日提示词已复制');}catch {tab='handoff';await render();const field=$('#prompt-text');field.focus();field.select();notify('无法自动复制，已选中提示词，请手动复制。');}}
-  document.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>select(subject.id,date,b.dataset.tab);b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const buttons=[...document.querySelectorAll('[data-tab]')],i=buttons.indexOf(b),n=buttons[(i+(e.key==='ArrowRight'?1:3))%4];n.click();n.focus();};});
+  document.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>select(subject.id,date,b.dataset.tab);b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const buttons=[...document.querySelectorAll('[data-tab]')],i=buttons.indexOf(b),n=buttons[(i+(e.key==='ArrowRight'?1:buttons.length-1))%buttons.length];n.click();n.focus();};});
   $('#date').onchange=e=>{if(e.target.value)select(subject.id,e.target.value,tab);};
   $('#refresh').onclick=()=>syncSubject(true);$('#copy-prompt').onclick=copyPrompt;
   $('#reviewed').onclick=()=>{put(key('reviewed'),get(key('reviewed'))==='yes'?'no':'yes');updateChrome();};
   $('#draft').oninput=e=>put(key('draft'),e.target.value);
   $('#clear-draft').onclick=()=>{if(!get(key('draft')))return;if(confirm('清空本日期、本科目的本地草稿？建议先导出。')){put(key('draft'),'');$('#draft').value='';}};
   $('#export-draft').onclick=()=>download(`# ${date} ${subject.name}｜个人复盘草稿\n\n${get(key('draft'))}\n\n仅个人草稿，公开上传前需审核。\n`,`${date}-${subject.name}-个人草稿.md`);
-  $('#export').onclick=()=>{if(currentText)download(currentText,`${date}-${subject.name}-${tab}.md`);};
-  function route(){const [id,d,t]=location.hash.slice(1).split('/');select(id,d,['daily','records','history','handoff'].includes(t)?t:'daily');}
+  $('#export').onclick=()=>{if(currentText)download(currentText,`${date}-${subject.name}-${{daily:'每日复盘',records:'当天问答',ledger:'题目追踪',history:'过往记录',handoff:'交给助手'}[tab]}.md`);};
+  function route(){const [id,d,t]=location.hash.slice(1).split('/');select(id,d,TABS.includes(t)?t:'daily');}
   window.addEventListener('hashchange',()=>{if(data)route();});
   fetch('assets/data.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{data=d;route();}).catch(()=>{$('#subject-title').textContent='学习档案暂时未加载';$('#content').textContent='请刷新页面，或通过左侧公开资料库直接读取Markdown。';});
 })();

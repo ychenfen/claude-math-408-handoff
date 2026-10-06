@@ -5,15 +5,28 @@ async (page) => {
   try {
     await page.setViewportSize({width:1440,height:1000});
     await page.goto('http://127.0.0.1:8765/#os/2026-10-05/daily');await page.waitForLoadState('networkidle');
-    assert(await page.locator('details.selftest').count()===4,'OS self-tests missing');
+    assert(await page.locator('details.selftest').count()===5,'OS self-tests missing');
     assert(await page.locator('details.selftest[open]').count()===0,'Answers should start hidden');
     await page.locator('details.selftest summary').first().click();
     assert(await page.locator('details.selftest[open]').count()===1,'Reveal failed');
+    assert((await page.locator('#overview').textContent()).includes('下次先做'),'Next action missing');
+    assert((await page.locator('#overview').textContent()).includes('PV-22'),'Next action should name a question');
+    assert(await page.locator('#content td .status').count()===11,'Status pills in daily table');
+    await page.getByRole('tab',{name:'题目追踪'}).click();await page.locator('.ledger-item').first().waitFor();
+    assert(await page.locator('.ledger-item').count()===11,'Ledger items');
+    assert((await page.locator('.ledger-item').first().textContent()).includes('作答待核实'),'Unverified answers first');
+    assert(await page.locator('.ledger-item .status.s3, .ledger-item .status.s4').count()===0,'No unearned upgrades');assert(await page.locator('.ledger-warning').count()===0,'Committed sample should be consistent');assert(await page.locator('.ledger-item[data-id="PV-07(2)"]').count()===1,'Split range item');
+    assert((await page.locator('.ledger-item a[href*="问答记录"], .ledger-item a[href*="%E9%97%AE"]').count())>0,'Evidence links');
+    const ledgerDownload=page.waitForEvent('download');await page.locator('#export').click();
+    const ln=(await ledgerDownload).suggestedFilename();assert(ln.includes('题目追踪'),'Ledger export '+ln+' '+(await ledgerDownload).url());
     await page.getByRole('tab',{name:'当天问答'}).click();
     assert((await page.locator('#content').textContent()).includes('14:51'),'OS original Q&A missing');
     assert(!(await page.locator('#content').textContent()).includes('暴力解手册'),'Subjects mixed');
     await page.locator('[data-subject="ds"]').click();await page.waitForLoadState('networkidle');
     assert(await page.locator('details.selftest').count()===3,'DS summary missing');
+    await page.getByRole('tab',{name:'题目追踪'}).click();await page.locator('.ledger-empty').waitFor();
+    assert((await page.locator('.ledger-missing').textContent()).includes('2026-10-05'),'Missing table should be reported');
+    await page.getByRole('tab',{name:'每日复盘'}).click();
     assert(await page.locator('.katex').count()>0,'Math not rendered');
     await page.locator('#draft').fill('自动测试草稿：不公开上传');await page.locator('#reviewed').click();
     await page.reload();await page.waitForLoadState('networkidle');
@@ -40,11 +53,14 @@ async (page) => {
     assert((await download).suggestedFilename().includes('操作系统'),'Export filename');
     await page.setViewportSize({width:390,height:844});await page.evaluate(()=>scrollTo(0,0));
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile horizontal overflow');
+    await page.getByRole('tab',{name:'题目追踪'}).click();await page.locator('.ledger-item').first().waitFor();
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile ledger overflow');
+    await page.screenshot({path:'/tmp/study-mobile-ledger.png',fullPage:true});await page.getByRole('tab',{name:'每日复盘'}).click();
     await page.screenshot({path:'/tmp/study-mobile.png',fullPage:true});
     await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'/tmp/study-desktop-final.png',fullPage:false});
     await page.evaluate(()=>{localStorage.removeItem('study-v1:ds:2026-10-05:draft');localStorage.removeItem('study-v1:ds:2026-10-05:reviewed');});
     assert(errors.length===0,'JS errors: '+errors.join(','));
-    return {status:'PASS',checks:['six subjects','strict subject separation','hidden answers','math rendering','draft persistence and isolation','review marker','empty-date state','search','assistant prompt','Markdown download','mobile overflow','no JS errors']};
+    return {status:'PASS',checks:['status pills','next action','ledger view','no unearned upgrades','missing-table notice','six subjects','strict subject separation','hidden answers','math rendering','draft persistence and isolation','review marker','empty-date state','search','assistant prompt','Markdown download','mobile overflow','no JS errors']};
   } finally {
     await page.evaluate(()=>{localStorage.removeItem('study-v1:ds:2026-10-05:draft');localStorage.removeItem('study-v1:ds:2026-10-05:reviewed');});
     await page.unroute('https://api.github.com/**');
