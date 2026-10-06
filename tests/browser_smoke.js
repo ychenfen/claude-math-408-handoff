@@ -4,6 +4,19 @@ async (page) => {
   const assert=(v,m)=>{if(!v)throw Error(m);};
   try {
     await page.setViewportSize({width:1440,height:1000});
+    await page.goto('http://127.0.0.1:8765/');await page.waitForLoadState('networkidle');
+    await page.locator('.all-row').first().waitFor();
+    assert(await page.locator('.all-row').count()===6,'Overview rows');
+    const osRow=page.locator('.all-row[data-subject="os"]');
+    assert((await osRow.locator('.seg').count())===3,'OS status segments');
+    assert((await osRow.textContent()).includes('11题')&&(await osRow.textContent()).includes('下次先做'),'OS overview text');
+    assert((await page.locator('.all-row[data-subject="math"]').textContent()).includes('还没有复盘'),'Empty subject honest');
+    await osRow.locator('.seg').first().hover();assert(!(await page.locator('.chart-tip').isHidden()),'Bar tooltip');
+    await page.setViewportSize({width:390,height:844});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile overview overflow');
+    await page.screenshot({path:'/tmp/study-overview-mobile.png',fullPage:true});await page.setViewportSize({width:1440,height:1000});
+    await page.screenshot({path:'/tmp/study-overview-desktop.png',fullPage:true});
+    await osRow.click();await page.locator('.ledger-item').first().waitFor();
+    assert(await page.locator('#subject-title').textContent()==='操作系统','Overview → subject ledger');
     await page.goto('http://127.0.0.1:8765/#os/2026-10-05/daily');await page.waitForLoadState('networkidle');
     assert(await page.locator('details.selftest').count()===5,'OS self-tests missing');
     assert(await page.locator('details.selftest[open]').count()===0,'Answers should start hidden');
@@ -60,7 +73,7 @@ async (page) => {
     await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'/tmp/study-desktop-final.png',fullPage:false});
     await page.evaluate(()=>{localStorage.removeItem('study-v1:ds:2026-10-05:draft');localStorage.removeItem('study-v1:ds:2026-10-05:reviewed');});
     assert(errors.length===0,'JS errors: '+errors.join(','));
-    return {status:'PASS',checks:['status pills','next action','ledger view','no unearned upgrades','missing-table notice','six subjects','strict subject separation','hidden answers','math rendering','draft persistence and isolation','review marker','empty-date state','search','assistant prompt','Markdown download','mobile overflow','no JS errors']};
+    return {status:'PASS',checks:['six-subject overview','status bars + tooltip','activity strip','status pills','next action','ledger view','no unearned upgrades','missing-table notice','six subjects','strict subject separation','hidden answers','math rendering','draft persistence and isolation','review marker','empty-date state','search','assistant prompt','Markdown download','mobile overflow','no JS errors']};
   } finally {
     await page.evaluate(()=>{localStorage.removeItem('study-v1:ds:2026-10-05:draft');localStorage.removeItem('study-v1:ds:2026-10-05:reviewed');});
     await page.unroute('https://api.github.com/**');

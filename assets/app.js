@@ -4,7 +4,7 @@
   const $ = s => document.querySelector(s);
   const RAW = 'https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/';
   const API = 'https://api.github.com/repos/ychenfen/claude-math-408-handoff/contents/';
-  let data, subject, date, tab = 'daily', generation = 0, currentText = '', storageOK = true;
+  let data, subject, date, mode = 'subject', tab = 'daily', generation = 0, currentText = '', storageOK = true;
   const memo = {}, synced = new Map();
   const STATUSES = ['仅安排','已讨论','作答待核实','独立做对','隔日重做通过'];
   const STATUS_NOTE = {'仅安排':'计划，未讨论','已讨论':'看过讲解，没有作答','作答待核实':'有作答，未达独立＋正确＋原件已核','独立做对':'独立作答，对照原件核对正确','隔日重做通过':'另一天再次独立做对'};
@@ -28,6 +28,25 @@
     const real=attempts.filter(counts);if(!real.length)return discussed?'已讨论':'仅安排';
     const last=real[real.length-1];if(!verified(last))return '作答待核实';
     return real.some(a=>a.date<last.date)?'隔日重做通过':'独立做对';
+  }
+  // Per-question latest status for one subject, derived from every review's attempt log (oldest first).
+  async function ledgerOf(s) {
+    const docs=[...s.summaries].sort((a,b)=>a.date.localeCompare(b.date));
+    for(const d of docs)await loadDoc(d);
+    const items=new Map(),missing=[],problems=[];
+    docs.forEach(d=>{
+      const parsed=parseReview(d.text);if(parsed===null){missing.push(d.date);return;}
+      parsed.problems.forEach(x=>problems.push(`${d.date}：${x}`));
+      parsed.questions.forEach((q,id)=>{
+        const it=items.get(id)||{trail:[],attempts:[],discussed:false};
+        it.attempts.push(...parsed.attempts.filter(a=>a.id===id));it.attempts.sort((a,b)=>a.date.localeCompare(b.date));
+        it.discussed=it.discussed||q.declared==='已讨论'||it.trail.some(([,s])=>s!=='仅安排');
+        const status=derive(it.attempts,it.discussed);
+        if(q.declared!==status)problems.push(`${d.date} ${id}：表中写“${q.declared}”，作答记录只支持“${status}”，此处按证据显示`);
+        Object.assign(it,q,{status,path:d.path});it.trail.push([d.date,status]);items.set(id,it);
+      });
+    });
+    return {items,missing,problems,docs};
   }
   function nextAction(text) { const body=section(text||'','下次先做');const m=body&&body.match(/^- \[ \] (.+)$/m);return m?m[1].trim():''; }
   const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -71,11 +90,14 @@
     $('#empty-copy').onclick=copyPrompt;
   }
   function updateChrome() {
+    document.body.classList.toggle('all-mode',mode==='all');
+    $('#all-link').setAttribute('aria-current',mode==='all');
     document.title=`${subject.name} · 温故学习工作台`;
     $('#subject-title').textContent=subject.name;$('#tagline').textContent=subject.tag;$('#date').value=date;
     $('#eyebrow').textContent=`SUBJECT ${String(data.subjects.indexOf(subject)+1).padStart(2,'0')} / 六科独立记录`;
-    $('#subjects').innerHTML=data.subjects.map((s,i)=>`<button class="subject" data-subject="${s.id}" aria-current="${s===subject}"><span class="num">0${i+1}</span>${escape(s.name)}${s.records.length?'<i class="dot"></i>':''}</button>`).join('');
+    $('#subjects').innerHTML=data.subjects.map((s,i)=>`<button class="subject" data-subject="${s.id}" aria-current="${mode!=='all'&&s===subject}"><span class="num">0${i+1}</span>${escape(s.name)}${s.records.length?'<i class="dot"></i>':''}</button>`).join('');
     $('#subjects').querySelectorAll('button').forEach(b=>b.onclick=()=>select(b.dataset.subject,null,'daily'));
+    if(mode==='all'){document.title='六科总览 · 温故学习工作台';$('#subject-title').textContent='六科总览';$('#tagline').textContent='先看哪科卡着，再进该科做题';$('#eyebrow').textContent='OVERVIEW / 数学二 + 408';$('#overview').innerHTML='';$('#sync-state').textContent='发布快照 · 已检查科目会合并GitHub新记录';return;}
     const available=Boolean(summaryDoc());
     const next=available?nextAction(summaryDoc().text).replace(/`/g,''):'';
     $('#overview').innerHTML=`<div class="metric"><div class="mark">↗</div><div><b>${next?'下次先做':available?'这一天，已有复盘':recordDoc()?'已有问答 · 等待整理':'这一天，尚无记录'}</b><span class="${next?'next-action':''}">${next?escape(next):available?'先闭卷回想，再展开参考要点':recordDoc()?'记录不是完成，先确认再归纳':'留白真实，比补写可靠'}</span></div></div><div class="metric"><strong>${subject.records.length}</strong><div><b>天问答</b><span>本科独立保存</span></div></div><div class="metric"><strong>${subject.archive.length}</strong><div><b>历史主题</b><span>不是掌握数量</span></div></div>`;
@@ -89,8 +111,34 @@
     if(doc.text!==undefined)return doc;
     const r=await request(RAW+encodePath(doc.path));const t=await r.text();if(t.length>500000)throw Error('文件过大');doc.text=t;return doc;
   }
+  const today = localDate();
+  const daysBetween = (a,b) => Math.round((Date.parse(b)-Date.parse(a))/864e5);
+  async function renderAll(own) {
+    const pane=$('#content');pane.innerHTML='<p>正在汇总六科…</p>';
+    const rows=[];for(const s of data.subjects){rows.push({s,L:await ledgerOf(s)});if(own!==generation)return;}
+    pane.innerHTML='';
+    const head=document.createElement('div');head.className='all-head';
+    head.innerHTML=`<div><b>每科：题目状态分布 · 最近14天记录 · 下次先做</b><span>状态由作答记录推出，只说明证据到了哪一步，不代表掌握。点一行进入该科题目追踪。</span></div><ol class="legend">${STATUSES.map((st,i)=>`<li><i class="sw s${i}"></i>${st}</li>`).join('')}</ol>`;
+    pane.append(head);
+    const span=[...Array(14)].map((_,i)=>{const d=new Date(Date.parse(today)-(13-i)*864e5);return d.toISOString().slice(0,10);});
+    rows.forEach(({s,L})=>{
+      const items=[...L.items.values()],n=items.length,count=STATUSES.map(st=>items.filter(it=>it.status===st).length);
+      const days=new Set(s.records.map(d=>d.date)),reviews=new Set(s.summaries.map(d=>d.date));
+      const last=[...days,...reviews].sort().pop();
+      const latestReview=[...L.docs].reverse().find(d=>d.text);const next=latestReview?nextAction(latestReview.text).replace(/`/g,''):'';
+      const row=document.createElement('button');row.className='all-row';row.dataset.subject=s.id;
+      const bar=n?`<div class="stack" role="img" aria-label="${escape(s.name)}共${n}题：${STATUSES.map((st,i)=>count[i]?st+count[i]:'').filter(Boolean).join('，')}">${STATUSES.map((st,i)=>count[i]?`<span class="seg s${i}" style="flex:${count[i]}" data-tip="${st} ${count[i]}题"></span>`:'').join('')}</div><div class="stack-text">${n}题 · ${STATUSES.map((st,i)=>count[i]?`${st} ${count[i]}`:'').filter(Boolean).join(' · ')}</div>`:`<div class="stack empty-stack"></div><div class="stack-text muted">${s.summaries.length?'复盘还没有题目状态表':'还没有复盘'}</div>`;
+      const strip=`<div class="strip" aria-label="最近14天记录">${span.map(d=>{const lv=reviews.has(d)?2:days.has(d)?1:0;return `<i class="day d${lv}" data-tip="${d.slice(5)} ${['无记录','有问答','有问答和复盘'][lv]}"></i>`;}).join('')}</div><div class="strip-cap"><span>${span[0].slice(5)}</span><span>近14天</span><span>${span[13].slice(5)}</span></div>`;
+      row.innerHTML=`<div class="all-name"><b>${escape(s.name)}</b><span>${last?`最近记录 ${last.slice(5)} · ${daysBetween(last,today)===0?'今天':daysBetween(last,today)+'天前'}`:'暂无记录'}</span></div><div class="all-bar">${bar}</div><div class="all-days">${strip}</div><div class="all-next">${next?`<b>下次先做</b>${escape(next)}`:'<span class="muted">—</span>'}</div>`;
+      row.onclick=()=>select(s.id,null,n?'ledger':'daily');pane.append(row);
+    });
+    const foot=document.createElement('p');foot.className='all-foot';foot.textContent=`数据：随站点发布的快照，加上本次已检查过GitHub的科目。14天按北京时间，截止 ${today}。`;pane.append(foot);
+    currentText=['# 六科总览','',...rows.map(({s,L})=>{const items=[...L.items.values()];return `- ${s.name}：${items.length}题；`+STATUSES.map(st=>`${st}${items.filter(i=>i.status===st).length}`).join('，');})].join('\n')+'\n';
+    $('#export').disabled=false;
+  }
   async function render() {
-    const own=++generation;updateChrome();currentText='';$('#export').disabled=true;const pane=$('#content');pane.innerHTML='<p>正在读取本科记录…</p>';
+    const own=++generation;updateChrome();
+    if(mode==='all'){$('#export').disabled=true;currentText='';try{await renderAll(own);}catch{if(own===generation)empty('暂时无法汇总','网络可能不可用或GitHub限流，请稍后重试。');}return;}currentText='';$('#export').disabled=true;const pane=$('#content');pane.innerHTML='<p>正在读取本科记录…</p>';
     try {
       if(tab==='handoff') {
         pane.innerHTML='<div class="protocol-intro">每科各写各的。规范问答 → 当日总结 → 闭卷自测 → 下次接续。</div>';
@@ -98,21 +146,7 @@
         const field=document.createElement('textarea');field.id='prompt-text';field.className='search';field.rows=10;field.readOnly=true;field.value=prompt();pane.append(field);
         pane.append(renderMarkdown(data.protocol.text,data.protocol.path));currentText=prompt()+'\n\n'+data.protocol.text;
       } else if(tab==='ledger') {
-        const docs=[...subject.summaries].sort((a,b)=>a.date.localeCompare(b.date));
-        for(const d of docs){await loadDoc(d);if(own!==generation)return;}
-        const items=new Map(),missing=[],problems=[];
-        docs.forEach(d=>{
-          const parsed=parseReview(d.text);if(parsed===null){missing.push(d.date);return;}
-          parsed.problems.forEach(x=>problems.push(`${d.date}：${x}`));
-          parsed.questions.forEach((q,id)=>{
-            const it=items.get(id)||{trail:[],attempts:[],discussed:false};
-            it.attempts.push(...parsed.attempts.filter(a=>a.id===id));it.attempts.sort((a,b)=>a.date.localeCompare(b.date));
-            it.discussed=it.discussed||q.declared==='已讨论'||it.trail.some(([,s])=>s!=='仅安排');
-            const status=derive(it.attempts,it.discussed);
-            if(q.declared!==status)problems.push(`${d.date} ${id}：表中写“${q.declared}”，作答记录只支持“${status}”，此处按证据显示`);
-            Object.assign(it,q,{status,path:d.path});it.trail.push([d.date,status]);items.set(id,it);
-          });
-        });
+        const L=await ledgerOf(subject);if(own!==generation)return;const {items,missing,problems,docs}=L;
         pane.innerHTML='<div class="doc-meta"><span class="badge">题目追踪</span><span>每题只显示最新状态 · 状态由逐次作答记录推出 · 只查证据是否齐全，不替你判卷</span></div>';
         const scale=document.createElement('ol');scale.className='status-scale';scale.innerHTML=STATUSES.map((s,i)=>`<li><span class="status s${i}">${s}</span><small>${STATUS_NOTE[s]}</small></li>`).join('');pane.append(scale);
         if(problems.length){const w=document.createElement('div');w.className='ledger-warning';w.innerHTML='<b>需要整理的记录</b>'+problems.map(x=>`<p>${escape(x)}</p>`).join('');pane.append(w);}
@@ -145,7 +179,7 @@
       $('#export').disabled=!currentText;
     } catch {if(own!==generation)return;empty('暂时无法读取这个文件','网络可能不可用或GitHub限流。已发布快照与GitHub原文仍可查看，请稍后重试。');}
   }
-  function select(id,day,nextTab){subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();tab=nextTab||'daily';if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();syncSubject(false);}
+  function select(id,day,nextTab){if(id==='all'){mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#all');render();return;}mode='subject';subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();tab=nextTab||'daily';if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();syncSubject(false);}
   async function syncSubject(force) {
     const s=subject;if(synced.has(s.id)&&!force)return;
     synced.set(s.id,'正在检查GitHub新记录…');updateChrome();
@@ -168,13 +202,16 @@
   async function copyPrompt() {try {await navigator.clipboard.writeText(prompt());notify('本科每日提示词已复制');}catch {tab='handoff';await render();const field=$('#prompt-text');field.focus();field.select();notify('无法自动复制，已选中提示词，请手动复制。');}}
   document.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>select(subject.id,date,b.dataset.tab);b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const buttons=[...document.querySelectorAll('[data-tab]')],i=buttons.indexOf(b),n=buttons[(i+(e.key==='ArrowRight'?1:buttons.length-1))%buttons.length];n.click();n.focus();};});
   $('#date').onchange=e=>{if(e.target.value)select(subject.id,e.target.value,tab);};
-  $('#refresh').onclick=()=>syncSubject(true);$('#copy-prompt').onclick=copyPrompt;
+  $('#refresh').onclick=()=>syncSubject(true);$('#all-link').onclick=e=>{e.preventDefault();select('all');};$('#copy-prompt').onclick=copyPrompt;
   $('#reviewed').onclick=()=>{put(key('reviewed'),get(key('reviewed'))==='yes'?'no':'yes');updateChrome();};
   $('#draft').oninput=e=>put(key('draft'),e.target.value);
   $('#clear-draft').onclick=()=>{if(!get(key('draft')))return;if(confirm('清空本日期、本科目的本地草稿？建议先导出。')){put(key('draft'),'');$('#draft').value='';}};
   $('#export-draft').onclick=()=>download(`# ${date} ${subject.name}｜个人复盘草稿\n\n${get(key('draft'))}\n\n仅个人草稿，公开上传前需审核。\n`,`${date}-${subject.name}-个人草稿.md`);
   $('#export').onclick=()=>{if(currentText)download(currentText,`${date}-${subject.name}-${{daily:'每日复盘',records:'当天问答',ledger:'题目追踪',history:'过往记录',handoff:'交给助手'}[tab]}.md`);};
-  function route(){const [id,d,t]=location.hash.slice(1).split('/');select(id,d,TABS.includes(t)?t:'daily');}
+  // One hover/focus tooltip for chart marks (bar segments, day cells).
+  const tip=document.createElement('div');tip.className='chart-tip';tip.hidden=true;document.body.append(tip);
+  document.addEventListener('pointerover',e=>{const m=e.target.closest('[data-tip]');if(!m){tip.hidden=true;return;}tip.textContent=m.dataset.tip;tip.hidden=false;const r=m.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left+r.width/2-tip.offsetWidth/2))+'px';tip.style.top=(r.top-tip.offsetHeight-8)+'px';});
+  function route(){const [id,d,t]=location.hash.slice(1).split('/');if(!id||id==='all'){select('all');return;}select(id,d,TABS.includes(t)?t:'daily');}
   window.addEventListener('hashchange',()=>{if(data)route();});
   fetch('assets/data.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{data=d;route();}).catch(()=>{$('#subject-title').textContent='学习档案暂时未加载';$('#content').textContent='请刷新页面，或通过左侧公开资料库直接读取Markdown。';});
 })();

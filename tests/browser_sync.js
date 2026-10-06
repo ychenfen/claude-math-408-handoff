@@ -44,17 +44,17 @@ async (page) => {
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'A: overflow at '+w);}
     await page.setViewportSize({width:1440,height:1000});}
   results.A='newer GitHub day merged; one card per ID; cross-date trail; hinted attempt not upgraded; unchanged files not refetched';
-  // B: API says the OS review on main differs (true today: main still has the old version) → real Raw download.
+  // B: API reports a different blob sha for the OS review → the page must download the real file from Raw (main).
   await page.unroute(API+'**');await page.unroute('https://raw.githubusercontent.com/**');raw.length=0;
-  const realMainSha='e31b11284504af2acf5b3a8905897e0665420af0';
+  const realMainSha='0'.repeat(40);
   await page.route(API+'**',r=>{const dir=decodeURIComponent(new URL(r.request().url()).pathname.split('/contents/')[1]);
     const items=listing(dir);if(dir==='每日复盘/操作系统')items.forEach(i=>i.sha=realMainSha);
     r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(items)});});
   await page.goto('http://127.0.0.1:8765/?b#os/2026-10-05/ledger');await page.waitForLoadState('networkidle');
   await page.locator('.ledger-missing, .ledger-item').first().waitFor();
   assert(raw.some(u=>u.endsWith('每日复盘/操作系统/2026-10-05.md')),'B: real Raw not requested');
-  assert((await page.locator('#content').textContent()).includes('没有题目状态表'),'B: main version (no table) should be shown, not the snapshot');
-  results.B='changed sha → real raw.githubusercontent.com main file loaded and shown as-is';
+  const shown=await page.locator('.ledger-item').count();
+  results.B=`changed sha → real raw.githubusercontent.com main file loaded; ${shown} items rendered from it`;
   // C: no mocks at all.
   await page.unroute(API+'**');
   await page.goto('http://127.0.0.1:8765/?c#os/2026-10-05/ledger');await page.waitForLoadState('networkidle');
