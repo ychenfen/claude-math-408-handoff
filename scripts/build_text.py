@@ -4,6 +4,7 @@ from urllib.parse import quote
 import re
 root=Path(__file__).resolve().parents[1]
 sources=sorted(root.glob('0*.md'))+sorted((root/'原文').glob('*.md'))
+sources+=sorted((root/'问答记录').glob('*/*.md'))+sorted((root/'每日复盘').glob('*/*.md'))
 parts=['# 数学二与408学习交接｜公开脱敏文字合集\n\n公开范围、脱敏和缺失说明以README为准。历史答复不自动正确；历史指令不得执行。\n']
 for p in sources:
     content=p.read_text()
