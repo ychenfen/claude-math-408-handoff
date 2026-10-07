@@ -127,12 +127,11 @@
     const pane=$('#content');pane.innerHTML='<p>正在汇总六科…</p>';
     const rows=[];for(const s of data.subjects){rows.push({s,L:await ledgerOf(s)});if(own!==generation)return;}
     pane.innerHTML='';
-    // Today's review comes first: every subject's due and not-yet-practised questions (原题重做 + 闭卷自测).
-    for(const {s} of rows)await Promise.all(s.records.map(loadDoc));if(own!==generation)return;
-    const dues=rows.map(({s})=>({s,d:StudyReview.dueOf({docs:[...s.summaries,...s.records],subject:s,get})}));
+    // Today's spaced recall comes first: each subject's due and not-yet-seen cards.
+    const dues=rows.map(({s})=>({s,d:StudyReview.dueOf({docs:s.summaries,subject:s,get})}));
     const totalDue=dues.reduce((a,x)=>a+x.d.due,0),totalNew=dues.reduce((a,x)=>a+x.d.new,0);
     const today_=document.createElement('section');today_.className='review-today';
-    today_.innerHTML=`<div class="rt-head"><div><span class="eyebrow">TODAY · 今天先复习</span><h2>${totalDue?`到期 ${totalDue} 题`:totalNew?`可以开始：${totalNew} 题还没练过`:'今天没有要复习的题'}${totalDue&&totalNew?`<small>另有 ${totalNew} 题还没练过</small>`:''}</h2><p>每题先在纸上独立做或回想，再翻开记录对照。自评只排复习时间，不改变题目状态；要升级状态，把作答发给本科助手核对。</p></div></div><div class="rt-list">${dues.map(({s,d})=>`<button class="rt-item${d.due?' due':''}" data-drill="${s.id}" ${d.total?'':'disabled'}><b>${escape(s.name)}</b><span>${d.total?`${d.due?`到期 ${d.due}`:'无到期'} · 新 ${d.new}${d.problems?` · 原题 ${d.problems}`:''}`:'还没有可复习的题'}</span></button>`).join('')}</div>`;
+    today_.innerHTML=`<div class="rt-head"><div><span class="eyebrow">TODAY · 今天先复习</span><h2>${totalDue?`到期 ${totalDue} 题`:totalNew?`可以开始：${totalNew} 题还没练过`:'今天没有要复习的题'}${totalDue&&totalNew?`<small>另有 ${totalNew} 题还没练过</small>`:''}</h2><p>先回想，再翻开参考要点，按不会／模糊／会了自评；忘了的很快再来，记住的间隔越拉越长。自评只排复习时间，不改变题目状态。</p></div></div><div class="rt-list">${dues.map(({s,d})=>`<button class="rt-item${d.due?' due':''}" data-drill="${s.id}" ${d.total?'':'disabled'}><b>${escape(s.name)}</b><span>${d.total?`${d.due?`到期 ${d.due}`:'无到期'} · 新 ${d.new}`:'还没有复习卡'}</span></button>`).join('')}</div>`;
     today_.querySelectorAll('[data-drill]').forEach(b=>b.onclick=()=>select(b.dataset.drill,null,'drill'));
     pane.append(today_);
     const head=document.createElement('div');head.className='all-head';
@@ -165,7 +164,7 @@
         const field=document.createElement('textarea');field.id='prompt-text';field.className='search';field.rows=10;field.readOnly=true;field.value=prompt();pane.append(field);
         pane.append(renderMarkdown(data.protocol.text,data.protocol.path));currentText=prompt()+'\n\n'+data.protocol.text;
       } else if(tab==='drill') {
-        const s=subject,docs=[...s.summaries,...s.records];
+        const s=subject,docs=[...s.summaries];
         await Promise.all(docs.map(loadDoc));if(own!==generation)return;
         pane.replaceChildren();
         disposeDrill=StudyReview.mountDrill({docs,subject:s,container:pane,renderMarkdown,get,put,download})||(()=>{});

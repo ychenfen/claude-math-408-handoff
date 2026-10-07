@@ -49,24 +49,15 @@ async (browserPage) => {
     assert(await page.locator('.selftest-item .drill-context').first().isVisible(),'Daily question visible before reveal');
     assert(await page.locator('details.selftest[open]').count()===0,'Daily answers still start hidden');
     assert(await page.locator('details.selftest .answer').first().isHidden(),'Daily answer content hidden');
-    // Q&A problems with an `编号` heading become redo cards: problem first, recorded answer hidden.
     await page.locator('[data-subject="linear"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
-    await page.locator('.recall-answer').waitFor();
-    const eyebrow=await page.locator('.drill-stage .eyebrow').textContent();
-    assert(/^1 \/ (\d+) · 原题重做/.test(eyebrow)&&Number(eyebrow.match(/\/ (\d+)/)[1])>=8,'Linear algebra redo cards from Q&A: '+eyebrow);
-    assert((await page.locator('.drill-question').innerText()).includes('880-线代9'),'Card names the original problem ID');
-    const front=await page.locator('.drill-context').innerText();
-    assert(front.length>20&&!/选 [A-D]|\*\*答\*\*|参考要点/.test(front),'Problem front must not leak the recorded answer: '+front.slice(0,120));
-    assert(await page.locator('.drill-answer').isHidden(),'Recorded answer hidden before recall');
-    await page.getByRole('button',{name:'我已回想，查看参考要点'}).click();
-    assert((await page.locator('.drill-answer').innerText()).includes('作答'),'Recorded attempt shown after recall');
+    assert((await page.locator('.drill-stage').textContent()).includes('还没有复习卡'),'Q&A problems are not turned into redo cards');
     await page.locator('[data-subject="co"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
-    assert((await page.locator('.drill-stage').textContent()).includes('还没有可复习的题'),'Honest empty state');
+    assert((await page.locator('.drill-stage').textContent()).includes('还没有复习卡'),'Honest empty state');
     await page.goto(BASE+'/#all');await page.waitForLoadState('networkidle');await page.locator('.review-today').waitFor();
     assert(await page.locator('.rt-item').count()===6,'Today panel lists six subjects');
-    assert((await page.locator('.rt-item[data-drill="linear"]').textContent()).includes('原题'),'Today panel counts redo problems');
-    await page.locator('.rt-item[data-drill="linear"]').click();await page.locator('.recall-answer').waitFor();
-    assert((await page.locator('#subject-title').textContent())==='线性代数','Today panel opens that subject drill');
+    assert((await page.locator('.rt-item[data-drill="os"]').textContent()).includes('新'),'Today panel counts recall cards');
+    await page.locator('.rt-item[data-drill="os"]').click();await page.locator('.recall-answer').waitFor();
+    assert((await page.locator('#subject-title').textContent())==='操作系统','Today panel opens that subject drill');
     await page.locator('[data-subject="os"]').click();await page.getByRole('tab',{name:'当天问答',exact:true}).click();
     await page.locator('.study-figure img').waitFor();
     await page.waitForFunction(()=>document.querySelector('.study-figure img').naturalWidth>0);
@@ -80,6 +71,6 @@ async (browserPage) => {
     await page.keyboard.press('Escape');assert(await page.locator('dialog[open]').count()===0,'Esc closes lightbox');
     assert(external.length===0,'SVG requested external resource');
     assert(errors.length===0,'Page errors: '+errors.join(','));
-    return {status:'PASS',checks:['Q&A redo cards','today panel','recall before reveal','persistence','due date','subject isolation','empty state','export','mobile','SVG render and sanitize','no script execution','lightbox','no evidence promotion']};
+    return {status:'PASS',checks:['today panel','recall before reveal','persistence','due date','subject isolation','empty state','export','mobile','SVG render and sanitize','no script execution','lightbox','no evidence promotion']};
   } finally {await context.close();}
 }
