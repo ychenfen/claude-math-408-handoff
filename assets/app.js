@@ -6,9 +6,10 @@
   const API = 'https://api.github.com/repos/ychenfen/claude-math-408-handoff/contents/';
   let data, subject, date, mode = 'subject', tab = 'daily', generation = 0, currentText = '', storageOK = true;
   const memo = {}, synced = new Map();
+  let disposeDrill = () => {};
   const STATUSES = ['仅安排','已讨论','作答待核实','独立做对','隔日重做通过'];
   const STATUS_NOTE = {'仅安排':'计划，未讨论','已讨论':'看过讲解，没有作答','作答待核实':'有作答，未达独立＋正确＋原件已核','独立做对':'独立作答，对照原件核对正确','隔日重做通过':'另一天再次独立做对'};
-  const TABS = ['daily','records','ledger','history','handoff'];
+  const TABS = ['daily','records','drill','ledger','history','handoff'];
   const ID_RE = /^[0-9A-Za-z一-鿿]+(?:[-.][0-9A-Za-z一-鿿]+)*(?:\(\d+\))?$/;
   const section = (text,name) => { const m=text.match(new RegExp('^## '+name+'\\s*$([\\s\\S]*?)(?=^## |(?![\\s\\S]))','m')); return m?m[1]:null; };
   const rowsOf = body => body.split('\n').filter(l=>l.trim().startsWith('|')).slice(2).map(l=>l.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim()));
@@ -59,7 +60,7 @@
   async function request(url) { const r=await fetch(url,{signal:AbortSignal.timeout(12000),credentials:'omit'});if(!r.ok)throw Error(`HTTP ${r.status}`);return r; }
   function renderMarkdown(text,path) {
     const el=document.createElement('article');el.className='markdown';
-    el.innerHTML=DOMPurify.sanitize(marked.parse(text),{FORBID_TAGS:['style','iframe','form','input'],FORBID_ATTR:['style']});
+    el.innerHTML=DOMPurify.sanitize(marked.parse(text),{FORBID_TAGS:['style','iframe','form','input','svg'],FORBID_ATTR:['style']});
     const base=new URL(encodePath(path),new URL('./',location.href));
     el.querySelectorAll('a[href],img[src]').forEach(node=>{
       const attr=node.tagName==='IMG'?'src':'href',value=node.getAttribute(attr);
@@ -76,6 +77,7 @@
       box.append(answer);h.replaceWith(box);
     });
     el.querySelectorAll('td').forEach(td=>{if(STATUSES.includes(td.textContent.trim())){td.innerHTML=`<span class="status s${STATUSES.indexOf(td.textContent.trim())}">${escape(td.textContent.trim())}</span>`;}});
+    StudyReview.enhanceFigures(el);
     if(window.renderMathInElement)renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}],throwOnError:false,trust:false});
     return el;
   }
@@ -137,6 +139,7 @@
     $('#export').disabled=false;
   }
   async function render() {
+    disposeDrill();disposeDrill=()=>{};
     const own=++generation;updateChrome();
     if(mode==='all'){$('#export').disabled=true;currentText='';try{await renderAll(own);}catch{if(own===generation)empty('暂时无法汇总','网络可能不可用或GitHub限流，请稍后重试。');}return;}currentText='';$('#export').disabled=true;const pane=$('#content');pane.innerHTML='<p>正在读取本科记录…</p>';
     try {
@@ -145,6 +148,11 @@
         const label=document.createElement('label');label.textContent='本科提示词（可手动选中复制）';label.htmlFor='prompt-text';pane.append(label);
         const field=document.createElement('textarea');field.id='prompt-text';field.className='search';field.rows=10;field.readOnly=true;field.value=prompt();pane.append(field);
         pane.append(renderMarkdown(data.protocol.text,data.protocol.path));currentText=prompt()+'\n\n'+data.protocol.text;
+      } else if(tab==='drill') {
+        const s=subject,docs=[...s.summaries];
+        await Promise.all(docs.map(loadDoc));if(own!==generation)return;
+        pane.replaceChildren();
+        disposeDrill=StudyReview.mountDrill({docs,subject:s,container:pane,renderMarkdown,get,put,download})||(()=>{});
       } else if(tab==='ledger') {
         const L=await ledgerOf(subject);if(own!==generation)return;const {items,missing,problems,docs}=L;
         pane.innerHTML='<div class="doc-meta"><span class="badge">题目追踪</span><span>每题只显示最新状态 · 状态由逐次作答记录推出 · 只查证据是否齐全，不替你判卷</span></div>';
@@ -176,7 +184,7 @@
         const days=[...new Set([...subject.records,...subject.summaries].map(d=>d.date))].sort().reverse();
         if(days.length){const h=document.createElement('h3');h.textContent='已保存的日期';pane.append(h);const list=document.createElement('div');list.className='record-list';days.forEach(day=>{const b=document.createElement('button');b.className='record-entry';b.textContent=day+(subject.summaries.some(d=>d.date===day)?' · 有复盘':' · 有问答');b.onclick=()=>select(subject.id,day,tab);list.append(b);});pane.append(list);}
       }
-      $('#export').disabled=!currentText;
+      updateChrome();$('#export').disabled=!currentText;
     } catch {if(own!==generation)return;empty('暂时无法读取这个文件','网络可能不可用或GitHub限流。已发布快照与GitHub原文仍可查看，请稍后重试。');}
   }
   function select(id,day,nextTab){if(id==='all'){mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#all');render();return;}mode='subject';subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();tab=nextTab||'daily';if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();syncSubject(false);}

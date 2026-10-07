@@ -5,10 +5,10 @@
   <meta name="description" content="数学二与408六科学习工作台：分科问答、每日总结、知识点与闭卷复盘。">
   <title>温故 · 数学二与408学习工作台</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="assets/vendor/katex/katex.min.css"><link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/vendor/katex/katex.min.css"><link rel="stylesheet" href="assets/style.css"><link rel="stylesheet" href="assets/review-tools.css">
   <script defer src="assets/vendor/marked.umd.js"></script><script defer src="assets/vendor/purify.min.js"></script>
   <script defer src="assets/vendor/katex/katex.min.js"></script><script defer src="assets/vendor/katex/contrib/auto-render.min.js"></script>
-  <script defer src="assets/app.js"></script>
+  <script defer src="assets/spaced-review.js"></script><script defer src="assets/review-tools.js"></script><script defer src="assets/app.js"></script>
 </head>
 <body>
   <a class="skip" href="#content">跳至正文</a>
@@ -23,7 +23,7 @@
     <header class="topbar"><span>LEARNING JOURNAL <b>/ 学习与复盘</b></span><span class="public-pill">公开脱敏资料</span></header>
     <section class="heading"><div><div id="eyebrow" class="eyebrow">SUBJECT NOTEBOOK</div><h1 id="subject-title">正在打开学习档案…</h1><p id="tagline"></p></div><div class="date-control"><label for="date">记录日期 · 北京时间</label><input type="date" id="date"><div id="sync-state" role="status">读取发布快照</div></div></section>
     <section id="overview" class="overview" aria-label="科目概况"></section>
-    <div class="workspace-bar"><div class="tabs" role="tablist" aria-label="内容类型"><button role="tab" data-tab="daily">每日复盘</button><button role="tab" data-tab="records">当天问答</button><button role="tab" data-tab="ledger">题目追踪</button><button role="tab" data-tab="history">过往记录</button><button role="tab" data-tab="handoff">交给助手</button></div><button id="refresh" class="text-button">↻ 检查新记录</button></div>
+    <div class="workspace-bar"><div class="tabs" role="tablist" aria-label="内容类型"><button role="tab" data-tab="daily">每日复盘</button><button role="tab" data-tab="records">当天问答</button><button role="tab" data-tab="drill">闭卷自测</button><button role="tab" data-tab="ledger">题目追踪</button><button role="tab" data-tab="history">过往记录</button><button role="tab" data-tab="handoff">交给助手</button></div><button id="refresh" class="text-button">↻ 检查新记录</button></div>
     <div class="workspace"><section id="content" class="paper" tabindex="-1" aria-live="polite"></section><aside class="rail"><div class="rail-card"><div class="eyebrow">RECALL, THEN CHECK</div><h2>先想，再看答案。</h2><p>不要把“讲过”当成“会了”。用自己的话复述一次，再打开参考要点。</p><button id="reviewed" class="primary">标记本次已复盘</button><small id="review-state">标记只保存在当前浏览器</small></div><div class="rail-card"><h3>接着学，不从头来</h3><p>把本科提示词发给负责的助手，接上历史，再总结今天。</p><button id="copy-prompt" class="secondary">复制本科每日提示词 ↗</button><button id="export" class="text-button full">↓ 下载当前内容</button></div><div class="rail-card draft-card"><label for="draft"><h3>我的一句话复盘</h3></label><textarea id="draft" rows="5" placeholder="今天真正想通了什么？还有哪一步说不清？"></textarea><div class="draft-actions"><button id="export-draft" class="text-button">↓ 导出草稿</button><button id="clear-draft" class="text-button">清空</button></div><small>仅本机浏览器保存，不上传、不跨设备。请定期导出。</small></div></aside></div>
     <footer>一科一本，日积月累。<span>历史记录 ≠ 当前掌握 · 没有记录的地方不补写</span></footer>
   </main>

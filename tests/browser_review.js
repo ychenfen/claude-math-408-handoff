@@ -1,0 +1,58 @@
+// Run this function with Playwright against a local preview. Uses a fresh browser context.
+async (browserPage) => {
+  const context=await browserPage.context().browser().newContext({viewport:{width:1440,height:1000}});
+  const page=await context.newPage(),BASE='http://127.0.0.1:8878',errors=[],external=[];
+  const assert=(v,m)=>{if(!v)throw Error(m);};
+  page.on('pageerror',e=>errors.push(e.message));
+  page.on('request',r=>{if(r.url().includes('example.invalid'))external.push(r.url());});
+  try {
+    await page.route('https://api.github.com/**',r=>r.fulfill({status:200,contentType:'application/json',body:'[]'}));
+    const snapshot=await (await page.request.get(BASE+'/assets/data.json')).json();
+    const os=snapshot.subjects.find(s=>s.id==='os');
+    os.records[0].text+='\n\n## 图解测试夹具（不是学习记录）\n\n```svg\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 180" onload="window.svgInjected=1"><script>window.svgInjected=1</script><foreignObject><div>unsafe</div></foreignObject><image href="https://example.invalid/pixel"/><rect x="10" y="10" width="680" height="160" fill="#edf2e2"/><text x="40" y="95" font-size="30" fill="#243e31">先回想 → 看参考 → 再验证</text></svg>\n```\n\n```jsx\n<script>window.jsxInjected=1</script>\n```\n';
+    await page.route(BASE+'/assets/data.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(snapshot)}));
+    await page.goto(BASE+'/#os/2026-10-05/drill');await page.waitForLoadState('networkidle');
+    await page.locator('.recall-answer').waitFor();
+    assert((await page.locator('.drill-stage .eyebrow').textContent()).startsWith('1 / 5'),'Five OS cards');
+    assert(await page.locator('.drill-answer').isHidden(),'Answer must start hidden');
+    assert(await page.locator('.drill-rate').isHidden(),'No rating before recall');
+    await page.locator('.recall-answer').fill('测试回想：两把锁分别保护两个读者类别。');
+    await page.reload();await page.waitForLoadState('networkidle');
+    assert((await page.locator('.recall-answer').inputValue()).includes('测试回想'),'Recall note survives reload');
+    await page.getByRole('button',{name:'我已回想，查看参考要点'}).click();
+    assert(await page.locator('.drill-answer').isVisible(),'Reveal answer');
+    await page.getByRole('button',{name:/^会了/}).click();
+    const state=await page.evaluate(()=>Object.entries(localStorage).filter(([k])=>k.startsWith('study-drill-v1:os:')).map(([k,v])=>[k,JSON.parse(v)]));
+    assert(state.length===1&&state[0][1].rating==='会了','Local rating stored');
+    assert(state[0][1].due>Date.now()+0.9*86400000&&state[0][1].due<Date.now()+1.1*86400000,'First success deferred one day');
+    assert(await page.evaluate(()=>!Object.keys(localStorage).some(k=>k.endsWith(':reviewed'))),'Rating must not mark evidence reviewed');
+    await page.reload();await page.waitForLoadState('networkidle');
+    assert((await page.locator('.drill-stage .eyebrow').textContent()).startsWith('1 / 4'),'Not due card excluded');
+    const download=page.waitForEvent('download');await page.getByRole('button',{name:'导出本科自测记录'}).click();
+    assert((await download).suggestedFilename()==='操作系统-闭卷自测记录.md','Export filename');
+    await page.screenshot({path:'/tmp/study-recall-desktop.png',fullPage:false});
+    await page.setViewportSize({width:390,height:844});
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile drill overflow');
+    await page.screenshot({path:'/tmp/study-recall-mobile.png',fullPage:true});
+    await page.locator('[data-subject="ds"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
+    await page.locator('.recall-answer').waitFor();
+    assert((await page.locator('.drill-stage .eyebrow').textContent()).startsWith('1 / 3'),'DS cards isolated across dates');
+    assert(await page.locator('.recall-answer').inputValue()==='','No cross-subject notes');
+    await page.locator('[data-subject="math"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
+    assert((await page.locator('.drill-stage').textContent()).includes('没有已保存的自测题'),'Honest empty state');
+    await page.locator('[data-subject="os"]').click();await page.getByRole('tab',{name:'当天问答',exact:true}).click();
+    await page.locator('.study-figure img').waitFor();
+    await page.waitForFunction(()=>document.querySelector('.study-figure img').naturalWidth>0);
+    const svg=await page.locator('.study-figure img').getAttribute('src');
+    assert(!/script|foreignObject|onload|example.invalid/.test(decodeURIComponent(svg)),'SVG unsafe content retained');
+    assert(await page.locator('.source-only').count()===1,'JSX source collapsed');
+    assert(await page.evaluate(()=>!window.svgInjected&&!window.jsxInjected),'Source executed');
+    await page.locator('.study-figure .figure-zoom').click();
+    assert(await page.locator('dialog[open]').count()===1,'Lightbox opens');
+    await page.screenshot({path:'/tmp/study-svg-mobile.png',fullPage:false});
+    await page.keyboard.press('Escape');assert(await page.locator('dialog[open]').count()===0,'Esc closes lightbox');
+    assert(external.length===0,'SVG requested external resource');
+    assert(errors.length===0,'Page errors: '+errors.join(','));
+    return {status:'PASS',checks:['recall before reveal','persistence','due date','subject isolation','empty state','export','mobile','SVG render and sanitize','no script execution','lightbox','no evidence promotion']};
+  } finally {await context.close();}
+}

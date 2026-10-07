@@ -2,14 +2,13 @@
 // raw.githubusercontent.com. Scenario A replays GitHub's contents-API shape with a newer, unpublished day;
 // scenario B uses the real Raw file on main; scenario C uses the real API (or its failure) without mocks.
 async (page) => {
-  const fs=require('fs'),path=require('path'),crypto=require('crypto');
-  const ROOT=process.cwd(),API='https://api.github.com/repos/ychenfen/claude-math-408-handoff/contents/';
+  const API='https://api.github.com/repos/ychenfen/claude-math-408-handoff/contents/';
+  const snapshot=await (await page.request.get('http://127.0.0.1:8765/assets/data.json')).json();
+  const docs=snapshot.subjects.flatMap(s=>[...s.records,...s.summaries]);
   const assert=(v,m)=>{if(!v)throw Error(m);};
-  const blob=buf=>crypto.createHash('sha1').update(Buffer.concat([Buffer.from(`blob ${buf.length}\0`),buf])).digest('hex');
   const listing=(dir,extra={})=>{
-    const full=path.join(ROOT,dir);const names=fs.existsSync(full)?fs.readdirSync(full).filter(n=>/^\d{4}-\d{2}-\d{2}\.md$/.test(n)):[];
-    const items=names.map(n=>({name:n,path:`${dir}/${n}`,type:'file',sha:blob(fs.readFileSync(path.join(full,n)))}));
-    Object.entries(extra).forEach(([n,text])=>items.push({name:n,path:`${dir}/${n}`,type:'file',sha:blob(Buffer.from(text))}));
+    const items=docs.filter(d=>d.path.startsWith(dir+'/')).map(d=>({name:d.path.split('/').pop(),path:d.path,type:'file',sha:d.gitSha}));
+    Object.keys(extra).forEach(n=>items.push({name:n,path:`${dir}/${n}`,type:'file',sha:'fixture-new-blob'}));
     return items;
   };
   const Q='../../问答记录/操作系统/2026-10-07.md';
@@ -21,10 +20,10 @@ async (page) => {
   const raw=[];page.on('request',r=>{if(r.url().startsWith('https://raw.githubusercontent.com/'))raw.push(decodeURIComponent(r.url()));});
   const results={};
   // A: GitHub has a newer day than the snapshot; unchanged files must not be re-downloaded.
-  await page.route(API+'**',r=>{const dir=decodeURIComponent(new URL(r.request().url()).pathname.split('/contents/')[1]);
+  await page.route(API+'**',r=>{const dir=decodeURIComponent(r.request().url().split('/contents/')[1].split('?')[0]);
     const extra=dir.endsWith('操作系统')?{'2026-10-07.md':fixtures[`${dir}/2026-10-07.md`]}:{};
     r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(listing(dir,extra))});});
-  await page.route('https://raw.githubusercontent.com/**',r=>{const p=decodeURIComponent(new URL(r.request().url()).pathname).split('/main/')[1];
+  await page.route('https://raw.githubusercontent.com/**',r=>{const p=decodeURIComponent(r.request().url()).split('/main/')[1].split('?')[0];
     if(fixtures[p])return r.fulfill({status:200,contentType:'text/plain; charset=utf-8',body:fixtures[p]});return r.continue();});
   await page.goto('http://127.0.0.1:8765/#os/2026-10-05/ledger');await page.waitForLoadState('networkidle');
   await page.locator('#sync-state',{hasText:'比快照新'}).waitFor();
@@ -39,7 +38,7 @@ async (page) => {
   assert(!raw.some(u=>u.includes('2026-10-05')),'A: unchanged files re-downloaded: '+raw.join(','));
   await page.getByRole('tab',{name:'每日复盘'}).click();
   assert((await page.locator('.record-list').textContent()).includes('2026-10-07'),'A: new date listed');
-  if(process.env.SHOTS){await page.getByRole('tab',{name:'题目追踪'}).click();await page.locator('.ledger-item').first().waitFor();
+  if(typeof process!=='undefined'&&process.env.SHOTS){await page.getByRole('tab',{name:'题目追踪'}).click();await page.locator('.ledger-item').first().waitFor();
     for(const [w,h,n] of [[1440,1000,'sync-desktop'],[390,844,'sync-mobile']]){await page.setViewportSize({width:w,height:h});await page.screenshot({path:`${process.env.SHOTS}/${n}.png`,fullPage:true});
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'A: overflow at '+w);}
     await page.setViewportSize({width:1440,height:1000});}
@@ -47,7 +46,7 @@ async (page) => {
   // B: API reports a different blob sha for the OS review → the page must download the real file from Raw (main).
   await page.unroute(API+'**');await page.unroute('https://raw.githubusercontent.com/**');raw.length=0;
   const realMainSha='0'.repeat(40);
-  await page.route(API+'**',r=>{const dir=decodeURIComponent(new URL(r.request().url()).pathname.split('/contents/')[1]);
+  await page.route(API+'**',r=>{const dir=decodeURIComponent(r.request().url().split('/contents/')[1].split('?')[0]);
     const items=listing(dir);if(dir==='每日复盘/操作系统')items.forEach(i=>i.sha=realMainSha);
     r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(items)});});
   await page.goto('http://127.0.0.1:8765/?b#os/2026-10-05/ledger');await page.waitForLoadState('networkidle');

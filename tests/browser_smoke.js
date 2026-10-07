@@ -36,6 +36,8 @@ async (page) => {
     assert((await page.locator('#content').textContent()).includes('14:51'),'OS original Q&A missing');
     assert(!(await page.locator('#content').textContent()).includes('暴力解手册'),'Subjects mixed');
     await page.locator('[data-subject="ds"]').click();await page.waitForLoadState('networkidle');
+    // Newer Q&A may exist without a same-day summary; this test targets the known fixture date.
+    await page.locator('#date').fill('2026-10-05');await page.locator('#date').dispatchEvent('change');
     assert(await page.locator('details.selftest').count()===3,'DS summary missing');
     await page.getByRole('tab',{name:'题目追踪'}).click();await page.locator('.ledger-empty').waitFor();
     assert((await page.locator('.ledger-missing').textContent()).includes('2026-10-05'),'Missing table should be reported');

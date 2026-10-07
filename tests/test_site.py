@@ -36,4 +36,8 @@ class SiteTests(unittest.TestCase):
     def test_vendors_present(self):
         for p in ['marked.umd.js','purify.min.js','katex/katex.min.js','katex/katex.min.css','katex/contrib/auto-render.min.js']:
             self.assertTrue((ROOT/'assets/vendor'/p).is_file())
+    def test_oct6_ds_record_is_not_lost(self):
+        self.assertEqual((ROOT/'问答记录/2026-10-06.md').read_text(),(ROOT/'问答记录/数据结构/2026-10-06.md').read_text())
+        ds=next(s for s in self.data['subjects'] if s['id']=='ds')
+        self.assertIn('2026-10-06',{d['date'] for d in ds['records']})
 if __name__=='__main__':unittest.main()
