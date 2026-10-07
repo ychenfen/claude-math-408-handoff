@@ -10,7 +10,7 @@ async (page) => {
     const osRow=page.locator('.all-row[data-subject="os"]');
     assert((await osRow.locator('.seg').count())===3,'OS status segments');
     assert((await osRow.textContent()).includes('11题')&&(await osRow.textContent()).includes('下次先做'),'OS overview text');
-    assert((await page.locator('.all-row[data-subject="math"]').textContent()).includes('还没有复盘'),'Empty subject honest');
+    assert((await page.locator('.all-row[data-subject="co"]').textContent()).includes('还没有复盘'),'Empty subject honest');
     await osRow.locator('.seg').first().hover();assert(!(await page.locator('.chart-tip').isHidden()),'Bar tooltip');
     await page.setViewportSize({width:390,height:844});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile overview overflow');
     await page.screenshot({path:'/tmp/study-overview-mobile.png',fullPage:true});await page.setViewportSize({width:1440,height:1000});
@@ -48,7 +48,7 @@ async (page) => {
     assert(await page.locator('#draft').inputValue()==='自动测试草稿：不公开上传','Draft persistence');
     assert((await page.locator('#reviewed').textContent()).includes('已标记'),'Review persistence');
     await page.locator('[data-subject="os"]').click();assert(await page.locator('#draft').inputValue()==='','Subject draft isolation');
-    await page.locator('[data-subject="math"]').click();await page.waitForLoadState('networkidle');
+    await page.goto('http://127.0.0.1:8765/#math/2026-10-06/daily');await page.waitForLoadState('networkidle');
     assert((await page.locator('#content').textContent()).includes('还没有本科复盘'),'Missing date fabricated');
     assert(await page.locator('#reviewed').isDisabled(),'Empty day should not be markable');
     await page.getByRole('tab',{name:'过往记录'}).click();await page.getByRole('searchbox').fill('arctan');

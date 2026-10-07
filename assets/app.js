@@ -132,6 +132,8 @@
     const totalDue=dues.reduce((a,x)=>a+x.d.due,0),totalNew=dues.reduce((a,x)=>a+x.d.new,0);
     const today_=document.createElement('section');today_.className='review-today';
     today_.innerHTML=`<div class="rt-head"><div><span class="eyebrow">TODAY · 今天先复习</span><h2>${totalDue?`到期 ${totalDue} 题`:totalNew?`可以开始：${totalNew} 题还没练过`:'今天没有要复习的题'}${totalDue&&totalNew?`<small>另有 ${totalNew} 题还没练过</small>`:''}</h2><p>先回想，再翻开参考要点，按不会／模糊／会了自评；忘了的很快再来，记住的间隔越拉越长。自评只排复习时间，不改变题目状态。</p></div></div><div class="rt-list">${dues.map(({s,d})=>`<button class="rt-item${d.due?' due':''}" data-drill="${s.id}" ${d.total?'':'disabled'}><b>${escape(s.name)}</b><span>${d.total?`${d.due?`到期 ${d.due}`:'无到期'} · 新 ${d.new}`:'还没有复习卡'}</span></button>`).join('')}</div>`;
+    const bed=document.createElement('button');bed.className='rt-bed';bed.innerHTML='<b>☾ 睡前复习</b><span>全科混合 · 暗色 · 10～25 张 · 只回想不写字</span>';bed.onclick=()=>select('bed');
+    today_.querySelector('.rt-head').append(bed);
     today_.querySelectorAll('[data-drill]').forEach(b=>b.onclick=()=>select(b.dataset.drill,null,'drill'));
     pane.append(today_);
     const head=document.createElement('div');head.className='all-head';
@@ -209,7 +211,7 @@
       updateChrome();$('#export').disabled=!currentText;
     } catch {if(own!==generation)return;empty('暂时无法读取这个文件','网络可能不可用或GitHub限流。已发布快照与GitHub原文仍可查看，请稍后重试。');}
   }
-  function select(id,day,nextTab){if(id==='all'){mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#all');render();return;}mode='subject';subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();tab=nextTab||'daily';if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();syncSubject(false);}
+  function select(id,day,nextTab){if(id==='bed'){openBed();return;}if(id==='all'){mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#all');render();return;}mode='subject';subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();tab=nextTab||'daily';if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();syncSubject(false);}
   async function syncSubject(force) {
     const s=subject;if(synced.has(s.id)&&!force)return;
     synced.set(s.id,'正在检查GitHub新记录…');updateChrome();
@@ -232,7 +234,7 @@
   async function copyPrompt() {try {await navigator.clipboard.writeText(prompt());notify('本科每日提示词已复制');}catch {tab='handoff';await render();const field=$('#prompt-text');field.focus();field.select();notify('无法自动复制，已选中提示词，请手动复制。');}}
   document.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>select(subject.id,date,b.dataset.tab);b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const buttons=[...document.querySelectorAll('[data-tab]')],i=buttons.indexOf(b),n=buttons[(i+(e.key==='ArrowRight'?1:buttons.length-1))%buttons.length];n.click();n.focus();};});
   $('#date').onchange=e=>{if(e.target.value)select(subject.id,e.target.value,tab);};
-  $('#refresh').onclick=()=>syncSubject(true);$('#all-link').onclick=e=>{e.preventDefault();select('all');};$('#copy-prompt').onclick=copyPrompt;
+  $('#refresh').onclick=()=>syncSubject(true);$('#all-link').onclick=e=>{e.preventDefault();select('all');};$('#bed-link').onclick=e=>{e.preventDefault();select('bed');};$('#copy-prompt').onclick=copyPrompt;
   $('#reviewed').onclick=()=>{put(key('reviewed'),get(key('reviewed'))==='yes'?'no':'yes');updateChrome();};
   $('#draft').oninput=e=>put(key('draft'),e.target.value);
   $('#clear-draft').onclick=()=>{if(!get(key('draft')))return;if(confirm('清空本日期、本科目的本地草稿？建议先导出。')){put(key('draft'),'');$('#draft').value='';}};
@@ -241,7 +243,15 @@
   // One hover/focus tooltip for chart marks (bar segments, day cells).
   const tip=document.createElement('div');tip.className='chart-tip';tip.hidden=true;document.body.append(tip);
   document.addEventListener('pointerover',e=>{const m=e.target.closest('[data-tip]');if(!m){tip.hidden=true;return;}tip.textContent=m.dataset.tip;tip.hidden=false;const r=m.getBoundingClientRect();tip.style.left=Math.min(innerWidth-tip.offsetWidth-8,Math.max(8,r.left+r.width/2-tip.offsetWidth/2))+'px';tip.style.top=(r.top-tip.offsetHeight-8)+'px';});
-  function route(){const [id,d,t]=location.hash.slice(1).split('/');if(!id||id==='all'){select('all');return;}select(id,d,TABS.includes(t)?t:'daily');}
+  // Bedtime review opens over the overview; closing it returns there.
+  let bedOpen=false;
+  async function openBed(){
+    if(bedOpen)return;bedOpen=true;mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#bed');
+    await Promise.all(data.subjects.flatMap(s=>s.summaries.map(loadDoc))).catch(()=>{});
+    render();
+    StudyBedtime.mount({subjects:data.subjects,renderMarkdown,get,put,today,nextOf:s=>{const d=[...s.summaries].sort((a,b)=>b.date.localeCompare(a.date)).find(x=>x.text);return d?nextAction(d.text).replace(/`/g,''):'';},onExit:()=>{bedOpen=false;history.replaceState(null,'','#all');render();}});
+  }
+  function route(){const [id,d,t]=location.hash.slice(1).split('/');if(id==='bed'){select('bed');return;}if(!id||id==='all'){select('all');return;}select(id,d,TABS.includes(t)?t:'daily');}
   window.addEventListener('hashchange',()=>{if(data)route();});
   fetch('assets/data.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{data=d;route();}).catch(()=>{$('#subject-title').textContent='学习档案暂时未加载';$('#content').textContent='请刷新页面，或通过左侧公开资料库直接读取Markdown。';});
 })();

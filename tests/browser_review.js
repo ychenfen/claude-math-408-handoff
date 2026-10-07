@@ -50,7 +50,8 @@ async (browserPage) => {
     assert(await page.locator('details.selftest[open]').count()===0,'Daily answers still start hidden');
     assert(await page.locator('details.selftest .answer').first().isHidden(),'Daily answer content hidden');
     await page.locator('[data-subject="linear"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
-    assert((await page.locator('.drill-stage').textContent()).includes('还没有复习卡'),'Q&A problems are not turned into redo cards');
+    await page.locator('.recall-answer').waitFor();
+    assert((await page.locator('.drill-stage .eyebrow').textContent()).startsWith('1 / 5'),'Linear algebra recall cards come from its review, not from Q&A redo');
     await page.locator('[data-subject="co"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
     assert((await page.locator('.drill-stage').textContent()).includes('还没有复习卡'),'Honest empty state');
     await page.goto(BASE+'/#all');await page.waitForLoadState('networkidle');await page.locator('.review-today').waitFor();

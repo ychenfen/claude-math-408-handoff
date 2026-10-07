@@ -18,7 +18,8 @@ test('card context is separate from hidden answer; code and legacy formats survi
 test('all published recall cards have standalone context and source labels',()=>{
   const data=JSON.parse(fs.readFileSync(require.resolve('../assets/data.json'),'utf8'));
   const cards=cardsOf(data.subjects.flatMap(s=>s.summaries));
-  assert.equal(cards.length,11);
+  // Cards grow as reviews are added; every published card must meet the same standard.
+  assert.ok(cards.length>=11,`expected at least 11 cards, got ${cards.length}`);
   for(const card of cards){assert.match(card.context,/\*\*题干\*\*：/);assert.match(card.answer,/^\*\*参考要点\*\*/);}
   const pv=cards.find(c=>c.question.includes('thread3写y'));
   for(const code of ['thread1','thread2','thread3','float a','w.a = 1','z = add(z, w)','y = add(y, w)'])assert.ok(pv.context.includes(code),code);

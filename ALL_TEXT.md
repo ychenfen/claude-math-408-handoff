@@ -3796,6 +3796,99 @@ thread3 {
 
 ---
 
+来源文件：`每日复盘/线性代数/2026-10-05.md`
+
+# 2026-10-05 线性代数｜被表示的秩不大，左乘管行
+
+## 今天实际涉及
+
+- 880 第九章向量：基础选择 3、4、5、6，强化综合选择 3～8，共 10 题；讲解时串张宇《线代9讲》第 4～6 讲。
+- 只有综合 6、综合 7 有你的作答（文字选项，两题都选错）；其余 8 题是直接要讲解，没有作答。
+- 追问的三个点：$n$ 指什么、可逆矩阵乘上去为什么不改变秩、同解为什么推出行组等价。
+
+## 题目状态
+
+状态由下方「作答记录」推出。直接要讲解的题记“已讨论”；综合 6、7 的作答只有当时助手的判断，记“作答待核实”。
+
+| 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
+|---|---|---|---|---|
+| `880-线代9-基础4` 向量组表示与相关性 | 已讨论 | [10:36](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；工具：被表示的组秩不大，秩 ≤ 个数 | 先写不等号链 $r(\mathrm I)\le r(\mathrm{II})\le s$ 再判断 |
+| `880-线代9-基础5` 三条直线恰交于一点 | 已讨论 | [10:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[10:53](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 追问时把方程个数 3 当成 $n$ → $n$ 是未知数个数 2 | 说出唯一解条件里 $n$ 是谁 |
+| `880-线代9-基础6` 加成组的无关性 | 已讨论 | [11:01](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[11:05](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 忘了“可逆矩阵乘上去秩不变” → 三种理解见 11:05 | 写成 $(\beta)=(\alpha)C$ 再看 $C$ |
+| `880-线代9-基础3` 哪组向量线性无关 | 已讨论 | [11:49](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；凑零或算 $\lvert C\rvert$ | 首尾相接组 $\lvert C\rvert$ 公式 |
+| `880-线代9-综合3` $k_1k_3\ne0$ 时哪两组等价 | 已讨论 | [11:50](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[12:31](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 题眼 $k_2$ 可能为 0；系数不为零才能解出对应向量 | 说出 A、B、D 的共同反例思路 |
+| `880-线代9-综合4` $\beta$ 组也无关的充要条件 | 已讨论 | [12:43](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；矩阵等价只看秩 | 区分矩阵等价与向量组等价 |
+| `880-线代9-综合5` 正交向量组的秩 | 已讨论 | [12:47](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[12:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 追问 $n=4$ 怎么看 → $n$ 是 $A^{\mathrm T}$ 的列数 | 用基础解系个数 $n-r$ 求秩 |
+| `880-线代9-综合6` $Ax=0$ 与 $Bx=0$ 同解的充要条件 | 作答待核实 | [13:16](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 选 C（矩阵等价）→ 应为 B（行向量组等价）；矩阵等价只是秩相等 | 给出反例 $A=(1,0)$、$B=(0,1)$ |
+| `880-线代9-综合7` 选错误的一项 | 作答待核实 | [13:20](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 选 B（正确命题）→ 题问错误项，答案 D；左乘管行、右乘管列 | 先圈出“错误的” |
+| `880-线代9-综合8` $r(A)=n$ 时 $AB$ 与 $B$ | 已讨论 | [13:26](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[13:28](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；列满秩 ⇒ $ABx=0\iff Bx=0$ | 复述三步：同解 → 秩相等 → 行组等价 |
+
+## 作答记录
+
+| 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
+|---|---|---|---|---|---|
+| `880-线代9-综合6` | 未注明 | 文字「第六题我选c了」 | 错误 | 仅旧助手判断 | [13:16](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) |
+| `880-线代9-综合7` | 未注明 | 文字「第七题选的b」 | 错误 | 仅旧助手判断 | [13:20](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) |
+
+## 知识点与适用条件
+
+- 被表示的组秩不大：$(\mathrm I)$ 可由 $(\mathrm{II})$ 表示 ⇒ $r(\mathrm I)\le r(\mathrm{II})$。配合“秩 ≤ 个数”“无关 ⇔ 秩 = 个数”判断相关性。口诀“以少表多，多的相关；无关被表，被表不多”说的都是被表示的组。
+- $P$ 可逆时 $r(PC)=r(C)$，右乘同理。$\alpha$ 无关时，$(\beta)=(\alpha)C$ 的无关性只看 $C$ 是否列满秩（方阵即 $|C|\ne0$）。
+- 唯一解：$r(A)=r(A,b)=n$，$n$ 是未知数个数（列数），不是方程个数。
+- 三种“等价”由弱到强：矩阵等价只要求同型且秩相等；$Ax=0$ 与 $Bx=0$ 同解 ⇔ 行向量组等价 ⇔ $r(A)=r(B)=r\begin{pmatrix}A\\B\end{pmatrix}$；列向量组等价对应 $A^{\mathrm T}y=0$ 与 $B^{\mathrm T}y=0$ 同解。
+- 左乘管行，右乘管列：$A=PB$（$P$ 可逆）⇒ 行组等价；$A=BQ$ ⇒ 列组等价；$A=PBQ$ ⇒ 只是矩阵等价。
+
+## 我的卡点与纠正
+
+- 综合 6：把矩阵等价当成同解条件。原因：没分清“只要秩相等”和“行空间相同”。
+- 综合 7：选了一个正确命题。题目问的是错误项；也可能是左乘、右乘对应行、列记反了（当时助手的推测）。
+- 追问暴露的两处：$n$ 指未知数个数；“可逆矩阵乘上去秩不变”要能说出至少一个理由。
+
+## 闭卷自测
+
+### 自测：向量组 (I) 能由 (II) 表示，(I) 有 t 个向量、(II) 有 s 个，且 s<t。(I) 一定相关吗？
+
+**题干**：$(\mathrm I)\ \beta_1,\dots,\beta_t$ 可由 $(\mathrm{II})\ \alpha_1,\dots,\alpha_s$ 线性表示，$s<t$。判断 $(\mathrm I)$ 是否一定线性相关，并写出依据的不等号链。
+
+**参考要点**：一定相关。$r(\mathrm I)\le r(\mathrm{II})\le s<t$，秩小于个数即相关。口诀“以少表多，多的相关”；“相关”说的是被表示的 $(\mathrm I)$。反过来 $(\mathrm{II})$ 由 $(\mathrm I)$ 表示时得不出结论。
+
+### 自测：$Ax=0$ 与 $Bx=0$ 同解，等价于 A、B 满足什么？只要求矩阵等价够吗？
+
+**题干**：$A$、$B$ 都是 $m\times n$ 矩阵。$Ax=0$ 与 $Bx=0$ 同解的充要条件是什么？“$A$ 与 $B$ 等价（秩相等）”够不够？请给一个例子。（你在 880-线代9-综合6 选了矩阵等价。）
+
+**参考要点**：行向量组等价，即 $r(A)=r(B)=r\begin{pmatrix}A\\B\end{pmatrix}$。矩阵等价只说明秩相等，不够：$A=(1,0)$、$B=(0,1)$ 秩都为 1，但解集不同。每个方程是一行，所以看行。
+
+### 自测：迁移｜$A=PB$、$A=BQ$、$A=PBQ$（$P$、$Q$ 可逆）分别能推出哪种等价？
+
+**题干**：设 $P$、$Q$ 可逆。分别说出 $A=PB$、$A=BQ$、$A=PBQ$ 时，$A$ 与 $B$ 之间一定成立的是行向量组等价、列向量组等价，还是只有矩阵等价。
+
+**参考要点**：左乘管行，右乘管列。$A=PB$ ⇒ 行组等价；$A=BQ$ ⇒ 列组等价；$A=PBQ$ ⇒ 只有矩阵等价（秩相等）。反例：$B=\mathrm{diag}(1,0)$，$P=Q=\begin{pmatrix}0&1\\1&0\end{pmatrix}$，得 $A=\mathrm{diag}(0,1)$，行组、列组都不等价。做题先圈出问的是“正确”还是“错误”。
+
+### 自测：$\alpha_1,\alpha_2,\alpha_3$ 无关，$\beta_1=\alpha_1+k\alpha_3$、$\beta_2=\alpha_2+\mu\alpha_3$ 一定无关吗？用矩阵说明。
+
+**题干**：3 维向量 $\alpha_1,\alpha_2,\alpha_3$ 线性无关，$k,\mu$ 任意。判断 $\beta_1=\alpha_1+k\alpha_3$、$\beta_2=\alpha_2+\mu\alpha_3$ 是否一定无关，并写成 $(\beta)=(\alpha)C$ 的形式说明理由。
+
+**参考要点**：一定无关。$(\beta_1,\beta_2)=(\alpha_1,\alpha_2,\alpha_3)C$，$C=\begin{pmatrix}1&0\\0&1\\k&\mu\end{pmatrix}$，$r(C)=2$。$\alpha$ 无关时 $(\alpha)$ 可逆，可逆矩阵乘上去秩不变，$r(\beta)=r(C)=2$。反过来不成立（反例 $\alpha_3=0$），所以在原题里是必要不充分条件。
+
+### 自测：迁移｜4 维中与 3 个无关向量都正交的非零向量组，秩是多少？换成 $n$ 维、$k$ 个呢？
+
+**题干**：4 维向量 $\alpha_1,\alpha_2,\alpha_3$ 线性无关，非零向量 $\beta_1,\dots,\beta_4$ 都与这三个向量正交。求 $r(\beta_1,\dots,\beta_4)$。若改成 $n$ 维中 $k$ 个无关向量，与它们都正交的向量组秩最多是多少？
+
+**参考要点**：$\beta_i$ 都是 $A^{\mathrm T}x=0$ 的解，$A^{\mathrm T}$ 是 $3\times4$、秩 3，基础解系 $4-3=1$ 个向量，所以秩为 1（非零）。一般情形最多 $n-k$。$n$ 是未知数个数，即 $A^{\mathrm T}$ 的列数。
+
+## 下次先做
+
+- [ ] 不看记录，重做 `880-线代9-综合6`、`880-线代9-综合7`，把作答发给本科助手核对。
+- [ ] 回到 880 第九章，继续没讲完的题。
+
+## 来源与边界
+
+- [当天线性代数问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)：10:36～13:28 及项目主聊天一问。
+- 本复盘只依据问答记录整理；参考要点里的反例和结论均出自当天讲解。880 选项原文没有收录，题干按记录改写。
+
+
+---
+
 来源文件：`每日复盘/计算机网络/2026-10-05.md`
 
 # 2026-10-05 计算机网络｜重新拾起数据链路层
@@ -3850,3 +3943,68 @@ thread3 {
 
 - [当天计算机网络问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-05.md)：16:50。
 - 原答仅提供复习路线，没有课件附件或作答证据。本复盘的条件补充是一般原理解释，教材页码、对应真题与个人掌握程度待核实。
+
+
+---
+
+来源文件：`每日复盘/高等数学/2026-10-05.md`
+
+# 2026-10-05 高等数学｜被夹住的函数，导数也被夹住
+
+## 今天实际涉及
+
+- 对照 880 第 2 章错题登记表，排出剩余错题：基础选择 17、19、20、21、22，再到填空和解答。
+- 做了基础选择 17（文字作答，当时助手判对）；基础选择 19 已出题，未作答、未讲解，之后转去问线代。
+
+## 题目状态
+
+| 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
+|---|---|---|---|---|
+| `880-高数2-基础选择17` $\lvert f(x)\rvert\le x^2$ 时 $x=0$ 是什么点 | 作答待核实 | [10:19](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md) | 记录中没有错误；只有当时助手的判断 | 写出夹逼的那一行不等式 |
+| `880-高数2-基础选择19` 三次函数求 $a,b,c$ | 仅安排 | [10:19](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md) | 未作答、未讲解 | 列三个方程解出 $a,b,c$ |
+
+## 作答记录
+
+| 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
+|---|---|---|---|---|---|
+| `880-高数2-基础选择17` | 未注明 | 文字「定义 c」：用导数定义，选 C | 正确 | 仅旧助手判断 | [10:19](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md) |
+
+## 知识点与适用条件
+
+- $|f(x)|\le|x|^{\alpha}$（$x$ 在 0 附近）：先得 $f(0)=0$。
+  - $\alpha>1$：$\left|\dfrac{f(x)-f(0)}{x}\right|\le|x|^{\alpha-1}\to0$，所以可导且 $f'(0)=0$。
+  - $\alpha=1$：只能保证连续，是否可导不确定，例如 $f(x)=|x|$。
+
+## 我的卡点与纠正
+
+- 当天没有暴露错误。基础选择 19 还没做，不能判断。
+
+## 闭卷自测
+
+### 自测：$|f(x)|\le x^2$（$x$ 在 0 附近），$x=0$ 处可导吗？导数是多少？
+
+**题干**：$f(x)$ 在 $(-\delta,\delta)$ 内有定义，且 $|f(x)|\le x^2$。判断 $x=0$ 是间断点、连续不可导点，还是可导点；若可导，求 $f'(0)$，并写出关键不等式。
+
+**参考要点**：可导且 $f'(0)=0$。先由 $|f(0)|\le0$ 得 $f(0)=0$；再看 $\left|\dfrac{f(x)-f(0)}{x}\right|=\dfrac{|f(x)|}{|x|}\le|x|\to0$，夹逼得导数为 0（880-高数2-基础选择17，选 C）。
+
+### 自测：迁移｜把条件换成 $|f(x)|\le|x|$，还能推出可导吗？
+
+**题干**：$f(x)$ 在 0 附近有定义，$|f(x)|\le|x|$。在 $x=0$ 处能推出连续吗？能推出可导吗？各给理由或反例。
+
+**参考要点**：能推出连续：$f(0)=0$，且 $|f(x)|\le|x|\to0$。不能推出可导：差商只被夹在 $[-1,1]$ 之间，反例 $f(x)=|x|$。规律：$|f(x)|\le|x|^{\alpha}$ 时，$\alpha>1$ 可导且导数为 0，$\alpha=1$ 只保证连续。
+
+### 自测：三次函数在 $x=-2$ 取极值，又与 $y=-3x+3$ 相切于 $(1,0)$，列出求 $a,b,c$ 的三个方程。
+
+**题干**：$y=x^3+ax^2+bx+c$ 在 $x=-2$ 处取得极值，且与直线 $y=-3x+3$ 相切于点 $(1,0)$。把三个条件各写成一个方程，并解出 $a,b,c$。
+
+**参考要点**：$y'=3x^2+2ax+b$。极值：$y'(-2)=12-4a+b=0$；过点：$1+a+b+c=0$；切线斜率：$y'(1)=3+2a+b=-3$。解得 $a=1$，$b=-8$，$c=6$。这道题当天没有讲解，本条参考要点由整理时推导，未对照 880 答案页。
+
+## 下次先做
+
+- [ ] 做 `880-高数2-基础选择19`，把作答发给本科助手核对；然后是基础选择 20、21、22。
+- [ ] 第 2 章基础填空剩 12、15、16、17、19、20、24、25、26、27。
+
+## 来源与边界
+
+- [当天高等数学问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md)：10:14、10:17、10:19。
+- 基础选择 19 的参考要点是整理时推导的结果，不是当时的讲解，也没有核对原书答案。

@@ -25,3 +25,30 @@ body.all-mode .workspace-bar,body.all-mode .rail,body.all-mode .date-control,bod
 @media(max-width:700px){.rt-list{grid-template-columns:1fr 1fr}}
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:12px 0 28px}.gallery-item{margin:0;border:1px solid var(--line);background:#fff;padding:10px}.gallery-item img{width:100%;height:auto;display:block;margin:0 0 6px}.gallery-item .markdown h1{font-size:15px!important;margin:4px 0}.gallery-item .markdown p,.gallery-item .markdown li{font-size:12px!important;line-height:1.75!important}
 .rt-item span{display:block;line-height:1.6}
+/* Bedtime review: warm, dim, one-handed */
+body.bed-open{overflow:hidden}
+.bed{position:fixed;inset:0;z-index:30;background:#16140f;color:#d8d0bf;display:flex;flex-direction:column;color-scheme:dark;font-size:17px;line-height:1.85}
+.bed-top{display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 16px 8px}
+.bed-progress{flex:1;height:3px;background:#2b271f;border-radius:2px;overflow:hidden}.bed-progress i{display:block;height:100%;background:#a8915f;transition:width .25s}
+.bed-x{background:none;border:0;color:#8f8672;font-size:26px;line-height:1;width:44px;height:44px}
+.bed-body{flex:1;overflow-y:auto;padding:8px 20px 24px;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box;-webkit-overflow-scrolling:touch}
+.bed-eyebrow{font-size:12px;letter-spacing:1px;color:#8f8672;margin:8px 0}
+.bed h1{font:26px/1.5 var(--serif);color:#eee6d4;margin:6px 0 12px;font-weight:500}.bed h2{font:18px var(--serif);color:#e6dcc6;margin:22px 0 8px;border:0}
+.bed-note{color:#a39a86;font-size:14px!important}
+.bed .markdown h3{font:21px/1.6 var(--serif);color:#f1e9d6;margin:4px 0 12px}
+.bed .markdown p,.bed .markdown li{font-size:16px;line-height:1.85;color:#d8d0bf}
+.bed .markdown code{color:#e2c98f;background:none}.bed .markdown pre{background:#211e17;color:#d8d0bf;border-radius:6px;font-size:13px;padding:12px;overflow:auto}
+.bed .markdown table{font-size:13px}.bed .markdown th,.bed .markdown td{border-color:#3a3428}.bed .markdown th{background:#211e17}
+.bed .markdown a{color:#c9b07a}.bed .markdown strong{color:#efe5cf}
+.bed-ctx{border-left:2px solid #3a3428;padding-left:12px;margin-bottom:8px}
+.bed-ans{margin-top:18px;padding:14px 16px;background:#1f1c15;border:1px solid #3a3428;border-radius:8px}
+.bed-foot{display:flex;gap:10px;padding:12px 16px calc(14px + env(safe-area-inset-bottom));background:#16140f;border-top:1px solid #2b271f;max-width:720px;width:100%;margin:0 auto;box-sizing:border-box}
+.bed-main{flex:1;min-height:56px;border:0;border-radius:10px;background:#a8915f;color:#1a170f;font-size:17px;font-weight:600}
+.bed-rate{flex:1;min-height:64px;border-radius:10px;border:1px solid #3a3428;background:#211e17;color:#e6dcc6;font-size:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.bed-rate small{display:block;font-size:11px;color:#8f8672;margin:0}.bed-rate.r0{border-color:#6e3b2f}.bed-rate.r2{border-color:#5b6b3f}
+.bed-sizes{display:flex;gap:8px;margin:18px 0 6px}.bed-sizes button{flex:1;min-height:44px;border-radius:8px;border:1px solid #3a3428;background:#1f1c15;color:#a39a86;font-size:15px}.bed-sizes button.on{border-color:#a8915f;color:#eee6d4}
+.bed-plan{padding-left:18px}.bed-plan li{font-size:14px!important;color:#cbc2ad;margin:6px 0}
+.bed .katex{color:inherit}
+.rt-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}.rt-bed{border:0;border-radius:6px;background:#1f2a22;color:#ece4cf;padding:12px 16px;text-align:left;min-width:220px}.rt-bed b{display:block;font-size:15px}.rt-bed span{font-size:11px;color:#b9b19c}
+.bed-link{border:1px solid #ffffff22!important;margin-top:-14px}
+@media(max-width:700px){.rt-bed{width:100%}.bed-link{margin-top:0}}
