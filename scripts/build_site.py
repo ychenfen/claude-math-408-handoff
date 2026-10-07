@@ -17,7 +17,13 @@ def build():
             for p in sorted((ROOT/area/name).glob('*.md'),reverse=True):
                 if not re.fullmatch(r'\d{4}-\d{2}-\d{2}\.md',p.name):raise ValueError(f'Invalid dated file: {p}')
                 d=doc(p);d['date']=p.stem;target.append(d)
-        subjects.append({'id':sid,'name':name,'tag':tag,'history':doc(ROOT/history),'archive':[doc(p) for p in sorted((ROOT/'原文').glob(f'{prefix}*.md'))] if prefix else [],'records':records,'summaries':summaries})
+        diagrams=[]
+        for img in sorted((ROOT/'图解'/name).glob('*')) if (ROOT/'图解'/name).is_dir() else []:
+            if img.suffix.lower() not in ('.svg','.png','.jpg','.jpeg','.webp'):continue
+            if img.suffix.lower()=='.svg' and re.search(r'<script|\son\w+\s*=|<foreignObject|javascript:',img.read_text(),re.I):raise ValueError(f'SVG contains executable content: {img}')
+            cap=img.with_suffix('.md');caption=doc(cap) if cap.is_file() else None
+            diagrams.append({'path':img.relative_to(ROOT).as_posix(),'title':caption['title'] if caption else img.stem,'caption':caption})
+        subjects.append({'id':sid,'name':name,'tag':tag,'diagrams':diagrams,'history':doc(ROOT/history),'archive':[doc(p) for p in sorted((ROOT/'原文').glob(f'{prefix}*.md'))] if prefix else [],'records':records,'summaries':summaries})
     dates=[r['date'] for s in subjects for r in s['records']]
     data={'version':1,'latestDate':max(dates,default=''),'subjects':subjects,'protocol':doc(ROOT/'每日复盘/使用说明.md')}
     out=ROOT/'assets/data.json';out.parent.mkdir(exist_ok=True);out.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')

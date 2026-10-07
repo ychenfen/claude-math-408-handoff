@@ -127,6 +127,14 @@
     const pane=$('#content');pane.innerHTML='<p>正在汇总六科…</p>';
     const rows=[];for(const s of data.subjects){rows.push({s,L:await ledgerOf(s)});if(own!==generation)return;}
     pane.innerHTML='';
+    // Today's review comes first: every subject's due and not-yet-practised questions (原题重做 + 闭卷自测).
+    for(const {s} of rows)await Promise.all(s.records.map(loadDoc));if(own!==generation)return;
+    const dues=rows.map(({s})=>({s,d:StudyReview.dueOf({docs:[...s.summaries,...s.records],subject:s,get})}));
+    const totalDue=dues.reduce((a,x)=>a+x.d.due,0),totalNew=dues.reduce((a,x)=>a+x.d.new,0);
+    const today_=document.createElement('section');today_.className='review-today';
+    today_.innerHTML=`<div class="rt-head"><div><span class="eyebrow">TODAY · 今天先复习</span><h2>${totalDue?`到期 ${totalDue} 题`:totalNew?`可以开始：${totalNew} 题还没练过`:'今天没有要复习的题'}${totalDue&&totalNew?`<small>另有 ${totalNew} 题还没练过</small>`:''}</h2><p>每题先在纸上独立做或回想，再翻开记录对照。自评只排复习时间，不改变题目状态；要升级状态，把作答发给本科助手核对。</p></div></div><div class="rt-list">${dues.map(({s,d})=>`<button class="rt-item${d.due?' due':''}" data-drill="${s.id}" ${d.total?'':'disabled'}><b>${escape(s.name)}</b><span>${d.total?`${d.due?`到期 ${d.due}`:'无到期'} · 新 ${d.new}${d.problems?` · 原题 ${d.problems}`:''}`:'还没有可复习的题'}</span></button>`).join('')}</div>`;
+    today_.querySelectorAll('[data-drill]').forEach(b=>b.onclick=()=>select(b.dataset.drill,null,'drill'));
+    pane.append(today_);
     const head=document.createElement('div');head.className='all-head';
     head.innerHTML=`<div><b>每科：题目状态分布 · 最近14天记录 · 下次先做</b><span>状态由作答记录推出，只说明证据到了哪一步，不代表掌握。点一行进入该科题目追踪。</span></div><ol class="legend">${STATUSES.map((st,i)=>`<li><i class="sw s${i}"></i>${st}</li>`).join('')}</ol>`;
     pane.append(head);
@@ -157,7 +165,7 @@
         const field=document.createElement('textarea');field.id='prompt-text';field.className='search';field.rows=10;field.readOnly=true;field.value=prompt();pane.append(field);
         pane.append(renderMarkdown(data.protocol.text,data.protocol.path));currentText=prompt()+'\n\n'+data.protocol.text;
       } else if(tab==='drill') {
-        const s=subject,docs=[...s.summaries];
+        const s=subject,docs=[...s.summaries,...s.records];
         await Promise.all(docs.map(loadDoc));if(own!==generation)return;
         pane.replaceChildren();
         disposeDrill=StudyReview.mountDrill({docs,subject:s,container:pane,renderMarkdown,get,put,download})||(()=>{});
@@ -180,6 +188,13 @@
         currentText=['# '+subject.name+'｜题目追踪','','状态由作答记录推出；只检查证据是否齐全，不判断答案正确性。','',...[...items.values()].map(it=>`- ${it.id}｜${it.status}｜${it.trail.map(([d,s])=>d+' '+s).join(' → ')}｜下次：${it.next}`)].join('\n')+'\n';
       } else if(tab==='history') {
         pane.innerHTML='<div class="doc-meta"><span class="badge">历史交接</span><span>原回答可能有误，请连同边界说明阅读</span></div>';
+        if(subject.diagrams?.length){
+          const h=document.createElement('h2');h.textContent='本科图解';pane.append(h);
+          const grid=document.createElement('div');grid.className='gallery';pane.append(grid);
+          subject.diagrams.forEach(g=>{const fig=document.createElement('figure');fig.className='gallery-item';
+            fig.append(renderMarkdown(`![${g.title.replace(/[\[\]]/g,'')}](${g.path.split('/').pop()})`,g.path));
+            if(g.caption)fig.append(renderMarkdown(g.caption.text,g.caption.path));grid.append(fig);});
+        }
         pane.append(renderMarkdown(subject.history.text,subject.history.path));
         const h=document.createElement('h2');h.textContent='按问题找原文';pane.append(h);
         const search=document.createElement('input');search.type='search';search.placeholder='搜索本科历史问题、关键词…';search.setAttribute('aria-label','搜索本科历史问题');search.className='search';pane.append(search);

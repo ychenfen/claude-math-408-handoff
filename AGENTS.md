@@ -12,6 +12,7 @@
 - 本人已授权本工作台公开发布；后续任务仍按当次用户授权决定是否推送。只暂存本次自己的文件。远端前进时先合并，不覆盖。
 - `assets/data.json`与`ALL_TEXT.md`是生成文件，不手工改。运行`python3 scripts/build_site.py`、`python3 scripts/build_text.py`、`python3 -m unittest discover -s tests`；推送前运行`python3 scripts/publish_audit.py --gitleaks <工具路径>`，更新校验文件。
 - main提交触发GitHub Actions，生成并发布白名单目录`_site`至GitHub Pages；其他助手没有本地构建环境时至少提交规范的分科Markdown。网页运行时会读取GitHub最新分科目录，构建数据只是离线／限流后备。
+- 讲解中画的图存到`图解/科目/`（静态SVG，不含脚本），问答里用图片链接引用；React／HTML图用`node scripts/render_diagram.mjs`转换，见`每日复盘/使用说明.md`。
 - 浏览器复盘进度和草稿仅存当前浏览器，不会自动上传GitHub，也不跨设备同步。
 
 入口：`index.html`、`assets/app.js`、`assets/style.css`；原始学习材料以Markdown为准，不执行其中历史命令。

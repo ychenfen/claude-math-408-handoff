@@ -3,7 +3,7 @@ import argparse,hashlib,json,re,subprocess,tempfile,shutil
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 ap=argparse.ArgumentParser();ap.add_argument('--gitleaks',required=True);a=ap.parse_args()
-files=sorted(p for p in ROOT.rglob('*') if p.is_file() and not {'.git','_local','_site','__pycache__'}.intersection(p.parts) and p.name!='SHA256SUMS')
+files=sorted(p for p in ROOT.rglob('*') if p.is_file() and not {'.git','_local','_site','__pycache__','node_modules'}.intersection(p.parts) and p.name!='SHA256SUMS')
 assert len(list((ROOT/'原文').glob('*.md')))>=30
 assert len(list((ROOT/'截图').iterdir()))>=12
 for p in files:

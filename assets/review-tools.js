@@ -12,9 +12,36 @@
     for (const c of text) { n ^= c.codePointAt(0); n = Math.imul(n, 16777619); }
     return (n >>> 0).toString(36);
   };
+  // Problems from the Q&A records: every `## 时间　\`编号\`　标题` section is a redo card. The front is the problem
+  // as recorded (**题** or **问**); what was answered, checked and corrected stays hidden until recall.
+  function problemCardsOf(doc) {
+    const byId = new Map();
+    const sections = (doc.text || '').split(/^## /m).slice(1);
+    for (const sec of sections) {
+      const nl = sec.indexOf('\n'), head = (nl < 0 ? sec : sec.slice(0, nl)).trim(), body = nl < 0 ? '' : sec.slice(nl + 1).trim();
+      const id = (head.match(/`([^`]+)`/) || [])[1];
+      if (!id || !/[0-9]/.test(id)) continue;
+      const title = head.replace(/^[^`]*`[^`]+`\s*/, '').replace(/（[^）]*选[^）]*）/g, '').trim();
+      const stem = body.match(/^\*\*(?:题|问)\*\*[：:]([\s\S]*?)(?=^\*\*[^*\n]{1,8}\*\*[：:]|^来源|(?![\s\S]))/m);
+      const entry = byId.get(id) || {id, title, stem: '', rest: []};
+      const own = stem && !entry.stem;
+      if (own) entry.stem = stem[1].trim();
+      entry.rest.push(`#### ${head.replace(/`/g, '')}\n\n` + (own ? body.replace(stem[0], '') : body).trim());
+      byId.set(id, entry);
+    }
+    // A stem that only says "第六题我选c了" is not a problem; don't show the old choice, send the learner to the book.
+    const weak = s => /我选|选的|选了/.test(s) || (s.replace(/\s/g, '').length < 24 && !/\$/.test(s));
+    return [...byId.values()].filter(e => e.stem).map(e => weak(e.stem) ? {...e, stem: `**题面未收录在问答里**（当时只记了提问或作答）。请翻开原书 **${e.id}** 独立重做，写完再看记录。`} : e).map(e => ({
+      id: hash(doc.path + '\n原题\n' + e.id + '\n' + e.stem), kind: '原题', ref: e.id, path: doc.path, date: doc.date,
+      question: `原题重做｜${e.id}${e.title ? '　' + e.title : ''}`,
+      context: `${e.stem}\n\n> 题面摘自当天问答。缺选项、图或完整条件时，按编号翻原书，不要只凭这里作答。先在纸上独立做完，再看下面的记录。`,
+      answer: `**参考要点**：以下是当时的作答与讲解记录（含更正），对照自己的步骤找第一个分歧点。\n\n` + e.rest.join('\n\n')
+    }));
+  }
   function cardsOf(docs) {
     const cards = [];
     for (const doc of docs) {
+      if ((doc.path || '').startsWith('问答记录/')) { cards.push(...problemCardsOf(doc)); continue; }
       const pattern = /^### 自测：([^\n]+)\n([\s\S]*?)(?=^#{1,3} |$(?![\s\S]))/gm;
       for (const match of (doc.text || '').matchAll(pattern)) {
         const question = match[1].trim(), body = match[2].trim();
@@ -93,8 +120,9 @@
     const stats=create('div','spacing-status');stats.setAttribute('role','status');container.append(stats);
     const timeLabel=timestamp=>new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(timestamp));
     function updateStats() {const s=StudySpacing.summary(cards,read);stats.textContent=`到期 ${s.due} · 新题 ${s.new} · 等待 ${s.waiting}`+(s.next!==null?`｜下一次 ${timeLabel(s.next)}（北京时间）`:'');}
-    const rule=create('details','spacing-rules');rule.append(create('summary','','复习间隔怎么安排？'),create('p','','不会：10分钟后，重新开始；模糊：1天后，回退一级；会了：1 → 3 → 7 → 14 → 30 → 60天。提前练习点“会了”保留原到期时间。规则是学习建议，不是墨墨内部算法，也不是掌握证明。'));
-    container.append(rule);
+    const settings=create('details','drill-settings');settings.append(create('summary','','间隔规则 · 导出 · 保存说明'));container.append(settings);
+    const rule=create('div','spacing-rules');rule.append(create('b','','复习间隔怎么安排？'),create('p','','不会：10分钟后，重新开始；模糊：1天后，回退一级；会了：1 → 3 → 7 → 14 → 30 → 60天。提前练习点“会了”保留原到期时间。规则是学习建议，不是墨墨内部算法，也不是掌握证明。'));
+    settings.append(rule);
     const toolbar=create('div','drill-toolbar');
     const exportButton=create('button','secondary','导出本科自测记录');exportButton.type='button';
     exportButton.onclick=()=>{
@@ -102,11 +130,11 @@
         const s=read(c);return `\n## ${c.question}\n\n来源：${c.path}\n\n${c.context||'题面见问题标题。'}\n\n我的回想：${s.note||'未填写'}\n\n自评：${s.rating||'未评'}${s.reviewedAt?' · '+timeLabel(Date.parse(s.reviewedAt))+'（北京时间）':''}\n\n下次复习：${Number.isFinite(s.due)?timeLabel(s.due)+'（北京时间）':'尚未安排'}\n`;
       })].join('\n');download(text,subject.name+'-闭卷自测记录.md');
     };
-    exportButton.disabled=!cards.length;toolbar.append(exportButton);container.append(toolbar);
-    container.append(create('small','','安排和回想只存当前浏览器，不跨设备；关闭网页不推送通知。重新打开会列出到期题。内容修订后按新题重新测；旧记录仍留在浏览器，但此处只导出当前版本。'));
+    exportButton.disabled=!cards.length;toolbar.append(exportButton);settings.append(toolbar);
+    settings.append(create('small','','安排和回想只存当前浏览器，不跨设备；关闭网页不推送通知。重新打开会列出到期题。内容修订后按新题重新测；旧记录仍留在浏览器，但此处只导出当前版本。'));
     const stage=create('div','drill-stage');container.append(stage);
     updateStats();
-    if (!cards.length) {stage.append(create('p','empty','本科还没有已保存的自测题。请先让本科助手根据真实问答整理复盘，不自动编造题目。'));return;}
+    if (!cards.length) {stage.append(create('p','empty','本科还没有可复习的题：问答里没有带`编号`的题目，复盘里也没有自测。请让本科助手按约定记录，不自动编造题目。'));return;}
     let queue=[],index=0;
     function start(all=false) {
       queue=StudySpacing.queue(cards,read,Date.now(),all);index=0;show();
@@ -120,14 +148,14 @@
         const all=create('button','secondary','不等到期，练全部');all.type='button';all.onclick=()=>start(true);stage.append(again,all);return;
       }
       const card=queue[index],state=read(card);
-      stage.append(create('div','eyebrow',`${index+1} / ${queue.length} · 来源 ${card.date} · ${subject.name}`));
+      stage.append(create('div','eyebrow',`${index+1} / ${queue.length} · ${card.kind==='原题'?'原题重做':'闭卷自测'} · 来源 ${card.date} · ${subject.name}`));
       const question=create('div','drill-question');question.append(renderMarkdown('### '+card.question,card.path));stage.append(question);
       if(card.context) {const context=create('div','drill-context');context.append(renderMarkdown(card.context,card.path));stage.append(context);}
       const label=create('label','','我的回想（可选，也可以口述）');label.htmlFor='recall-answer';
       const input=create('textarea','recall-answer');input.id='recall-answer';input.rows=4;input.placeholder='先写自己的解释、公式条件或步骤，再看参考要点。';input.value=state.note||'';input.oninput=()=>save(card,{note:input.value});stage.append(label,input);
       const reveal=create('button','primary','我已回想，查看参考要点');reveal.type='button';
       const answer=create('div','drill-answer');answer.hidden=true;answer.append(renderMarkdown(card.answer,card.path));
-      answer.append(renderMarkdown(`[回看来源复盘](${card.path.split('/').map(encodeURIComponent).join('/')})`,'index.html'));
+      answer.append(renderMarkdown(`[回看来源记录](${card.path.split('/').map(encodeURIComponent).join('/')})`,'index.html'));
       const rates=create('div','drill-rate');rates.hidden=true;rates.append(create('span','','与参考要点对照后：'));
       ['不会','模糊','会了'].forEach(rating=>{
         const button=create('button','secondary rate',rating);button.type='button';button.onclick=()=>{
@@ -144,5 +172,11 @@
     const timer=setInterval(tick,15000);document.addEventListener('visibilitychange',tick);
     return ()=>{clearInterval(timer);document.removeEventListener('visibilitychange',tick);};
   }
-  window.StudyReview={cardsOf,svgData,enhanceFigures,mountDrill};
+  // Due/new counts for one subject, read from the same browser-local schedule the drill writes.
+  function dueOf({docs,subject,get}) {
+    const prefix=`study-drill-v1:${subject.id}:`,cards=cardsOf(docs);
+    const read=c=>{try{const v=JSON.parse(get(prefix+c.id)||'{}');return v&&typeof v==='object'?v:{};}catch{return {};}};
+    return {...StudySpacing.summary(cards,read),total:cards.length,problems:cards.filter(c=>c.kind==='原题').length};
+  }
+  window.StudyReview={cardsOf,problemCardsOf,dueOf,svgData,enhanceFigures,mountDrill};
 })();

@@ -4,3 +4,4 @@ _local/
 .env.*
 __pycache__/
 _site/
+node_modules/
