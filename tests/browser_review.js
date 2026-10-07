@@ -13,6 +13,10 @@ async (browserPage) => {
     await page.route(BASE+'/assets/data.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(snapshot)}));
     await page.goto(BASE+'/#os/2026-10-05/drill');await page.waitForLoadState('networkidle');
     await page.locator('.recall-answer').waitFor();
+    assert(await page.locator('.drill-context').isVisible(),'Question context visible before reveal');
+    const contextText=await page.locator('.drill-context').innerText();
+    for(const part of ['thread1','thread2','thread3','y = add(y, w)','2017'])assert(contextText.includes(part),'Missing question detail: '+part);
+    assert(!contextText.includes('参考要点'),'Answer must not leak into question context');
     assert((await page.locator('.drill-stage .eyebrow').textContent()).startsWith('1 / 5'),'Five OS cards');
     assert(await page.locator('.drill-answer').isHidden(),'Answer must start hidden');
     assert(await page.locator('.drill-rate').isHidden(),'No rating before recall');
@@ -38,6 +42,13 @@ async (browserPage) => {
     await page.locator('.recall-answer').waitFor();
     assert((await page.locator('.drill-stage .eyebrow').textContent()).startsWith('1 / 3'),'DS cards isolated across dates');
     assert(await page.locator('.recall-answer').inputValue()==='','No cross-subject notes');
+    assert((await page.locator('.drill-context').innerText()).includes('res[i]'),'DS card includes standalone array problem');
+    await page.locator('#date').fill('2026-10-05');await page.locator('#date').dispatchEvent('change');
+    await page.getByRole('tab',{name:'每日复盘',exact:true}).click();
+    assert(await page.locator('.selftest-item .drill-context').count()===3,'Daily review also exposes question context');
+    assert(await page.locator('.selftest-item .drill-context').first().isVisible(),'Daily question visible before reveal');
+    assert(await page.locator('details.selftest[open]').count()===0,'Daily answers still start hidden');
+    assert(await page.locator('details.selftest .answer').first().isHidden(),'Daily answer content hidden');
     await page.locator('[data-subject="math"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
     assert((await page.locator('.drill-stage').textContent()).includes('没有已保存的自测题'),'Honest empty state');
     await page.locator('[data-subject="os"]').click();await page.getByRole('tab',{name:'当天问答',exact:true}).click();

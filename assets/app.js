@@ -72,9 +72,17 @@
       const box=document.createElement('details');box.className='selftest';
       const summary=document.createElement('summary');summary.textContent=h.textContent.replace(/^自测：/,'');box.append(summary);
       const answer=document.createElement('div');answer.className='answer';
+      const context=document.createElement('div');context.className='drill-context';
+      const nodes=[];
       let next=h.nextSibling;
-      while(next && !(next.nodeType===1 && /^H[123]$/.test(next.tagName))){const move=next;next=next.nextSibling;answer.append(move);}
-      box.append(answer);h.replaceWith(box);
+      while(next && !(next.nodeType===1 && /^H[123]$/.test(next.tagName))){nodes.push(next);next=next.nextSibling;}
+      const marker=nodes.findIndex(n=>n.nodeType===1&&n.tagName==='P'&&/^参考要点[：:]/.test(n.textContent));
+      nodes.forEach((node,i)=>(marker>0&&i<marker?context:answer).append(node));
+      box.append(answer);
+      if(context.textContent.trim()) {
+        const wrapper=document.createElement('section');wrapper.className='selftest-item';
+        h.replaceWith(wrapper);wrapper.append(h,context,box);summary.textContent='查看参考要点';
+      } else h.replaceWith(box);
     });
     el.querySelectorAll('td').forEach(td=>{if(STATUSES.includes(td.textContent.trim())){td.innerHTML=`<span class="status s${STATUSES.indexOf(td.textContent.trim())}">${escape(td.textContent.trim())}</span>`;}});
     StudyReview.enhanceFigures(el);

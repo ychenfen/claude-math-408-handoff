@@ -27,6 +27,10 @@ class SiteTests(unittest.TestCase):
                 t=d['text'];questions=re.findall(r'^### 自测：',t,re.M)
                 self.assertGreaterEqual(len(questions),3)
                 self.assertEqual(len(questions),t.count('**参考要点**'))
+                for body in re.findall(r'^### 自测：[^\n]+\n([\s\S]*?)(?=^#{1,3} |\Z)',t,re.M):
+                    self.assertIn('**题干**：',body,d['path'])
+                    self.assertLess(body.index('**题干**：'),body.index('**参考要点**'),d['path'])
+                    self.assertGreater(len(body.split('**参考要点**')[0].strip()),60,d['path'])
                 self.assertIn('## 来源与边界',t)
                 for target in re.findall(r'\]\((\.\./[^)]+)\)',t):self.assertTrue((ROOT/d['path']).parent.joinpath(target).is_file())
     def test_every_summary_has_same_day_evidence(self):

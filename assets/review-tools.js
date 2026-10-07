@@ -17,9 +17,14 @@
     for (const doc of docs) {
       const pattern = /^### 自测：([^\n]+)\n([\s\S]*?)(?=^#{1,3} |$(?![\s\S]))/gm;
       for (const match of (doc.text || '').matchAll(pattern)) {
-        const question = match[1].trim(), answer = match[2].trim();
+        const question = match[1].trim(), body = match[2].trim();
+        // Only text before the explicit answer marker is visible before recall.
+        // Legacy cards without the marker keep their whole body hidden.
+        const marker = /^\*\*参考要点\*\*[：:]/m.exec(body);
+        const context = marker ? body.slice(0,marker.index).trim() : '';
+        const answer = marker ? body.slice(marker.index).trim() : body;
         if (!answer) continue;
-        cards.push({id:hash(doc.path+'\n'+question+'\n'+answer),question,answer,path:doc.path,date:doc.date});
+        cards.push({id:hash(doc.path+'\n'+question+'\n'+body),question,context,answer,path:doc.path,date:doc.date});
       }
     }
     return cards;
@@ -94,7 +99,7 @@
     const exportButton=create('button','secondary','导出本科自测记录');exportButton.type='button';
     exportButton.onclick=()=>{
       const text=['# '+subject.name+'｜本机闭卷自测记录','','仅自评／个人草稿，不是已核实作答证据。',...cards.map(c=>{
-        const s=read(c);return `\n## ${c.question}\n\n来源：${c.path}\n\n我的回想：${s.note||'未填写'}\n\n自评：${s.rating||'未评'}${s.reviewedAt?' · '+timeLabel(Date.parse(s.reviewedAt))+'（北京时间）':''}\n\n下次复习：${Number.isFinite(s.due)?timeLabel(s.due)+'（北京时间）':'尚未安排'}\n`;
+        const s=read(c);return `\n## ${c.question}\n\n来源：${c.path}\n\n${c.context||'题面见问题标题。'}\n\n我的回想：${s.note||'未填写'}\n\n自评：${s.rating||'未评'}${s.reviewedAt?' · '+timeLabel(Date.parse(s.reviewedAt))+'（北京时间）':''}\n\n下次复习：${Number.isFinite(s.due)?timeLabel(s.due)+'（北京时间）':'尚未安排'}\n`;
       })].join('\n');download(text,subject.name+'-闭卷自测记录.md');
     };
     exportButton.disabled=!cards.length;toolbar.append(exportButton);container.append(toolbar);
@@ -117,6 +122,7 @@
       const card=queue[index],state=read(card);
       stage.append(create('div','eyebrow',`${index+1} / ${queue.length} · 来源 ${card.date} · ${subject.name}`));
       const question=create('div','drill-question');question.append(renderMarkdown('### '+card.question,card.path));stage.append(question);
+      if(card.context) {const context=create('div','drill-context');context.append(renderMarkdown(card.context,card.path));stage.append(context);}
       const label=create('label','','我的回想（可选，也可以口述）');label.htmlFor='recall-answer';
       const input=create('textarea','recall-answer');input.id='recall-answer';input.rows=4;input.placeholder='先写自己的解释、公式条件或步骤，再看参考要点。';input.value=state.note||'';input.oninput=()=>save(card,{note:input.value});stage.append(label,input);
       const reveal=create('button','primary','我已回想，查看参考要点');reveal.type='button';
