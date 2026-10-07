@@ -60,7 +60,11 @@
   async function request(url) { const r=await fetch(url,{signal:AbortSignal.timeout(12000),credentials:'omit'});if(!r.ok)throw Error(`HTTP ${r.status}`);return r; }
   function renderMarkdown(text,path) {
     const el=document.createElement('article');el.className='markdown';
-    el.innerHTML=DOMPurify.sanitize(marked.parse(text),{FORBID_TAGS:['style','iframe','form','input','svg'],FORBID_ATTR:['style']});
+    // Shield TeX from Markdown: otherwise \\ (matrix rows), \{ \} \, and * _ inside $...$ are eaten before KaTeX sees them.
+    const tex=[];
+    const shielded=String(text).replace(/(```[\s\S]*?```|`[^`\n]*`)|\$\$[\s\S]+?\$\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]|\$(?=\S)(?:\\\$|[^$\n])+?\$/g,(m,code)=>code?m:`@@TEX${tex.push(m)-1}@@`);
+    const html=marked.parse(shielded).replace(/@@TEX(\d+)@@/g,(m,i)=>escape(tex[Number(i)]));
+    el.innerHTML=DOMPurify.sanitize(html,{FORBID_TAGS:['style','iframe','form','input','svg'],FORBID_ATTR:['style']});
     const base=new URL(encodePath(path),new URL('./',location.href));
     el.querySelectorAll('a[href],img[src]').forEach(node=>{
       const attr=node.tagName==='IMG'?'src':'href',value=node.getAttribute(attr);
@@ -86,7 +90,7 @@
     });
     el.querySelectorAll('td').forEach(td=>{if(STATUSES.includes(td.textContent.trim())){td.innerHTML=`<span class="status s${STATUSES.indexOf(td.textContent.trim())}">${escape(td.textContent.trim())}</span>`;}});
     StudyReview.enhanceFigures(el);
-    if(window.renderMathInElement)renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false}],throwOnError:false,trust:false});
+    if(window.renderMathInElement)renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false,trust:false});
     return el;
   }
   function prompt() {
@@ -134,6 +138,12 @@
     today_.innerHTML=`<div class="rt-head"><div><span class="eyebrow">TODAY · 今天先复习</span><h2>${totalDue?`到期 ${totalDue} 题`:totalNew?`可以开始：${totalNew} 题还没练过`:'今天没有要复习的题'}${totalDue&&totalNew?`<small>另有 ${totalNew} 题还没练过</small>`:''}</h2><p>先回想，再翻开参考要点，按不会／模糊／会了自评；忘了的很快再来，记住的间隔越拉越长。自评只排复习时间，不改变题目状态。</p></div></div><div class="rt-list">${dues.map(({s,d})=>`<button class="rt-item${d.due?' due':''}" data-drill="${s.id}" ${d.total?'':'disabled'}><b>${escape(s.name)}</b><span>${d.total?`${d.due?`到期 ${d.due}`:'无到期'} · 新 ${d.new}`:'还没有复习卡'}</span></button>`).join('')}</div>`;
     const bed=document.createElement('button');bed.className='rt-bed';bed.innerHTML='<b>☾ 睡前复习</b><span>全科混合 · 暗色 · 10～25 张 · 只回想不写字</span>';bed.onclick=()=>select('bed');
     today_.querySelector('.rt-head').append(bed);
+    // Daytime algorithm: the data-structures plan says which template to hand-write today; night only recalls it.
+    const ds=data.subjects.find(z=>z.id==='ds'),dsDoc=ds&&[...ds.summaries].sort((p,q)=>q.date.localeCompare(p.date)).find(z=>z.text);
+    const algoPlan=dsDoc?nextAction(dsDoc.text).replace(/`/g,''):'';
+    const algo=document.createElement('div');algo.className='rt-algo';
+    algo.innerHTML=`<b>白天 · 算法手写</b><span>${algoPlan?escape(algoPlan):'按暴力解手册逐日表，在数据结构项目里手写一道并拍照批改。'}</span><small>晚上睡前复习每轮至少 2 张算法卡，只回想模板骨架。</small>`;
+    today_.append(algo);
     today_.querySelectorAll('[data-drill]').forEach(b=>b.onclick=()=>select(b.dataset.drill,null,'drill'));
     pane.append(today_);
     const head=document.createElement('div');head.className='all-head';

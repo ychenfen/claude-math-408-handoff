@@ -3693,6 +3693,8 @@ thread3 {
 
 **参考要点**：两类读者分别受y1、y2保护。写者要同时排除两类读者；单拿一把会漏掉另一类。锁名可以不同，语义必须覆盖全部冲突。
 
+![写者必须同时拿到 y1、y2 两把读锁](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/PV-22%E8%AF%BB%E5%86%99%E4%B8%A4%E6%8A%8A%E9%94%81.svg)
+
 ### 自测：wan限制为min(m,n-1)主要阻止哪种情况？
 
 **题干**：`PV-23`（2019统考题）。有$n\geq3$名哲学家围坐圆桌，桌中心有$m\geq1$个碗，相邻两人间各有一根筷子。每人拿到一个碗及左右两根筷子才能就餐，用完归还；要求尽可能多的人同时就餐，且不发生死锁。
@@ -3858,11 +3860,15 @@ thread3 {
 
 **参考要点**：行向量组等价，即 $r(A)=r(B)=r\begin{pmatrix}A\\B\end{pmatrix}$。矩阵等价只说明秩相等，不够：$A=(1,0)$、$B=(0,1)$ 秩都为 1，但解集不同。每个方程是一行，所以看行。
 
+![三种等价的强弱](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E4%B8%89%E7%A7%8D%E7%AD%89%E4%BB%B7%E7%9A%84%E5%BC%BA%E5%BC%B1.svg)
+
 ### 自测：迁移｜$A=PB$、$A=BQ$、$A=PBQ$（$P$、$Q$ 可逆）分别能推出哪种等价？
 
 **题干**：设 $P$、$Q$ 可逆。分别说出 $A=PB$、$A=BQ$、$A=PBQ$ 时，$A$ 与 $B$ 之间一定成立的是行向量组等价、列向量组等价，还是只有矩阵等价。
 
 **参考要点**：左乘管行，右乘管列。$A=PB$ ⇒ 行组等价；$A=BQ$ ⇒ 列组等价；$A=PBQ$ ⇒ 只有矩阵等价（秩相等）。反例：$B=\mathrm{diag}(1,0)$，$P=Q=\begin{pmatrix}0&1\\1&0\end{pmatrix}$，得 $A=\mathrm{diag}(0,1)$，行组、列组都不等价。做题先圈出问的是“正确”还是“错误”。
+
+![左乘管行，右乘管列](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E4%B8%89%E7%A7%8D%E7%AD%89%E4%BB%B7%E7%9A%84%E5%BC%BA%E5%BC%B1.svg)
 
 ### 自测：$\alpha_1,\alpha_2,\alpha_3$ 无关，$\beta_1=\alpha_1+k\alpha_3$、$\beta_2=\alpha_2+\mu\alpha_3$ 一定无关吗？用矩阵说明。
 
@@ -3926,6 +3932,8 @@ thread3 {
 **题干**：经典共享、半双工以太网采用CSMA/CD，最远两站间的单向传播时延为$\tau$，链路速率为$R$。要求发送站在发完帧前能够检测到最坏情况下的冲突。最短帧的发送时间与$\tau$应满足什么关系，最短帧长如何表示？这道概念自测不适用于现代全双工交换以太网。
 
 **参考要点**：在经典CSMA/CD最坏情况中，冲突信息返回发送端前不能已经发完；发送时间至少覆盖往返传播时延。不要套到全双工以太网。
+
+![最坏情况下冲突信号 2τ 才回到发送方](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/CSMA-CD%E6%9C%80%E7%9F%AD%E5%B8%A7%E9%95%BF.svg)
 
 ### 自测：交换机学习源MAC还是目的MAC？未知目的怎样处理？
 
@@ -3992,6 +4000,8 @@ thread3 {
 **题干**：$f(x)$ 在 0 附近有定义，$|f(x)|\le|x|$。在 $x=0$ 处能推出连续吗？能推出可导吗？各给理由或反例。
 
 **参考要点**：能推出连续：$f(0)=0$，且 $|f(x)|\le|x|\to0$。不能推出可导：差商只被夹在 $[-1,1]$ 之间，反例 $f(x)=|x|$。规律：$|f(x)|\le|x|^{\alpha}$ 时，$\alpha>1$ 可导且导数为 0，$\alpha=1$ 只保证连续。
+
+![被 x² 夹住与被 |x| 夹住](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/%E5%A4%B9%E9%80%BC%E4%B8%8E%E5%8F%AF%E5%AF%BC.svg)
 
 ### 自测：三次函数在 $x=-2$ 取极值，又与 $y=-3x+3$ 相切于 $(1,0)$，列出求 $a,b,c$ 的三个方程。
 

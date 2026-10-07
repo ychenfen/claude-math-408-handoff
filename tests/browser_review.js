@@ -25,6 +25,8 @@ async (browserPage) => {
     assert((await page.locator('.recall-answer').inputValue()).includes('测试回想'),'Recall note survives reload');
     await page.getByRole('button',{name:'我已回想，查看参考要点'}).click();
     assert(await page.locator('.drill-answer').isVisible(),'Reveal answer');
+    await page.locator('.drill-answer img').first().waitFor();
+    assert(await page.evaluate(()=>{const i=document.querySelector('.drill-answer img');return i.complete&&i.naturalWidth>0&&/PV-22/.test(decodeURIComponent(i.src));}),'Diagram shown inside the revealed card');
     await page.getByRole('button',{name:/^会了/}).click();
     const state=await page.evaluate(()=>Object.entries(localStorage).filter(([k])=>k.startsWith('study-drill-v1:os:')).map(([k,v])=>[k,JSON.parse(v)]));
     assert(state.length===1&&state[0][1].rating==='会了','Local rating stored');
@@ -52,6 +54,11 @@ async (browserPage) => {
     await page.locator('[data-subject="linear"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
     await page.locator('.recall-answer').waitFor();
     assert((await page.locator('.drill-stage .eyebrow').textContent()).startsWith('1 / 5'),'Linear algebra recall cards come from its review, not from Q&A redo');
+    // Formulas: Markdown must not eat TeX backslashes (matrix rows, braces, spaces).
+    await page.goto(BASE+'/#linear/2026-10-05/daily');await page.waitForLoadState('networkidle');
+    const tex=await page.evaluate(()=>[...document.querySelectorAll('#content annotation')].map(a=>a.textContent));
+    assert(tex.some(t=>t.includes('\\begin{pmatrix}A\\\\B\\end{pmatrix}')),'Matrix row break survives Markdown');
+    assert(await page.locator('#content .katex-error').count()===0,'No KaTeX errors');
     await page.locator('[data-subject="co"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
     assert((await page.locator('.drill-stage').textContent()).includes('还没有复习卡'),'Honest empty state');
     await page.goto(BASE+'/#all');await page.waitForLoadState('networkidle');await page.locator('.review-today').waitFor();

@@ -5,6 +5,9 @@
   'use strict';
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
   const SIZES = [10, 15, 25];
+  const ALGO_MIN = 2;
+  // Algorithm cards: tagged 「算法｜」, or data-structure cards about code, loops, traversal or complexity.
+  const isAlgo = c => /^算法｜/.test(c.question) || (c.subject.id === 'ds' && /```|复杂度|循环|遍历|递归|指针|O\(|模板/.test(c.question + c.context + c.answer));
   function interleave(groups) {
     const out = [], lists = groups.map(g => [...g]);
     while (lists.some(l => l.length)) for (const l of lists) if (l.length) out.push(l.shift());
@@ -30,7 +33,16 @@
       const due = all.filter(c => has(c) && read(c).due <= now).sort((a, b) => read(a).due - read(b).due);
       const fresh = all.filter(c => !has(c)).sort((a, b) => b.date.localeCompare(a.date));
       const bySubject = list => subjects.map(s => list.filter(c => c.subject.id === s.id));
-      return [...interleave(bySubject(due)), ...interleave(bySubject(fresh))].slice(0, size);
+      let q = [...interleave(bySubject(due)), ...interleave(bySubject(fresh))].slice(0, size);
+      // Every night keeps a little code: at least ALGO_MIN algorithm cards, even if none is due (early practice keeps its schedule).
+      const have = q.filter(isAlgo).length;
+      if (have < ALGO_MIN) {
+        const extra = all.filter(c => isAlgo(c) && !q.includes(c)).sort((a, b) => (read(a).due || 0) - (read(b).due || 0)).slice(0, ALGO_MIN - have);
+        const keep = q.filter(c => !isAlgo(c)).slice(0, Math.max(0, size - have - extra.length));
+        const algos = [...q.filter(isAlgo), ...extra];
+        q = [...keep]; algos.forEach((c, k) => q.splice(Math.min(q.length, 2 + k * 4), 0, c));
+      }
+      return q;
     }
     function frame(children, footer) {
       root.replaceChildren();
@@ -46,7 +58,7 @@
       queue = build(); i = 0; tally = {不会: 0, 模糊: 0, 会了: 0}; relearned.clear();
       const counts = subjects.map(s => [s.name, queue.filter(c => c.subject.id === s.id).length]).filter(([, n]) => n);
       const intro = [el('p', 'bed-eyebrow', '睡前复习 · 全科混合'), el('h1', '', queue.length ? `今晚 ${queue.length} 张，约 ${Math.max(3, Math.round(queue.length * 0.6))} 分钟` : '今晚没有要复习的卡')];
-      if (queue.length) intro.push(el('p', 'bed-note', counts.map(([n, k]) => `${n} ${k}`).join(' · ')));
+      if (queue.length) intro.push(el('p', 'bed-note', counts.map(([n, k]) => `${n} ${k}`).join(' · ') + (queue.some(isAlgo) ? ` · 其中算法 ${queue.filter(isAlgo).length}` : '')));
       intro.push(el('p', 'bed-note', '只在脑子里回想，不用写字。先想，再翻开；想不起来就点「不会」，它会在本轮稍后再出现一次。自评只安排复习时间，不改变题目状态。'));
       const pick = el('div', 'bed-sizes');
       SIZES.forEach(n => { const b = el('button', n === size ? 'on' : '', `${n} 张`); b.type = 'button'; b.onclick = () => { size = n; try { put('bed-v1:size', String(n)); } catch {} start(); }; pick.append(b); });
@@ -59,7 +71,7 @@
       if (i >= queue.length) return finish();
       revealed = false;
       const c = queue[i];
-      const meta = el('p', 'bed-eyebrow', `${i + 1} / ${queue.length} · ${c.subject.name}${relearned.has(c.id) && c.again ? ' · 再来一次' : ''}`);
+      const meta = el('p', 'bed-eyebrow', `${i + 1} / ${queue.length} · ${c.subject.name}${isAlgo(c) ? ' · 算法' : ''}${relearned.has(c.id) && c.again ? ' · 再来一次' : ''}`);
       const q = el('div', 'bed-q'); q.append(renderMarkdown('### ' + c.question, c.path));
       const parts = [meta, q];
       if (c.context) { const ctx = el('div', 'bed-ctx'); ctx.append(renderMarkdown(c.context, c.path)); parts.push(ctx); }

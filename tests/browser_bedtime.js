@@ -14,6 +14,7 @@ async (browserPage) => {
     assert((await page.locator('.bed h1').textContent()).includes('今晚 10 张'),'Size choice');
     const subjects=await page.locator('.bed-note').first().textContent();
     assert(['线性代数','操作系统','高等数学'].every(s=>subjects.includes(s)),'Mixed subjects: '+subjects);
+    assert(/其中算法 [2-9]/.test(subjects),'At least two algorithm cards each night: '+subjects);
     await page.screenshot({path:'/tmp/bed-intro.png'});
     await page.getByRole('button',{name:'开始'}).click();
     assert(await page.locator('.bed-ans').count()===0,'Answer hidden before flip');
