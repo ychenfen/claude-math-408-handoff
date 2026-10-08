@@ -49,6 +49,27 @@
     });
     return {items,missing,problems,docs};
   }
+  // Review cards come from daily reviews plus this subject's wrong questions in 考试记录 (already inlined in data.json).
+  const cardDocs = s => [...s.summaries,...(s.examCards||[])];
+  // Mock exams: score trend, where the latest paper lost points, and recurring causes. Recorded scores only; nothing is graded here.
+  function examBoard() {
+    const exams=data.exams||[],box=document.createElement('section');box.className='exam-board';
+    const kinds=[...new Set(exams.map(e=>e.score.subject))];
+    const lostOf=e=>{const m=new Map();e.items.forEach(it=>m.set(it.subject,(m.get(it.subject)||0)+it.full-it.got));return [...m].sort((a,b)=>b[1]-a[1]);};
+    const causes=new Map();exams.forEach(e=>e.items.forEach(it=>{if(it.cause!=='待补')causes.set(it.cause,(causes.get(it.cause)||0)+1);}));
+    const todo=exams.reduce((n,e)=>n+e.items.filter(it=>it.cause==='待补').length,0);
+    const latest=exams[exams.length-1];
+    box.innerHTML=`<div class="eb-head"><span class="eyebrow">EXAMS · 整卷模拟</span><h2>${latest?`最近 ${latest.score.total} / ${latest.score.full}<small>${escape(latest.score.subject+' · '+latest.score.paper+' · '+latest.date.slice(5))}</small>`:'还没有整卷记录'}</h2><p>${latest?'成绩照记录显示，估分方式见各卷「成绩」小节。错题自测已进入对应科目的闭卷自测和睡前复习。':'做完一套整卷，按考试记录/使用说明.md新建一个文件，这里会显示成绩走势和丢分。'}</p></div>`;
+    kinds.forEach(kind=>{
+      const list=exams.filter(e=>e.score.subject===kind),last=list[list.length-1],lost=lostOf(last),most=Math.max(1,...lost.map(x=>x[1]));
+      const g=document.createElement('div');g.className='eb-group';
+      g.innerHTML=`<div class="eb-trend"><b>${escape(kind)} 成绩走势</b>${list.map(e=>`<div class="eb-score"><span>${escape(e.date.slice(5)+' '+e.score.paper)}</span><i style="--w:${(100*e.score.total/e.score.full).toFixed(1)}%" data-tip="选择 ${e.score.choice} · 大题 ${e.score.big}"></i><strong>${e.score.total}</strong></div>`).join('')}</div><div class="eb-lost"><b>最近一卷按科目丢分</b>${lost.map(([s,n])=>`<div class="eb-score"><span>${escape(s)}</span><i class="lost" style="--w:${(100*n/most).toFixed(1)}%"></i><strong>${n}</strong></div>`).join('')||'<span class="muted">没有丢分记录</span>'}</div>`;
+      box.append(g);
+    });
+    if(causes.size||todo){const c=document.createElement('p');c.className='eb-causes';c.textContent='错因累计：'+[...causes].sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${k} ${n}`).join(' · ')+(todo?`（另有 ${todo} 题错因待补）`:'');box.append(c);}
+    [...exams].reverse().forEach(e=>{const d=document.createElement('details');d.className='archive eb-paper';const s=document.createElement('summary');s.textContent=`${e.date} ${e.score.subject} ${e.score.paper} · ${e.score.total} 分 · 丢分题 ${e.items.length} 道`;d.append(s);d.ontoggle=()=>{if(d.open&&!d.querySelector('article'))d.append(renderMarkdown(e.text,e.path));};box.append(d);});
+    return box;
+  }
   function nextAction(text) { const body=section(text||'','下次先做');const m=body&&body.match(/^- \[ \] (.+)$/m);return m?m[1].trim():''; }
   const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const encodePath = p => p.split('/').map(encodeURIComponent).join('/');
@@ -132,7 +153,7 @@
     const rows=[];for(const s of data.subjects){rows.push({s,L:await ledgerOf(s)});if(own!==generation)return;}
     pane.innerHTML='';
     // Today's spaced recall comes first: each subject's due and not-yet-seen cards.
-    const dues=rows.map(({s})=>({s,d:StudyReview.dueOf({docs:s.summaries,subject:s,get})}));
+    const dues=rows.map(({s})=>({s,d:StudyReview.dueOf({docs:cardDocs(s),subject:s,get})}));
     const totalDue=dues.reduce((a,x)=>a+x.d.due,0),totalNew=dues.reduce((a,x)=>a+x.d.new,0);
     const today_=document.createElement('section');today_.className='review-today';
     today_.innerHTML=`<div class="rt-head"><div><span class="eyebrow">TODAY · 今天先复习</span><h2>${totalDue?`到期 ${totalDue} 题`:totalNew?`可以开始：${totalNew} 题还没练过`:'今天没有要复习的题'}${totalDue&&totalNew?`<small>另有 ${totalNew} 题还没练过</small>`:''}</h2><p>先回想，再翻开参考要点，按不会／模糊／会了自评；忘了的很快再来，记住的间隔越拉越长。自评只排复习时间，不改变题目状态。</p></div></div><div class="rt-list">${dues.map(({s,d})=>`<button class="rt-item${d.due?' due':''}" data-drill="${s.id}" ${d.total?'':'disabled'}><b>${escape(s.name)}</b><span>${d.total?`${d.due?`到期 ${d.due}`:'无到期'} · 新 ${d.new}`:'还没有复习卡'}</span></button>`).join('')}</div>`;
@@ -163,6 +184,7 @@
         notify(`已合并 ${n} 条进度`);render();}catch{notify('不是有效的温故进度备份文件');}
       e.target.value='';};
     pane.append(today_);
+    pane.append(examBoard());
     const head=document.createElement('div');head.className='all-head';
     head.innerHTML=`<div><b>每科：题目状态分布 · 最近14天记录 · 下次先做</b><span>状态由作答记录推出，只说明证据到了哪一步，不代表掌握。点一行进入该科题目追踪。</span></div><ol class="legend">${STATUSES.map((st,i)=>`<li><i class="sw s${i}"></i>${st}</li>`).join('')}</ol>`;
     pane.append(head);
@@ -193,7 +215,7 @@
         const field=document.createElement('textarea');field.id='prompt-text';field.className='search';field.rows=10;field.readOnly=true;field.value=prompt();pane.append(field);
         pane.append(renderMarkdown(data.protocol.text,data.protocol.path));currentText=prompt()+'\n\n'+data.protocol.text;
       } else if(tab==='drill') {
-        const s=subject,docs=[...s.summaries];
+        const s=subject,docs=cardDocs(s);
         await Promise.all(docs.map(loadDoc));if(own!==generation)return;
         pane.replaceChildren();
         disposeDrill=StudyReview.mountDrill({docs,subject:s,container:pane,renderMarkdown,get,put,download})||(()=>{});

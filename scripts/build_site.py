@@ -1,6 +1,7 @@
 """Generate only the public site data; keep authored Markdown canonical."""
 import hashlib,json,re
 from pathlib import Path
+from exams import load_all as load_exams
 ROOT=Path(__file__).resolve().parents[1]
 SUBJECTS=[('math','高等数学','01_高等数学.md','极限 · 微积分 · 错题串联','M'),('linear','线性代数','02_线性代数.md','向量 · 矩阵 · 二次型','L'),('ds','数据结构','03_数据结构.md','算法 · 图与树 · 手写代码','D'),('co','计算机组成原理','04_计算机组成原理.md','存储 · 指令 · 数据通路','C'),('os','操作系统','05_操作系统.md','进程 · 同步互斥 · 内存','O'),('net','计算机网络','06_计算机网络.md','分层 · 网络层 · TCP','')]
 def doc(p):
@@ -24,8 +25,14 @@ def build():
             cap=img.with_suffix('.md');caption=doc(cap) if cap.is_file() else None
             diagrams.append({'path':img.relative_to(ROOT).as_posix(),'title':caption['title'] if caption else img.stem,'caption':caption})
         subjects.append({'id':sid,'name':name,'tag':tag,'diagrams':diagrams,'history':doc(ROOT/history),'archive':[doc(p) for p in sorted((ROOT/'原文').glob(f'{prefix}*.md'))] if prefix else [],'records':records,'summaries':summaries})
+    # Mock exams: score and lost points for the overview; each wrong-question card joins its subject's review queue.
+    exams=[]
+    for e in load_exams():
+        exams.append({**doc(ROOT/e['path']),**e})
+        for s in subjects:
+            if s['name'] in e['cards']:s.setdefault('examCards',[]).append({'path':e['path'],'date':e['date'],'text':'\n'.join(e['cards'][s['name']])})
     dates=[r['date'] for s in subjects for r in s['records']]
-    data={'version':1,'latestDate':max(dates,default=''),'subjects':subjects,'protocol':doc(ROOT/'每日复盘/使用说明.md')}
+    data={'version':1,'latestDate':max(dates,default=''),'subjects':subjects,'exams':exams,'protocol':doc(ROOT/'每日复盘/使用说明.md'),'examProtocol':doc(ROOT/'考试记录/使用说明.md')}
     out=ROOT/'assets/data.json';out.parent.mkdir(exist_ok=True);out.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
-    print(json.dumps({'subjects':len(subjects),'daily_records':len(dates),'daily_summaries':sum(len(s['summaries']) for s in subjects),'latest':data['latestDate']},ensure_ascii=False))
+    print(json.dumps({'subjects':len(subjects),'daily_records':len(dates),'daily_summaries':sum(len(s['summaries']) for s in subjects),'exams':len(exams),'latest':data['latestDate']},ensure_ascii=False))
 if __name__=='__main__':build()

@@ -17,7 +17,7 @@
     const keyOf = c => `study-drill-v1:${c.subject.id}:${c.id}`;
     const read = c => { try { const v = JSON.parse(get(keyOf(c)) || '{}'); return v && typeof v === 'object' ? v : {}; } catch { return {}; } };
     const save = (c, patch) => put(keyOf(c), JSON.stringify({...read(c), ...patch}));
-    const all = subjects.flatMap(s => StudyReview.cardsOf(s.summaries).map(c => ({...c, subject: s})));
+    const all = subjects.flatMap(s => StudyReview.cardsOf([...s.summaries, ...(s.examCards || [])]).map(c => ({...c, subject: s})));
     let size = 15; try { size = Number(get('bed-v1:size')) || 15; } catch {}
     const root = el('div', 'bed'); root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', '睡前复习');
     root.setAttribute('aria-modal', 'true');
