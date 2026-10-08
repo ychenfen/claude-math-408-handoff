@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" role="img" aria-label="2009-47 网络拓扑：互联网—R2—R1—局域网1、局域网2，R2 下接域名服务器" font-family="PingFang SC,Microsoft YaHei,Noto Sans CJK SC,sans-serif" font-size="13"><title>408-2009-47 网络拓扑（据课件原题图重绘，不含答案）</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<path d="M130 120H260M300 120H540" stroke="#555" stroke-width="2" fill="none"/>
+<path d="M280 140V240M550 140L480 250M570 140L660 250" stroke="#555" stroke-width="2" fill="none"/>
+<ellipse cx="80" cy="120" rx="60" ry="34" fill="#e8e8e8" stroke="#888"/><text x="80" y="125" text-anchor="middle" font-weight="600" fill="#252d25">互联网</text>
+<circle cx="280" cy="120" r="22" fill="#2d5a8c"/><text x="280" y="125" text-anchor="middle" fill="#fff" font-weight="600">R2</text>
+<circle cx="560" cy="120" r="22" fill="#2d5a8c"/><text x="560" y="125" text-anchor="middle" fill="#fff" font-weight="600">R1</text>
+<text x="252" y="92" text-anchor="end" fill="#333">L1  130.11.120.1</text>
+<text x="306" y="148" text-anchor="start" fill="#333">L0  202.118.2.2</text>
+<text x="532" y="92" text-anchor="end" fill="#333">202.118.2.1  L0</text>
+<text x="290" y="200" fill="#333">E0  202.118.3.1</text>
+<text x="505" y="168" text-anchor="end" fill="#333">E1</text><text x="600" y="168" fill="#333">E2</text>
+<rect x="250" y="240" width="60" height="60" rx="4" fill="#4b4f8c"/><text x="280" y="320" text-anchor="middle" fill="#333">域名服务器</text><text x="242" y="262" text-anchor="end" fill="#333">202.118.3.2</text>
+<ellipse cx="470" cy="275" rx="58" ry="24" fill="#fff" stroke="#555" stroke-width="2"/><text x="470" y="280" text-anchor="middle" font-weight="600" fill="#252d25">局域网1</text>
+<ellipse cx="670" cy="275" rx="58" ry="24" fill="#fff" stroke="#555" stroke-width="2"/><text x="670" y="280" text-anchor="middle" font-weight="600" fill="#252d25">局域网2</text>
+<text x="380" y="346" text-anchor="middle" font-size="12" fill="#555">局域网1、2 共用地址空间 202.118.1.0/24，各需不少于 120 个地址</text>
+</svg>
