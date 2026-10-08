@@ -3524,6 +3524,25 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 **张宇**：《线代9讲》第 7 讲 特征值与特征向量（$A^*$ 的特征值 $\frac{|A|}{\lambda}$；$\sum\lambda_i=\operatorname{tr}A$，$\prod\lambda_i=|A|$）。
 
+## 09:56　`张宇9讲-线代7-例7.2`　已知特征值求特征向量；$B=P^{-1}A^{100}P$，求 $B+E$ 的特征向量
+
+**题**（《线代9讲》第 7 讲 例 7.2，Chen 上传的是课程视频截图，书上页码未核）：设 $A=\begin{pmatrix}1&2\\5&4\end{pmatrix}$，$P=\begin{pmatrix}1&1\\0&1\end{pmatrix}$，$B=P^{-1}A^{100}P$，则 $B+E$ 的线性无关的特征向量可以为：A. $(0,1)^{\mathrm T},(7,5)^{\mathrm T}$；B. $(-2,1)^{\mathrm T},(-3,5)^{\mathrm T}$；C. $(1,-1)^{\mathrm T},(2,5)^{\mathrm T}$；D. $(0,1)^{\mathrm T},(3,2)^{\mathrm T}$。答案 B。
+
+**问**：（视频截图）知道特征值怎么求特征向量。
+
+**作答**：
+- 作答方式：未作答（看视频讲解后提问）
+- 核对结果：未核对
+- 核对依据：未核对
+
+**答**：把 $\lambda$ 代入 $(\lambda E-A)x=0$，基础解系就是特征向量。
+- $\lambda=-1$：$\begin{pmatrix}-2&-2\\-5&-5\end{pmatrix}\to x_1+x_2=0$，$\xi_1=(-1,1)^{\mathrm T}$。
+- $\lambda=6$：$\begin{pmatrix}5&-2\\-5&2\end{pmatrix}\to5x_1-2x_2=0$，$\xi_2=(2,5)^{\mathrm T}$。
+- 二阶速算：$\lambda E-A$ 秩为 1，取非零行 $(a,b)$，特征向量取 $(-b,a)^{\mathrm T}$。
+- 例 7.2 收尾：$f(A)$ 的特征向量不变；$P^{-1}AP$ 的特征向量是 $P^{-1}\xi$。$P^{-1}=\begin{pmatrix}1&-1\\0&1\end{pmatrix}$，得 $(-2,1)^{\mathrm T}$、$(-3,5)^{\mathrm T}$，选 B。
+
+**张宇**：《线代9讲》第 7 讲 特征值与特征向量；第 8 讲 相似理论（$P^{-1}AP$ 的特征向量为 $P^{-1}\xi$）。
+
 
 ---
 
