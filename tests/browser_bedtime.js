@@ -1,6 +1,6 @@
 // Bedtime review on a phone-sized screen. Run against the local preview on port 8878 with Playwright.
 async (browserPage) => {
-  const context=await browserPage.context().browser().newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const context=await browserPage.context().browser().newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
   const page=await context.newPage(),BASE='http://127.0.0.1:8878',errors=[];
   const assert=(v,m)=>{if(!v)throw Error(m);};
   page.on('pageerror',e=>errors.push(e.message));

@@ -145,6 +145,23 @@
     algo.innerHTML=`<b>白天 · 算法手写</b><span>${algoPlan?escape(algoPlan):'按暴力解手册逐日表，在数据结构项目里手写一道并拍照批改。'}</span><small>晚上睡前复习每轮至少 2 张算法卡，只回想模板骨架。</small>`;
     today_.append(algo);
     today_.querySelectorAll('[data-drill]').forEach(b=>b.onclick=()=>select(b.dataset.drill,null,'drill'));
+    // Progress lives in this browser only; a backup file carries it between phone and computer.
+    const sync=document.createElement('div');sync.className='rt-sync';
+    sync.innerHTML='<span>复习进度只存在这个浏览器。换手机／电脑前：</span><button type="button" class="text-button" id="backup-out">↓ 备份进度</button><label class="text-button" for="backup-in">↑ 从备份恢复</label><input type="file" id="backup-in" accept=".json,application/json" hidden>';
+    today_.append(sync);
+    sync.querySelector('#backup-out').onclick=()=>{const items={};try{for(let k=0;k<localStorage.length;k++){const key=localStorage.key(k);if(/^(study-drill-v1|bed-v1|study-v1):/.test(key))items[key]=localStorage.getItem(key);}}catch{}
+      const blob=JSON.stringify({app:'wengu-progress',version:1,exportedAt:new Date().toISOString(),items},null,1);
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([blob],{type:'application/json'}));a.download=`温故复习进度-${today}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);notify(`已导出 ${Object.keys(items).length} 条进度`);};
+    sync.querySelector('#backup-in').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+      try{const d=JSON.parse(await f.text());if(d.app!=='wengu-progress'||typeof d.items!=='object')throw Error();
+        let n=0;for(const [key,val] of Object.entries(d.items)){if(!/^(study-drill-v1|bed-v1|study-v1):/.test(key)||typeof val!=='string')continue;
+          const mine=get(key);
+          // Keep whichever review happened later; drafts and settings only fill gaps.
+          if(key.startsWith('study-drill-v1:')&&mine){try{const a=JSON.parse(mine),b=JSON.parse(val);if((Date.parse(a.reviewedAt)||0)>=(Date.parse(b.reviewedAt)||0))continue;}catch{}}
+          else if(mine)continue;
+          put(key,val);n++;}
+        notify(`已合并 ${n} 条进度`);render();}catch{notify('不是有效的温故进度备份文件');}
+      e.target.value='';};
     pane.append(today_);
     const head=document.createElement('div');head.className='all-head';
     head.innerHTML=`<div><b>每科：题目状态分布 · 最近14天记录 · 下次先做</b><span>状态由作答记录推出，只说明证据到了哪一步，不代表掌握。点一行进入该科题目追踪。</span></div><ol class="legend">${STATUSES.map((st,i)=>`<li><i class="sw s${i}"></i>${st}</li>`).join('')}</ol>`;
@@ -263,5 +280,7 @@
   }
   function route(){const [id,d,t]=location.hash.slice(1).split('/');if(id==='bed'){select('bed');return;}if(!id||id==='all'){select('all');return;}select(id,d,TABS.includes(t)?t:'daily');}
   window.addEventListener('hashchange',()=>{if(data)route();});
+  // Offline copy for bedtime use and slow networks; the page works the same without it.
+  if('serviceWorker' in navigator&&(location.protocol==='https:'||['127.0.0.1','localhost'].includes(location.hostname)))navigator.serviceWorker.register('sw.js').catch(()=>{});
   fetch('assets/data.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{data=d;route();}).catch(()=>{$('#subject-title').textContent='学习档案暂时未加载';$('#content').textContent='请刷新页面，或通过左侧公开资料库直接读取Markdown。';});
 })();

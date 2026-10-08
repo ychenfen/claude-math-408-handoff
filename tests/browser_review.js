@@ -1,6 +1,7 @@
 // Run this function with Playwright against a local preview. Uses a fresh browser context.
+// These tests mock network routes; service workers are blocked so the offline cache does not bypass the mocks (tests/browser_offline.js covers it).
 async (browserPage) => {
-  const context=await browserPage.context().browser().newContext({viewport:{width:1440,height:1000}});
+  const context=await browserPage.context().browser().newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
   const page=await context.newPage(),BASE='http://127.0.0.1:8878',errors=[],external=[];
   const assert=(v,m)=>{if(!v)throw Error(m);};
   page.on('pageerror',e=>errors.push(e.message));

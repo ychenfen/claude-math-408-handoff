@@ -1,0 +1,18 @@
+{
+  "name": "温故 · 数学二与408复习",
+  "short_name": "温故",
+  "description": "六科问答、复盘与间隔复习；睡前复习可离线打开。",
+  "lang": "zh-CN",
+  "start_url": "./#all",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#16140f",
+  "theme_color": "#243e31",
+  "icons": [
+    {"src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ],
+  "shortcuts": [
+    {"name": "睡前复习", "url": "./#bed", "icons": [{"src": "assets/icons/icon-192.png", "sizes": "192x192"}]}
+  ]
+}

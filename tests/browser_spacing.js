@@ -1,6 +1,6 @@
 // Fresh context and simulated clock: no ten-minute/day-long waits and no personal storage mutations.
 async (browserPage) => {
-  const context=await browserPage.context().browser().newContext({viewport:{width:1440,height:1000}});
+  const context=await browserPage.context().browser().newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
   const page=await context.newPage(),BASE='http://127.0.0.1:8878',errors=[];
   const assert=(v,m)=>{if(!v)throw Error(m);};
   page.on('pageerror',e=>errors.push(e.message));

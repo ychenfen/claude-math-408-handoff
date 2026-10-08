@@ -54,3 +54,4 @@ body.bed-open{overflow:hidden}
 @media(max-width:700px){.rt-bed{width:100%}.bed-link{margin-top:0}}
 .bed img{filter:invert(.9) hue-rotate(180deg);opacity:.9;border-radius:6px}.bed .figure-zoom{background:none;border:0;padding:0;width:100%}
 .rt-algo{margin-top:12px;padding:10px 14px;border-left:3px solid #5d7a48;background:#fff;font-size:12px}.rt-algo b{display:block;font-size:13px}.rt-algo span{display:block;color:var(--ink);margin:2px 0}.rt-algo small{margin:0}
+.rt-sync{margin-top:10px;font-size:11px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}.rt-sync .text-button{font-size:11px;cursor:pointer;padding:4px 0}
