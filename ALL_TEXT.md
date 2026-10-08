@@ -3552,6 +3552,8 @@ int Search_k(LinkList list, int k){
 
 ## 10:36　`880-线代9-基础4`　用秩讲向量组表示与相关性
 
+**题**（2026-10-08 补录题干，据 880 基础篇做题本 PDF 第 125 页）：设向量组 $(\mathrm I)\ \beta_1,\beta_2,\dots,\beta_t$，$(\mathrm{II})\ \alpha_1,\alpha_2,\dots,\alpha_s$，则下列命题：①若向量组 $(\mathrm I)$ 可由 $(\mathrm I)$ 线性表示，且 $s<t$，则必有 $(\mathrm I)$ 线性相关（原书如此印，按讲解应为「可由 $(\mathrm{II})$」）；②若向量组 $(\mathrm{II})$ 可由 $(\mathrm I)$ 线性表示，且 $s<t$，则必有 $(\mathrm I)$ 线性相关；③若向量组 $(\mathrm I)$ 可由 $(\mathrm{II})$ 线性表示，且 $(\mathrm I)$ 线性无关，则必有 $s\ge t$；④若向量组 $(\mathrm{II})$ 可由 $(\mathrm I)$ 线性表示，且 $(\mathrm I)$ 线性无关，则必有 $s\ge t$。正确的是：A. ①④；B. ①③；C. ②③；D. ②④。
+
 **问**：线代第九章基础第四题，用秩讲讲。$(\mathrm I)\ \beta_1,\dots,\beta_t$，$(\mathrm{II})\ \alpha_1,\dots,\alpha_s$，四个命题哪些对？
 
 **作答**：未作答（直接要讲解）。
@@ -3580,6 +3582,8 @@ int Search_k(LinkList list, int k){
 
 ## 10:51　`880-线代9-基础5`　三条直线恰交于一点
 
+**题**（2026-10-08 补录题干，据 880 基础篇做题本 PDF 第 125 页）：设 $\alpha_1=(a_1,a_2,a_3)^{\mathrm T}$，$\alpha_2=(b_1,b_2,b_3)^{\mathrm T}$，$\alpha_3=(c_1,c_2,c_3)^{\mathrm T}$，其中 $a_i^2+b_i^2\ne0\ (i=1,2,3)$，则三条直线 $a_ix+b_iy+c_i=0\ (i=1,2,3)$ 恰好仅交于一点的充分必要条件是：A. $r(\alpha_1,\alpha_2,\alpha_3)=3$；B. $r(\alpha_1,\alpha_2,\alpha_3)=1$；C. $r(\alpha_1,\alpha_2,\alpha_3)=r(\alpha_1,\alpha_2)$；D. $r(\alpha_1,\alpha_2,\alpha_3)=r(\alpha_1,\alpha_2)=2$。
+
 **问**：第五题。三条直线 $a_ix+b_iy+c_i=0$ 恰交于一点的充要条件。
 
 **作答**：未作答（直接要讲解）。
@@ -3597,6 +3601,8 @@ int Search_k(LinkList list, int k){
 **更正（当时助手自纠）**：$r(\alpha_1,\alpha_2)=1$ 且 $r(\alpha_1,\alpha_2,\alpha_3)=2$ 时，三线平行但不全重合，也没有公共点；无公共点不只是秩为 3 一种情况。
 
 ## 11:01　`880-线代9-基础6`　$\alpha_1+k\alpha_3,\ \alpha_2+\mu\alpha_3$ 无关是什么条件
+
+**题**（2026-10-08 补录题干，据 880 基础篇做题本 PDF 第 125 页）：设 $\alpha_1,\alpha_2,\alpha_3$ 均为 3 维向量，则对任意常数 $k$ 和 $\mu$，向量组 $\alpha_1+k\alpha_3,\ \alpha_2+\mu\alpha_3$ 线性无关是向量组 $\alpha_1,\alpha_2,\alpha_3$ 线性无关的：A. 充分必要条件；B. 充分非必要条件；C. 必要非充分条件；D. 既非充分又非必要条件。
 
 **问**：下一题。对任意 $k,\mu$，$\alpha_1+k\alpha_3,\ \alpha_2+\mu\alpha_3$ 无关，是 3 维 $\alpha_1,\alpha_2,\alpha_3$ 无关的什么条件？
 
@@ -3625,6 +3631,8 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 ## 11:49　`880-线代9-基础3`　哪组向量线性无关
 
+**题**（2026-10-08 补录题干，据 880 基础篇做题本 PDF 第 124 页）：设向量组 $\alpha_1,\alpha_2,\alpha_3,\alpha_4$ 线性无关，则下列向量组线性无关的是：A. $\alpha_1+\alpha_2,\alpha_2+\alpha_3,\alpha_3+\alpha_4,\alpha_4+\alpha_1$；B. $\alpha_1+\alpha_2,\alpha_2+\alpha_3,\alpha_3+\alpha_4,\alpha_4-\alpha_1$；C. $\alpha_1+\alpha_2,\alpha_2-\alpha_3,\alpha_3+\alpha_4,\alpha_4-\alpha_1$；D. $\alpha_1-\alpha_2,\alpha_2-\alpha_3,\alpha_3-\alpha_4,\alpha_4-\alpha_1$。
+
 **问**：第三题（$\alpha_1,\dots,\alpha_4$ 线性无关，下列哪组无关）。
 
 **作答**：未作答（直接要讲解）。
@@ -3635,6 +3643,8 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 - 首尾相接组 $\alpha_1+c_1\alpha_2,\dots,\alpha_n+c_n\alpha_1$：$|C|=1+(-1)^{n+1}c_1\cdots c_n$；$n=4$ 时系数乘积为 1 就相关。$n$ 为奇数时全加号那组无关。
 
 ## 11:50　`880-线代9-综合3`　$k_1k_3\ne0$ 时哪两组等价
+
+**题**（2026-10-08 补录题干，据 880 强化篇做题本 PDF 第 164 页）：设向量 $\alpha_1,\alpha_2,\alpha_3$ 满足 $k_1\alpha_1+k_2\alpha_2+k_3\alpha_3=0$，$k_1,k_2,k_3$ 为常数，且 $k_1k_3\ne0$，则：A. $\alpha_1$ 与 $\alpha_3$ 等价；B. $\alpha_1,\alpha_2$ 与 $\alpha_1,\alpha_3$ 等价；C. $\alpha_1,\alpha_2$ 与 $\alpha_2,\alpha_3$ 等价；D. $\alpha_1,\alpha_3$ 与 $\alpha_2,\alpha_3$ 等价。
 
 **问**：综合第三题。$k_1\alpha_1+k_2\alpha_2+k_3\alpha_3=0$，$k_1k_3\ne0$。
 
@@ -3650,6 +3660,8 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 ## 12:43　`880-线代9-综合4`　$\beta$ 组也无关的充要条件
 
+**题**（2026-10-08 补录题干，据 880 强化篇做题本 PDF 第 165 页）：设 $n$ 维向量组 $(\mathrm I)\ \alpha_1,\alpha_2,\dots,\alpha_k\ (k<n)$ 线性无关，则 $n$ 维向量组 $(\mathrm{II})\ \beta_1,\beta_2,\dots,\beta_k$ 也线性无关的充分必要条件是：A. $\beta_1,\dots,\beta_k$ 可由 $\alpha_1,\dots,\alpha_k$ 线性表示；B. $\alpha_1,\dots,\alpha_k$ 可由 $\beta_1,\dots,\beta_k$ 线性表示；C. 向量组 $(\mathrm I)$ 与向量组 $(\mathrm{II})$ 等价；D. 矩阵 $(\alpha_1,\dots,\alpha_k)$ 与 $(\beta_1,\dots,\beta_k)$ 等价。
+
 **问**：4。$n$ 维 $\alpha_1,\dots,\alpha_k$（$k<n$）无关，$\beta_1,\dots,\beta_k$ 也无关的充要条件。
 
 **作答**：未作答（直接要讲解）。
@@ -3657,6 +3669,8 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 **答**：选 D（两矩阵等价）。同型矩阵等价 $\iff$ 秩相等 $\iff r(\beta)=k$。B、C 充分不必要（反例 $\alpha_1=e_1,\beta_1=e_2$）；A 连充分都不是（$\beta$ 全取零）。矩阵等价只看秩；向量组等价要求互相表示，更强。
 
 ## 12:47　`880-线代9-综合5`　与三个无关向量都正交的 $\beta$ 组的秩
+
+**题**（2026-10-08 补录题干，据 880 强化篇做题本 PDF 第 165 页）：设 4 维列向量 $\alpha_1,\alpha_2,\alpha_3$ 线性无关，$\beta_i\ (i=1,2,3,4)$ 为非零列向量，且 $\beta_i$ 与 $\alpha_1,\alpha_2,\alpha_3$ 均正交，则 $r(\beta_1,\beta_2,\beta_3,\beta_4)=$：A. 1；B. 2；C. 3；D. 4。
 
 **问**：5。4 维 $\alpha_1,\alpha_2,\alpha_3$ 无关，非零 $\beta_i\ (i=1,\dots,4)$ 都与它们正交，求 $r(\beta_1,\dots,\beta_4)$。
 
@@ -3672,6 +3686,8 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 - 图（降一维）：$\mathbb R^3$ 里两个无关 $\alpha$ 张成平面，与它垂直的只有一条法线，所有 $\beta$ 在这条线上；$3-2=1$ 对应原题 $4-3=1$。
 
 ## 13:16　`880-线代9-综合6`　$Ax=0$ 与 $Bx=0$ 同解的充要条件（Chen 选 C）
+
+**题**（2026-10-08 补录题干，据 880 强化篇做题本 PDF 第 165 页）：设 $A,B$ 均是 $m\times n$ 矩阵，则 $Ax=0$ 与 $Bx=0$ 同解的充分必要条件是：A. $A,B$ 的列向量组等价；B. $A,B$ 的行向量组等价；C. $A,B$ 是等价矩阵；D. $A^{\mathrm T}x=0$ 与 $B^{\mathrm T}x=0$ 同解。
 
 **问**：第六题我选c了。
 
@@ -3691,6 +3707,8 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 ## 13:20　`880-线代9-综合7`　选错误的一项（Chen 选 B）
 
+**题**（2026-10-08 补录题干，据 880 强化篇做题本 PDF 第 166 页）：设 $A,B$ 为 $n$ 阶矩阵，$P,Q$ 为 $n$ 阶可逆矩阵，下列选项错误的是：A. 若 $A=BQ$，则 $B$ 的列向量组与 $A$ 的列向量组等价；B. 若 $A=PB$，则 $B$ 的行向量组与 $A$ 的行向量组等价；C. 若 $A=PBQ$，则矩阵 $A$ 与 $B$ 等价；D. 若 $A=PBQ$，则 $B$ 的行（列）向量组与 $A$ 的行（列）向量组等价。
+
 **问**：第七题选的b。
 
 **作答**：
@@ -3702,6 +3720,8 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 **答**：口诀「左乘管行，右乘管列」。$A=PB$ 时 $A$ 的每一行是 $B$ 的行的组合，$P$ 可逆又能反推，所以行组等价，B 对；$A=BQ$ 列组等价，A 对；$A=PBQ$ 是矩阵等价定义，C 对；D 错，左右同乘只剩秩相等。反例 $B=\mathrm{diag}(1,0)$，$P=Q=\begin{pmatrix}0&1\\1&0\end{pmatrix}$，$A=\mathrm{diag}(0,1)$。可能原因（助手推测）：没注意问的是「错误的」，或把左乘、右乘对应行列记反。
 
 ## 13:26　`880-线代9-综合8`　$r(A)=n$ 时 $AB$ 与 $B$ 的关系
+
+**题**（2026-10-08 补录题干，据 880 强化篇做题本 PDF 第 166 页）：设 $A,B$ 分别为 $m\times n$ 与 $n\times s$ 矩阵，且 $r(A)=n$，则下列选项正确的是：A. $AB$ 的列向量组与 $B$ 的列向量组等价；B. $AB$ 的行向量组与 $B$ 的行向量组等价；C. $AB$ 的列向量组与 $A$ 的列向量组等价；D. $AB$ 的行向量组与 $A$ 的行向量组等价。
 
 **问**：第八题。$A_{m\times n}$，$B_{n\times s}$，$r(A)=n$。
 
@@ -3869,7 +3889,7 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 ## 12:22　`880-线代9-综合解答3`　含参 $AX=B$：$a\ne3$ 时回代求 $\beta_1,\beta_2$ 的表示式
 
-**题**（强化篇第九章解答题 (3)，题干按参考答案解析整理，原题页未核）：$A=(\alpha_1,\alpha_2,\alpha_3)=\begin{pmatrix}1&1&1\\0&1&2\\1&2&a\end{pmatrix}$，$B=(\beta_1,\beta_2)=\begin{pmatrix}-1&1\\2&0\\1&b\end{pmatrix}$。（Ⅰ）$a,b$ 取何值时 $\beta_1,\beta_2$ 不能同时由 $\alpha_1,\alpha_2,\alpha_3$ 表示；（Ⅱ）能表示时求表示式。
+**题**（2026-10-08 核对原题，据 880 强化篇做题本 PDF 第 168 页）：设 $A=(\alpha_1,\alpha_2,\alpha_3)$，其中 $\alpha_1=(1,0,1)^{\mathrm T}$，$\alpha_2=(1,1,2)^{\mathrm T}$，$\alpha_3=(1,2,a)^{\mathrm T}$；$B=(\beta_1,\beta_2)$，其中 $\beta_1=(-1,2,1)^{\mathrm T}$，$\beta_2=(1,0,b)^{\mathrm T}$。问：（Ⅰ）当 $a,b$ 为何值时，$\beta_1,\beta_2$ 不能同时由 $\alpha_1,\alpha_2,\alpha_3$ 线性表示？（Ⅱ）当 $a,b$ 为何值时，$\beta_1,\beta_2$ 可同时由 $\alpha_1,\alpha_2,\alpha_3$ 线性表示？并求表达式。
 
 **问**：（上传参考答案截图，框出（Ⅱ）$a\ne3$ 部分）怎么解的。
 
@@ -3898,7 +3918,7 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 ## 12:36　`880-线代9-综合解答4`　$\alpha_{k+1}=\sum\lambda_i\alpha_i$（$\lambda_i\ne0$），证任意 $k$ 个线性无关
 
-**题**（强化篇第九章解答题 (4)，题干按参考答案解析整理，原题页未核）：$\alpha_1,\dots,\alpha_k$ 线性无关，$\alpha_{k+1}=\lambda_1\alpha_1+\cdots+\lambda_k\alpha_k$，且 $\lambda_i\ne0$（$i=1,\dots,k$）。证明 $\alpha_1,\dots,\alpha_{k+1}$ 中任意 $k$ 个向量线性无关。
+**题**（2026-10-08 核对原题，据 880 强化篇做题本 PDF 第 168 页）：设 $n$ 维向量组 $\alpha_1,\alpha_2,\dots,\alpha_k\ (k<n)$ 线性无关，且 $\alpha_{k+1}=\lambda_1\alpha_1+\lambda_2\alpha_2+\cdots+\lambda_k\alpha_k$，$\lambda_i\ne0,\ i=1,2,\dots,k$。证明：$\alpha_1,\alpha_2,\dots,\alpha_k,\alpha_{k+1}$ 中任何 $k$ 个向量都线性无关。
 
 **问**：（上传参考答案截图）第四题。
 
@@ -3917,7 +3937,7 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 ## 12:48　`880-线代9-综合解答5`　把 $\beta$ 拆成特征向量的组合，求 $A^n\beta$
 
-**题**（强化篇第九章解答题 (5)，题干按参考答案解析整理，原题页未核）：$\alpha_1=(1,1,1)^{\mathrm T}$，$\alpha_2=(1,2,4)^{\mathrm T}$，$\alpha_3=(1,3,9)^{\mathrm T}$ 分别是 $A$ 属于特征值 $1,2,3$ 的特征向量，$\beta=(1,1,3)^{\mathrm T}$。（Ⅰ）将 $\beta$ 用 $\alpha_1,\alpha_2,\alpha_3$ 表示；（Ⅱ）求 $A^n\beta$。
+**题**（2026-10-08 核对原题，据 880 强化篇做题本 PDF 第 169 页）：设 $A$ 是 3 阶方阵，$A$ 的特征值为 $\lambda_1=1,\lambda_2=2,\lambda_3=3$，对应的特征向量分别为 $\alpha_1=(1,1,1)^{\mathrm T}$，$\alpha_2=(1,2,4)^{\mathrm T}$，$\alpha_3=(1,3,9)^{\mathrm T}$，另一向量 $\beta=(1,1,3)^{\mathrm T}$。（Ⅰ）将 $\beta$ 用 $\alpha_1,\alpha_2,\alpha_3$ 线性表示；（Ⅱ）求 $A^n\beta$（$n$ 为正整数）。
 
 **问**：（上传参考答案截图，框出（Ⅱ））这个也挺新。
 
@@ -3937,7 +3957,7 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 ## 12:52　`880-线代9-综合解答6`　$r(A)=n-1$ 时 $\beta$ 与 $\alpha_1-\alpha_2$ 线性相关
 
-**题**（强化篇第九章解答题 (6)，题干按参考答案解析整理，原题页未核）：$A\alpha_1=A\alpha_2=b\ne0$，$r(A)=n-1$，$\beta$ 是 $Ax=0$ 的非零解。（Ⅰ）证 $\alpha_1,\alpha_1-\alpha_2$ 线性无关；（Ⅱ）证 $\beta,\alpha_1,\alpha_2$ 线性相关。
+**题**（2026-10-08 核对原题，据 880 强化篇做题本 PDF 第 169 页）：设 $A$ 是 $m\times n$ 矩阵，$\alpha_1$ 与 $\alpha_2$ 是非齐次线性方程组 $Ax=b$ 的两个不同解。（Ⅰ）证明：$\alpha_1,\alpha_1-\alpha_2$ 线性无关；（Ⅱ）若 $\beta$ 是 $Ax=0$ 的一个非零解向量，$r(A)=n-1$，证明：$\beta,\alpha_1,\alpha_2$ 线性相关。
 
 **问**：（上传参考答案截图，框出（Ⅱ）「$\beta$ 与 $\alpha_1-\alpha_2$ 都是 $Ax=0$ 的非零解……线性相关」）这个不懂。
 
@@ -4423,7 +4443,7 @@ $$\left|\frac{f(x)-f(0)}{x-0}\right|=\frac{|f(x)|}{|x|}\le|x|\to0,$$
 
 ## 08:32　`880-高数2-基础选择21`　参数式＋隐函数，判断 $x=0$ 是否为极值点
 
-**题**（基础篇做题本第 2 章选择 (21)）：$x=\arctan t$，$y=y(x)$ 由 $y=\ln(1-t^2)-\sin y$ 确定，判断 $x=0$ 是什么点。答案 B：极大值点。
+**题**（基础篇做题本第 2 章选择 (21)，2026-10-08 补全选项，据做题本 PDF 文字层）：设可导函数 $y=y(x)$ 由 $\begin{cases}x=\arctan t\\ y=\ln(1-t^2)-\sin y\end{cases}$ 确定，则：A. $x=0$ 是 $y=y(x)$ 的极小值点；B. $x=0$ 是 $y=y(x)$ 的极大值点；C. 在 $x=0$ 的邻域 $(-\delta,0)$（$\delta>0$）内，$y=y(x)$ 单调递减；D. 在 $x=0$ 的邻域 $(0,\delta)$（$\delta>0$）内，$y=y(x)$ 单调递增。答案 B。
 
 **问**：（上传参考答案解析截图）这个讲讲思路。
 
