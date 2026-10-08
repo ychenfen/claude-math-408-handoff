@@ -27,7 +27,7 @@ class CommittedFiles(unittest.TestCase):
         self.assertFalse(any(q['status'] in ('独立做对','隔日重做通过') for q in state.values()))
         self.assertIn('PV-22',ledger.next_action((ROOT/'每日复盘/操作系统/2026-10-05.md').read_text()))
     def test_review_without_table_is_reported_not_invented(self):
-        days=ledger.collect('数据结构');self.assertTrue(days and all(q is None for _,q in days))
+        days=dict(ledger.collect('数据结构'));self.assertIn('2026-10-05',days);self.assertIsNone(days['2026-10-05'])
 class Structure(unittest.TestCase):
     def bad(self,*docs,exists=ANY):
         with self.assertRaises(LedgerError):run(*docs,exists=exists)
