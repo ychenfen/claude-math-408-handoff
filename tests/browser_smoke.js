@@ -7,6 +7,10 @@ async (page) => {
     await page.goto('http://127.0.0.1:8765/');await page.waitForLoadState('networkidle');
     await page.locator('.all-row').first().waitFor();
     assert(await page.locator('.all-row').count()===6,'Overview rows');
+    // Days with Q&A newer than the subject's latest review are listed, and stale next actions say so.
+    const pendingDays=await page.evaluate(()=>fetch('assets/data.json').then(r=>r.json()).then(d=>d.subjects.filter(s=>{const last=s.summaries.map(x=>x.date).sort().pop()||'';return s.records.some(r=>r.date>last);}).length));
+    assert(await page.locator('.rt-pending button').count()===pendingDays,'Unsummarized days listed per subject');
+    if(pendingDays)assert(await page.locator('.all-next .stale').count()>0,'Stale next action flagged');
     const osRow=page.locator('.all-row[data-subject="os"]');
     assert((await osRow.locator('.seg').count())===3,'OS status segments');
     assert((await osRow.textContent()).includes('11题')&&(await osRow.textContent()).includes('下次先做'),'OS overview text');
@@ -37,7 +41,10 @@ async (page) => {
     assert(!(await page.locator('#content').textContent()).includes('暴力解手册'),'Subjects mixed');
     await page.locator('[data-subject="ds"]').click();await page.waitForLoadState('networkidle');
     // Newer Q&A may exist without a same-day summary; this test targets the known fixture date.
+    // A day with Q&A but no review opens on 当天问答 instead of an empty review.
+    assert(await page.getByRole('tab',{name:'当天问答'}).getAttribute('aria-selected')==='true','Latest Q&A day without review opens on records');
     await page.locator('#date').fill('2026-10-05');await page.locator('#date').dispatchEvent('change');
+    await page.getByRole('tab',{name:'每日复盘'}).click();
     assert(await page.locator('details.selftest').count()===3,'DS summary missing');
     await page.getByRole('tab',{name:'题目追踪'}).click();await page.locator('.ledger-empty').waitFor();
     assert((await page.locator('.ledger-missing').textContent()).includes('2026-10-05'),'Missing table should be reported');
@@ -61,9 +68,10 @@ async (page) => {
     assert((await page.locator('#prompt-text').inputValue()).includes('【高等数学】'),'Wrong subject prompt');
     await page.locator('[data-subject="linear"]').click();await page.locator('[data-subject="co"]').click();await page.locator('[data-subject="net"]').click();
     assert(await page.locator('#subject-title').textContent()==='计算机网络','Six-subject routing');
-    await page.locator('#date').fill('2026-10-06');await page.locator('#date').dispatchEvent('change');
+    await page.goto('http://127.0.0.1:8765/#net/2026-10-01/daily');await page.waitForLoadState('networkidle');
     assert((await page.locator('#content').textContent()).includes('还没有本科复盘'),'Empty-date state');
     await page.locator('[data-subject="os"]').click();await page.waitForLoadState('networkidle');
+    await page.goto('http://127.0.0.1:8765/#os/2026-10-05/daily');await page.waitForLoadState('networkidle');
     const download=page.waitForEvent('download');await page.locator('#export').click();
     assert((await download).suggestedFilename().includes('操作系统'),'Export filename');
     await page.setViewportSize({width:390,height:844});await page.evaluate(()=>scrollTo(0,0));
@@ -75,7 +83,7 @@ async (page) => {
     await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:'/tmp/study-desktop-final.png',fullPage:false});
     await page.evaluate(()=>{localStorage.removeItem('study-v1:ds:2026-10-05:draft');localStorage.removeItem('study-v1:ds:2026-10-05:reviewed');});
     assert(errors.length===0,'JS errors: '+errors.join(','));
-    return {status:'PASS',checks:['six-subject overview','status bars + tooltip','activity strip','status pills','next action','ledger view','no unearned upgrades','missing-table notice','six subjects','strict subject separation','hidden answers','math rendering','draft persistence and isolation','review marker','empty-date state','search','assistant prompt','Markdown download','mobile overflow','no JS errors']};
+    return {status:'PASS',checks:['unsummarized days','stale next action','open on Q&A when no review','six-subject overview','status bars + tooltip','activity strip','status pills','next action','ledger view','no unearned upgrades','missing-table notice','six subjects','strict subject separation','hidden answers','math rendering','draft persistence and isolation','review marker','empty-date state','search','assistant prompt','Markdown download','mobile overflow','no JS errors']};
   } finally {
     await page.evaluate(()=>{localStorage.removeItem('study-v1:ds:2026-10-05:draft');localStorage.removeItem('study-v1:ds:2026-10-05:reviewed');});
     await page.unroute('https://api.github.com/**');

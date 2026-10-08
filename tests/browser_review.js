@@ -10,6 +10,8 @@ async (browserPage) => {
     await page.route('https://api.github.com/**',r=>r.fulfill({status:200,contentType:'application/json',body:'[]'}));
     const snapshot=await (await page.request.get(BASE+'/assets/data.json')).json();
     const os=snapshot.subjects.find(s=>s.id==='os');
+    const co=snapshot.subjects.find(s=>s.id==='co');co.summaries=[];co.examCards=[];// fixture: one subject with no cards at all
+    os.examCards=[];// this test walks the five review cards; exam cards are covered in test_exams.py
     os.records[0].text+='\n\n## 图解测试夹具（不是学习记录）\n\n```svg\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 180" onload="window.svgInjected=1"><script>window.svgInjected=1</script><foreignObject><div>unsafe</div></foreignObject><image href="https://example.invalid/pixel"/><rect x="10" y="10" width="680" height="160" fill="#edf2e2"/><text x="40" y="95" font-size="30" fill="#243e31">先回想 → 看参考 → 再验证</text></svg>\n```\n\n```jsx\n<script>window.jsxInjected=1</script>\n```\n';
     await page.route(BASE+'/assets/data.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(snapshot)}));
     await page.goto(BASE+'/#os/2026-10-05/drill');await page.waitForLoadState('networkidle');
@@ -43,9 +45,12 @@ async (browserPage) => {
     await page.screenshot({path:'/tmp/study-recall-mobile.png',fullPage:true});
     await page.locator('[data-subject="ds"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
     await page.locator('.recall-answer').waitFor();
-    assert((await page.locator('.drill-stage .eyebrow').textContent()).startsWith('1 / 3'),'DS cards isolated across dates');
+    const dsTotal=Number((await page.locator('.drill-stage .eyebrow').textContent()).match(/^1 \/ (\d+)/)[1]);
+    const dsExpected=snapshot.subjects.find(s=>s.id==='ds').summaries.reduce((n,d)=>n+(d.text.match(/^### 自测：/gm)||[]).length,0)+(snapshot.subjects.find(s=>s.id==='ds').examCards||[]).reduce((n,d)=>n+(d.text.match(/^### 自测：/gm)||[]).length,0);
+    assert(dsTotal===dsExpected,`DS cards from all its reviews and exams only: ${dsTotal} vs ${dsExpected}`);
     assert(await page.locator('.recall-answer').inputValue()==='','No cross-subject notes');
-    assert((await page.locator('.drill-context').innerText()).includes('res[i]'),'DS card includes standalone array problem');
+    // Newest first: the first DS card is whichever source is newest; every card must stand alone.
+    assert((await page.locator('.drill-context').innerText()).replace(/\s/g,'').length>40,'DS card shows a standalone question');
     await page.locator('#date').fill('2026-10-05');await page.locator('#date').dispatchEvent('change');
     await page.getByRole('tab',{name:'每日复盘',exact:true}).click();
     assert(await page.locator('.selftest-item .drill-context').count()===3,'Daily review also exposes question context');

@@ -7,6 +7,7 @@ async (browserPage) => {
   try {
     const data=await (await page.request.get(BASE+'/assets/data.json')).json();
     const os=data.subjects.find(s=>s.id==='os');
+    os.examCards=[];// only the fixture card
     os.summaries=[{...os.summaries[0],text:'# 测试夹具，不是真实学习记录\n\n### 自测：示例条件改变后，还能直接套公式吗？\n\n**参考要点**：先核对适用条件。\n'}];
     await page.route(BASE+'/assets/data.json',r=>r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(data)}));
     await page.route('https://api.github.com/**',r=>r.fulfill({status:200,contentType:'application/json',body:'[]'}));

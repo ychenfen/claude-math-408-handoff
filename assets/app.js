@@ -114,6 +114,9 @@
     if(window.renderMathInElement)renderMathInElement(el,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\(',right:'\\)',display:false},{left:'\\[',right:'\\]',display:true}],throwOnError:false,trust:false});
     return el;
   }
+  // Q&A days newer than the subject's latest review: work done but not yet turned into status rows and recall cards.
+  function unsummarized(s){const last=[...s.summaries].map(d=>d.date).sort().pop()||'';return [...new Set(s.records.map(d=>d.date))].filter(d=>d>last).sort();}
+  function promptFor(s,d){const keep=[subject,date];subject=s;date=d;try{return prompt();}finally{[subject,date]=keep;}}
   function prompt() {
     return `你负责【${subject.name}】。请先读 https://github.com/ychenfen/claude-math-408-handoff 的 AGENTS.md、每日复盘/使用说明.md 和该科历史交接。\n\n请按北京时间 ${date}，先看本科最近一份复盘的「题目状态」和「下次先做」，再读取 问答记录/${subject.name}/${date}.md 的真实记录，总结今天实际涉及的内容、逐题状态（仅安排／已讨论／作答待核实／独立做对／隔日重做通过，沿用题目编号，没有作答证据不升级）、知识点及适用条件、我的具体卡点与纠正、3～5个闭卷自测（至少一题迁移）和最多3项下一步动作。引用原问答；没有作答、原图或教材就标未核实，不把计划当完成、不混入其他科目。\n\n按 每日复盘/模板.md 保存到 每日复盘/${subject.name}/${date}.md。后续每次答疑追加到该科当天问答。请先给我核对公开内容；只有我授权上传时再提交GitHub，不覆盖其他助手改动。`;
   }
@@ -131,7 +134,7 @@
     $('#subject-title').textContent=subject.name;$('#tagline').textContent=subject.tag;$('#date').value=date;
     $('#eyebrow').textContent=`SUBJECT ${String(data.subjects.indexOf(subject)+1).padStart(2,'0')} / 六科独立记录`;
     $('#subjects').innerHTML=data.subjects.map((s,i)=>`<button class="subject" data-subject="${s.id}" aria-current="${mode!=='all'&&s===subject}"><span class="num">0${i+1}</span>${escape(s.name)}${s.records.length?'<i class="dot"></i>':''}</button>`).join('');
-    $('#subjects').querySelectorAll('button').forEach(b=>b.onclick=()=>select(b.dataset.subject,null,'daily'));
+    $('#subjects').querySelectorAll('button').forEach(b=>b.onclick=()=>select(b.dataset.subject,null,null));
     if(mode==='all'){document.title='六科总览 · 温故学习工作台';$('#subject-title').textContent='六科总览';$('#tagline').textContent='先看哪科卡着，再进该科做题';$('#eyebrow').textContent='OVERVIEW / 数学二 + 408';$('#overview').innerHTML='';$('#sync-state').textContent='发布快照 · 已检查科目会合并GitHub新记录';return;}
     const available=Boolean(summaryDoc());
     const next=available?nextAction(summaryDoc().text).replace(/`/g,''):'';
@@ -159,11 +162,17 @@
     today_.innerHTML=`<div class="rt-head"><div><span class="eyebrow">TODAY · 今天先复习</span><h2>${totalDue?`到期 ${totalDue} 题`:totalNew?`可以开始：${totalNew} 题还没练过`:'今天没有要复习的题'}${totalDue&&totalNew?`<small>另有 ${totalNew} 题还没练过</small>`:''}</h2><p>先回想，再翻开参考要点，按不会／模糊／会了自评；忘了的很快再来，记住的间隔越拉越长。自评只排复习时间，不改变题目状态。</p></div></div><div class="rt-list">${dues.map(({s,d})=>`<button class="rt-item${d.due?' due':''}" data-drill="${s.id}" ${d.total?'':'disabled'}><b>${escape(s.name)}</b><span>${d.total?`${d.due?`到期 ${d.due}`:'无到期'} · 新 ${d.new}`:'还没有复习卡'}</span></button>`).join('')}</div>`;
     const bed=document.createElement('button');bed.className='rt-bed';bed.innerHTML='<b>☾ 睡前复习</b><span>全科混合 · 暗色 · 10～25 张 · 只回想不写字</span>';bed.onclick=()=>select('bed');
     today_.querySelector('.rt-head').append(bed);
+    // Pending summaries: without them tonight's review has no new cards.
+    const pending=data.subjects.map(s=>({s,days:unsummarized(s)})).filter(x=>x.days.length);
+    if(pending.length){const box=document.createElement('div');box.className='rt-pending';
+      box.innerHTML='<b>还没总结的问答</b><span>不总结就不会生成新的复习卡。点一下复制提示词，发到该科项目里说“总结今天”。</span>'+pending.map(({s,days})=>`<button type="button" data-s="${s.id}" data-d="${days[days.length-1]}">${escape(s.name)} <small>${days.map(d=>d.slice(5)).join('、')}</small></button>`).join('');
+      box.querySelectorAll('button').forEach(b=>b.onclick=async()=>{const s=data.subjects.find(x=>x.id===b.dataset.s);const text=promptFor(s,b.dataset.d);try{await navigator.clipboard.writeText(text);notify(`已复制${s.name} ${b.dataset.d} 的总结提示词`);}catch{select(s.id,b.dataset.d,'handoff');}});
+      today_.append(box);}
     // Daytime algorithm: the data-structures plan says which template to hand-write today; night only recalls it.
     const ds=data.subjects.find(z=>z.id==='ds'),dsDoc=ds&&[...ds.summaries].sort((p,q)=>q.date.localeCompare(p.date)).find(z=>z.text);
     const algoPlan=dsDoc?nextAction(dsDoc.text).replace(/`/g,''):'';
     const algo=document.createElement('div');algo.className='rt-algo';
-    algo.innerHTML=`<b>白天 · 算法手写</b><span>${algoPlan?escape(algoPlan):'按暴力解手册逐日表，在数据结构项目里手写一道并拍照批改。'}</span><small>晚上睡前复习每轮至少 2 张算法卡，只回想模板骨架。</small>`;
+    algo.innerHTML=`<b>白天 · 算法手写${dsDoc?`<small> · 据 ${dsDoc.date.slice(5)} 复盘${unsummarized(ds).length?'，之后的问答未总结':''}</small>`:''}</b><span>${algoPlan?escape(algoPlan):'按暴力解手册逐日表，在数据结构项目里手写一道并拍照批改。'}</span><small>晚上睡前复习每轮至少 2 张算法卡，只回想模板骨架。</small>`;
     today_.append(algo);
     today_.querySelectorAll('[data-drill]').forEach(b=>b.onclick=()=>select(b.dataset.drill,null,'drill'));
     // Progress lives in this browser only; a backup file carries it between phone and computer.
@@ -197,7 +206,7 @@
       const row=document.createElement('button');row.className='all-row';row.dataset.subject=s.id;
       const bar=n?`<div class="stack" role="img" aria-label="${escape(s.name)}共${n}题：${STATUSES.map((st,i)=>count[i]?st+count[i]:'').filter(Boolean).join('，')}">${STATUSES.map((st,i)=>count[i]?`<span class="seg s${i}" style="flex:${count[i]}" data-tip="${st} ${count[i]}题"></span>`:'').join('')}</div><div class="stack-text">${n}题 · ${STATUSES.map((st,i)=>count[i]?`${st} ${count[i]}`:'').filter(Boolean).join(' · ')}</div>`:`<div class="stack empty-stack"></div><div class="stack-text muted">${s.summaries.length?'复盘还没有题目状态表':'还没有复盘'}</div>`;
       const strip=`<div class="strip" aria-label="最近14天记录">${span.map(d=>{const lv=reviews.has(d)?2:days.has(d)?1:0;return `<i class="day d${lv}" data-tip="${d.slice(5)} ${['无记录','有问答','有问答和复盘'][lv]}"></i>`;}).join('')}</div><div class="strip-cap"><span>${span[0].slice(5)}</span><span>近14天</span><span>${span[13].slice(5)}</span></div>`;
-      row.innerHTML=`<div class="all-name"><b>${escape(s.name)}</b><span>${last?`最近记录 ${last.slice(5)} · ${daysBetween(last,today)===0?'今天':daysBetween(last,today)+'天前'}`:'暂无记录'}</span></div><div class="all-bar">${bar}</div><div class="all-days">${strip}</div><div class="all-next">${next?`<b>下次先做</b>${escape(next)}`:'<span class="muted">—</span>'}</div>`;
+      row.innerHTML=`<div class="all-name"><b>${escape(s.name)}</b><span>${last?`最近记录 ${last.slice(5)} · ${daysBetween(last,today)===0?'今天':daysBetween(last,today)+'天前'}`:'暂无记录'}</span></div><div class="all-bar">${bar}</div><div class="all-days">${strip}</div><div class="all-next">${next?`<b>下次先做 · ${latestReview.date.slice(5)} 复盘</b>${escape(next)}${unsummarized(s).length?`<em class="stale">之后 ${unsummarized(s).map(d=>d.slice(5)).join('、')} 有新问答未总结，可能已做过</em>`:''}`:'<span class="muted">—</span>'}</div>`;
       row.onclick=()=>select(s.id,null,n?'ledger':'daily');pane.append(row);
     });
     const foot=document.createElement('p');foot.className='all-foot';foot.textContent=`数据：随站点发布的快照，加上本次已检查过GitHub的科目。14天按北京时间，截止 ${today}。`;pane.append(foot);
@@ -260,7 +269,9 @@
       updateChrome();$('#export').disabled=!currentText;
     } catch {if(own!==generation)return;empty('暂时无法读取这个文件','网络可能不可用或GitHub限流。已发布快照与GitHub原文仍可查看，请稍后重试。');}
   }
-  function select(id,day,nextTab){if(id==='bed'){openBed();return;}if(id==='all'){mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#all');render();return;}mode='subject';subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();tab=nextTab||'daily';if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();syncSubject(false);}
+  function select(id,day,nextTab){if(id==='bed'){openBed();return;}if(id==='all'){mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#all');render();return;}mode='subject';subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();
+    // Opening a subject without a chosen tab: show that day's review if there is one, else that day's Q&A rather than an empty page.
+    tab=nextTab||(subject.summaries.some(d=>d.date===date)||!subject.records.some(d=>d.date===date)?'daily':'records');history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();syncSubject(false);}
   async function syncSubject(force) {
     const s=subject;if(synced.has(s.id)&&!force)return;
     synced.set(s.id,'正在检查GitHub新记录…');updateChrome();
@@ -298,9 +309,9 @@
     if(bedOpen)return;bedOpen=true;mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#bed');
     await Promise.all(data.subjects.flatMap(s=>s.summaries.map(loadDoc))).catch(()=>{});
     render();
-    StudyBedtime.mount({subjects:data.subjects,renderMarkdown,get,put,today,nextOf:s=>{const d=[...s.summaries].sort((a,b)=>b.date.localeCompare(a.date)).find(x=>x.text);return d?nextAction(d.text).replace(/`/g,''):'';},onExit:()=>{bedOpen=false;history.replaceState(null,'','#all');render();}});
+    StudyBedtime.mount({subjects:data.subjects,renderMarkdown,get,put,today,nextOf:s=>{const d=[...s.summaries].sort((a,b)=>b.date.localeCompare(a.date)).find(x=>x.text);const n=d?nextAction(d.text).replace(/`/g,''):'';return n?`${n}（${d.date.slice(5)} 复盘${unsummarized(s).length?'，之后的问答还没总结':''}）`:'';},onExit:()=>{bedOpen=false;history.replaceState(null,'','#all');render();}});
   }
-  function route(){const [id,d,t]=location.hash.slice(1).split('/');if(id==='bed'){select('bed');return;}if(!id||id==='all'){select('all');return;}select(id,d,TABS.includes(t)?t:'daily');}
+  function route(){const [id,d,t]=location.hash.slice(1).split('/');if(id==='bed'){select('bed');return;}if(!id||id==='all'){select('all');return;}select(id,d,TABS.includes(t)?t:null);}
   window.addEventListener('hashchange',()=>{if(data)route();});
   // Offline copy for bedtime use and slow networks; the page works the same without it.
   if('serviceWorker' in navigator&&(location.protocol==='https:'||['127.0.0.1','localhost'].includes(location.hostname)))navigator.serviceWorker.register('sw.js').catch(()=>{});
