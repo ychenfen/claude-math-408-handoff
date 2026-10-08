@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" role="img" aria-label="TCP 拥塞控制：慢开始、拥塞避免、超时后 cwnd 回到 1，快重传后进入快恢复" font-family="PingFang SC,Microsoft YaHei,Noto Sans CJK SC,sans-serif" font-size="12"><title>TCP 拥塞窗口随传输轮次的变化</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="60" y="40" width="96" height="330" fill="#cfe6c0" opacity="0.35"/>
+<text x="108.0" y="56" text-anchor="middle" font-weight="600" fill="#252d25">慢开始</text>
+<rect x="156" y="40" width="192" height="330" fill="#f3d9bf" opacity="0.35"/>
+<text x="252.0" y="56" text-anchor="middle" font-weight="600" fill="#252d25">拥塞避免</text>
+<rect x="372" y="40" width="96" height="330" fill="#cfe6c0" opacity="0.35"/>
+<text x="420.0" y="56" text-anchor="middle" font-weight="600" fill="#252d25">慢开始</text>
+<rect x="468" y="40" width="96" height="330" fill="#f3d9bf" opacity="0.35"/>
+<text x="516.0" y="56" text-anchor="middle" font-weight="600" fill="#252d25">拥塞避免</text>
+<rect x="588" y="40" width="110.40000000000009" height="330" fill="#f3d9bf" opacity="0.35"/>
+<text x="643.2" y="56" text-anchor="middle" font-weight="600" fill="#252d25">拥塞避免</text>
+<path d="M60 370H718M60 370V30" stroke="#555" fill="none"/>
+<text x="720" y="374" fill="#555">轮次</text><text x="52" y="26" text-anchor="end" fill="#555">cwnd</text>
+<text x="54" y="326" text-anchor="end" fill="#555">4</text><path d="M57 322H60" stroke="#555"/>
+<text x="54" y="278" text-anchor="end" fill="#555">8</text><path d="M57 274H60" stroke="#555"/>
+<text x="54" y="230" text-anchor="end" fill="#555">12</text><path d="M57 226H60" stroke="#555"/>
+<text x="54" y="182" text-anchor="end" fill="#555">16</text><path d="M57 178H60" stroke="#555"/>
+<text x="54" y="134" text-anchor="end" fill="#555">20</text><path d="M57 130H60" stroke="#555"/>
+<text x="54" y="86" text-anchor="end" fill="#555">24</text><path d="M57 82H60" stroke="#555"/>
+<text x="60" y="386" text-anchor="middle" fill="#555">0</text>
+<text x="108" y="386" text-anchor="middle" fill="#555">2</text>
+<text x="156" y="386" text-anchor="middle" fill="#555">4</text>
+<text x="204" y="386" text-anchor="middle" fill="#555">6</text>
+<text x="252" y="386" text-anchor="middle" fill="#555">8</text>
+<text x="300" y="386" text-anchor="middle" fill="#555">10</text>
+<text x="348" y="386" text-anchor="middle" fill="#555">12</text>
+<text x="396" y="386" text-anchor="middle" fill="#555">14</text>
+<text x="444" y="386" text-anchor="middle" fill="#555">16</text>
+<text x="492" y="386" text-anchor="middle" fill="#555">18</text>
+<text x="540" y="386" text-anchor="middle" fill="#555">20</text>
+<text x="588" y="386" text-anchor="middle" fill="#555">22</text>
+<text x="636" y="386" text-anchor="middle" fill="#555">24</text>
+<text x="684" y="386" text-anchor="middle" fill="#555">26</text>
+<path d="M60 178H348" stroke="#333" stroke-dasharray="5 4" fill="none"/>
+<text x="62" y="192" fill="#333" font-size="11">ssthresh 初值 16</text>
+<path d="M372 226H564" stroke="#b03a2e" stroke-dasharray="5 4" fill="none"/>
+<text x="374" y="240" fill="#b03a2e" font-size="11">ssthresh=24/2=12</text>
+<path d="M588 274H684" stroke="#6a4c9c" stroke-dasharray="5 4" fill="none"/>
+<text x="590" y="288" fill="#6a4c9c" font-size="11">ssthresh=16/2=8</text>
+<polyline points="60,358 84,346 108,322 132,274 156,178 180,166 204,154 228,142 252,130 276,118 300,106 324,94 348,82" fill="none" stroke="#2d5a8c" stroke-width="2"/>
+<polyline points="372,358 396,346 420,322 444,274 468,226 492,214 516,202 540,190 564,178" fill="none" stroke="#2d5a8c" stroke-width="2"/>
+<polyline points="588,274 612,262 636,250 660,238 684,226" fill="none" stroke="#2d5a8c" stroke-width="2"/>
+<path d="M348 82L372 358M564 178L588 274" stroke="#2d5a8c" stroke-width="1.5" stroke-dasharray="3 3" fill="none"/>
+<circle cx="60" cy="358" r="3" fill="#2d5a8c"/>
+<circle cx="84" cy="346" r="3" fill="#2d5a8c"/>
+<text x="80" y="340" text-anchor="end" font-size="10" fill="#2d5a8c">2</text>
+<circle cx="108" cy="322" r="3" fill="#2d5a8c"/>
+<text x="104" y="316" text-anchor="end" font-size="10" fill="#2d5a8c">4</text>
+<circle cx="132" cy="274" r="3" fill="#2d5a8c"/>
+<text x="128" y="268" text-anchor="end" font-size="10" fill="#2d5a8c">8</text>
+<circle cx="156" cy="178" r="3" fill="#2d5a8c"/>
+<text x="152" y="172" text-anchor="end" font-size="10" fill="#2d5a8c">16</text>
+<circle cx="180" cy="166" r="3" fill="#2d5a8c"/>
+<circle cx="204" cy="154" r="3" fill="#2d5a8c"/>
+<circle cx="228" cy="142" r="3" fill="#2d5a8c"/>
+<circle cx="252" cy="130" r="3" fill="#2d5a8c"/>
+<circle cx="276" cy="118" r="3" fill="#2d5a8c"/>
+<circle cx="300" cy="106" r="3" fill="#2d5a8c"/>
+<circle cx="324" cy="94" r="3" fill="#2d5a8c"/>
+<circle cx="348" cy="82" r="3" fill="#2d5a8c"/>
+<text x="344" y="76" text-anchor="end" font-size="10" fill="#2d5a8c">24</text>
+<circle cx="372" cy="358" r="3" fill="#2d5a8c"/>
+<circle cx="396" cy="346" r="3" fill="#2d5a8c"/>
+<text x="392" y="340" text-anchor="end" font-size="10" fill="#2d5a8c">2</text>
+<circle cx="420" cy="322" r="3" fill="#2d5a8c"/>
+<text x="416" y="316" text-anchor="end" font-size="10" fill="#2d5a8c">4</text>
+<circle cx="444" cy="274" r="3" fill="#2d5a8c"/>
+<text x="440" y="268" text-anchor="end" font-size="10" fill="#2d5a8c">8</text>
+<circle cx="468" cy="226" r="3" fill="#2d5a8c"/>
+<text x="464" y="220" text-anchor="end" font-size="10" fill="#2d5a8c">12</text>
+<circle cx="492" cy="214" r="3" fill="#2d5a8c"/>
+<circle cx="516" cy="202" r="3" fill="#2d5a8c"/>
+<circle cx="540" cy="190" r="3" fill="#2d5a8c"/>
+<circle cx="564" cy="178" r="3" fill="#2d5a8c"/>
+<text x="560" y="172" text-anchor="end" font-size="10" fill="#2d5a8c">16</text>
+<circle cx="588" cy="274" r="3" fill="#2d5a8c"/>
+<text x="584" y="268" text-anchor="end" font-size="10" fill="#2d5a8c">8</text>
+<circle cx="612" cy="262" r="3" fill="#2d5a8c"/>
+<circle cx="636" cy="250" r="3" fill="#2d5a8c"/>
+<circle cx="660" cy="238" r="3" fill="#2d5a8c"/>
+<circle cx="684" cy="226" r="3" fill="#2d5a8c"/>
+<text x="680" y="220" text-anchor="end" font-size="10" fill="#2d5a8c">12</text>
+<circle cx="348" cy="82" r="7" fill="none" stroke="#b03a2e" stroke-width="2"/>
+<text x="358" y="86" fill="#b03a2e" font-weight="600">超时：ssthresh=cwnd/2，cwnd=1</text>
+<path d="M558 172l6 6l6 -6" stroke="#2a8a8a" fill="none" stroke-width="2"/>
+<text x="572" y="164" fill="#2a8a8a" font-weight="600">3 个重复 ACK：快重传</text>
+<text x="468" y="346" fill="#6a4c9c" font-weight="600">快恢复：ssthresh=cwnd/2，cwnd=ssthresh</text>
+<text x="400.0" y="418" text-anchor="middle" font-size="12" fill="#252d25">慢开始每轮翻倍但不超过 ssthresh；到 ssthresh 后每轮 +1（单位：MSS）</text>
+</svg>
