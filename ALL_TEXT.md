@@ -3754,6 +3754,38 @@ A. 只有Ⅱ　B. Ⅰ和Ⅱ　C. Ⅰ和Ⅲ　D. Ⅰ、Ⅱ和Ⅲ
 
 卡点判断：用户的真正缺口是链表指针遍历（10/8 诊断），先闭卷写两遍版。
 
+## 15:50　`408-2009-42`　发暴力解
+
+**问**：你把暴力解发我
+
+**答**：按三段式发了两遍扫描暴力版（与 10/8 22:09 代码同逻辑，第二遍改写成「走 n−k 步」）：
+
+```c
+typedef struct LNode{
+    int data;
+    struct LNode *link;          // 指向下一个结点的指针
+} LNode, *LinkList;
+
+int Search_k(LinkList list, int k){
+    int n = 0;
+    LNode *p = list->link;       // p 指向第一个数据结点
+    while (p != NULL){           // 第一遍：求表长 n
+        n++;
+        p = p->link;
+    }
+    if (k > n) return 0;         // 表长不足 k，查找失败
+    p = list->link;              // 第二遍：从头再走
+    for (int i = 0; i < n - k; i++)
+        p = p->link;             // 走 n-k 步，到正数第 n-k+1 个
+    printf("%d", p->data);
+    return 1;
+}
+```
+
+设计思想：先数表长 n；k>n 返回 0；再走 n−k 步到倒数第 k 个，输出 data 返回 1。时间 O(n)，空间 O(1)。
+
+要求用户合上后白纸默写拍照；今天的作答记「看答案后」，隔日独立重写才能升级。
+
 
 ---
 
