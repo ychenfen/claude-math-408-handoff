@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" role="img" aria-label="202.118.1.0/24 按 120、60、60 个地址划分为 /25、/26、/26" font-family="PingFang SC,Microsoft YaHei,Noto Sans CJK SC,sans-serif" font-size="13"><title>一个 /24 分给 120、60、60 个地址的三个局域网</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="380.0" y="30" text-anchor="middle" font-size="15" font-weight="600" fill="#252d25">202.118.1.0/24：只看最后 8 位（0～255）</text>
+<rect x="60.0" y="60" width="320.0" height="70" fill="#cfe0f3" stroke="#2d5a8c" stroke-width="2"/>
+<text x="220.0" y="88" text-anchor="middle" font-weight="600" fill="#2d5a8c">局域网1（E1）</text>
+<text x="220.0" y="110" text-anchor="middle" fill="#252d25">202.118.1.0/25</text>
+<text x="220.0" y="160" text-anchor="middle" font-family="Menlo,Consolas,monospace" fill="#2d5a8c">末字节 0xxxxxxx</text>
+<text x="220.0" y="182" text-anchor="middle" font-size="12" fill="#252d25">主机号 7 位：2⁷−2=126 ≥ 120</text>
+<text x="220.0" y="200" text-anchor="middle" font-size="12" fill="#555">掩码 255.255.255.128</text>
+<rect x="380.0" y="60" width="160.0" height="70" fill="#d9ecd0" stroke="#3f6b2c" stroke-width="2"/>
+<text x="460.0" y="88" text-anchor="middle" font-weight="600" fill="#3f6b2c">局域网2（E2）</text>
+<text x="460.0" y="110" text-anchor="middle" fill="#252d25">202.118.1.128/26</text>
+<text x="460.0" y="160" text-anchor="middle" font-family="Menlo,Consolas,monospace" fill="#3f6b2c">末字节 10xxxxxx</text>
+<text x="460.0" y="182" text-anchor="middle" font-size="12" fill="#252d25">主机号 6 位：2⁶−2=62 ≥ 60</text>
+<text x="460.0" y="200" text-anchor="middle" font-size="12" fill="#555">掩码 255.255.255.192</text>
+<rect x="540.0" y="60" width="160.0" height="70" fill="#f3e2cf" stroke="#9a5a26" stroke-width="2"/>
+<text x="620.0" y="88" text-anchor="middle" font-weight="600" fill="#9a5a26">局域网3（E3）</text>
+<text x="620.0" y="110" text-anchor="middle" fill="#252d25">202.118.1.192/26</text>
+<text x="620.0" y="160" text-anchor="middle" font-family="Menlo,Consolas,monospace" fill="#9a5a26">末字节 11xxxxxx</text>
+<text x="620.0" y="182" text-anchor="middle" font-size="12" fill="#252d25">主机号 6 位：62 ≥ 60</text>
+<text x="620.0" y="200" text-anchor="middle" font-size="12" fill="#555">掩码 255.255.255.192</text>
+<text x="60.0" y="54" text-anchor="middle" font-size="12" fill="#555">0</text>
+<text x="380.0" y="54" text-anchor="middle" font-size="12" fill="#555">128</text>
+<text x="540.0" y="54" text-anchor="middle" font-size="12" fill="#555">192</text>
+<text x="700.0" y="54" text-anchor="middle" font-size="12" fill="#555">255</text>
+<path d="M60.0 220H700.0" stroke="#bbb" fill="none"/>
+<text x="60" y="248" fill="#252d25">① 先按需求最大的分：120 → 7 位主机号 → /25，取前一半 0～127。</text>
+<text x="60" y="272" fill="#252d25">② 剩下的 128～255（一个 /25）再对半分成两个 /26：128～191、192～255。</text>
+<text x="60" y="296" fill="#252d25">③ 前缀长度 = 32 − 主机号位数；网络地址末字节必须是块大小（128、64）的整数倍。</text>
+<text x="60" y="320" font-size="12" fill="#9a3b26">易错：前缀是网络号位数，不是“借了几位”；/7 表示只有前 7 位是网络号。</text>
+</svg>
