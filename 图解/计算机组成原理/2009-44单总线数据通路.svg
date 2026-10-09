@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" role="img" aria-label="2009-44 单总线数据通路示意：存储器经系统总线 AB、DB 与 MAR、MDR 相连，CPU 内部单总线连接 MAR、MDR、R0、R1、A、ALU、AC、PC" font-family="PingFang SC,Microsoft YaHei,Noto Sans CJK SC,sans-serif" font-size="13"><title>2009-44 单总线数据通路（重绘示意）</title>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#333"/></marker></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<rect x="300" y="18" width="420" height="58" rx="4" fill="#f4f4f4" stroke="#333"/>
+<text x="510" y="40" text-anchor="middle" font-weight="700" fill="#222">存储器 M</text>
+<text x="350" y="68" text-anchor="middle" fill="#a54a4a" font-weight="600">MemR</text><text x="450" y="68" text-anchor="middle" fill="#a54a4a" font-weight="600">MemW</text><text x="560" y="68" text-anchor="middle" fill="#333">Data</text><text x="660" y="68" text-anchor="middle" fill="#333">Addr</text>
+<path d="M120 105H860" stroke="#777" stroke-width="3"/><text x="866" y="109" fill="#555">CB 控制总线</text>
+<path d="M120 135H860" stroke="#4a6aa5" stroke-width="3"/><text x="866" y="139" fill="#4a6aa5">DB 数据总线</text>
+<path d="M120 165H860" stroke="#4d8a3a" stroke-width="3"/><text x="866" y="169" fill="#4d8a3a">AB 地址总线</text>
+<path d="M350 105V78M450 105V78" stroke="#777" marker-end="url(#a)"/>
+<path d="M560 135V78" stroke="#4a6aa5" marker-start="url(#a)" marker-end="url(#a)"/>
+<path d="M660 165V78" stroke="#4d8a3a" marker-end="url(#a)"/>
+<rect x="150" y="205" width="80" height="32" rx="3" fill="#e9f5e4" stroke="#4d8a3a"/><text x="190" y="226" text-anchor="middle" font-weight="700">MAR</text>
+<path d="M190 205V167" stroke="#4d8a3a" marker-end="url(#a)"/><text x="196" y="190" font-size="11" fill="#4d8a3a">输出一直使能</text>
+<path d="M190 278V239" stroke="#333" marker-end="url(#a)"/><text x="100" y="262" font-size="12" fill="#a54a4a" font-weight="600">MARin</text>
+<rect x="440" y="205" width="90" height="32" rx="3" fill="#e8eef8" stroke="#4a6aa5"/><text x="485" y="226" text-anchor="middle" font-weight="700">MDR</text>
+<path d="M460 205V137" stroke="#4a6aa5" marker-end="url(#a)"/><text x="365" y="190" font-size="12" fill="#a54a4a" font-weight="600">MDRoutE ↑</text>
+<path d="M510 137V203" stroke="#4a6aa5" marker-end="url(#a)"/><text x="518" y="190" font-size="12" fill="#a54a4a" font-weight="600">↓ MDRinE</text>
+<path d="M460 239V276" stroke="#333" marker-end="url(#a)"/><text x="370" y="262" font-size="12" fill="#a54a4a" font-weight="600">MDRout ↓</text>
+<path d="M510 278V241" stroke="#333" marker-end="url(#a)"/><text x="518" y="262" font-size="12" fill="#a54a4a" font-weight="600">↑ MDRin</text>
+<path d="M90 280H860" stroke="#222" stroke-width="4"/><text x="866" y="284" font-weight="700" fill="#222">CPU 内部单总线</text>
+<rect x="150" y="320" width="80" height="30" rx="3" fill="#fff" stroke="#333"/><text x="190" y="340" text-anchor="middle" font-weight="700">R0</text>
+<rect x="150" y="400" width="80" height="30" rx="3" fill="#fff" stroke="#333"/><text x="190" y="420" text-anchor="middle" font-weight="700">R1</text>
+<path d="M130 282V335H148" stroke="#333" fill="none" marker-end="url(#a)"/><text x="80" y="330" font-size="12" fill="#a54a4a" font-weight="600">R0in</text>
+<path d="M232 335H250V282" stroke="#333" fill="none" marker-end="url(#a)"/><text x="256" y="330" font-size="12" fill="#a54a4a" font-weight="600">R0out</text>
+<path d="M110 282V415H148" stroke="#333" fill="none" marker-end="url(#a)"/><text x="62" y="410" font-size="12" fill="#a54a4a" font-weight="600">R1in</text>
+<path d="M232 415H270V282" stroke="#333" fill="none" marker-end="url(#a)"/><text x="276" y="410" font-size="12" fill="#a54a4a" font-weight="600">R1out</text>
+<rect x="420" y="320" width="60" height="30" rx="3" fill="#fff" stroke="#333"/><text x="450" y="340" text-anchor="middle" font-weight="700">A</text>
+<path d="M450 282V318" stroke="#333" marker-end="url(#a)"/><text x="398" y="305" font-size="12" fill="#a54a4a" font-weight="600">Ain</text>
+<path d="M420 380H540L520 410H440Z" fill="#fdf1e3" stroke="#b5651d"/><text x="480" y="400" text-anchor="middle" font-weight="700">ALU</text>
+<path d="M450 350V378" stroke="#333" marker-end="url(#a)"/>
+<path d="M520 282V378" stroke="#333" marker-end="url(#a)"/><text x="527" y="340" font-size="11" fill="#555">另一输入直接取自总线</text>
+<text x="360" y="400" font-size="12" fill="#a54a4a" font-weight="600">ADD →</text>
+<rect x="445" y="445" width="70" height="30" rx="3" fill="#fff" stroke="#333"/><text x="480" y="465" text-anchor="middle" font-weight="700">AC</text>
+<path d="M480 410V443" stroke="#333" marker-end="url(#a)"/><text x="400" y="440" font-size="12" fill="#a54a4a" font-weight="600">ACin</text>
+<path d="M517 460H600V282" stroke="#333" fill="none" marker-end="url(#a)"/><text x="606" y="430" font-size="12" fill="#a54a4a" font-weight="600">ACout</text>
+<rect x="720" y="320" width="70" height="30" rx="3" fill="#fff" stroke="#333"/><text x="755" y="340" text-anchor="middle" font-weight="700">PC</text>
+<path d="M700 282V335H718" stroke="#333" fill="none" marker-end="url(#a)"/><text x="652" y="330" font-size="12" fill="#a54a4a" font-weight="600">PCin</text>
+<path d="M792 335H810V282" stroke="#333" fill="none" marker-end="url(#a)"/><text x="816" y="330" font-size="12" fill="#a54a4a" font-weight="600">PCout</text>
+<text x="755" y="370" text-anchor="middle" font-size="12" fill="#a54a4a" font-weight="600">PC+1</text>
+<rect x="720" y="400" width="70" height="30" rx="3" fill="#fff" stroke="#333"/><text x="755" y="420" text-anchor="middle" font-weight="700">IR</text>
+<path d="M680 282V415H718" stroke="#333" fill="none" marker-end="url(#a)"/><text x="634" y="410" font-size="12" fill="#a54a4a" font-weight="600">IRin</text>
+<path d="M755 432V455" stroke="#333" marker-end="url(#a)"/><text x="755" y="472" text-anchor="middle" font-size="11" fill="#555">至指令译码部件</text>
+<text x="60" y="505" font-size="11" fill="#666">示意图，依据用户上传的视频课截图中的原题图重绘；带 E 的信号连系统数据总线 DB，不带 E 的连 CPU 内部总线。</text>
+</svg>
