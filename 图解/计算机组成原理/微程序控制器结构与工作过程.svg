@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 560" role="img" aria-label="微程序控制器的基本结构（左）与工作过程（右）" font-family="PingFang SC,Microsoft YaHei,Noto Sans CJK SC,sans-serif" font-size="13"><title>微程序控制器的结构与工作过程</title>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#444"/></marker><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#b5651d"/></marker></defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="230" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#222">① 结构：控制信号从控制存储器里“查”出来</text>
+<text x="670" y="30" text-anchor="middle" font-size="16" font-weight="700" fill="#222">② 工作过程（每条机器指令循环一次）</text>
+<path d="M450 45V540" stroke="#ccc" stroke-dasharray="4 4"/>
+<!-- structure -->
+<rect x="40" y="60" width="150" height="44" rx="6" fill="#e8eef8" stroke="#4a6aa5"/><text x="115" y="80" text-anchor="middle" font-weight="600" fill="#222">指令寄存器 IR</text><text x="115" y="96" text-anchor="middle" font-size="11" fill="#555">提供操作码 OP</text>
+<rect x="250" y="60" width="160" height="44" rx="6" fill="#e8eef8" stroke="#4a6aa5"/><text x="330" y="80" text-anchor="middle" font-weight="600" fill="#222">状态条件</text><text x="330" y="96" text-anchor="middle" font-size="11" fill="#555">标志位 ZF、CF 等</text>
+<rect x="110" y="150" width="230" height="50" rx="6" fill="#fdf1e3" stroke="#b5651d"/><text x="225" y="172" text-anchor="middle" font-weight="600" fill="#222">微地址形成部件</text><text x="225" y="189" text-anchor="middle" font-size="11" fill="#555">产生入口微地址 / 后继微地址</text>
+<path d="M115 104V140H170V148" stroke="#444" fill="none" marker-end="url(#a)"/>
+<text x="62" y="130" font-size="11" fill="#444">OP → 入口地址</text>
+<path d="M330 104V140H285V148" stroke="#444" fill="none" marker-end="url(#a)"/>
+<rect x="130" y="240" width="190" height="44" rx="6" fill="#e9f5e4" stroke="#4d8a3a"/><text x="225" y="260" text-anchor="middle" font-weight="600" fill="#222">微地址寄存器 μPC</text><text x="225" y="276" text-anchor="middle" font-size="11" fill="#555">（CMAR）存下一条微指令地址</text>
+<path d="M225 200V238" stroke="#444" marker-end="url(#a)"/>
+<rect x="110" y="324" width="230" height="58" rx="6" fill="#e9f5e4" stroke="#4d8a3a" stroke-width="2"/><text x="225" y="347" text-anchor="middle" font-weight="700" fill="#222">控制存储器 CM（ROM）</text><text x="225" y="366" text-anchor="middle" font-size="11" fill="#555">存放全部微程序，核心部件</text>
+<path d="M225 284V322" stroke="#444" marker-end="url(#a)"/><text x="232" y="308" font-size="11" fill="#444">读地址</text>
+<rect x="60" y="422" width="330" height="44" rx="6" fill="#e9f5e4" stroke="#4d8a3a"/>
+<path d="M260 422V466" stroke="#4d8a3a"/>
+<text x="160" y="442" text-anchor="middle" font-weight="600" fill="#222">操作控制字段</text><text x="160" y="458" text-anchor="middle" font-size="11" fill="#555">微命令</text>
+<text x="325" y="442" text-anchor="middle" font-weight="600" fill="#222">顺序控制字段</text><text x="325" y="458" text-anchor="middle" font-size="11" fill="#555">判别 + 下址</text>
+<text x="40" y="416" font-size="12" font-weight="600" fill="#4d8a3a">微指令寄存器 μIR（CMDR）</text>
+<path d="M225 382V420" stroke="#444" marker-end="url(#a)"/><text x="232" y="406" font-size="11" fill="#444">读出微指令</text>
+<rect x="85" y="500" width="150" height="36" rx="6" fill="#f6e3e3" stroke="#a54a4a"/><text x="160" y="523" text-anchor="middle" font-weight="600" fill="#222">执行部件</text>
+<path d="M160 466V498" stroke="#444" marker-end="url(#a)"/><text x="167" y="488" font-size="11" fill="#444">控制信号</text>
+<path d="M390 444H420V175H342" stroke="#b5651d" stroke-width="1.6" fill="none" marker-end="url(#b)"/>
+<text x="432" y="320" font-size="11" fill="#b5651d" transform="rotate(90 432 320)">下址、判别方式反馈</text>
+<!-- process -->
+<rect x="480" y="60" width="380" height="72" rx="8" fill="#e9f5e4" stroke="#4d8a3a"/>
+<text x="495" y="82" font-weight="700" fill="#222">1. 取指令（公共取指微程序）</text>
+<text x="495" y="102" font-size="12" fill="#333">取指微程序入口（通常为 CM 的 0 号单元）送 μPC，</text>
+<text x="495" y="120" font-size="12" fill="#333">逐条执行取指微指令，机器指令从主存送入 IR</text>
+<path d="M670 132V158" stroke="#444" marker-end="url(#a)"/>
+<rect x="480" y="160" width="380" height="72" rx="8" fill="#fdf1e3" stroke="#b5651d"/>
+<text x="495" y="182" font-weight="700" fill="#222">2. 找入口：操作码 → 微程序入口地址</text>
+<text x="495" y="202" font-size="12" fill="#333">IR 中的 OP 经微地址形成部件，</text>
+<text x="495" y="220" font-size="12" fill="#333">得到这条指令对应微程序的首地址，送 μPC</text>
+<path d="M670 232V258" stroke="#444" marker-end="url(#a)"/>
+<rect x="480" y="260" width="380" height="92" rx="8" fill="#e8eef8" stroke="#4a6aa5"/>
+<text x="495" y="282" font-weight="700" fill="#222">3. 执行：逐条读微指令</text>
+<text x="495" y="302" font-size="12" fill="#333">μPC → CM → μIR：操作控制字段发出微命令，</text>
+<text x="495" y="320" font-size="12" fill="#333">顺序控制字段（结合状态条件）给出下一条微地址，</text>
+<text x="495" y="338" font-size="12" fill="#333">一个微周期执行一条微指令</text>
+<path d="M670 352V378" stroke="#444" marker-end="url(#a)"/>
+<rect x="480" y="380" width="380" height="54" rx="8" fill="#f6e3e3" stroke="#a54a4a"/>
+<text x="495" y="402" font-weight="700" fill="#222">4. 本条指令的微程序结束</text>
+<text x="495" y="422" font-size="12" fill="#333">转回取指微程序入口，处理下一条机器指令</text>
+<path d="M860 407H872V96H862" stroke="#a54a4a" stroke-width="1.6" fill="none" marker-end="url(#a)"/>
+<rect x="480" y="456" width="380" height="84" rx="8" fill="#f7f7f7" stroke="#999"/>
+<text x="495" y="477" font-weight="700" fill="#222">要记住的对应关系</text>
+<text x="495" y="497" font-size="12" fill="#333">一条机器指令 ↔ 一段微程序 ↔ 若干条微指令</text>
+<text x="495" y="515" font-size="12" fill="#333">CM 中微程序个数 = 机器指令条数 + 公共微程序（取指、间址、中断）</text>
+<text x="495" y="533" font-size="12" fill="#333">μPC/CMAR ≠ PC，μIR/CMDR ≠ IR；CM 在 CPU 内，不是主存</text>
+</svg>
