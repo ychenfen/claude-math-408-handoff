@@ -4024,6 +4024,12 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 **张宇**：《线代9讲》Schmidt 正交化、正交矩阵（讲次与页码待核实）。
 
+**追问（10:01）**：要求用 LaTeX 公式重写；之后又说「不懂」。
+
+**答**：用 LaTeX 重写后，又放慢拆成五步讲框中那一行。（0）目标是 $A=QT$，框中一行在求 $\gamma_3$ 用了多少个 $\alpha$；（1）代入 $l_1,l_2$ 得 $\beta_3=\alpha_3-\beta_1+\frac13\beta_2$；（2）由 $\beta_1=\alpha_1$、$k=0\Rightarrow\beta_2=\alpha_2$，得 $\beta_3=-\alpha_1+\frac13\alpha_2+\alpha_3$；（3）$\beta_3=\frac13(1,-2,-1)^{\mathrm T}$，$\|\beta_3\|=\frac{\sqrt6}3$；（4）整体乘 $\frac3{\sqrt6}$ 得框中式子。说到底就是代入，再乘一个数。
+
+**卡点**：没意识到 $\beta_3$ 本身就是 $\alpha$ 的组合，只需把 $\beta_1,\beta_2$ 换回 $\alpha$ 再单位化。
+
 
 ---
 
