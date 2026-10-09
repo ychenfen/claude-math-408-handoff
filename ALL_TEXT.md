@@ -4005,6 +4005,25 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 **张宇**：《线代9讲》第 6 讲 $O_1$ 具体型向量组（印刷 p.65 起）。
 
+## 09:58　`880-线代9-综合解答10`　Schmidt 正交化后求 $A=QT$：$\gamma_3$ 为什么写成 $\alpha$ 的组合
+
+**题**（强化篇做题本 PDF 第 172 页，第九章解答题 (10)）：设 $A=(\alpha_1,\alpha_2,\alpha_3)$ 为 3 阶矩阵，交换 $A$ 的第 1、2 行，再交换 $A$ 的第 2、3 列得 $B=\begin{pmatrix}0&-1&1\\1&1&1\\1&1&-1\end{pmatrix}$。（Ⅰ）求 $A$；（Ⅱ）记 $\beta_1=\alpha_1$，$\beta_2=\alpha_2-k\beta_1$，$\beta_3=\alpha_3-l_1\beta_1-l_2\beta_2$，若 $\beta_1,\beta_2,\beta_3$ 两两正交，求 $k,l_1,l_2$；（Ⅲ）求正交矩阵 $Q$ 及上三角矩阵 $T$，使得 $A=QT$。
+
+**问**：（上传参考答案截图，框出 $\gamma_3=\frac{\beta_3}{\|\beta_3\|}=-\frac3{\sqrt6}\alpha_1+\frac1{\sqrt6}\alpha_2+\frac3{\sqrt6}\alpha_3$）讲讲这个思路。
+
+**作答**：
+- 作答方式：未作答（看答案解析后提问）
+- 核对结果：未核对
+- 核对依据：未核对
+
+**答**：
+1. $A$ 的列为 $\alpha_1=(1,0,1)^{\mathrm T}$，$\alpha_2=(1,1,-1)^{\mathrm T}$，$\alpha_3=(1,-1,1)^{\mathrm T}$；$k=0$，$l_1=1$，$l_2=-\frac13$。
+2. $k=0$ 所以 $\beta_2=\alpha_2$，$\beta_3=\alpha_3-\alpha_1+\frac13\alpha_2=\frac13(1,-2,-1)^{\mathrm T}$，$\|\beta_3\|=\frac{\sqrt6}3$，乘 $\frac3{\sqrt6}$ 得框中式子。
+3. 正交化中 $\gamma_k$ 只用到 $\alpha_1,\dots,\alpha_k$，所以 $(\gamma_1,\gamma_2,\gamma_3)=(\alpha_1,\alpha_2,\alpha_3)C$，$C$ 上三角；$Q=AC$，$T=C^{-1}$ 仍上三角。
+4. 更快：$T=Q^{\mathrm T}A$，元素为 $\gamma_i\cdot\alpha_j$，得 $T=\begin{pmatrix}\sqrt2&0&\sqrt2\\0&\sqrt3&-\frac{\sqrt3}3\\0&0&\frac{\sqrt6}3\end{pmatrix}$，与答案一致。
+
+**张宇**：《线代9讲》Schmidt 正交化、正交矩阵（讲次与页码待核实）。
+
 
 ---
 
