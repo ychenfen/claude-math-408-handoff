@@ -32,7 +32,7 @@ def build():
         for s in subjects:
             if s['name'] in e['cards']:s.setdefault('examCards',[]).append({'path':e['path'],'date':e['date'],'text':'\n'.join(e['cards'][s['name']])})
     dates=[r['date'] for s in subjects for r in s['records']]
-    data={'version':1,'latestDate':max(dates,default=''),'subjects':subjects,'exams':exams,'protocol':doc(ROOT/'每日复盘/使用说明.md'),'examProtocol':doc(ROOT/'考试记录/使用说明.md')}
+    data={'version':1,'latestDate':max(dates,default=''),'subjects':subjects,'exams':exams,'protocol':doc(ROOT/'每日复盘/使用说明.md'),'examProtocol':doc(ROOT/'考试记录/使用说明.md'),'links':[doc(p) for p in sorted((ROOT/'串联').glob('*.md'))]}
     out=ROOT/'assets/data.json';out.parent.mkdir(exist_ok=True);out.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'subjects':len(subjects),'daily_records':len(dates),'daily_summaries':sum(len(s['summaries']) for s in subjects),'exams':len(exams),'latest':data['latestDate']},ensure_ascii=False))
 if __name__=='__main__':build()

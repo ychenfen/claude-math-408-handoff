@@ -52,6 +52,13 @@
   // Review cards come from daily reviews plus this subject's wrong questions in 考试记录 (already inlined in data.json).
   const cardDocs = s => [...s.summaries,...(s.examCards||[])];
   // Mock exams: score trend, where the latest paper lost points, and recurring causes. Recorded scores only; nothing is graded here.
+  // Cross-subject links: one Markdown table per file in 串联/, collapsed so the overview stays short.
+  function linkBoard() {
+    const box=document.createElement('section');box.className='link-board';
+    (data.links||[]).forEach(d=>{const det=document.createElement('details');det.className='archive';const n=(d.text.match(/^\|\s*\d+\s*\|/gm)||[]).length;
+      det.innerHTML=`<summary><b>LINKS · ${escape(d.title)}</b> · ${n} 条主线</summary>`;det.append(renderMarkdown(d.text,d.path));box.append(det);});
+    return box;
+  }
   function examBoard() {
     const exams=data.exams||[],box=document.createElement('section');box.className='exam-board';
     const kinds=[...new Set(exams.map(e=>e.score.subject))];
@@ -233,6 +240,7 @@
     pane.append(examBoard());
     await Promise.all(rows.flatMap(({s})=>s.records.map(d=>loadDoc(d).catch(()=>{}))));if(own!==generation)return;
     pane.append(gapBoard(rows));
+    if(data.links?.length)pane.append(linkBoard());
     const head=document.createElement('div');head.className='all-head';
     head.innerHTML=`<div><b>每科：题目状态分布 · 最近14天记录 · 下次先做</b><span>状态由作答记录推出，只说明证据到了哪一步，不代表掌握。点一行进入该科题目追踪。</span></div><ol class="legend">${STATUSES.map((st,i)=>`<li><i class="sw s${i}"></i>${st}</li>`).join('')}</ol>`;
     pane.append(head);
