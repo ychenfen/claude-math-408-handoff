@@ -70,6 +70,43 @@
     [...exams].reverse().forEach(e=>{const d=document.createElement('details');d.className='archive eb-paper';const s=document.createElement('summary');s.textContent=`${e.date} ${e.score.subject} ${e.score.paper} · ${e.score.total} 分 · 丢分题 ${e.items.length} 道`;d.append(s);d.ontoggle=()=>{if(d.open&&!d.querySelector('article'))d.append(renderMarkdown(e.text,e.path));};box.append(d);});
     return box;
   }
+  // Gap notebook: every Q&A section that names a 漏洞 or sets a 检验 question. Read from the records themselves, so
+  // subject assistants only write Markdown. Status comes from an explicit **检验结果** line; nothing is inferred.
+  const GAP_FIELD=/^\*\*(漏洞|补法|检验结果|检验)\*\*([^：:\n]*)[：:]([\s\S]*?)(?=\n\s*\n|\n\*\*|(?![\s\S]))/gm;
+  function gapsOf(doc) {
+    const out=[];
+    (doc.text||'').split(/^(?=## )/m).forEach(sec=>{
+      const head=sec.match(/^## (.+)$/m);if(!head)return;
+      const f={};for(const m of sec.matchAll(GAP_FIELD))if(!f[m[1]])f[m[1]]={note:m[2].trim(),text:m[3].trim()};
+      if(!f['漏洞']&&!f['检验'])return;
+      const result=f['检验结果']?.text||'';
+      out.push({title:head[1].replace(/^\d{1,2}:\d{2}\s*/,'').replace(/`/g,'').trim(),date:doc.date,path:doc.path,gap:f['漏洞']?.text||'',fix:f['补法']?.text||'',check:f['检验']?.text||'',checkNote:f['检验']?.note||'',result,status:/^未通过/.test(result)?'未通过':/^通过/.test(result)?'已通过':'待检验'});
+    });
+    return out;
+  }
+  function gapBoard(rows) {
+    const box=document.createElement('section');box.className='gap-board';
+    const all=rows.flatMap(({s})=>s.records.filter(d=>d.text).flatMap(d=>gapsOf(d).map(g=>({...g,s}))));
+    const n=st=>all.filter(g=>g.status===st).length;
+    box.innerHTML=`<div class="eb-head"><span class="eyebrow">GAPS · 漏洞本</span><h2>待检验 ${n('待检验')+n('未通过')} 条<small>已通过 ${n('已通过')} · 共 ${all.length}</small></h2><p>各科问答里写了「漏洞」或「检验」的小节都收在这里。先说清漏洞，再补那块知识，最后闭卷做检验题；助手核对后在原小节补一行「**检验结果**：通过／未通过」。</p></div>`;
+    rows.forEach(({s})=>{
+      const list=all.filter(g=>g.s===s).sort((a,b)=>({'未通过':0,'待检验':1,'已通过':2}[a.status]-{'未通过':0,'待检验':1,'已通过':2}[b.status])||b.date.localeCompare(a.date));
+      if(!list.length)return;
+      const open=list.filter(g=>g.status!=='已通过').length;
+      const d=document.createElement('details');d.className='archive gap-subject';d.open=open>0&&open<=6;
+      d.innerHTML=`<summary><b>${escape(s.name)}</b> · 待检验 ${open} / ${list.length}</summary>`;
+      list.forEach(g=>{
+        const c=document.createElement('div');c.className='gap-item';
+        c.innerHTML=`<header><span class="gap-st ${g.status==='已通过'?'ok':g.status==='未通过'?'bad':''}">${g.status}</span><b>${escape(g.title)}</b><a href="#${s.id}/${g.date}/records">${g.date.slice(5)} 原文 →</a></header>`;
+        [['漏洞',g.gap],['检验'+(g.checkNote?' '+g.checkNote:''),g.check],['结果',g.result]].forEach(([k,v])=>{if(!v)return;const r=document.createElement('div');r.className='ledger-row';const b=document.createElement('b');b.textContent=k;r.append(b,renderMarkdown(v,g.path));c.append(r);});
+        if(g.fix){const m=document.createElement('details');m.className='attempts';m.innerHTML='<summary>补法</summary>';m.append(renderMarkdown(g.fix,g.path));c.append(m);}
+        d.append(c);
+      });
+      box.append(d);
+    });
+    if(!all.length)box.insertAdjacentHTML('beforeend','<p class="muted">还没有写过漏洞或检验的问答。</p>');
+    return box;
+  }
   function nextAction(text) { const body=section(text||'','下次先做');const m=body&&body.match(/^- \[ \] (.+)$/m);return m?m[1].trim():''; }
   const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const encodePath = p => p.split('/').map(encodeURIComponent).join('/');
@@ -194,6 +231,8 @@
       e.target.value='';};
     pane.append(today_);
     pane.append(examBoard());
+    await Promise.all(rows.flatMap(({s})=>s.records.map(d=>loadDoc(d).catch(()=>{}))));if(own!==generation)return;
+    pane.append(gapBoard(rows));
     const head=document.createElement('div');head.className='all-head';
     head.innerHTML=`<div><b>每科：题目状态分布 · 最近14天记录 · 下次先做</b><span>状态由作答记录推出，只说明证据到了哪一步，不代表掌握。点一行进入该科题目追踪。</span></div><ol class="legend">${STATUSES.map((st,i)=>`<li><i class="sw s${i}"></i>${st}</li>`).join('')}</ol>`;
     pane.append(head);
