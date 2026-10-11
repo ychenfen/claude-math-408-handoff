@@ -126,7 +126,7 @@
   const encodePath = p => p.split('/').map(encodeURIComponent).join('/');
   const localDate = () => new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
   function get(key) { try { return localStorage.getItem(key) || ''; } catch { storageOK = false; return memo[key] || ''; } }
-  function put(key, value) { memo[key] = value; try { localStorage.setItem(key,value); } catch { storageOK = false; notify('浏览器存储不可用，请导出备份；本次内容仅临时保留。'); } }
+  function put(key, value) { memo[key] = value; try { localStorage.setItem(key,value); window.WenguCloud?.enqueue(key,value); } catch { storageOK = false; notify('浏览器存储不可用，请导出备份；本次内容仅临时保留。'); } }
   const key = type => `study-v1:${subject.id}:${date}:${type}`;
   function notify(message) { const t=$('#toast');t.textContent=message;t.hidden=false;clearTimeout(t.timer);t.timer=setTimeout(()=>t.hidden=true,4000); }
   async function request(url) { const r=await fetch(url,{signal:AbortSignal.timeout(12000),credentials:'omit'});if(!r.ok)throw Error(`HTTP ${r.status}`);return r; }
@@ -193,7 +193,7 @@
     $('#overview').innerHTML=`<div class="metric"><div class="mark">↗</div><div><b>${next?'下次先做':available?'这一天，已有复盘':recordDoc()?'已有问答 · 等待整理':'这一天，尚无记录'}</b><span class="${next?'next-action':''}">${next?escape(next):available?'先闭卷回想，再展开参考要点':recordDoc()?'记录不是完成，先确认再归纳':'留白真实，比补写可靠'}</span></div></div><div class="metric"><strong>${subject.records.length}</strong><div><b>天问答</b><span>本科独立保存</span></div></div><div class="metric"><strong>${subject.archive.length}</strong><div><b>历史主题</b><span>不是掌握数量</span></div></div>`;
     document.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===(tab==='practice'?'drill':tab);b.setAttribute('aria-selected',active);b.tabIndex=active?0:-1;});
     const reviewed=get(key('reviewed'))==='yes';$('#reviewed').textContent=reviewed?'✓ 已标记复盘 · 点击撤销':'标记本次已复盘';$('#reviewed').classList.toggle('done',reviewed);$('#reviewed').disabled=!available;
-    $('#review-state').textContent=storageOK?'仅当前浏览器的自报标记，不代表掌握':'存储不可用，请导出；标记仅临时保留';
+    $('#review-state').textContent=storageOK?'个人自报标记，不代表掌握；同步状态见顶部':'存储不可用，请导出；标记仅临时保留';
     $('#draft').value=get(key('draft'));
     $('#sync-state').textContent=synced.get(subject.id)||'已加载发布快照';
   }
@@ -231,7 +231,7 @@
     today_.querySelectorAll('[data-drill]').forEach(b=>b.onclick=()=>select(b.dataset.drill,null,'drill'));
     // Progress lives in this browser only; a backup file carries it between phone and computer.
     const sync=document.createElement('div');sync.className='rt-sync';
-    sync.innerHTML='<span>复习进度只存在这个浏览器。换手机／电脑前：</span><button type="button" class="text-button" id="backup-out">↓ 备份进度</button><label class="text-button" for="backup-in">↑ 从备份恢复</label><input type="file" id="backup-in" accept=".json,application/json" hidden>';
+    sync.innerHTML='<span>未登录时复习进度仅存本机；跨站迁移或备用恢复：</span><button type="button" class="text-button" id="backup-out">↓ 备份进度</button><label class="text-button" for="backup-in">↑ 从备份恢复</label><input type="file" id="backup-in" accept=".json,application/json" hidden>';
     today_.append(sync);
     sync.querySelector('#backup-out').onclick=()=>{const items={};try{for(let k=0;k<localStorage.length;k++){const key=localStorage.key(k);if(/^(study-drill-v1|bed-v1|study-v1):/.test(key))items[key]=localStorage.getItem(key);}}catch{}
       const blob=JSON.stringify({app:'wengu-progress',version:1,exportedAt:new Date().toISOString(),items},null,1);
@@ -376,5 +376,5 @@
   window.addEventListener('hashchange',()=>{if(data)route();});
   // Offline copy for bedtime use and slow networks; the page works the same without it.
   if('serviceWorker' in navigator&&(location.protocol==='https:'||['127.0.0.1','localhost'].includes(location.hostname)))navigator.serviceWorker.register('sw.js').catch(()=>{});
-  fetch('assets/data.json').then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{data=d;route();}).catch(()=>{$('#subject-title').textContent='学习档案暂时未加载';$('#content').textContent='请刷新页面，或通过左侧公开资料库直接读取Markdown。';});
+  Promise.resolve(window.WenguCloud?.ready).catch(()=>{}).then(()=>fetch('assets/data.json')).then(r=>{if(!r.ok)throw Error();return r.json();}).then(d=>{data=d;route();}).catch(()=>{$('#subject-title').textContent='学习档案暂时未加载';$('#content').textContent='请刷新页面，或通过左侧公开资料库直接读取Markdown。';});
 })();

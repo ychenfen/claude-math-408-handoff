@@ -1,14 +1,14 @@
 /* Offline copy of the study site. Network first with a short timeout, so updates show when online and
    the last good copy opens on slow or blocked networks. GitHub API/Raw requests are never cached here. */
-const CACHE='wengu-v2';
+const CACHE='wengu-v3';
 const SHELL=['./','index.html','manifest.webmanifest','assets/style.css','assets/review-tools.css','assets/vendor/katex/katex.min.css',
   'assets/vendor/marked.umd.js','assets/vendor/purify.min.js','assets/vendor/katex/katex.min.js','assets/vendor/katex/contrib/auto-render.min.js',
-  'assets/spaced-review.js','assets/practice-plan.js','assets/review-tools.js','assets/bedtime.js','assets/app.js','assets/data.json','assets/icons/icon-192.png'];
+  'assets/cloud-sync.js','assets/cloud-client.js','assets/spaced-review.js','assets/practice-plan.js','assets/review-tools.js','assets/bedtime.js','assets/app.js','assets/data.json','assets/icons/icon-192.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',e=>{
   const req=e.request,url=new URL(req.url);
-  if(req.method!=='GET'||url.origin!==self.location.origin)return;
+  if(req.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/.netlify/')||url.pathname.startsWith('/api/'))return;
   e.respondWith((async()=>{
     const cache=await caches.open(CACHE);
     const network=fetch(req).then(res=>{if(res.ok)cache.put(req,res.clone());return res;});

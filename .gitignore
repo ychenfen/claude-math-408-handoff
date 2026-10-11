@@ -5,3 +5,5 @@ _local/
 __pycache__/
 _site/
 node_modules/
+.netlify/
+assets/cloud-client.js

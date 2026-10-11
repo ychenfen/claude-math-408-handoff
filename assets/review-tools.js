@@ -131,7 +131,7 @@
       })].join('\n');download(text,subject.name+'-闭卷自测记录.md');
     };
     exportButton.disabled=!cards.length;toolbar.append(exportButton);settings.append(toolbar);
-    settings.append(create('small','','安排和回想只存当前浏览器，不跨设备；关闭网页不推送通知。重新打开会列出到期题。内容修订后按新题重新测；旧记录仍留在浏览器，但此处只导出当前版本。'));
+    settings.append(create('small','','未登录时安排和回想只存当前浏览器；私有同步入口登录后跨设备同步。关闭网页不推送通知。重新打开会列出到期题。内容修订后按新题重新测；旧记录仍留在浏览器，但此处只导出当前版本。'));
     const stage=create('div','drill-stage');container.append(stage);
     updateStats();
     if (!cards.length) {stage.append(create('p','empty','本科还没有复习卡：复盘里还没有自测题。说“总结今天”让本科助手根据真实问答写，不自动编造。'));return;}

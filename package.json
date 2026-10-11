@@ -1,13 +1,21 @@
 {
   "name": "study-workspace-tools",
   "private": true,
-  "description": "Offline helpers only. The published site has no build step and no runtime dependencies from npm.",
+  "description": "Study site, private sync functions, and offline helpers",
   "scripts": {
-    "diagram": "node scripts/render_diagram.mjs"
+    "diagram": "node scripts/render_diagram.mjs",
+    "build:cloud": "node scripts/build_cloud.mjs"
   },
   "devDependencies": {
     "@babel/standalone": "7.25.6",
+    "@netlify/database-dev": "^1.0.1",
+    "esbuild": "^0.28.2",
     "react": "18.3.1",
     "react-dom": "18.3.1"
+  },
+  "dependencies": {
+    "@netlify/database": "^2.0.1",
+    "@netlify/functions": "^6.0.2",
+    "@netlify/identity": "^2.0.0"
   }
 }
