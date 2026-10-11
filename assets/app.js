@@ -6,10 +6,10 @@
   const API = 'https://api.github.com/repos/ychenfen/claude-math-408-handoff/contents/';
   let data, subject, date, mode = 'subject', tab = 'daily', generation = 0, currentText = '', storageOK = true;
   const memo = {}, synced = new Map();
-  let disposeDrill = () => {};
+  let disposeDrill = () => {}, practiceId = '';
   const STATUSES = ['仅安排','已讨论','作答待核实','独立做对','隔日重做通过'];
   const STATUS_NOTE = {'仅安排':'计划，未讨论','已讨论':'看过讲解，没有作答','作答待核实':'有作答，未达独立＋正确＋原件已核','独立做对':'独立作答，对照原件核对正确','隔日重做通过':'另一天再次独立做对'};
-  const TABS = ['daily','records','drill','ledger','history','handoff'];
+  const TABS = ['daily','records','drill','ledger','history','handoff','practice'];
   const ID_RE = /^[0-9A-Za-z一-鿿]+(?:[-.][0-9A-Za-z一-鿿]+)*(?:\(\d+\))?$/;
   const section = (text,name) => { const m=text.match(new RegExp('^## '+name+'\\s*$([\\s\\S]*?)(?=^## |(?![\\s\\S]))','m')); return m?m[1]:null; };
   const rowsOf = body => body.split('\n').filter(l=>l.trim().startsWith('|')).slice(2).map(l=>l.trim().replace(/^\||\|$/g,'').split('|').map(c=>c.trim()));
@@ -79,25 +79,13 @@
   }
   // Gap notebook: every Q&A section that names a 漏洞 or sets a 检验 question. Read from the records themselves, so
   // subject assistants only write Markdown. Status comes from an explicit **检验结果** line; nothing is inferred.
-  const GAP_FIELD=/^\*\*(漏洞|补法|检验结果|检验)\*\*([^：:\n]*)[：:]([\s\S]*?)(?=\n\s*\n|\n\*\*|(?![\s\S]))/gm;
-  function gapsOf(doc) {
-    const out=[];
-    (doc.text||'').split(/^(?=## )/m).forEach(sec=>{
-      const head=sec.match(/^## (.+)$/m);if(!head)return;
-      const f={};for(const m of sec.matchAll(GAP_FIELD))if(!f[m[1]])f[m[1]]={note:m[2].trim(),text:m[3].trim()};
-      if(!f['漏洞']&&!f['检验'])return;
-      const result=f['检验结果']?.text||'';
-      out.push({title:head[1].replace(/^\d{1,2}:\d{2}\s*/,'').replace(/`/g,'').trim(),date:doc.date,path:doc.path,gap:f['漏洞']?.text||'',fix:f['补法']?.text||'',check:f['检验']?.text||'',checkNote:f['检验']?.note||'',result,status:/^未通过/.test(result)?'未通过':/^通过/.test(result)?'已通过':'待检验'});
-    });
-    return out;
-  }
   function gapBoard(rows) {
     const box=document.createElement('section');box.className='gap-board';
-    const all=rows.flatMap(({s})=>s.records.filter(d=>d.text).flatMap(d=>gapsOf(d).map(g=>({...g,s}))));
+    const all=StudyPlan.groupsOf(rows.map(({s})=>s));
     const n=st=>all.filter(g=>g.status===st).length;
-    box.innerHTML=`<div class="eb-head"><span class="eyebrow">GAPS · 漏洞本</span><h2>待检验 ${n('待检验')+n('未通过')} 条<small>已通过 ${n('已通过')} · 共 ${all.length}</small></h2><p>各科问答里写了「漏洞」或「检验」的小节都收在这里。先说清漏洞，再补那块知识，最后闭卷做检验题；助手核对后在原小节补一行「**检验结果**：通过／未通过」。</p></div>`;
+    box.innerHTML=`<div class="eb-head"><span class="eyebrow">GAPS · 漏洞本</span><h2>待检验 ${n('待检验')+n('未通过')} 条<small>已通过 ${n('已通过')} · 共 ${all.length}</small></h2><p>按明确重复的检验、复用引用或漏洞编号合并，保留全部来源。不同检验不因题号相同而合并；计数是待检验项，不是掌握率。</p></div>`;
     rows.forEach(({s})=>{
-      const list=all.filter(g=>g.s===s).sort((a,b)=>({'未通过':0,'待检验':1,'已通过':2}[a.status]-{'未通过':0,'待检验':1,'已通过':2}[b.status])||b.date.localeCompare(a.date));
+      const list=all.filter(g=>g.subject===s).sort((a,b)=>({'未通过':0,'待检验':1,'已通过':2}[a.status]-{'未通过':0,'待检验':1,'已通过':2}[b.status])||b.date.localeCompare(a.date));
       if(!list.length)return;
       const open=list.filter(g=>g.status!=='已通过').length;
       const d=document.createElement('details');d.className='archive gap-subject';d.open=open>0&&open<=6;
@@ -106,12 +94,31 @@
         const c=document.createElement('div');c.className='gap-item';
         c.innerHTML=`<header><span class="gap-st ${g.status==='已通过'?'ok':g.status==='未通过'?'bad':''}">${g.status}</span><b>${escape(g.title)}</b><a href="#${s.id}/${g.date}/records">${g.date.slice(5)} 原文 →</a></header>`;
         [['漏洞',g.gap],['检验'+(g.checkNote?' '+g.checkNote:''),g.check],['结果',g.result]].forEach(([k,v])=>{if(!v)return;const r=document.createElement('div');r.className='ledger-row';const b=document.createElement('b');b.textContent=k;r.append(b,renderMarkdown(v,g.path));c.append(r);});
+        if(g.check&&g.status!=='已通过'){const go=document.createElement('button');go.type='button';go.className='secondary';go.textContent='闭卷做这项检验';go.onclick=()=>select(s.id,g.date,'practice',g.id);c.append(go);}
+        if(g.members.length>1){const history=document.createElement('details');history.className='attempts';const label=document.createElement('summary');label.textContent=`${g.members.length} 次相关记录 · 全部来源`;history.append(label);g.members.forEach(m=>{const row=document.createElement('p');const link=document.createElement('a');link.href=`#${s.id}/${m.date}/records`;link.textContent=`${m.date} ${m.time} ${m.title}`;row.append(link);if(m.result)row.append(document.createTextNode(' · '+m.result));history.append(row);});c.append(history);}
         if(g.fix){const m=document.createElement('details');m.className='attempts';m.innerHTML='<summary>补法</summary>';m.append(renderMarkdown(g.fix,g.path));c.append(m);}
         d.append(c);
       });
       box.append(d);
     });
     if(!all.length)box.insertAdjacentHTML('beforeend','<p class="muted">还没有写过漏洞或检验的问答。</p>');
+    return box;
+  }
+  function priorityBoard(rows) {
+    const groups=StudyPlan.groupsOf(rows.map(({s})=>s)),tasks=StudyPlan.priorities(groups,data.exams||[]);
+    const box=document.createElement('section');box.className='priority-board';
+    box.innerHTML='<span class="eyebrow">TODAY · 今日优先任务</span><h2>今天先做这 '+tasks.length+' 项</h2><p>先选检验未通过、最近整卷失分较多的题，再参考重复记录和日期；优先覆盖不同科目。这是基于记录的建议，可自行调整。</p>';
+    const missing=rows.flatMap(({s})=>s.records).filter(d=>d.text===undefined).length;
+    if(missing){const warn=document.createElement('p');warn.className='ledger-warning';warn.textContent=`有 ${missing} 份问答未能读取，以下建议只依据已加载记录。`;box.append(warn);}
+    tasks.forEach((task,i)=>{
+      const article=document.createElement('article');article.className='priority-task';
+      const title=document.createElement('h3');title.textContent=`${i+1}. ${task.subject.name} · ${task.title}`;
+      const reason=document.createElement('p');reason.className='priority-reason';reason.textContent=task.reasons.join(' · ');
+      const meta=document.createElement('p');meta.textContent='建议预留 15～25 分钟；完成标准：闭卷作答后留下核对结果。';
+      const start=document.createElement('button');start.type='button';start.className='primary';start.textContent='开始这项闭卷检验';start.onclick=()=>select(task.subject.id,task.date,'practice',task.id);
+      article.append(title,reason,meta,start);box.append(article);
+    });
+    if(!tasks.length){const text=document.createElement('p');text.textContent='当前没有带题面、尚待检验的任务。可以做下方到期回想，或先整理新问答。';box.append(text);}
     return box;
   }
   function nextAction(text) { const body=section(text||'','下次先做');const m=body&&body.match(/^- \[ \] (.+)$/m);return m?m[1].trim():''; }
@@ -173,6 +180,7 @@
   }
   function updateChrome() {
     document.body.classList.toggle('all-mode',mode==='all');
+    document.body.classList.toggle('practice-mode',mode!=='all'&&tab==='practice');
     $('#all-link').setAttribute('aria-current',mode==='all');
     document.title=`${subject.name} · 温故学习工作台`;
     $('#subject-title').textContent=subject.name;$('#tagline').textContent=subject.tag;$('#date').value=date;
@@ -183,7 +191,7 @@
     const available=Boolean(summaryDoc());
     const next=available?nextAction(summaryDoc().text).replace(/`/g,''):'';
     $('#overview').innerHTML=`<div class="metric"><div class="mark">↗</div><div><b>${next?'下次先做':available?'这一天，已有复盘':recordDoc()?'已有问答 · 等待整理':'这一天，尚无记录'}</b><span class="${next?'next-action':''}">${next?escape(next):available?'先闭卷回想，再展开参考要点':recordDoc()?'记录不是完成，先确认再归纳':'留白真实，比补写可靠'}</span></div></div><div class="metric"><strong>${subject.records.length}</strong><div><b>天问答</b><span>本科独立保存</span></div></div><div class="metric"><strong>${subject.archive.length}</strong><div><b>历史主题</b><span>不是掌握数量</span></div></div>`;
-    document.querySelectorAll('[data-tab]').forEach(b=>{b.setAttribute('aria-selected',b.dataset.tab===tab);b.tabIndex=b.dataset.tab===tab?0:-1;});
+    document.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===(tab==='practice'?'drill':tab);b.setAttribute('aria-selected',active);b.tabIndex=active?0:-1;});
     const reviewed=get(key('reviewed'))==='yes';$('#reviewed').textContent=reviewed?'✓ 已标记复盘 · 点击撤销':'标记本次已复盘';$('#reviewed').classList.toggle('done',reviewed);$('#reviewed').disabled=!available;
     $('#review-state').textContent=storageOK?'仅当前浏览器的自报标记，不代表掌握':'存储不可用，请导出；标记仅临时保留';
     $('#draft').value=get(key('draft'));
@@ -198,12 +206,14 @@
   async function renderAll(own) {
     const pane=$('#content');pane.innerHTML='<p>正在汇总六科…</p>';
     const rows=[];for(const s of data.subjects){rows.push({s,L:await ledgerOf(s)});if(own!==generation)return;}
+    await Promise.all(rows.flatMap(({s})=>s.records.map(d=>loadDoc(d).catch(()=>{}))));if(own!==generation)return;
     pane.innerHTML='';
+    pane.append(priorityBoard(rows));
     // Today's spaced recall comes first: each subject's due and not-yet-seen cards.
     const dues=rows.map(({s})=>({s,d:StudyReview.dueOf({docs:cardDocs(s),subject:s,get})}));
     const totalDue=dues.reduce((a,x)=>a+x.d.due,0),totalNew=dues.reduce((a,x)=>a+x.d.new,0);
     const today_=document.createElement('section');today_.className='review-today';
-    today_.innerHTML=`<div class="rt-head"><div><span class="eyebrow">TODAY · 今天先复习</span><h2>${totalDue?`到期 ${totalDue} 题`:totalNew?`可以开始：${totalNew} 题还没练过`:'今天没有要复习的题'}${totalDue&&totalNew?`<small>另有 ${totalNew} 题还没练过</small>`:''}</h2><p>先回想，再翻开参考要点，按不会／模糊／会了自评；忘了的很快再来，记住的间隔越拉越长。自评只排复习时间，不改变题目状态。</p></div></div><div class="rt-list">${dues.map(({s,d})=>`<button class="rt-item${d.due?' due':''}" data-drill="${s.id}" ${d.total?'':'disabled'}><b>${escape(s.name)}</b><span>${d.total?`${d.due?`到期 ${d.due}`:'无到期'} · 新 ${d.new}`:'还没有复习卡'}</span></button>`).join('')}</div>`;
+    today_.innerHTML=`<div class="rt-head"><div><span class="eyebrow">RECALL · 间隔回想</span><h2>${totalDue?`到期 ${totalDue} 题`:totalNew?`可以开始：${totalNew} 题本机未自评`:'今天没有要复习的题'}${totalDue&&totalNew?`<small>另有 ${totalNew} 题本机未自评</small>`:''}</h2><p>先回想，再翻开参考要点，按不会／模糊／会了自评；忘了的很快再来，记住的间隔越拉越长。自评只排复习时间，不改变题目状态。</p></div></div><div class="rt-list">${dues.map(({s,d})=>`<button class="rt-item${d.due?' due':''}" data-drill="${s.id}" ${d.total?'':'disabled'}><b>${escape(s.name)}</b><span>${d.total?`${d.due?`到期 ${d.due}`:'无到期'} · 新 ${d.new}`:'还没有复习卡'}</span></button>`).join('')}</div>`;
     const bed=document.createElement('button');bed.className='rt-bed';bed.innerHTML='<b>☾ 睡前复习</b><span>全科混合 · 暗色 · 10～25 张 · 只回想不写字</span>';bed.onclick=()=>select('bed');
     today_.querySelector('.rt-head').append(bed);
     // Pending summaries: without them tonight's review has no new cards.
@@ -238,7 +248,6 @@
       e.target.value='';};
     pane.append(today_);
     pane.append(examBoard());
-    await Promise.all(rows.flatMap(({s})=>s.records.map(d=>loadDoc(d).catch(()=>{}))));if(own!==generation)return;
     pane.append(gapBoard(rows));
     if(data.links?.length)pane.append(linkBoard());
     const head=document.createElement('div');head.className='all-head';
@@ -270,11 +279,16 @@
         const label=document.createElement('label');label.textContent='本科提示词（可手动选中复制）';label.htmlFor='prompt-text';pane.append(label);
         const field=document.createElement('textarea');field.id='prompt-text';field.className='search';field.rows=10;field.readOnly=true;field.value=prompt();pane.append(field);
         pane.append(renderMarkdown(data.protocol.text,data.protocol.path));currentText=prompt()+'\n\n'+data.protocol.text;
+      } else if(tab==='practice') {
+        const s=subject;await Promise.all(s.records.map(loadDoc));if(own!==generation)return;
+        const group=StudyPlan.groupsOf([s]).find(g=>g.id===practiceId);pane.replaceChildren();
+        if(group)StudyReview.mountPractice({group,subject:s,container:pane,renderMarkdown,get,put,today:localDate()});
+        else empty('这项检验已变化','回到六科总览，选择当前的优先任务。');
       } else if(tab==='drill') {
         const s=subject,docs=cardDocs(s);
         await Promise.all(docs.map(loadDoc));if(own!==generation)return;
         pane.replaceChildren();
-        disposeDrill=StudyReview.mountDrill({docs,subject:s,container:pane,renderMarkdown,get,put,download})||(()=>{});
+        disposeDrill=StudyReview.mountDrill({docs,subject:s,container:pane,renderMarkdown,get,put,download,today:localDate()})||(()=>{});
       } else if(tab==='ledger') {
         const L=await ledgerOf(subject);if(own!==generation)return;const {items,missing,problems,docs}=L;
         pane.innerHTML='<div class="doc-meta"><span class="badge">题目追踪</span><span>每题只显示最新状态 · 状态由逐次作答记录推出 · 只查证据是否齐全，不替你判卷</span></div>';
@@ -316,9 +330,9 @@
       updateChrome();$('#export').disabled=!currentText;
     } catch {if(own!==generation)return;empty('暂时无法读取这个文件','网络可能不可用或GitHub限流。已发布快照与GitHub原文仍可查看，请稍后重试。');}
   }
-  function select(id,day,nextTab){if(id==='bed'){openBed();return;}if(id==='all'){mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#all');render();return;}mode='subject';subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();
+  function select(id,day,nextTab,target){practiceId=target||'';window.scrollTo(0,0);if(id==='bed'){openBed();return;}if(id==='all'){mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#all');render();return;}mode='subject';subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();
     // Opening a subject without a chosen tab: show that day's review if there is one, else that day's Q&A rather than an empty page.
-    tab=nextTab||(subject.summaries.some(d=>d.date===date)||!subject.records.some(d=>d.date===date)?'daily':'records');history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();syncSubject(false);}
+    tab=nextTab||(subject.summaries.some(d=>d.date===date)||!subject.records.some(d=>d.date===date)?'daily':'records');history.replaceState(null,'',`#${subject.id}/${date}/${tab}${tab==='practice'?'/'+practiceId:''}`);render();syncSubject(false);}
   async function syncSubject(force) {
     const s=subject;if(synced.has(s.id)&&!force)return;
     synced.set(s.id,'正在检查GitHub新记录…');updateChrome();
@@ -358,7 +372,7 @@
     render();
     StudyBedtime.mount({subjects:data.subjects,renderMarkdown,get,put,today,nextOf:s=>{const d=[...s.summaries].sort((a,b)=>b.date.localeCompare(a.date)).find(x=>x.text);const n=d?nextAction(d.text).replace(/`/g,''):'';return n?`${n}（${d.date.slice(5)} 复盘${unsummarized(s).length?'，之后的问答还没总结':''}）`:'';},onExit:()=>{bedOpen=false;history.replaceState(null,'','#all');render();}});
   }
-  function route(){const [id,d,t]=location.hash.slice(1).split('/');if(id==='bed'){select('bed');return;}if(!id||id==='all'){select('all');return;}select(id,d,TABS.includes(t)?t:null);}
+  function route(){const [id,d,t,target]=location.hash.slice(1).split('/');if(id==='bed'){select('bed');return;}if(!id||id==='all'){select('all');return;}select(id,d,TABS.includes(t)?t:null,target);}
   window.addEventListener('hashchange',()=>{if(data)route();});
   // Offline copy for bedtime use and slow networks; the page works the same without it.
   if('serviceWorker' in navigator&&(location.protocol==='https:'||['127.0.0.1','localhost'].includes(location.hostname)))navigator.serviceWorker.register('sw.js').catch(()=>{});
