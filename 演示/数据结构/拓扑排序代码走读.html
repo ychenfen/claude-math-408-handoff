@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>拓扑排序代码走读</title>
+<style>
+/* Layout: code on the left with the running line lit; live state (graph, matrix, indegree, queue) on the right; controls under the code */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --dec:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --dec:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --dec:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:16px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:70ch}
+.presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.presets button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.presets button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg)}
+.main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+.code{overflow-x:auto;font:12.5px/1.85 var(--mono);margin:0}
+.code .ln{display:block;white-space:pre;padding:0 8px;border-left:3px solid transparent}
+.code .ln.on{background:var(--hl);border-left-color:var(--accent)}
+.code .no{display:inline-block;width:2em;color:var(--muted);user-select:none}
+.code .cm{color:var(--muted)}
+.code .kw{color:var(--q);font-weight:600}
+.note{margin-top:12px;padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:14px;min-height:3.4em}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.ctrl button.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.state{display:grid;gap:14px}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 6px}
+.vars{display:flex;flex-wrap:wrap;gap:6px 14px;font:13px var(--mono)}
+.vars span{border:1px solid var(--line);border-radius:4px;padding:0 8px}
+.vars b{color:var(--q)}
+.arr{display:flex;gap:4px;flex-wrap:wrap}
+.cell{min-width:44px;text-align:center;border:1px solid var(--line);border-radius:4px;padding:2px 4px;font:14px var(--mono);position:relative;background:var(--bg)}
+.cell small{display:block;font-size:10px;color:var(--muted)}
+.cell.cmp{border-color:var(--cmp);background:color-mix(in srgb,var(--cmp) 18%,transparent)}
+.cell.dec{border-color:var(--dec);background:color-mix(in srgb,var(--dec) 18%,transparent)}
+.cell.zero{font-weight:700}
+.cell.out{opacity:.45}
+.cell.f::after,.cell.r::after{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font:10px var(--mono);color:var(--q);white-space:nowrap}
+.cell.f::after{content:"front"}.cell.r::after{content:"rear"}.cell.f.r::after{content:"front=rear"}
+.cell.gone{color:var(--muted);text-decoration:line-through}
+.qwrap{padding-bottom:18px}
+.mat{border-collapse:collapse;font:13px var(--mono)}
+.mat td,.mat th{width:30px;height:28px;text-align:center;border:1px solid var(--line)}
+.mat th{color:var(--muted);font-weight:400;font-size:11px}
+.mat td{cursor:pointer}
+.mat td.one{font-weight:700}
+.mat td.cmp{background:color-mix(in srgb,var(--cmp) 30%,transparent)}
+.mat td.row{background:var(--hl)}
+.mat td.dis{cursor:default;color:var(--muted)}
+.gm{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start}
+@media (max-width:520px){.gm{grid-template-columns:minmax(0,1fr)}}
+svg text{font-family:var(--mono)}
+.order{font:14px var(--mono)}
+.legend{font-size:11px;color:var(--muted)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.res{font-weight:700}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>拓扑排序代码走读</h1>
+    <p class="sub">邻接矩阵版 TopoCount，手册第 7 章图 10 的统一写法（2024 真题就是在它上面加一句）。每执行一行停一步：左边亮的是正在执行的那一行，右边是此刻的入度数组、队列和图。点矩阵里的格子可以加边、删边。</p>
+  </header>
+
+  <div class="presets" role="group" aria-label="例子">
+    例子：
+    <button type="button" data-p="uniq" aria-pressed="true">序列唯一</button>
+    <button type="button" data-p="multi" aria-pressed="false">序列不唯一</button>
+    <button type="button" data-p="cycle" aria-pressed="false">有环</button>
+    <span>顶点数</span>
+    <button type="button" id="nminus" aria-label="减少一个顶点">−</button><b id="nval">4</b><button type="button" id="nplus" aria-label="增加一个顶点">+</button>
+  </div>
+
+  <div class="main">
+    <section class="panel">
+      <pre class="code" id="code"></pre>
+      <div class="note" id="note" role="status"></div>
+      <div class="ctrl">
+        <button id="first" type="button">⏮ 重来</button>
+        <button id="prev" type="button">◀ 上一步</button>
+        <button id="play" class="primary" type="button">播放</button>
+        <button id="next" type="button">下一步 ▶</button>
+        <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="3"> <span id="spdv"></span></label>
+        <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+        <span class="count" id="count"></span>
+      </div>
+      <p class="tip">键盘：← → 单步，空格播放／暂停。</p>
+    </section>
+
+    <section class="panel state">
+      <div><h2>变量</h2><div class="vars" id="vars"></div></div>
+      <div class="gm">
+        <div><h2>图</h2><div id="graph"></div><div class="legend">绿色带序号＝已出队（输出顺序）；橙色边＝正在看的那条；红色边＝刚把终点入度减 1。</div></div>
+        <div><h2>G.Edge 矩阵</h2><table class="mat" id="mat"></table><div class="legend">第 i 行第 j 列为 1 表示 i→j。点格子改图。</div></div>
+      </div>
+      <div><h2>indegree[ ]</h2><div class="arr" id="indeg"></div></div>
+      <div class="qwrap"><h2>que[ ]</h2><div class="arr" id="que"></div></div>
+      <div><h2>输出顺序</h2><div class="order" id="order"></div></div>
+    </section>
+  </div>
+</div>
+
+<script>
+const CODE=[
+ ['int TopoCount(MGraph G){',''],
+ ['    int indegree[MAXV] = {0}, que[MAXV];',''],
+ ['    int front = 0, rear = 0, count = 0;',''],
+ ['    for (int i = 0; i < G.numVertices; i++)','// 1. 统计入度'],
+ ['        for (int j = 0; j < G.numVertices; j++)',''],
+ ['            if (G.Edge[i][j] != 0) indegree[j]++;',''],
+ ['    for (int i = 0; i < G.numVertices; i++)','// 2. 入度为 0 的入队'],
+ ['        if (indegree[i] == 0) que[rear++] = i;',''],
+ ['    while (front != rear){','// 3. 出队、删出边'],
+ ['        int v = que[front++];',''],
+ ['        count++;',''],
+ ['        for (int j = 0; j < G.numVertices; j++)',''],
+ ['            if (G.Edge[v][j] != 0 && --indegree[j] == 0) que[rear++] = j;',''],
+ ['    }',''],
+ ['    return count;','// 4. count < 顶点数 说明有环'],
+ ['}','']
+];
+const PRE={
+ uniq:{n:4,e:[[0,1],[0,2],[1,2],[1,3],[2,3]]},
+ multi:{n:4,e:[[0,1],[0,2],[1,3],[2,3]]},
+ cycle:{n:4,e:[[0,1],[0,2],[1,2],[2,3],[3,1]]}
+};
+let n=4,E=[],frames=[],at=0,timer=null;
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const KW=/\b(int|for|if|while|return)\b/g;
+
+function load(p){const d=PRE[p];n=d.n;E=Array.from({length:n},()=>Array(n).fill(0));d.e.forEach(([a,b])=>E[a][b]=1);rebuild()}
+
+function trace(){
+  const F=[],ind=Array(n).fill(0),que=[];let front=0,rear=0,count=0;const order=[];
+  const snap=(line,note,o={})=>F.push(Object.assign({line,note,ind:ind.slice(),que:que.slice(),front,rear,count,order:order.slice(),vars:{}},o));
+  snap(0,`进入函数。这张图有 ${n} 个顶点，G.numVertices = ${n}。`);
+  snap(1,'开入度数组 indegree，全部置 0；开队列数组 que。');
+  snap(2,'front = rear = 0 表示队列为空；count 记已经输出了几个顶点。');
+  for(let i=0;i<n;i++){
+    snap(3,`第一步统计入度：看第 ${i} 行，也就是从顶点 ${i} 出发的边。`,{vars:{i}});
+    for(let j=0;j<n;j++){
+      if(E[i][j]){ind[j]++;snap(5,`Edge[${i}][${j}] = 1，有边 ${i}→${j}，所以 ${j} 的入度加 1，变成 ${ind[j]}。`,{vars:{i,j},cell:[i,j],dec:[j],edge:[i,j],ec:'cmp'})}
+      else snap(5,`Edge[${i}][${j}] = 0，没有边 ${i}→${j}，跳过。`,{vars:{i,j},cell:[i,j],cmp:[j]});
+    }
+  }
+  snap(5,`入度统计完：${ind.map((d,k)=>k+':'+d).join('  ')}。按列看矩阵，每列 1 的个数就是入度。`,{});
+  for(let i=0;i<n;i++){
+    if(ind[i]===0){que[rear++]=i;snap(7,`indegree[${i}] = 0，没有前驱，可以先输出：入队，que[${rear-1}] = ${i}，rear 变成 ${rear}。`,{vars:{i},cmp:[i]})}
+    else snap(7,`indegree[${i}] = ${ind[i]}，还有前驱没输出，不入队。`,{vars:{i},cmp:[i]});
+  }
+  while(true){
+    if(front===rear){snap(8,`front = rear = ${front}，队列空了，循环结束。`);break}
+    snap(8,`front = ${front}，rear = ${rear}，队里还有 ${rear-front} 个顶点，进入循环。`);
+    const v=que[front++];
+    snap(9,`出队：v = que[${front-1}] = ${v}，front 变成 ${front}。`,{vars:{v}});
+    count++;order.push(v);
+    snap(10,`输出 ${v}，count 变成 ${count}。`,{vars:{v}});
+    for(let j=0;j<n;j++){
+      snap(11,`扫第 ${v} 行找 ${v} 的出边：j = ${j}。`,{vars:{v,j},cell:[v,j],row:v,cmp:[j]});
+      if(E[v][j]){ind[j]--;
+        if(ind[j]===0){que[rear++]=j;snap(12,`有边 ${v}→${j}，删掉它：indegree[${j}] 减 1 变成 0，${j} 入队，rear 变成 ${rear}。`,{vars:{v,j},cell:[v,j],row:v,dec:[j],edge:[v,j],ec:'dec'})}
+        else snap(12,`有边 ${v}→${j}，删掉它：indegree[${j}] 减 1 变成 ${ind[j]}，还不是 0，不入队。`,{vars:{v,j},cell:[v,j],row:v,dec:[j],edge:[v,j],ec:'dec'});
+      } else snap(12,`Edge[${v}][${j}] = 0，没有这条边。&& 左边已经是假，--indegree[${j}] 不会执行。`,{vars:{v,j},cell:[v,j],row:v});
+    }
+    snap(13,'这个顶点的出边删完，回到 while 判断。');
+  }
+  const ok=count===n;
+  snap(14,ok?`返回 count = ${count}，等于顶点数 ${n}：全部输出，没有环。拓扑序列 ${order.join(' ')}。`
+           :`返回 count = ${count}，小于顶点数 ${n}：剩下的 ${[...Array(n).keys()].filter(k=>!order.includes(k)).join('、')} 入度始终不为 0，它们在环上。`,{res:true});
+  snap(15,'函数结束。默写时注意：四步各一段，while 条件是 front != rear，减入度要写 --indegree[j]（先减再比）。');
+  return F;
+}
+
+function rebuild(){stop();frames=trace();at=0;$('scrub').max=frames.length-1;$('nval').textContent=n;drawMat();draw()}
+
+function drawMat(f){
+  let h='<tr><th></th>'+[...Array(n).keys()].map(j=>`<th>${j}</th>`).join('')+'</tr>';
+  for(let i=0;i<n;i++){h+=`<tr><th>${i}</th>`;for(let j=0;j<n;j++){
+    const c=[E[i][j]?'one':'',i===j?'dis':'',f&&f.cell&&f.cell[0]===i&&f.cell[1]===j?'cmp':'',f&&f.row===i&&!(f.cell&&f.cell[1]===j)?'row':''].join(' ');
+    h+=`<td class="${c}" data-i="${i}" data-j="${j}" ${i===j?'aria-disabled="true"':`role="button" tabindex="0" aria-label="切换边 ${i} 到 ${j}"`}>${E[i][j]}</td>`}h+='</tr>'}
+  $('mat').innerHTML=h;
+}
+
+function pos(k){if(n===4){return[[40,110],[150,35],[150,185],[260,110]][k]}const a=-Math.PI/2+2*Math.PI*k/n;return[150+105*Math.cos(a),110+80*Math.sin(a)]}
+function graph(f){
+  const done=new Set(f.order);let s='<svg viewBox="0 0 300 220" role="img" aria-label="当前有向图"><defs>';
+  ['n','c','d'].forEach((k,i)=>s+=`<marker id="m${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${['var(--muted)','var(--cmp)','var(--dec)'][i]}"/></marker>`);
+  s+='</defs>';
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++)if(E[i][j]){
+    const[x1,y1]=pos(i),[x2,y2]=pos(j),dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;
+    const rev=E[j][i]?7:0,ox=-uy*rev,oy=ux*rev;
+    const hot=f.edge&&f.edge[0]===i&&f.edge[1]===j;const k=hot?(f.ec==='dec'?'d':'c'):'n';
+    const gone=done.has(i)&&!hot;
+    s+=`<line x1="${x1+ux*19+ox}" y1="${y1+uy*19+oy}" x2="${x2-ux*20+ox}" y2="${y2-uy*20+oy}" stroke="${hot?(k==='d'?'var(--dec)':'var(--cmp)'):'var(--muted)'}" stroke-width="${hot?3:1.6}" ${gone?'stroke-dasharray="4 4" opacity=".45"':''} marker-end="url(#m${k})"/>`;
+  }
+  for(let k=0;k<n;k++){const[x,y]=pos(k),d=done.has(k),idx=f.order.indexOf(k);
+    s+=`<circle cx="${x}" cy="${y}" r="17" fill="${d?'var(--done)':'var(--paper)'}" stroke="${(f.vars.v===k)?'var(--q)':'var(--ink)'}" stroke-width="${f.vars.v===k?3:1.4}"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="15" fill="${d?'var(--paper)':'var(--ink)'}">${k}</text>`;
+    if(d)s+=`<text x="${x+16}" y="${y-16}" font-size="11" fill="var(--done)">第${idx+1}</text>`;
+    s+=`<text x="${x}" y="${y+33}" text-anchor="middle" font-size="10" fill="var(--muted)">入度 ${f.ind[k]}</text>`;
+  }
+  return s+'</svg>';
+}
+
+function draw(){
+  const f=frames[at];
+  $('code').innerHTML=CODE.map(([c,cm],i)=>`<span class="ln${i===f.line?' on':''}"><span class="no">${i+1}</span>${esc(c).replace(KW,'<span class="kw">$1</span>')}${cm?'  <span class="cm">'+esc(cm)+'</span>':''}</span>`).join('');
+  $('note').innerHTML=(f.res?'<span class="res">'+f.note+'</span>':f.note);
+  const V=Object.assign({},f.vars);
+  $('vars').innerHTML=[['front',f.front],['rear',f.rear],['count',f.count],...Object.entries(V)].map(([k,v])=>`<span>${k} = <b>${v}</b></span>`).join('');
+  $('indeg').innerHTML=f.ind.map((d,k)=>`<div class="cell${(f.cmp||[]).includes(k)?' cmp':''}${(f.dec||[]).includes(k)?' dec':''}${d===0?' zero':''}${f.order.includes(k)?' out':''}">${d}<small>[${k}]</small></div>`).join('');
+  let q='';for(let k=0;k<Math.max(n,f.rear+1);k++){const has=k<f.que.length;
+    q+=`<div class="cell${k===f.front?' f':''}${k===f.rear?' r':''}${has&&k<f.front?' gone':''}">${has?f.que[k]:'&nbsp;'}<small>[${k}]</small></div>`}
+  $('que').innerHTML=q;
+  $('order').textContent=f.order.length?f.order.join(' → '):'（还没有输出）';
+  $('graph').innerHTML=graph(f);
+  drawMat(f);
+  $('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;
+  $('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放');
+}
+
+const SPD=[3000,2000,1400,1000,700,450,250];
+const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function tick(){if(at<frames.length-1){at++;draw();timer=setTimeout(tick,delay())}else{timer=null;draw()}}
+function play(){if(timer){stop();draw();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());draw()}
+
+$('play').onclick=play;
+$('next').onclick=()=>{stop();if(at<frames.length-1)at++;draw()};
+$('prev').onclick=()=>{stop();if(at>0)at--;draw()};
+$('first').onclick=()=>{stop();at=0;draw()};
+$('scrub').oninput=e=>{stop();at=+e.target.value;draw()};
+$('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+function toggle(t){if(!t||t.dataset.i===undefined)return;const i=+t.dataset.i,j=+t.dataset.j;if(i===j)return;E[i][j]^=1;
+  document.querySelectorAll('.presets [data-p]').forEach(b=>b.setAttribute('aria-pressed','false'));rebuild()}
+$('mat').onclick=e=>toggle(e.target.closest('td'));
+$('mat').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle(e.target.closest('td'))}};
+document.querySelectorAll('.presets [data-p]').forEach(b=>b.onclick=()=>{document.querySelectorAll('.presets [data-p]').forEach(x=>x.setAttribute('aria-pressed',x===b));load(b.dataset.p)});
+function resize(m){const nn=Math.min(6,Math.max(3,n+m));if(nn===n)return;const old=E;n=nn;E=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>old[i]&&old[i][j]||0));
+  document.querySelectorAll('.presets [data-p]').forEach(b=>b.setAttribute('aria-pressed','false'));rebuild()}
+$('nminus').onclick=()=>resize(-1);$('nplus').onclick=()=>resize(1);
+document.addEventListener('keydown',e=>{if(['INPUT','TD','BUTTON'].includes(e.target.tagName)&&e.key===' ')return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+showSpd();load('uniq');
+</script>
+</body>
+</html>
