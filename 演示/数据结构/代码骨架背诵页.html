@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>代码骨架背诵页</title>
+<style>
+/* Layout: chapter chips + mode toggle on top, then one column of manual pages, each with a title bar that stays readable in cover mode */
+:root{--bg:#f3f2eb;--paper:#fffef9;--ink:#252d25;--muted:#6c7166;--line:#dddfd4;--green:#243e31;--accent:#86a951;--hl:#eef3dc;
+ --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif;--sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a16;--paper:#1c231e;--ink:#e3e8df;--muted:#9aa294;--line:#2f3a31;--green:#a9c98a;--accent:#8fb85a;--hl:#2a3a24;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141a16;--paper:#1c231e;--ink:#e3e8df;--muted:#9aa294;--line:#2f3a31;--green:#a9c98a;--accent:#8fb85a;--hl:#2a3a24;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:18px 56px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:14px 0 4px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 14px;max-width:66ch}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:2;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg)}
+.mode{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.toc{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;margin:12px 0 4px}
+.pages{display:grid;gap:18px;margin-top:14px}
+figure{margin:0;background:var(--paper);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+figcaption{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);font-size:14px}
+figcaption b{font-family:var(--serif);font-weight:600}
+figcaption span{font-size:11px;color:var(--muted);white-space:nowrap}
+.img{position:relative;background:#fff}
+.img img{display:block;width:100%;height:auto;transition:filter .2s}
+.covered .img img{filter:blur(14px)}
+.covered .img::after{content:"闭卷：先在纸上默写，再点这里揭开";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#243e31;background:#f3f2ebb3}
+.covered.shown .img img{filter:none}.covered.shown .img::after{display:none}
+.covered .img{cursor:pointer}
+.note{font-size:11px;color:var(--muted);margin-top:24px;border-top:1px solid var(--line);padding-top:10px}
+@media (prefers-reduced-motion:reduce){.img img{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <h1>代码骨架背诵页</h1>
+  <p class="sub">《408 代码题暴力解作战手册 v4》里要背的页：第 3 章基本功、第 4 章结构体、第 5 章 T1–T11、第 6 章快排二分归并，外加第 12 章速查表。打开“闭卷”后页面会遮住，只留标题，先在纸上默写，再点开对照。</p>
+  <div class="bar">
+    <div id="chips" role="group" aria-label="章节"></div>
+    <div class="mode"><button type="button" class="chip" id="cover" aria-pressed="false">闭卷</button></div>
+  </div>
+  <div class="toc" id="toc"></div>
+  <div class="pages" id="pages"></div>
+  <p class="note">页面图片由手册 PDF 原样转成（第 6–31、91–94 页），内容以手册为准。点页面图片可在新标签打开大图。</p>
+</div>
+<script>
+const P=[["基本功", [[6, "3.1 ++i 和 i++（栈、队列下标）"], [7, "3.1 图解：栈 st[++top]"], [8, "3.1 图解：写数组 C[k++]"], [9, "3.2 结果带出函数 · 3.3 . 和 -> · 3.4 return"], [10, "3.5 固定写法 · 3.6 复杂度"]]], ["结构体", [[11, "第 4 章 全书统一结构体"], [12, "第 4 章 真题给的结构体"], [13, "4.1 树的三种表示法"], [14, "4.2 其他会用到的结构体"]]], ["T1–T11", [[15, "T1 多重循环枚举"], [16, "T2 辅助数组"], [17, "T3 有序合并"], [18, "T4 链表：先求长度／转数组"], [19, "T5 二叉树递归遍历"], [20, "T6 邻接矩阵双重循环"], [21, "T7 增删基本操作"], [22, "T7 图解：就地逆置（头插）"], [23, "T8 队列：层序／BFS"], [24, "T9 DFS 与拓扑排序"], [25, "T10 邻接表遍历所有边"], [26, "T11 孩子兄弟树递归"], [27, "T11 续 · 单背的几道"]]], ["快排二分归并", [[28, "6.1 快速排序"], [29, "6.1 图解：递归过程"], [30, "6.2 二分查找两个模板"], [31, "6.3 二路归并排序"]]], ["速查表", [[91, "12 速查表：顺序表、链表"], [92, "12 速查表：树"], [93, "12 速查表：排序、查找、图"], [94, "12 速查表：补充题"]]]];
+let cur='全部',cover=false;
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(3,'0');
+function render(){
+  $('chips').innerHTML=['全部',...P.map(c=>c[0])].map(c=>`<button type="button" class="chip" data-c="${c}" aria-pressed="${c===cur}">${c}</button>`).join(' ');
+  const list=P.filter(c=>cur==='全部'||c[0]===cur).flatMap(c=>c[1].map(p=>[c[0],...p]));
+  const seen=new Set();$('toc').innerHTML=list.filter(([c,n,t])=>{const k=t.split(' ')[0];if(seen.has(k))return false;seen.add(k);return true}).map(([c,n,t])=>`<a href="#p${n}">${t.split(' ')[0]}</a>`).join('');
+  $('pages').innerHTML=list.map(([c,n,t])=>`<figure id="p${n}" class="${cover?'covered':''}"><figcaption><b>${t}</b><span>${c} · 第 ${n} 页</span></figcaption><div class="img" data-n="${n}"><img loading="lazy" src="手册页/p-${pad(n)}.jpg" width="1400" height="1980" alt="手册第 ${n} 页：${t}"></div></figure>`).join('');
+}
+$('chips').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;cur=b.dataset.c;render();try{localStorage.setItem('bs-cur',cur)}catch{}};
+$('cover').onclick=()=>{cover=!cover;$('cover').setAttribute('aria-pressed',cover);render()};
+$('pages').onclick=e=>{const d=e.target.closest('.img');if(!d)return;const f=d.parentElement;
+  if(f.classList.contains('covered')&&!f.classList.contains('shown')){f.classList.add('shown');return}
+  window.open('手册页/p-'+pad(+d.dataset.n)+'.jpg','_blank','noopener')};
+try{const s=localStorage.getItem('bs-cur');if(s&&(s==='全部'||P.some(c=>c[0]===s)))cur=s}catch{}
+render();
+</script>
+</body>
+</html>
