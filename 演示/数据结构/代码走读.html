@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>代码骨架走读</title>
+<style>
+/* Layout: template chips on top; code with the running line lit on the left, live data structures on the right; controls under the code */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --dim:#c9cbc2;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --dim:#3a443c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --dim:#3a443c; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:76ch}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 11px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.chip small{opacity:.7;margin-left:3px;font-size:11px}
+.progs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.progs .chip{border-radius:5px}
+.when{font-size:13px;background:var(--hl);border-radius:5px;padding:6px 10px;margin:0}
+.main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:920px){.main{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+.code{overflow-x:auto;font:12.5px/1.85 var(--mono);margin:0}
+.code .ln{display:block;white-space:pre;padding:0 8px;border-left:3px solid transparent}
+.code .ln.on{background:var(--hl);border-left-color:var(--accent)}
+.code .no{display:inline-block;width:2em;color:var(--muted);user-select:none}
+.code .cm{color:var(--muted)}
+.code .kw{color:var(--q);font-weight:600}
+.note{margin-top:12px;padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:14px;min-height:3.4em}
+.note b{color:var(--done)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.ctrl button.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.state{display:grid;gap:14px}
+h2{font:14px var(--serif);font-weight:600;margin:0 0 6px}
+.vars{display:flex;flex-wrap:wrap;gap:6px 10px;font:13px var(--mono)}
+.vars span{border:1px solid var(--line);border-radius:4px;padding:0 8px}
+.vars b{color:var(--q)}
+.arr{display:flex;gap:4px;flex-wrap:wrap;padding-bottom:16px}
+.cell{min-width:42px;text-align:center;border:1px solid var(--line);border-radius:4px;padding:2px 4px;font:14px var(--mono);position:relative;background:var(--bg)}
+.cell small{display:block;font-size:10px;color:var(--muted)}
+.cell.cmp{border-color:var(--cmp);background:color-mix(in srgb,var(--cmp) 20%,transparent)}
+.cell.mv{border-color:var(--mv);background:color-mix(in srgb,var(--mv) 20%,transparent)}
+.cell.done{border-color:var(--done);background:color-mix(in srgb,var(--done) 18%,transparent)}
+.cell.dim{opacity:.4}
+.cell .pt{position:absolute;top:100%;left:50%;transform:translateX(-50%);font:10px/1.2 var(--mono);color:var(--q);white-space:nowrap;margin-top:2px;font-weight:600}
+.stack{display:flex;flex-direction:column-reverse;gap:3px;font:12px var(--mono)}
+.stack div{border:1px solid var(--line);border-radius:4px;padding:1px 8px;background:var(--bg)}
+.stack div:last-child{border-color:var(--accent);background:var(--hl)}
+.svgbox{overflow-x:auto}
+.svgbox svg{display:block;max-width:100%;height:auto}
+svg text{font-family:var(--mono)}
+.legend{font-size:11px;color:var(--muted)}
+.also{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="代码骨架背诵页.html">骨架背诵页</a></div>
+  <header>
+    <h1>代码骨架走读</h1>
+    <p class="sub">手册第 5、6 章的骨架逐行执行：每执行一行停一步，左边亮的是正在执行的那一行，右边是这一刻的数组、链表、树、队列和递归栈。先闭卷默写，再来这里对照每一行为什么这么写。</p>
+  </header>
+  <div class="chips" id="tpl" role="group" aria-label="模板"></div>
+  <div class="progs" id="progs"></div>
+  <p class="when" id="when"></p>
+  <div class="main">
+    <section class="panel">
+      <pre class="code" id="code"></pre>
+      <div class="note" id="note" role="status"></div>
+      <div class="ctrl">
+        <button id="first" type="button">⏮ 重来</button>
+        <button id="prev" type="button">◀ 上一步</button>
+        <button id="play" class="primary" type="button">播放</button>
+        <button id="next" type="button">下一步 ▶</button>
+        <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="3"> <span id="spdv"></span></label>
+        <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+        <span class="count" id="count"></span>
+      </div>
+      <p class="tip">键盘：← → 单步，空格播放／暂停。</p>
+    </section>
+    <section class="panel state" id="state"></section>
+  </div>
+</div>
+
+<script>
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const KW=/\b(int|for|if|else|while|return|void|char|free|malloc|sizeof)\b/g;
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+/* Recorder: programs call S(key, note, view) where view describes what to draw now. */
+function Rec(code){this.F=[];this.keys={};code.forEach((c,i)=>{if(c[2])this.keys[c[2]]=i});}
+Rec.prototype.S=function(key,note,view){const line=this.keys[key];if(line===undefined)throw new Error('bad key '+key);this.F.push({line,note,view:clone(view)})};
+
+/* ---------- views ---------- */
+function vVars(v){return `<div><h2>变量</h2><div class="vars">${Object.entries(v).map(([k,x])=>`<span>${esc(k)} = <b>${esc(x)}</b></span>`).join('')||'<span>—</span>'}</div></div>`}
+function vArr(a){const pts={};Object.entries(a.ptrs||{}).forEach(([k,i])=>{if(i!==null&&i!==undefined)(pts[i]=pts[i]||[]).push(k)});
+  const base=a.base||0;
+  return `<div><h2>${esc(a.name)}</h2><div class="arr">${a.vals.map((x,i)=>`<div class="cell ${(a.cls||{})[i]||''}">${x===null||x===undefined?'&nbsp;':esc(x)}<small>[${i+base}]</small>${pts[i]?`<span class="pt">${esc(pts[i].join(' '))}</span>`:''}</div>`).join('')}</div></div>`}
+function vStack(s,title){return `<div><h2>${title||'递归栈（上面是正在执行的）'}</h2><div class="stack">${s.map(x=>`<div>${esc(x)}</div>`).join('')||'<div>（空）</div>'}</div></div>`}
+function vList(L){ // L: {nodes:{id:val}, order:[id], next:{id:id|null}, ptrs:{name:id}, cls:{id:c}, head:id}
+  const W=78,H=34,gap=30,x0=10,y0=48;const pos={};L.order.forEach((id,k)=>pos[id]=x0+k*(W+gap));
+  const w=x0+L.order.length*(W+gap)+20;let s=`<svg viewBox="0 0 ${w} 150" width="${w}" role="img" aria-label="链表"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker></defs>`;
+  L.order.forEach(id=>{const x=pos[id],c=(L.cls||{})[id];const col=c==='mv'?'var(--mv)':c==='cmp'?'var(--cmp)':c==='done'?'var(--done)':'var(--ink)';
+    const isHead=id===L.head;
+    s+=`<rect x="${x}" y="${y0}" width="${W}" height="${H}" rx="4" fill="${isHead?'var(--hl)':'var(--paper)'}" stroke="${col}" stroke-width="${c?2.5:1.4}"/><line x1="${x+W*0.58}" y1="${y0}" x2="${x+W*0.58}" y2="${y0+H}" stroke="var(--line)"/>`;
+    s+=`<text x="${x+W*0.29}" y="${y0+22}" text-anchor="middle" font-size="14" fill="var(--ink)">${isHead?'头':esc(L.nodes[id])}</text>`;
+    if(L.next[id]===null||L.next[id]===undefined)s+=`<text x="${x+W*0.79}" y="${y0+22}" text-anchor="middle" font-size="13" fill="var(--muted)">∧</text>`;
+  });
+  L.order.forEach((id,k)=>{const t=L.next[id];if(t===null||t===undefined||pos[t]===undefined)return;
+    const x1=pos[id]+W*0.79,y=y0+H/2,x2=pos[t];
+    if(pos[t]===pos[id]+W+gap)s+=`<line x1="${x1}" y1="${y}" x2="${x2-1}" y2="${y}" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#ar)"/>`;
+    else{const tx=pos[t]+W/2,below=pos[t]<pos[id];const yy=below?y0+H:y0;const cy=below?y0+H+44:y0-40;
+      s+=`<path d="M${pos[id]+W*0.79} ${yy} C ${pos[id]+W*0.79} ${cy}, ${tx} ${cy}, ${tx} ${yy}" fill="none" stroke="var(--ink)" stroke-width="1.5" marker-end="url(#ar)"/>`}
+  });
+  const by={};Object.entries(L.ptrs||{}).forEach(([k,id])=>{if(id!==null&&id!==undefined&&pos[id]!==undefined)(by[id]=by[id]||[]).push(k)});
+  Object.entries(by).forEach(([id,ks])=>{s+=`<text x="${pos[id]+W/2}" y="${y0+H+28}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--q)">↑${esc(ks.join(' '))}</text>`});
+  Object.entries(L.nullPtrs||{}).forEach(([k,v])=>{if(v)s+=``});
+  return `<div><h2>链表</h2><div class="svgbox">${s}</svg></div>${L.extra?`<div class="legend">${esc(L.extra)}</div>`:''}</div>`}
+function vTree(T){ // T: {nodes:{id:{t,l,r}}, root, cls:{id}, tags:{id:text}, title, edgeL, edgeR}
+  const xs={},ds={};let k=0;(function walk(id,d){if(id===null||id===undefined)return;const n=T.nodes[id];walk(n.l,d+1);xs[id]=k++;ds[id]=d;walk(n.r,d+1)})(T.root,0);
+  const cnt=k,dx=58,W=Math.max(260,cnt*dx+20),maxd=Math.max(0,...Object.values(ds)),H=(maxd+1)*64+30;
+  const P=id=>[20+xs[id]*dx+dx/2-10,28+ds[id]*64];let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="${T.title||'树'}">`;
+  Object.entries(T.nodes).forEach(([id,n])=>{if(xs[id]===undefined)return;[['l',n.l],['r',n.r]].forEach(([w,c])=>{if(c===null||c===undefined||xs[c]===undefined)return;const[a,b]=P(id),[c2,d]=P(c);
+    s+=`<line x1="${a}" y1="${b}" x2="${c2}" y2="${d}" stroke="var(--muted)" stroke-width="1.5" ${w==='r'&&T.sibDash?'stroke-dasharray="5 4"':''}/>`;
+    if(T.edgeLabel){const lb=w==='l'?T.edgeLabel[0]:T.edgeLabel[1];s+=`<text x="${(a+c2)/2+(w==='l'?-8:8)}" y="${(b+d)/2}" font-size="9" text-anchor="middle" fill="var(--muted)">${lb}</text>`}})});
+  Object.entries(T.nodes).forEach(([id,n])=>{if(xs[id]===undefined)return;const[x,y]=P(id),c=(T.cls||{})[id];
+    const fill=c==='done'?'var(--done)':c==='cmp'?'var(--cmp)':c==='mv'?'var(--mv)':'var(--paper)';
+    s+=`<circle cx="${x}" cy="${y}" r="17" fill="${fill}" stroke="${c==='cur'?'var(--q)':'var(--ink)'}" stroke-width="${c==='cur'?3.2:1.3}"/><text x="${x}" y="${y+5}" text-anchor="middle" font-size="13" fill="${c==='done'||c==='mv'?'var(--paper)':'var(--ink)'}">${esc(n.t)}</text>`;
+    const tg=(T.tags||{})[id];if(tg)s+=`<text x="${x+18}" y="${y-15}" font-size="10" fill="var(--q)">${esc(tg)}</text>`});
+  return `<div><h2>${esc(T.title||'树')}</h2><div class="svgbox">${s}</svg></div>${T.legend?`<div class="legend">${esc(T.legend)}</div>`:''}</div>`}
+function vAdj(G){ // G: {n, adj:[[...]], cur:[i,k]|null, vis:[], title}
+  let s='',W=0;const rows=G.adj.map((r,i)=>{let x=10,y=10+i*36,t=`<rect x="${x}" y="${y}" width="34" height="26" rx="3" fill="${(G.vis||[])[i]?'var(--done)':'var(--paper)'}" stroke="${G.curV===i?'var(--q)':'var(--ink)'}" stroke-width="${G.curV===i?3:1.3}"/><text x="${x+17}" y="${y+18}" text-anchor="middle" font-size="13" fill="${(G.vis||[])[i]?'var(--paper)':'var(--ink)'}">${i}</text>`;x+=34;
+    r.forEach((v,k)=>{t+=`<line x1="${x}" y1="${y+13}" x2="${x+18}" y2="${y+13}" stroke="var(--ink)" marker-end="url(#ar2)"/>`;x+=20;const on=G.cur&&G.cur[0]===i&&G.cur[1]===k;
+      t+=`<rect x="${x}" y="${y}" width="34" height="26" rx="3" fill="${on?'color-mix(in srgb,var(--cmp) 35%,transparent)':'var(--paper)'}" stroke="${on?'var(--cmp)':'var(--ink)'}" stroke-width="${on?2.5:1.1}"/><text x="${x+17}" y="${y+18}" text-anchor="middle" font-size="13" fill="var(--ink)">${v}</text>`;if(on)t+=`<text x="${x+17}" y="${y-2}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--q)">p</text>`;x+=34});
+    t+=`<text x="${x+10}" y="${y+18}" font-size="13" fill="var(--muted)">∧</text>`;W=Math.max(W,x+30);return t});
+  s=`<svg viewBox="0 0 ${W} ${G.adj.length*36+12}" width="${W}" role="img" aria-label="邻接表"><defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker></defs>${rows.join('')}</svg>`;
+  return `<div><h2>${esc(G.title||'邻接表 G.adjlist')}</h2><div class="svgbox">${s}</div><div class="legend">左边方框是顶点（绿色＝已访问／已出队），右边一串是它的边表；橙色是 p 当前指着的边结点。</div></div>`}
+
+function render(view){return view.map(([kind,arg,extra])=>({vars:vVars,arr:vArr,stack:a=>vStack(a,extra),list:vList,tree:vTree,adj:vAdj,html:x=>x})[kind](arg)).join('')}
+
+/* ---------- programs ---------- */
+const P={};
+/* T1 */
+P.t1={tpl:'T1',name:'任两数乘积的最大值',when:'题目要“所有 (i,j) 组合里的最大/最小/满足条件的”，或者逐对比较。',
+ code:[
+ ['int max = A[0] * A[1];','// 初值用第一对合法的 (0,1)，别写 0','init'],
+ ['for (int i = 0; i < n; i++)','','fi'],
+ ['    for (int j = i + 1; j < n; j++)','// j 从 i+1 开始：每对只看一次','fj'],
+ ['        if (A[i] * A[j] > max)','// (i,j) 这一对满足条件','if'],
+ ['            max = A[i] * A[j];','// 更新答案','upd'],
+ ['printf("%d", max);','','end']],
+ run(R){const A=[1,4,-9,6],n=4;let max=A[0]*A[1];const V=(o={})=>[['vars',Object.assign({n,max},o.v||{})],['arr',{name:'A[ ]',vals:A,ptrs:o.p||{},cls:o.c||{}}]];
+  R.S('init',`max 先取 A[0]×A[1] = ${max}。写成 0 的话，全是负数乘积时答案就错了。`,V({c:{0:'mv',1:'mv'}}));
+  for(let i=0;i<n;i++){R.S('fi',`外层 i = ${i}：固定 A[${i}] = ${A[i]}。`,V({v:{i},p:{i}}));
+   for(let j=i+1;j<n;j++){R.S('fj',`内层 j = ${j}，从 i+1 往后扫。`,V({v:{i,j},p:{i,j},c:{[j]:'cmp'}}));
+    const pr=A[i]*A[j];R.S('if',`A[${i}]×A[${j}] = ${A[i]}×${A[j]} = ${pr}，${pr>max?'比':'不比'} max = ${max} 大。`,V({v:{i,j,'A[i]*A[j]':pr},p:{i,j},c:{[i]:'cmp',[j]:'cmp'}}));
+    if(pr>max){max=pr;R.S('upd',`更新：max = ${pr}。`,V({v:{i,j},p:{i,j},c:{[i]:'mv',[j]:'mv'}}))}}
+   if(i===n-1)R.S('fj',`i = ${n-1} 时 j 从 ${n} 开始，内层一次都不跑。`,V({v:{i},p:{i}}))}
+  R.S('end',`输出 max = <b>${max}</b>。共比较 n(n−1)/2 = 6 对，O(n²)。`,V())}};
+/* T2 */
+P.t2={tpl:'T2',name:'最小未出现正整数（2018）',when:'值域给了上限（0≤ai<n、|data|≤n、找最小未出现正整数），或原地改想不清，先放进新数组。',
+ code:[
+ ['int *B = (int *)malloc(sizeof(int) * (n + 1));','// 值域 1..n，开 n+1 个','mal'],
+ ['for (int i = 0; i <= n; i++)','','f1'],
+ ['    B[i] = 0;','// 必须先清零','z'],
+ ['for (int i = 0; i < n; i++)','','f2'],
+ ['    if (A[i] > 0 && A[i] <= n)','// ≤0 和 >n 的跳过','if'],
+ ['        B[A[i]]++;','// 值当下标：标记出现过','mark'],
+ ['for (int i = 1; i <= n; i++)','','f3'],
+ ['    if (B[i] == 0)','// 第一个没出现的','chk'],
+ ['        return i;','','ret'],
+ ['return n + 1;','// 1..n 全出现过','retn']],
+ run(R){const A=[3,4,-1,1],n=4,B=Array(n+1).fill('?');const V=(o={})=>[['vars',Object.assign({n},o.v||{})],['arr',{name:'A[ ]',vals:A,ptrs:o.p||{},cls:o.c||{}}],['arr',{name:'B[ ]（计数）',vals:B,ptrs:o.bp||{},cls:o.bc||{}}]];
+  R.S('mal','开辅助数组 B[0..n]。malloc 出来的内容是随机的，所以下一步要清零。',V());
+  for(let i=0;i<=n;i++){R.S('f1',`清零循环 i = ${i}。`,V({v:{i},bp:{i}}));B[i]=0;R.S('z',`B[${i}] = 0。`,V({v:{i},bp:{i},bc:{[i]:'mv'}}))}
+  for(let i=0;i<n;i++){R.S('f2',`扫 A：i = ${i}，A[${i}] = ${A[i]}。`,V({v:{i},p:{i},c:{[i]:'cmp'}}));
+   const ok=A[i]>0&&A[i]<=n;R.S('if',ok?`${A[i]} 在 1..n 里，要标记。`:`${A[i]} 不在 1..n 里，跳过（负数当下标会越界）。`,V({v:{i},p:{i},c:{[i]:'cmp'}}));
+   if(ok){B[A[i]]++;R.S('mark',`值当下标：B[${A[i]}]++，变成 ${B[A[i]]}。`,V({v:{i},p:{i},bp:{'A[i]':A[i]},bc:{[A[i]]:'mv'}}))}}
+  for(let i=1;i<=n;i++){R.S('f3',`从 1 开始找：i = ${i}。`,V({v:{i},bp:{i}}));R.S('chk',`B[${i}] = ${B[i]}，${B[i]===0?'等于 0：'+i+' 没出现过':'出现过，继续'}。`,V({v:{i},bp:{i},bc:{[i]:'cmp'}}));
+   if(B[i]===0){R.S('ret',`返回 <b>${i}</b>：最小的未出现正整数。时间 O(n)，空间 O(n)。`,V({v:{i},bp:{i},bc:{[i]:'done'}}));return}}
+  R.S('retn','1..n 都出现了，答案是 n+1。',V())}};
+/* T3 */
+P.t3={tpl:'T3',name:'两个升序数组合并',when:'出现“两个（三个）递增序列”，或先排好序问题就变简单。',
+ code:[
+ ['int i = 0, j = 0, k = 0;','','init'],
+ ['while (i < m && j < n)','// 两边都没走完：比较，小的先放','w1'],
+ ['    if (A[i] < B[j]) C[k++] = A[i++];','','a'],
+ ['    else             C[k++] = B[j++];','','b'],
+ ['while (i < m) C[k++] = A[i++];','// 收尾：剩下的直接接上','w2'],
+ ['while (j < n) C[k++] = B[j++];','','w3']],
+ run(R){const A=[1,4,7],B=[2,3,9],m=3,n=3,C=Array(6).fill(null);let i=0,j=0,k=0;
+  const V=(o={})=>[['vars',{i,j,k,m,n}],['arr',{name:'A[ ]',vals:A,ptrs:{i},cls:Object.assign(Object.fromEntries(A.map((_,t)=>[t,t<i?'dim':''])),o.ac||{})}],['arr',{name:'B[ ]',vals:B,ptrs:{j},cls:Object.assign(Object.fromEntries(B.map((_,t)=>[t,t<j?'dim':''])),o.bc||{})}],['arr',{name:'C[ ]',vals:C,ptrs:{k},cls:o.cc||{}}]];
+  R.S('init','三个下标都从 0 开始：i 走 A，j 走 B，k 指着 C 的下一个空位。',V());
+  while(true){const go=i<m&&j<n;R.S('w1',go?`i = ${i} < m 且 j = ${j} < n，两边都还有。`:`有一边走完了（${i>=m?'A':'B'}），跳出比较循环。`,V());if(!go)break;
+   if(A[i]<B[j]){R.S('a',`A[${i}] = ${A[i]} < B[${j}] = ${B[j]}，放 A 的。`,V({ac:{[i]:'cmp'},bc:{[j]:'cmp'}}));C[k++]=A[i++];R.S('a',`C[${k-1}] = ${C[k-1]}，然后 i、k 各加 1。`,V({cc:{[k-1]:'mv'}}))}
+   else{R.S('b',`A[${i}] = ${A[i]} ≥ B[${j}] = ${B[j]}，放 B 的。`,V({ac:{[i]:'cmp'},bc:{[j]:'cmp'}}));C[k++]=B[j++];R.S('b',`C[${k-1}] = ${C[k-1]}，然后 j、k 各加 1。`,V({cc:{[k-1]:'mv'}}))}}
+  while(true){if(i<m){C[k++]=A[i++];R.S('w2',`A 还剩，直接接上：C[${k-1}] = ${C[k-1]}。`,V({cc:{[k-1]:'mv'}}))}else{R.S('w2',`i = ${i} = m，A 没剩的。`,V());break}}
+  while(true){if(j<n){C[k++]=B[j++];R.S('w3',`B 还剩，直接接上：C[${k-1}] = ${C[k-1]}。`,V({cc:{[k-1]:'mv'}}))}else{R.S('w3',`j = ${j} = n，合并完成：C = ${C.join(' ')}。收尾两个 while 别漏。`,V({cc:Object.fromEntries(C.map((_,t)=>[t,'done']))}));break}}}};
+/* T4 */
+P.t4={tpl:'T4',name:'求长度 + 转数组（倒数第 2 个）',when:'链表题要“倒数第 k 个”“中间”“两个链表对齐”，需要总长度或随机访问。',
+ code:[
+ ['int n = 0;','','n0'],
+ ['for (LinkList p = L->next; p != NULL; p = p->next)','// 第一个数据结点是 L->next','f1'],
+ ['    n++;','// ① 求长度','inc'],
+ ['LinkList *A = (LinkList *)malloc(sizeof(LinkList) * n);','// 存结点地址的数组','mal'],
+ ['int k = 0;','','k0'],
+ ['for (LinkList p = L->next; p != NULL; p = p->next)','','f2'],
+ ['    A[k++] = p;','// ② 结点指针存进数组','st'],
+ ['printf("%d", A[n - 2]->data);','// ③ 倒数第 2 个就是 A[n-2]','pr']],
+ run(R){const vals=[10,20,30,40,50];const ids=['L','a1','a2','a3','a4','a5'];const nodes={L:'L'};vals.forEach((v,t)=>nodes['a'+(t+1)]=v);
+  const next={};ids.forEach((id,t)=>next[id]=ids[t+1]||null);let n=0,k=0,p=null;const A=[];
+  const V=(o={})=>{const view=[['vars',Object.assign({n},o.v||{})],['list',{nodes,order:ids,next,head:'L',ptrs:p===null?{}:{p},cls:o.lc||{},extra:p===null&&o.pnull?'p = NULL：走过最后一个结点了':''}]];if(o.arr)view.push(['arr',{name:'A[ ]（存的是结点地址）',vals:A.map(x=>'→'+x),ptrs:o.ap||{},cls:o.ac||{}}]);return view};
+  R.S('n0','n 记长度，从 0 开始。',V());
+  p='a1';R.S('f1','p = L->next：从第一个数据结点出发（头结点不算）。',V());
+  while(p){R.S('f1',`p != NULL，进入循环体。`,V({lc:{[p]:'cmp'}}));n++;R.S('inc',`n++，n = ${n}。`,V({lc:{[p]:'cmp'}}));const q=next[p];p=q;R.S('f1',p?`p = p->next，p 走到下一个结点。`:'p = p->next，变成 NULL，循环结束。',V({pnull:!p}))}
+  p=null;R.S('mal',`长度 n = ${n}。开 n 个“结点指针”的数组。注意类型是 LinkList *，存地址不是存 data。`,V({arr:1}));
+  R.S('k0','k 指着 A 的下一个空位。',V({arr:1,ap:{k}}));
+  p='a1';R.S('f2','第二遍：p 再从 L->next 出发。',V({arr:1,ap:{k}}));
+  while(p){A[k++]=p;R.S('st',`A[${k-1}] = p，存的是结点 ${p}（data=${nodes[p]}）的地址。k = ${k}。`,V({arr:1,ap:{k},ac:{[k-1]:'mv'},lc:{[p]:'mv'}}));p=next[p];R.S('f2',p?'p = p->next。':'p 变成 NULL，存完了。',V({arr:1,ap:{k},pnull:!p}))}
+  p=null;const t=A[n-2];R.S('pr',`A[n-2] = A[${n-2}] 指向 ${t}，输出它的 data = <b>${nodes[t]}</b>。之后链表就能当数组用：A[i] 是第 i+1 个结点。`,V({arr:1,ap:{'n-2':n-2},ac:{[n-2]:'done'},lc:{[t]:'done'}}))}};
+/* T7 programs */
+P.t7a={tpl:'T7',name:'顺序表插入',when:'顺序表插入删除；链表逆置、拆分、删结点、合并、重排——凡是要改链的。',
+ code:[
+ ['for (int i = L->length - 1; i >= pos; i--)','// 从后往前挪','f'],
+ ['    L->data[i + 1] = L->data[i];','','mv'],
+ ['L->data[pos] = x;','','put'],
+ ['L->length++;','// 最容易漏','len']],
+ run(R){const d=[1,3,6,8,null],pos=2,x=5;let len=4;const V=(o={})=>[['vars',Object.assign({pos,x,'L->length':len},o.v||{})],['arr',{name:'L->data[ ]',vals:d,ptrs:o.p||{},cls:o.c||{}}]];
+  for(let i=len-1;;i--){if(i<pos){R.S('f',`i = ${i} < pos，挪完了。`,V({v:{i}}));break}R.S('f',`i = ${i} ≥ pos = ${pos}，继续挪。`,V({v:{i},p:{i}}));d[i+1]=d[i];R.S('mv',`data[${i+1}] = data[${i}] = ${d[i]}：往后挪一格。必须从后往前，不然会互相覆盖。`,V({v:{i},p:{i},c:{[i+1]:'mv'}}))}
+  d[pos]=x;R.S('put',`空出的 data[${pos}] 放 x = ${x}。`,V({c:{[pos]:'mv'}}));len++;R.S('len',`length 从 4 变成 ${len}。插入删除后 length 一定要改。`,V({c:Object.fromEntries(d.map((_,t)=>[t,'done']))}))}};
+P.t7b={tpl:'T7',name:'删除 p 的后继',when:P.t7a.when,
+ code:[
+ ['LinkList q = p->next;','// q 是要删的','q'],
+ ['p->next = q->next;','// 跨过 q','link'],
+ ['free(q);','// 之后不能再用 q','free']],
+ run(R){const nodes={L:'L',n1:1,n2:2,n3:3};const order=['L','n1','n2','n3'];const next={L:'n1',n1:'n2',n2:'n3',n3:null};let ptrs={p:'n1'};
+  const V=(o={})=>[['list',{nodes,order:o.order||order,next,head:'L',ptrs,cls:o.c||{}}]];
+  R.S('q','删谁就要先拿到它的前驱：p 停在 1，要删的是 2。q = p->next。',(ptrs={p:'n1',q:'n2'},V({c:{n2:'cmp'}})));
+  next.n1='n3';R.S('link','p->next = q->next：1 直接指向 3，2 被跨过去了。',V({c:{n2:'mv',n1:'mv'}}));
+  delete nodes.n2;delete next.n2;ptrs={p:'n1'};R.S('free','free(q)：释放 2 的空间。q 现在是野指针，不能再用。',V({order:['L','n1','n3']}))}};
+P.t7c={tpl:'T7',name:'头插法就地逆置（链 1）',when:P.t7a.when,
+ code:[
+ ['void reverse(LinkList L){','','fn'],
+ ['    LinkList p = L->next;','// p 指向第一个数据结点','p'],
+ ['    L->next = NULL;','// 头结点先断开','cut'],
+ ['    LinkList r;','','r'],
+ ['    while (p != NULL){','','w'],
+ ['        r = p->next;','// r 先存住后继，少了它后面就丢了','save'],
+ ['        p->next = L->next;','// 头插 ①：先连后','h1'],
+ ['        L->next = p;','// 头插 ②：再连前','h2'],
+ ['        p = r;','','adv'],
+ ['    }',''],
+ ['}','','end']],
+ run(R){const nodes={L:'L',a:1,b:2,c:3};const order=['L','a','b','c'];const next={L:'a',a:'b',b:'c',c:null};let p=null,r=null;
+  const V=(o={})=>[['list',{nodes,order,next,head:'L',ptrs:Object.fromEntries([['p',p],['r',r]].filter(x=>x[1])),cls:o.c||{},extra:'按结点原来的位置摆放；弯箭头表示指向前面的结点。'}]];
+  R.S('fn','原链表：L → 1 → 2 → 3。目标：L → 3 → 2 → 1，不开新结点。',V());
+  p='a';R.S('p','p = L->next，指向 1。',V());
+  next.L=null;R.S('cut','L->next = NULL：头结点先断开，变成空表；原来的结点靠 p 拿着。',V());
+  R.S('r','r 用来暂存 p 的后继。',V());
+  while(true){R.S('w',p?`p = ${nodes[p]} 不空，进入循环。`:'p = NULL，全部插完。',V({c:p?{[p]:'cmp'}:{}}));if(!p)break;
+   r=next[p];R.S('save',r?`r = p->next：先存住 ${nodes[r]}。`:'r = p->next = NULL。',V({c:{[p]:'cmp'}}));
+   next[p]=next.L;R.S('h1',`p->next = L->next：${nodes[p]} 先指向${next[p]?' '+nodes[next[p]]:' NULL'}（先连后）。`,V({c:{[p]:'mv'}}));
+   next.L=p;R.S('h2',`L->next = p：头结点指向 ${nodes[p]}（再连前）。两句顺序反了链就断。`,V({c:{[p]:'mv'}}));
+   p=r;r=r;R.S('adv',p?`p = r，处理下一个 ${nodes[p]}。`:'p = r = NULL。',V())}
+  r=null;R.S('end','完成：L → 3 → 2 → 1。时间 O(n)，空间 O(1)。头插出来是逆序，尾插保持原序。',V({c:{a:'done',b:'done',c:'done'}}))}};
+P.t7d={tpl:'T7',name:'尾插法建表',when:P.t7a.when,
+ code:[
+ ['LinkList r = L;','// r 指向当前尾结点','r'],
+ ['for (int i = 0; i < n; i++){','','f'],
+ ['    LinkList s = (LinkList)malloc(sizeof(LNode));','','new'],
+ ['    s->data = A[i];','','d'],
+ ['    r->next = s;','// ① 接到尾巴后面','link'],
+ ['    r = s;','// ② r 移到新尾巴','mv'],
+ ['}',''],
+ ['r->next = NULL;','// 全部插完再封口','nul']],
+ run(R){const A=[1,2,3],n=3;const nodes={L:'L'},order=['L'],next={L:null};let r='L',s=null;const open=new Set();
+  const V=(o={})=>[['vars',Object.assign({n},o.v||{})],['arr',{name:'A[ ]',vals:A,ptrs:o.ap||{}}],['list',{nodes,order,next,head:'L',ptrs:Object.fromEntries([['r',r],['s',s]].filter(x=>x[1])),cls:o.c||{},extra:'尾结点的 next 在封口前还没赋值（图里画成 ∧ 只是占位）。'}]];
+  R.S('r','r = L：空表时尾巴就是头结点。',V());
+  for(let i=0;i<n;i++){R.S('f',`i = ${i}。`,V({v:{i},ap:{i}}));const id='s'+i;nodes[id]='?';order.push(id);next[id]=null;s=id;R.S('new','malloc 一个新结点 s。',V({v:{i},ap:{i},c:{[id]:'cmp'}}));
+   nodes[id]=A[i];R.S('d',`s->data = A[${i}] = ${A[i]}。`,V({v:{i},ap:{i},c:{[id]:'cmp'}}));
+   next[r]=id;R.S('link',`r->next = s：旧尾巴接上 ${A[i]}。`,V({v:{i},c:{[id]:'mv'}}));r=id;R.S('mv','r = s：r 挪到新尾巴。',V({v:{i}}))}
+  s=null;next[r]=null;R.S('nul','r->next = NULL：最后封口。尾插保持原序 1 2 3。',V({c:Object.fromEntries(order.slice(1).map(x=>[x,'done']))}))}};
+/* T5 WPL */
+const TREE1={A:{t:'A',l:'B',r:'G'},B:{t:'B',l:'D',r:'E'},D:{t:'5',l:null,r:null},E:{t:'2',l:null,r:null},G:{t:'7',l:null,r:null}};
+P.t5a={tpl:'T5',name:'WPL（先序 + 带深度，2014）',when:'二叉链表的树，几乎所有题。处理当前结点不需要子树结果的用先序。',
+ code:[
+ ['int WPL = 0;','// 全局：累加结果','g'],
+ ['void PreOrder(BiTree p, int depth){','// depth：第几层，根为 1','fn'],
+ ['    if (p == NULL) return;','// ① 出口：第一行','nul'],
+ ['    if (p->left == NULL && p->right == NULL)','// 先序位置：处理 p','leaf'],
+ ['        WPL += p->weight * (depth - 1);','// 叶结点：权 × 路径长度','add'],
+ ['    PreOrder(p->left, depth + 1);','// ② 左子树，下一层','L'],
+ ['    PreOrder(p->right, depth + 1);','// ③ 右子树，下一层','Rr'],
+ ['}','','end'],
+ ['// 调用：WPL = 0; PreOrder(root, 1);','','call']],
+ run(R){let WPL=0;const st=[],cls={},tags={};const V=(cur)=>[['vars',{WPL}],['stack',st.slice()],['tree',{nodes:TREE1,root:'A',cls:Object.assign({},cls,cur?{[cur]:'cur'}:{}),tags,title:'二叉树（数字是叶子的权）',legend:'蓝圈＝正在执行的结点；绿色＝已处理完；标签是 depth。'}]];
+  R.S('call','先把全局 WPL 置 0，再从根调用，根在第 1 层。',V());
+  (function go(p,d,from){st.push(`PreOrder(${p?TREE1[p].t:'NULL'}, ${d})`);R.S('fn',`进入 PreOrder(${p?TREE1[p].t:'NULL'}, depth=${d})${from?'，从 '+from+' 调用':''}。`,V(p));
+   if(p===null){R.S('nul','p == NULL，直接返回：空子树什么也不做。',V(null));st.pop();return}
+   tags[p]='depth '+d;R.S('nul',`p 不空，继续。`,V(p));const n=TREE1[p],leaf=!n.l&&!n.r;
+   R.S('leaf',leaf?`${n.t} 左右孩子都空，是叶子。`:`${n.t} 有孩子，不是叶子，不累加。`,V(p));
+   if(leaf){WPL+=Number(n.t)*(d-1);R.S('add',`WPL += ${n.t} × (${d}−1) = ${Number(n.t)*(d-1)}，WPL = ${WPL}。`,V(p))}
+   R.S('L',`递归左子树，depth+1 = ${d+1}。`,V(p));go(n.l,d+1,n.t);R.S('L',`左子树处理完，回到 ${n.t}。depth 是普通参数，回来时自动还是 ${d}。`,V(p));
+   R.S('Rr',`递归右子树，depth+1 = ${d+1}。`,V(p));go(n.r,d+1,n.t);
+   cls[p]='done';R.S('end',`${n.t} 处理完，返回。`,V(p));st.pop()})('A',1,'');
+  R.S('call',`遍历结束，WPL = <b>${WPL}</b>（5×2 + 2×2 + 7×1）。时间 O(n)，空间 O(h)。`,V())}};
+P.t5b={tpl:'T5',name:'树高（后序 + 返回值）',when:'处理当前结点必须先知道左右子树结果的，用后序和返回值。',
+ code:[
+ ['int Height(BiTree p){','','fn'],
+ ['    if (p == NULL) return 0;','// 空树高 0','nul'],
+ ['    int hl = Height(p->lchild);','// 左子树高','L'],
+ ['    int hr = Height(p->rchild);','// 右子树高','Rr'],
+ ['    return (hl > hr ? hl : hr) + 1;','// 后序位置：用子树结果算自己','ret'],
+ ['}','']],
+ run(R){const st=[],cls={},tags={};const V=(cur,v)=>[['vars',v||{}],['stack',st.slice()],['tree',{nodes:TREE1,root:'A',cls:Object.assign({},cls,cur?{[cur]:'cur'}:{}),tags,title:'二叉树',legend:'标签是这个结点算出来的高度（返回值）。'}]];
+  (function go(p){st.push(`Height(${p?TREE1[p].t:'NULL'})`);R.S('fn',`进入 Height(${p?TREE1[p].t:'NULL'})。`,V(p));
+   if(p===null){R.S('nul','p == NULL，返回 0。',V(null));st.pop();return 0}R.S('nul','p 不空。',V(p));
+   R.S('L',`先算 ${TREE1[p].t} 的左子树高。`,V(p));const hl=go(TREE1[p].l);R.S('L',`左子树返回 hl = ${hl}。`,V(p,{hl}));
+   R.S('Rr',`再算右子树高。`,V(p,{hl}));const hr=go(TREE1[p].r);R.S('Rr',`右子树返回 hr = ${hr}。`,V(p,{hl,hr}));
+   const h=Math.max(hl,hr)+1;tags[p]='h='+h;cls[p]='done';R.S('ret',`${TREE1[p].t} 的高 = max(${hl}, ${hr}) + 1 = ${h}，返回。`,V(p,{hl,hr}));st.pop();return h})('A');
+  R.S('fn','根返回 3：树高 3。和 WPL 对比：WPL 用全局变量往上累加，树高靠返回值往上传。',V(null))}};
+/* T8 */
+const TREE2={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:'D',r:'E'},C:{t:'C',l:null,r:'F'},D:{t:'D',l:null,r:null},E:{t:'E',l:null,r:null},F:{t:'F',l:null,r:null}};
+P.t8={tpl:'T8',name:'层序求树高（树 7）',when:'树要“按层”（高度、宽度）；图要“最近 / 最远 / 一层层扩展”。',
+ code:[
+ ['int level(BiTree bt){','','fn'],
+ ['    if (bt == NULL) return 0;','','nul'],
+ ['    BiTree que[maxsize];','',''],
+ ['    int front = 0, rear = 0, last = 1, h = 0;','','init'],
+ ['    que[rear++] = bt;','// 根入队；第 1 层到下标 1 为止','in'],
+ ['    while (front != rear){','// 队不空','w'],
+ ['        BiTree p = que[front++];','// 出队','out'],
+ ['        if (p->lchild != NULL) que[rear++] = p->lchild;','','l'],
+ ['        if (p->rchild != NULL) que[rear++] = p->rchild;','','r'],
+ ['        if (front == last){','// 本层最后一个出队了','chk'],
+ ['            h++;','','h'],
+ ['            last = rear;','// 下一层到 rear 为止','last'],
+ ['        }',''],
+ ['    }',''],
+ ['    return h;','','ret'],
+ ['}','']],
+ run(R){const que=[];let front=0,rear=0,last=1,h=0,p=null;const cls={};
+  const V=(o={})=>[['vars',Object.assign({front,rear,last,h},p?{p:TREE2[p].t}:{})],['arr',{name:'que[ ]',vals:Array.from({length:7},(_,k)=>k<que.length?TREE2[que[k]].t:null),ptrs:{front,rear,last},cls:Object.assign(Object.fromEntries(que.map((_,k)=>[k,k<front?'dim':''])),o.qc||{})}],['tree',{nodes:TREE2,root:'A',cls:Object.assign({},cls,p?{[p]:'cur'}:{}),title:'二叉树'}]];
+  R.S('fn','bt 是根 A。',V());R.S('nul','树不空。',V());R.S('init','front：下一个要出队的；rear：下一个空位；last：当前层在队列里到哪结束；h：层数。',V());
+  que[rear++]='A';R.S('in','根入队：que[0] = A，rear = 1。',V({qc:{0:'mv'}}));
+  while(true){if(front===rear){R.S('w','front == rear，队空，结束。',V());break}R.S('w',`front = ${front} ≠ rear = ${rear}，队不空。`,V());
+   p=que[front++];cls[p]='done';R.S('out',`出队 ${TREE2[p].t}，front = ${front}。`,V());
+   const n=TREE2[p];if(n.l){que[rear++]=n.l;R.S('l',`左孩子 ${TREE2[n.l].t} 入队，rear = ${rear}。`,V({qc:{[rear-1]:'mv'}}))}else R.S('l','左孩子空，不入队。',V());
+   if(n.r){que[rear++]=n.r;R.S('r',`右孩子 ${TREE2[n.r].t} 入队，rear = ${rear}。`,V({qc:{[rear-1]:'mv'}}))}else R.S('r','右孩子空，不入队。',V());
+   if(front===last){R.S('chk',`front = ${front} 追上 last = ${last}：这一层出完了。`,V());h++;R.S('h',`h++，h = ${h}。`,V());last=rear;R.S('last',`last = rear = ${rear}：下一层的结点正好是队里 [${front}, ${rear}) 这一段。`,V())}
+   else R.S('chk',`front = ${front} ≠ last = ${last}，这一层还没出完。`,V())}
+  p=null;R.S('ret',`返回 h = <b>${h}</b>。队列只有一种写法：que[rear++] 入队、que[front++] 出队、front == rear 为空。`,V())}};
+/* T9 */
+const G1=[[1,2],[3],[3],[4],[]];
+P.t9a={tpl:'T9',name:'DFS（邻接表）',when:'图要判断两点有无路径、是否连通 / 是否是树、找根、判环、拓扑序列。',
+ code:[
+ ['int visit[MAXV];','// 全局：访问标记','g'],
+ ['void DFS(Graph G, int v){','','fn'],
+ ['    visit[v] = 1;','/* 处理 v */','vis'],
+ ['    for (Node p = G.adjlist[v].firstarc; p != NULL; p = p->nextarc)','','for'],
+ ['        if (visit[p->adjvex] == 0)','// 邻接点是 p->adjvex，不是 p','if'],
+ ['            DFS(G, p->adjvex);','','rec'],
+ ['}','','end'],
+ ['// 用之前：for (k = 0; k < G.numVertices; k++) visit[k] = 0;','','pre']],
+ run(R){const vis=Array(5).fill(0),st=[],ord=[];const V=(o={})=>[['vars',{'访问顺序':ord.join(' → ')||'—'}],['arr',{name:'visit[ ]',vals:vis,cls:o.vc||{}}],['stack',st.slice()],['adj',{adj:G1,cur:o.cur||null,vis,curV:o.v}]];
+  R.S('pre','先把 visit 全部清零，再从 0 出发。',V());
+  (function go(v){st.push(`DFS(G, ${v})`);R.S('fn',`进入 DFS(G, ${v})。`,V({v}));vis[v]=1;ord.push(v);R.S('vis',`visit[${v}] = 1，访问 ${v}。`,V({v,vc:{[v]:'mv'}}));
+   const a=G1[v];for(let k=0;;k++){if(k>=a.length){R.S('for',k===0?`${v} 的边表是空的（firstarc = NULL）。`:`p = p->nextarc = NULL，${v} 的边看完了。`,V({v}));break}
+    R.S('for',k===0?`p = G.adjlist[${v}].firstarc：${v} 的第一条边，指向 ${a[k]}。`:`p = p->nextarc：下一条边，指向 ${a[k]}。`,V({v,cur:[v,k]}));
+    const w=a[k];R.S('if',`visit[${w}] = ${vis[w]}，${vis[w]?'已访问，跳过（少了 visit，有环就死循环）':'没访问过，递归'}。`,V({v,cur:[v,k],vc:{[w]:'cmp'}}));
+    if(!vis[w]){R.S('rec',`DFS(G, ${w})。`,V({v,cur:[v,k]}));go(w);R.S('rec',`从 ${w} 返回到 ${v}，继续看 ${v} 的下一条边。`,V({v,cur:[v,k]}))}}
+   R.S('end',`DFS(G, ${v}) 结束，返回。`,V({v}));st.pop()})(0);
+  R.S('pre',`访问顺序 ${ord.join(' → ')}：走到底再回退。`,V())}};
+P.t9b={tpl:'T9',name:'拓扑排序 TopoCount（邻接表）',when:P.t9a.when,
+ code:[
+ ['int TopoCount(Graph G){','','fn'],
+ ['    int indegree[MAXV] = {0}, que[MAXV];','',''],
+ ['    int front = 0, rear = 0, count = 0;','','init'],
+ ['    for (int i = 0; i < G.numVertices; i++)','// 1. 统计入度','f1'],
+ ['        for (Node p = G.adjlist[i].firstarc; p != NULL; p = p->nextarc)','','f1b'],
+ ['            indegree[p->adjvex]++;','','inc'],
+ ['    for (int i = 0; i < G.numVertices; i++)','// 2. 入度为 0 的入队','f2'],
+ ['        if (indegree[i] == 0) que[rear++] = i;','','in'],
+ ['    while (front != rear){','// 3. 出队、删出边','w'],
+ ['        int v = que[front++];','','out'],
+ ['        count++;','','cnt'],
+ ['        for (Node p = G.adjlist[v].firstarc; p != NULL; p = p->nextarc)','','f3'],
+ ['            if (--indegree[p->adjvex] == 0) que[rear++] = p->adjvex;','','dec'],
+ ['    }',''],
+ ['    return count;','// count < 顶点数 说明有环','ret'],
+ ['}','']],
+ run(R){const n=5,ind=Array(n).fill(0),que=[],done=Array(n).fill(0);let front=0,rear=0,count=0;
+  const V=(o={})=>[['vars',Object.assign({front,rear,count},o.v||{})],['arr',{name:'indegree[ ]',vals:ind,cls:o.ic||{}}],['arr',{name:'que[ ]',vals:Array.from({length:n},(_,k)=>k<que.length?que[k]:null),ptrs:{front,rear},cls:Object.fromEntries(que.map((_,k)=>[k,k<front?'dim':'']))}],['adj',{adj:G1,cur:o.cur||null,vis:done,curV:o.cv}]];
+  R.S('fn','和邻接矩阵版同一个流程，只是“找出边”换成走边表。',V());R.S('init','队列为空，count = 0。',V());
+  for(let i=0;i<n;i++){R.S('f1',`统计入度：看顶点 ${i} 的边表。`,V({v:{i},cv:i}));G1[i].forEach((w,k)=>{R.S('f1b',`p 指向 ${i} 的一条边，终点 p->adjvex = ${w}。`,V({v:{i},cur:[i,k]}));ind[w]++;R.S('inc',`indegree[${w}]++，变成 ${ind[w]}。`,V({v:{i},cur:[i,k],ic:{[w]:'mv'}}))});if(!G1[i].length)R.S('f1b',`${i} 没有出边。`,V({v:{i},cv:i}))}
+  for(let i=0;i<n;i++){R.S('f2',`i = ${i}。`,V({v:{i},ic:{[i]:'cmp'}}));if(ind[i]===0){que[rear++]=i;R.S('in',`indegree[${i}] = 0，入队。`,V({v:{i},ic:{[i]:'cmp'}}))}else R.S('in',`indegree[${i}] = ${ind[i]}，不入队。`,V({v:{i}}))}
+  while(true){if(front===rear){R.S('w','队空，结束。',V());break}R.S('w',`队里还有 ${rear-front} 个。`,V());const v=que[front++];R.S('out',`出队 v = ${v}。`,V({v:{v},cv:v}));count++;done[v]=1;R.S('cnt',`count = ${count}。`,V({v:{v},cv:v}));
+   G1[v].forEach((w,k)=>{R.S('f3',`p 走到 ${v} 的一条边，终点 ${w}。`,V({v:{v},cur:[v,k]}));ind[w]--;if(ind[w]===0){que[rear++]=w;R.S('dec',`--indegree[${w}] 变成 0，${w} 入队。`,V({v:{v},cur:[v,k],ic:{[w]:'mv'}}))}else R.S('dec',`--indegree[${w}] 变成 ${ind[w]}，不入队。`,V({v:{v},cur:[v,k],ic:{[w]:'mv'}}))});
+   if(!G1[v].length)R.S('f3',`${v} 没有出边。`,V({v:{v},cv:v}))}
+  R.S('ret',`返回 count = <b>${count}</b> = 顶点数，无环。`,V())}};
+/* T10 */
+const G2=[[1,2],[2],[3],[0]];
+P.t10={tpl:'T10',name:'遍历所有边：求出度',when:'图用邻接表存，统计出度 / 入度、找某种边、数边，或者把矩阵版的题改成邻接表版。',
+ code:[
+ ['for (int i = 0; i < G.numVertices; i++){','// 每个顶点 i','fi'],
+ ['    int out = 0;','','o0'],
+ ['    for (Node p = G.adjlist[i].firstarc; p != NULL; p = p->nextarc)','// i 发出的每条边','fp'],
+ ['        out++;','// 处理边 i → p->adjvex','inc'],
+ ['    printf("%d 的出度 %d\\n", i, out);','','pr'],
+ ['}','']],
+ run(R){const res=Array(4).fill(null);const V=(o={})=>[['vars',o.v||{}],['adj',{adj:G2,cur:o.cur||null,curV:o.cv,vis:[]}],['arr',{name:'已求出的出度',vals:res,cls:o.rc||{}}]];
+  for(let i=0;i<4;i++){R.S('fi',`顶点 i = ${i}。`,V({v:{i},cv:i}));let out=0;R.S('o0','out = 0。',V({v:{i,out},cv:i}));
+   for(let k=0;;k++){if(k>=G2[i].length){R.S('fp',`p = NULL，${i} 的边表走完。`,V({v:{i,out},cv:i}));break}
+    R.S('fp',k?'p = p->nextarc。':`p = G.adjlist[${i}].firstarc。`,V({v:{i,out},cur:[i,k]}));out++;R.S('inc',`边 ${i} → ${G2[i][k]}（p->adjvex），out = ${out}。`,V({v:{i,out},cur:[i,k]}))}
+   res[i]=out;R.S('pr',`输出：${i} 的出度 ${out}。`,V({v:{i,out},cv:i,rc:{[i]:'mv'}}))}
+  R.S('fi','每个顶点、每条边各看一次：O(n + e)。邻接矩阵版是 O(n²)。',V())}};
+/* T11 */
+const CS={A:{t:'A',l:'B',r:null},B:{t:'B',l:'E',r:'C'},E:{t:'E',l:null,r:'F'},F:{t:'F',l:null,r:null},C:{t:'C',l:null,r:'D'},D:{t:'D',l:'G',r:null},G:{t:'G',l:null,r:null}};
+P.t11={tpl:'T11',name:'孩子兄弟树：叶子数（树补 3）',when:'题目说“树 / 森林用孩子兄弟链表存储”，求叶子数、度、高度、结点数。',
+ code:[
+ ['int leaf = 0;','// 全局：叶子个数','g'],
+ ['void CountLeafCS(CSTree p){','','fn'],
+ ['    if (p == NULL) return;','// ① 出口','nul'],
+ ['    if (p->firstchild == NULL) leaf++;','// 没有孩子就是叶子（不看 nextsibling）','leaf'],
+ ['    CountLeafCS(p->firstchild);','// ② 往下：p 的孩子们','fc'],
+ ['    CountLeafCS(p->nextsibling);','// ③ 往右：p 的兄弟们','ns'],
+ ['}','','end'],
+ ['// 调用：leaf = 0; CountLeafCS(root);','','call']],
+ run(R){let leaf=0;const st=[],cls={};const V=(cur)=>[['vars',{leaf}],['stack',st.slice()],['tree',{nodes:CS,root:'A',cls:Object.assign({},cls,cur?{[cur]:'cur'}:{}),title:'孩子兄弟链表（原树：A 的孩子 B C D，B 的孩子 E F，D 的孩子 G）',edgeLabel:['孩子','兄弟'],sibDash:true,legend:'左下实线＝firstchild（往下一层）；右下虚线＝nextsibling（同一层往右）。'}]];
+  R.S('call','leaf 置 0，从根 A 调用。',V());
+  (function go(p,how){st.push(`CountLeafCS(${p?CS[p].t:'NULL'})`);R.S('fn',`进入 CountLeafCS(${p?CS[p].t:'NULL'})${how?'，'+how:''}。`,V(p));
+   if(!p){R.S('nul','p == NULL，返回。',V(null));st.pop();return}R.S('nul','p 不空。',V(p));
+   const n=CS[p];if(!n.l){leaf++;R.S('leaf',`${n.t} 的 firstchild 为空：叶子，leaf = ${leaf}。`,V(p))}else R.S('leaf',`${n.t} 有孩子 ${CS[n.l].t}，不是叶子。`,V(p));
+   R.S('fc',`往下：递归 ${n.t} 的第一个孩子。`,V(p));go(n.l,`${n.t} 的第一个孩子`);R.S('ns',`往右：递归 ${n.t} 的下一个兄弟。漏了这句就只走了最左一条链。`,V(p));go(n.r,`${n.t} 的下一个兄弟`);
+   cls[p]='done';R.S('end',`${n.t} 处理完。`,V(p));st.pop()})('A','');
+  R.S('call',`leaf = <b>${leaf}</b>：E、F、C、G。`,V())}};
+/* 快排 */
+P.qs={tpl:'快排',name:'交换式快排',when:'空白纸 3 分钟默写零错，并能对着 6 个数手推。既是暴力工具（先排序再处理），也是考点本身。',
+ code:[
+ ['void Qsort(int A[], int L, int R){','','fn'],
+ ['    if (L >= R) return;','// 0 或 1 个元素：递归结束','base'],
+ ['    int i = L, j = R;','','ij'],
+ ['    int pivot = A[L];','// 选区间第一个元素作基准','pv'],
+ ['    while (i < j){','','w'],
+ ['        while (i < j && A[j] >= pivot) j--;','// ① j 从右往左找第一个 < pivot 的','j'],
+ ['        while (i < j && A[i] <= pivot) i++;','// ② i 从左往右找第一个 > pivot 的','i'],
+ ['        if (i < j){','// ③ 交换这两个','sw'],
+ ['            int t = A[i]; A[i] = A[j]; A[j] = t;','','swp'],
+ ['        }',''],
+ ['    }',''],
+ ['    int t = A[L]; A[L] = A[i]; A[i] = t;','// ④ 基准和相遇位置交换，基准归位','home'],
+ ['    Qsort(A, L, i - 1);','// ⑤ 递归左半','lq'],
+ ['    Qsort(A, i + 1, R);','//    递归右半','rq'],
+ ['}','']],
+ run(R){const A=[4,7,2,9,1,6],fin=new Set(),st=[];
+  const V=(L,Rr,o={})=>{const c={};A.forEach((_,k)=>{if(fin.has(k))c[k]='done';else if(L!==undefined&&(k<L||k>Rr))c[k]='dim'});Object.assign(c,o.c||{});
+   return[['vars',Object.assign(L!==undefined?{L,R:Rr}:{},o.v||{})],['arr',{name:'A[ ]',vals:A,ptrs:o.p||{},cls:c}],['stack',st.slice()]]};
+  (function go(L,Rr){st.push(`Qsort(A, ${L}, ${Rr})`);R.S('fn',`进入 Qsort(A, ${L}, ${Rr})。`,V(L,Rr));
+   if(L>=Rr){if(L===Rr)fin.add(L);R.S('base',L===Rr?`L = R = ${L}：只有 1 个元素，返回。`:`L = ${L} > R = ${Rr}：空区间，返回。所以出口是 >= 不是 ==。`,V(L,Rr));st.pop();return}
+   R.S('base',`L = ${L} < R = ${Rr}，要划分。`,V(L,Rr));let i=L,j=Rr;R.S('ij','i 在最左，j 在最右。',V(L,Rr,{p:{i,j},v:{i,j}}));const pivot=A[L];R.S('pv',`pivot = A[${L}] = ${pivot}。`,V(L,Rr,{p:{i,j},v:{i,j,pivot},c:{[L]:'cmp'}}));
+   const W=(o)=>V(L,Rr,Object.assign({p:{i,j},v:{i,j,pivot}},o));
+   while(true){if(!(i<j)){R.S('w',`i = j = ${i}，相遇，划分循环结束。`,W());break}R.S('w',`i = ${i} < j = ${j}，继续。`,W());
+    while(true){const go2=i<j&&A[j]>=pivot;R.S('j',!(i<j)?'i == j，停。':go2?`A[${j}] = ${A[j]} ≥ ${pivot}，j 左移。`:`A[${j}] = ${A[j]} < ${pivot}，j 停在这里。`,W({c:{[j]:'cmp'}}));if(!go2)break;j--}
+    while(true){const go2=i<j&&A[i]<=pivot;R.S('i',!(i<j)?'i 撞上 j，停。':go2?`A[${i}] = ${A[i]} ≤ ${pivot}，i 右移。`:`A[${i}] = ${A[i]} > ${pivot}，i 停在这里。`,W({c:{[i]:'cmp'}}));if(!go2)break;i++}
+    if(i<j){R.S('sw',`i < j，交换 A[${i}] 和 A[${j}]。`,W({c:{[i]:'cmp',[j]:'cmp'}}));[A[i],A[j]]=[A[j],A[i]];R.S('swp',`交换后 A[${i}] = ${A[i]}，A[${j}] = ${A[j]}。`,W({c:{[i]:'mv',[j]:'mv'}}))}else R.S('sw','i == j，不交换。',W())}
+   [A[L],A[i]]=[A[i],A[L]];fin.add(i);R.S('home',`基准 ${pivot} 和 A[${i}] 交换，归位到下标 ${i}：左边都 ≤ ${pivot}，右边都 ≥ ${pivot}。先动 j 才保证相遇点 ≤ 基准。`,W({c:{[L]:'mv',[i]:'mv'}}));
+   R.S('lq',`递归左半 (${L}, ${i-1})，基准自己不再参加。`,W());go(L,i-1);R.S('rq',`递归右半 (${i+1}, ${Rr})。`,W());go(i+1,Rr);st.pop()})(0,5);
+  R.S('fn',`排完：${A.join(' ')}。平均时间 O(n log n)，平均空间 O(log n)。`,V())}};
+/* 二分 */
+P.bs1={tpl:'二分',name:'模板一：等值判断',when:'找某个确切的值用模板一；要找“第一个 ≥ x 的位置”用模板二。',
+ code:[
+ ['int B_Search(int A[], int L, int R, int x){','','fn'],
+ ['    while (L <= R){','// 区间 [L, R] 不空就继续','w'],
+ ['        int mid = (L + R) / 2;','// 中点','mid'],
+ ['        if (A[mid] == x)','','eq'],
+ ['            return mid;','// 找到','ret'],
+ ['        else if (x < A[mid])','','lt'],
+ ['            R = mid - 1;','// x 在左半：[L, mid-1]','r'],
+ ['        else',''],
+ ['            L = mid + 1;','// x 在右半：[mid+1, R]','l'],
+ ['    }',''],
+ ['    return -1;','// 区间空了还没找到','none'],
+ ['}','']],
+ run(R){const A=[1,2,3,7,8,11,15];let x=8,L=0,Rr=6,mid=null;const V=(o={})=>[['vars',Object.assign({x,L,R:Rr},mid!==null?{mid}:{})],['arr',{name:'A[ ]',vals:A,ptrs:Object.assign({L,R:Rr},mid!==null?{mid}:{}),cls:Object.assign(Object.fromEntries(A.map((_,k)=>[k,k<L||k>Rr?'dim':''])),o.c||{})}]];
+  R.S('fn','调用 B_Search(A, 0, n−1, 8)：传的是下标，不是 n。',V());
+  while(true){if(!(L<=Rr)){R.S('w',`L = ${L} > R = ${Rr}，区间空了。`,V());break}R.S('w',`L = ${L} ≤ R = ${Rr}，区间不空。`,V());mid=(L+Rr)>>1;R.S('mid',`mid = (${L}+${Rr})/2 = ${mid}。`,V({c:{[mid]:'cmp'}}));
+   R.S('eq',`A[${mid}] = ${A[mid]} ${A[mid]===x?'==':'!='} ${x}。`,V({c:{[mid]:'cmp'}}));if(A[mid]===x){R.S('ret',`返回 <b>${mid}</b>。`,V({c:{[mid]:'done'}}));return}
+   const lt=x<A[mid];R.S('lt',`${x} ${lt?'<':'>'} A[${mid}] = ${A[mid]}。`,V({c:{[mid]:'cmp'}}));if(lt){Rr=mid-1;R.S('r',`R = mid−1 = ${Rr}：mid 已经比过，排除。`,V())}else{L=mid+1;R.S('l',`L = mid+1 = ${L}：mid 已经比过，排除。`,V())}}
+  R.S('none','返回 −1。',V())}};
+P.bs2={tpl:'二分',name:'模板二：第一个 ≥ x',when:P.bs1.when,
+ code:[
+ ['int B_First(int A[], int L, int R, int x){','','fn'],
+ ['    while (L < R){','// 区间只剩一个元素时停','w'],
+ ['        int mid = (L + R) / 2;','','mid'],
+ ['        if (A[mid] >= x)','','ge'],
+ ['            R = mid;','// mid 可能就是答案，不能减 1','r'],
+ ['        else',''],
+ ['            L = mid + 1;','','l'],
+ ['    }',''],
+ ['    return L;','// 第一个 >= x 的位置（还要再判断是不是 x）','ret'],
+ ['}','']],
+ run(R){const A=[1,2,3,3,3,4,4];let x=3,L=0,Rr=6,mid=null;const V=(o={})=>[['vars',Object.assign({x,L,R:Rr},mid!==null?{mid}:{})],['arr',{name:'A[ ]',vals:A,ptrs:Object.assign({L,R:Rr},mid!==null?{mid}:{}),cls:Object.assign(Object.fromEntries(A.map((_,k)=>[k,k<L||k>Rr?'dim':''])),o.c||{})}]];
+  R.S('fn','找第一个 3。有重复元素时用模板二。',V());
+  while(true){if(!(L<Rr)){R.S('w',`L = R = ${L}，只剩一个，停。`,V());break}R.S('w',`L = ${L} < R = ${Rr}。`,V());mid=(L+Rr)>>1;R.S('mid',`mid = ${mid}。`,V({c:{[mid]:'cmp'}}));
+   const ge=A[mid]>=x;R.S('ge',`A[${mid}] = ${A[mid]} ${ge?'≥':'<'} ${x}。`,V({c:{[mid]:'cmp'}}));if(ge){Rr=mid;R.S('r',`R = mid = ${Rr}：mid 可能就是第一个 ${x}，留着。写成 mid−1 会把答案扔掉。`,V())}else{L=mid+1;R.S('l',`L = mid+1 = ${L}。`,V())}}
+  R.S('ret',`返回 L = <b>${L}</b>，A[${L}] = ${A[L]}，是第一个 3。L < R 配 R = mid；L <= R 配 mid ± 1，混用就死循环或漏解。`,V({c:{[L]:'done'}}))}};
+/* 归并 */
+P.ms={tpl:'归并',name:'二路归并排序（排 2）',when:'merge 就是 T3 的合并模板；mergeSort 只是劈两半、各自排好、再合并。题目要求稳定排序时用它。',
+ code:[
+ ['void merge(int A[], int low, int mid, int high){','','mfn'],
+ ['    int *B = (int *)malloc((high + 1) * sizeof(int));','',''],
+ ['    for (int i = low; i <= high; i++)','',''],
+ ['        B[i] = A[i];','// 复制到辅助数组','cp'],
+ ['    int i = low, j = mid + 1, k = low;','','ijk'],
+ ['    while (i <= mid && j <= high)','','w1'],
+ ['        if (B[i] <= B[j]) A[k++] = B[i++];','// 相等取左边：稳定','a'],
+ ['        else              A[k++] = B[j++];','','b'],
+ ['    while (i <= mid) A[k++] = B[i++];','','w2'],
+ ['    while (j <= high) A[k++] = B[j++];','','w3'],
+ ['    free(B);','','free'],
+ ['}',''],
+ ['void mergeSort(int A[], int low, int high){','','fn'],
+ ['    if (low < high){','','if'],
+ ['        int mid = (low + high) / 2;','','mid'],
+ ['        mergeSort(A, low, mid);','','l'],
+ ['        mergeSort(A, mid + 1, high);','','r'],
+ ['        merge(A, low, mid, high);','','m'],
+ ['    }',''],
+ ['}','','end']],
+ run(R){const A=[4,7,2,9,1,6];const st=[];let B=null;
+  const V=(lo,hi,o={})=>{const c={};A.forEach((_,k)=>{if(lo!==undefined&&(k<lo||k>hi))c[k]='dim'});Object.assign(c,o.c||{});const v=[['vars',o.v||{}],['arr',{name:'A[ ]',vals:A,ptrs:o.p||{},cls:c}]];if(B)v.push(['arr',{name:'B[ ]（辅助数组）',vals:B,ptrs:o.bp||{},cls:o.bc||{}}]);v.push(['stack',st.slice()]);return v};
+  (function ms(lo,hi){st.push(`mergeSort(A, ${lo}, ${hi})`);R.S('fn',`进入 mergeSort(A, ${lo}, ${hi})。`,V(lo,hi));
+   if(!(lo<hi)){R.S('if',`low = high = ${lo}：只有一个元素，本身有序，返回。`,V(lo,hi));st.pop();return}
+   R.S('if',`low < high，要劈开。`,V(lo,hi));const mid=(lo+hi)>>1;R.S('mid',`mid = ${mid}：左半 [${lo}, ${mid}]，右半 [${mid+1}, ${hi}]。`,V(lo,hi,{v:{low:lo,mid,high:hi}}));
+   R.S('l','先把左半排好。',V(lo,hi));ms(lo,mid);R.S('r','再把右半排好。',V(lo,hi));ms(mid+1,hi);
+   R.S('m',`两半都有序了，合并 [${lo}, ${mid}] 和 [${mid+1}, ${hi}]。`,V(lo,hi));st.push(`merge(A, ${lo}, ${mid}, ${hi})`);
+   B=A.map((x,k)=>k>=lo&&k<=hi?x:null);R.S('cp',`把 A[${lo}..${hi}] 复制到 B。`,V(lo,hi,{bc:Object.fromEntries(B.map((x,k)=>[k,x===null?'dim':'']))}));
+   let i=lo,j=mid+1,k=lo;const PV=(o={})=>V(lo,hi,Object.assign({v:{i,j,k},p:{k},bp:{i,j},bc:Object.fromEntries(B.map((x,t)=>[t,x===null||(t<i&&t<=mid)||(t>mid&&t<j)?'dim':'']))},o));
+   R.S('ijk','i 走左段，j 走右段，k 写回 A。',PV());
+   while(i<=mid&&j<=hi){R.S('w1',`两段都还有：比较 B[${i}] = ${B[i]} 和 B[${j}] = ${B[j]}。`,PV({bc:Object.assign(PV().slice(-2)[0][1].cls,{[i]:'cmp',[j]:'cmp'})}));
+    if(B[i]<=B[j]){A[k++]=B[i++];R.S('a',`取左边 ${A[k-1]} 放到 A[${k-1}]。`,PV({c:{[k-1]:'mv'}}))}else{A[k++]=B[j++];R.S('b',`取右边 ${A[k-1]} 放到 A[${k-1}]。`,PV({c:{[k-1]:'mv'}}))}}
+   R.S('w1','有一段走完了。',PV());
+   while(i<=mid){A[k++]=B[i++];R.S('w2',`左段剩下的 ${A[k-1]} 接上。`,PV({c:{[k-1]:'mv'}}))}
+   while(j<=hi){A[k++]=B[j++];R.S('w3',`右段剩下的 ${A[k-1]} 接上。`,PV({c:{[k-1]:'mv'}}))}
+   B=null;R.S('free',`free(B)。A[${lo}..${hi}] 合并完成。`,V(lo,hi,{c:Object.fromEntries(A.map((_,t)=>[t,t>=lo&&t<=hi?'done':'']).filter(x=>x[1]))}));st.pop();
+   R.S('end',`mergeSort(A, ${lo}, ${hi}) 结束。`,V(lo,hi));st.pop()})(0,5);
+  R.S('end',`排完：${A.join(' ')}。时间 O(n log n)，空间 O(n)，稳定。`,V())}};
+
+const TPL=[['T1','多重循环'],['T2','辅助数组'],['T3','有序合并'],['T4','链表转数组'],['T5','二叉树递归'],['T6','邻接矩阵'],['T7','增删'],['T8','层序'],['T9','DFS 拓扑'],['T10','邻接表'],['T11','孩子兄弟'],['快排',''],['二分',''],['归并','']];
+
+/* ---------- player ---------- */
+let curTpl='T4',curProg=null,frames=[],at=0,timer=null;
+function progsOf(t){return Object.entries(P).filter(([,p])=>p.tpl===t)}
+function pick(t,pid){stop();curTpl=t;
+  $('tpl').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));
+  if(t==='T6'){$('progs').innerHTML='';$('when').innerHTML='T6 的走读是单独一页：<a href="拓扑排序代码走读.html">邻接矩阵拓扑排序代码走读</a>（可点矩阵改图）。';$('code').innerHTML='';$('note').textContent='';$('state').innerHTML='';$('count').textContent='';frames=[];return}
+  const ps=progsOf(t);curProg=pid&&P[pid]?pid:ps[0][0];
+  $('progs').innerHTML=ps.length>1?'例子：'+ps.map(([id,p])=>`<button type="button" class="chip" data-p="${id}" aria-pressed="${id===curProg}">${p.name}</button>`).join(''):`例子：<b>${P[curProg].name}</b>`;
+  const p=P[curProg];$('when').innerHTML='<b>什么时候想到它：</b>'+esc(p.when);
+  const R=new Rec(p.code);p.run(R);frames=R.F;at=0;$('scrub').max=frames.length-1;
+  try{history.replaceState(null,'','#'+curProg)}catch{}
+  draw()}
+function draw(){if(!frames.length)return;const f=frames[at],p=P[curProg];
+  $('code').innerHTML=p.code.map(([c,cm],i)=>`<span class="ln${i===f.line?' on':''}"><span class="no">${i+1}</span>${esc(c).replace(KW,'<span class="kw">$1</span>')}${cm?'  <span class="cm">'+esc(cm)+'</span>':''}</span>`).join('');
+  $('note').innerHTML=f.note;$('state').innerHTML=render(f.view);
+  $('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放');
+  const on=$('code').querySelector('.on');if(on&&on.scrollIntoView&&timer)on.scrollIntoView({block:'nearest',inline:'nearest'})}
+const SPD=[3000,2000,1400,1000,700,450,250];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function tick(){if(at<frames.length-1){at++;draw();timer=setTimeout(tick,delay())}else{timer=null;draw()}}
+function play(){if(!frames.length)return;if(timer){stop();draw();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());draw()}
+$('tpl').innerHTML=TPL.map(([t,n])=>`<button type="button" class="chip" data-t="${t}" aria-pressed="false">${t}${n?`<small>${n}</small>`:''}</button>`).join('');
+$('tpl').onclick=e=>{const b=e.target.closest('[data-t]');if(b)pick(b.dataset.t)};
+$('progs').onclick=e=>{const b=e.target.closest('[data-p]');if(b)pick(curTpl,b.dataset.p)};
+$('play').onclick=play;$('next').onclick=()=>{stop();if(at<frames.length-1)at++;draw()};$('prev').onclick=()=>{stop();if(at>0)at--;draw()};
+$('first').onclick=()=>{stop();at=0;draw()};$('scrub').oninput=e=>{stop();at=+e.target.value;draw()};
+$('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+showSpd();
+(function(){const h=decodeURIComponent(location.hash.slice(1));if(P[h])pick(P[h].tpl,h);else{const t=TPL.find(x=>x[0]===h);pick(t?t[0]:'T4')}})();
+</script>
+</body>
+</html>
