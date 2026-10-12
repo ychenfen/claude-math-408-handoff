@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>408 排序演示台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;900&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one working bench — tabs on top, the array stage in the middle, pass log + key facts beside it, full comparison table below */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --fg:#1d2733; --muted:#5d6b7a; --line:#d5dce4;
+  --accent:#1f6f8b; --bar:#9fb3c6; --zone:#bcd9e6; --cmp:#e0a326; --mv:#d9534f; --fin:#3f9c6b;
+  --g1:#5b8def; --g2:#e07b39; --g3:#8e6bd1; --g4:#2fa39a; --g5:#c9497a;
+  --display:"Noto Serif SC","Songti SC",serif; --body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131a21; --panel:#1b242d; --fg:#e4eaf0; --muted:#97a6b5; --line:#2e3b48;
+  --accent:#5bb4d4; --bar:#4d6275; --zone:#24526a; --cmp:#e8b13d; --mv:#ef6f6b; --fin:#4fbf85;
+  --g1:#7aa5f5; --g2:#ee9558; --g3:#a98ae3; --g4:#47c1b6; --g5:#e06b97; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131a21; --panel:#1b242d; --fg:#e4eaf0; --muted:#97a6b5; --line:#2e3b48;
+  --accent:#5bb4d4; --bar:#4d6275; --zone:#24526a; --cmp:#e8b13d; --mv:#ef6f6b; --fin:#4fbf85;
+  --g1:#7aa5f5; --g2:#ee9558; --g3:#a98ae3; --g4:#47c1b6; --g5:#e06b97; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.6}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:20px 48px;display:grid;gap:18px}
+h1{font-family:var(--display);font-weight:900;font-size:1.7rem;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{font:inherit;font-size:.92rem;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:5px 12px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:700}
+.tab:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tab small{opacity:.7;margin-left:4px}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px}
+@media (max-width:820px){.main{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.stage{display:grid;gap:12px}
+.note{font-size:1rem;min-height:3.2em;padding:8px 12px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.bars{display:flex;align-items:flex-end;gap:4px;height:210px;padding-top:8px}
+.slot{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.bar{will-change:transform;width:100%;border-radius:4px 4px 0 0;background:var(--bar);display:flex;align-items:flex-start;justify-content:center;transition:height .18s,background .18s;position:relative}
+.bar span{font-family:var(--mono);font-size:.8rem;font-weight:600;color:var(--fg);transform:translateY(-1.35em);white-space:nowrap}
+.hole{width:100%;height:28px;border:2px dashed var(--muted);border-radius:4px;opacity:.7}
+.slot.dim{opacity:.32}
+.idx{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-top:3px}
+.ptr{font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--accent);min-height:1.1em;line-height:1.1;text-align:center;word-break:break-all}
+.side{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.temp{display:flex;align-items:center;gap:8px;font-size:.88rem;color:var(--muted)}
+.temp b{font-family:var(--mono);color:var(--fg);border:2px solid var(--cmp);border-radius:6px;padding:1px 10px;background:color-mix(in srgb,var(--cmp) 15%,transparent)}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctrl button{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:5px 12px;cursor:pointer}
+.ctrl button.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700;min-width:72px}
+.ctrl input[type=range]{flex:1 1 140px;min-width:0;accent-color:var(--accent)}
+.spd{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--muted);flex:1 1 200px;min-width:0}.spd input{flex:1;min-width:0;accent-color:var(--accent)}.spd span{font-family:var(--mono);font-size:.8rem;min-width:4.5em}
+.ctrl .count{font-family:var(--mono);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.inp{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.85rem;color:var(--muted)}
+.inp input{font-family:var(--mono);font-size:.85rem;flex:1 1 200px;min-width:0;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+.inp button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:4px 10px;cursor:pointer}
+.err{color:var(--mv);font-size:.82rem}
+h2{font-family:var(--display);font-size:1.05rem;margin:0 0 8px}
+.passes{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:.86rem}
+.passes li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:3px 6px;border-radius:5px}
+.passes li.cur{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.passes .lb{color:var(--muted);white-space:nowrap}
+.passes .sq{font-family:var(--mono);font-size:.8rem;word-break:break-word}
+.empty{color:var(--muted);font-size:.85rem}
+.facts{display:grid;gap:6px;font-size:.88rem}
+.facts .idea{margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.78rem;border:1px solid var(--line);border-radius:999px;padding:1px 9px}
+.chip.good{border-color:var(--fin);color:var(--fin)}
+.chip.bad{border-color:var(--mv);color:var(--mv)}
+.trap{font-size:.84rem;color:var(--muted);margin:0}
+.trap b{color:var(--fg)}
+.buckets{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.bk{border:1px solid var(--line);border-radius:5px;min-height:70px;display:flex;flex-direction:column-reverse;align-items:center;gap:2px;padding:3px 2px}
+.bk .n{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.bk .it{font-family:var(--mono);font-size:.72rem;background:var(--zone);border-radius:3px;padding:0 3px;max-width:100%;overflow:hidden}
+.aux{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:.8rem;color:var(--muted)}
+.aux .it{font-family:var(--mono);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:0 6px}
+.aux .it.used{opacity:.3;text-decoration:line-through}
+.aux .it.c{background:var(--cmp);color:var(--bg)}
+.aux .it.L{border-color:var(--g1)} .aux .it.R{border-color:var(--g2)}
+.tree svg{width:100%;height:auto;display:block}
+.tree text{font-family:var(--mono);font-size:13px;fill:var(--fg)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.86rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{font-weight:700;color:var(--muted);font-size:.8rem;letter-spacing:.04em}
+td.m{font-family:var(--mono);font-size:.8rem;white-space:nowrap}
+.y{color:var(--fin);font-weight:700}.n{color:var(--mv);font-weight:700}
+.mnem{display:grid;gap:4px;font-size:.88rem;margin-top:12px}
+@media (prefers-reduced-motion:reduce){.bar{transition:none}}
+body{margin:0}
+.back{font-size:.85rem;color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <a class="back" href="../index.html">← 可视化目录</a>　<a class="back" href="../../index.html">温故复习网站</a>
+    <h1>408 排序演示台</h1>
+    <p class="sub">九种内部排序逐步演示（冒泡分上浮、沉底两个方向）。默认序列是教材里最常见的 49 38 65 97 76 13 27 49*，两个 49 用 * 区分。想亲眼看不稳定，就在下面输入卡片里给的小反例。</p>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+
+  <div class="main">
+    <section class="panel stage">
+      <div class="note" id="note"></div>
+      <div class="side" id="side"></div>
+      <div class="bars" id="bars"></div>
+      <div id="extra"></div>
+      <div class="legend">
+        <span><i style="background:var(--cmp)"></i>正在比较</span>
+        <span><i style="background:var(--mv)"></i>刚移动/交换</span>
+        <span><i style="background:var(--fin)"></i>最终位置已定</span>
+        <span><i style="background:var(--zone)"></i>有序区（未必最终）</span>
+        <span>虚线框 = 空位</span>
+      </div>
+      <div class="ctrl">
+        <button id="first" type="button">⏮</button>
+        <button id="prev" type="button">◀ 上一步</button>
+        <button id="play" class="primary" type="button">播放</button>
+        <button id="next" type="button">下一步 ▶</button>
+        <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="3"> <span id="spdv"></span></label>
+        <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+        <span class="count" id="count"></span>
+      </div>
+      <div class="inp">
+        <label for="seq">自己的序列：</label>
+        <input id="seq" value="49 38 65 97 76 13 27 49">
+        <button id="use" type="button">用这组数</button>
+        <button id="reset" type="button">恢复示例</button>
+        <span class="err" id="err"></span>
+      </div>
+    </section>
+
+    <aside class="panel" style="display:grid;gap:16px;align-content:start">
+      <div>
+        <h2>每趟结果</h2>
+        <ol class="passes" id="passes"></ol>
+      </div>
+      <div class="facts" id="facts"></div>
+    </aside>
+  </div>
+
+  <section class="panel">
+    <h2>九种排序一张表</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>排序</th><th>最好</th><th>平均</th><th>最坏</th><th>辅助空间</th><th>稳定</th><th>一趟定一个最终位置</th><th>备注</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="mnem">
+      <div><b>时间复杂度</b></div>
+      <div>选帽插，都很方(n²)，插帽最快一发出(最好为n)：选择、冒泡、插入都是O(n²)，插入和冒泡最好情况O(n)</div>
+      <div>快归队(堆)，n老二，快速最坏也很方：快排、归并、堆排序平均O(nlogn)，快排最坏O(n²)</div>
+      <div>基哥就是不一样，全部都是n+r：基数排序是O(n+r)，r是基数（每趟 n+r，共 d 趟，准确写法 O(d(n+r))）</div>
+      <div><b>空间复杂度</b></div>
+      <div>快老二，归并n：快排O(logn)，归并O(n)</div>
+      <div>基数r个队列，其余都是1：基数排序O(r)，其他都是O(1)</div>
+      <div><b>稳定性</b></div>
+      <div>不稳定：选艾希堆攻速：选择、希尔、堆排、攻速=快排</div>
+      <div>稳定：插帽龟(归)+基你太稳：插入、帽(冒泡)、归并、基数排序</div>
+    </div>
+  </section>
+</div>
+
+<script>
+const SORTS=[
+ {k:'ins',name:'直接插入',grp:'插入',idea:'每趟把下一个元素插进前面的有序区，比它大的依次后移。',
+  t:['O(n)','O(n²)','O(n²)'],sp:'O(1)',st:true,fix:false,note:'基本有序时最快；顺序表、链表都行',
+  trap:'前 i 个元素有序，但不是最终位置。<b>相等时停下不再前移</b>，所以稳定。'},
+ {k:'bin',name:'折半插入',grp:'插入',idea:'和直接插入一样，但用折半查找找插入位置，然后再统一后移。',
+  t:['O(n²)','O(n²)','O(n²)'],sp:'O(1)',st:true,fix:false,note:'比较次数降到 O(n log n)，移动次数不变；只能顺序表',
+  trap:'相等时 low=mid+1 往右找，所以插在相等元素后面，<b>保持稳定</b>。'},
+ {k:'shell',name:'希尔',grp:'插入',idea:'先按增量 d 分组（下标差 d 的同组），组内直接插入；d 减半，直到 d=1。',
+  t:['—','约 O(n¹·³)','O(n²)'],sp:'O(1)',st:false,fix:false,note:'只能顺序表',
+  trap:'相同关键字可能被分进不同组，相对顺序会乱，所以<b>不稳定</b>。试输入 3 2 2 1，结果是 1 2* 2 3。'},
+ {k:'bub',name:'冒泡·上浮',grp:'交换',idea:'王道代码的写法：从后往前两两比较，逆序就交换，每趟把最小的冒到最前面。',
+  t:['O(n)','O(n²)','O(n²)'],sp:'O(1)',st:true,fix:true,note:'一趟没有交换就提前结束',
+  trap:'只有严格大于才交换，所以稳定。<b>每趟确定一个元素的最终位置。</b>'},
+ {k:'bub2',name:'冒泡·沉底',grp:'交换',idea:'从前往后两两比较，逆序就交换，每趟把最大的沉到最后面。2010 年真题第 14 题用的就是这种。',
+  t:['O(n)','O(n²)','O(n²)'],sp:'O(1)',st:true,fix:true,note:'',tableSkip:true,
+  trap:'和“从后往前冒最小”是同一个算法，只是方向相反。试输入 2 12 16 88 5 10，前三趟就是真题给的结果。'},
+ {k:'quick',name:'快速',grp:'交换',idea:'取第一个元素作枢轴，high 从右找小的填左空位，low 从左找大的填右空位，交替进行，相遇处放枢轴。',
+  t:['O(n log n)','O(n log n)','O(n²)'],sp:'O(log n)～O(n)',st:false,fix:true,note:'初始有序时最差；空间是递归栈',
+  trap:'本演示按层算趟：第 k 趟 = 第 k 层的所有划分。<b>第 2 趟结束后至少 3 个元素到位</b>（枢轴在两端时可能只有 2 个），这是常考的判断题。试输入 2 2 1，结果是 1 2* 2，不稳定。'},
+ {k:'sel',name:'简单选择',grp:'选择',idea:'每趟在无序区里找出最小值，和无序区第一个交换。',
+  t:['O(n²)','O(n²)','O(n²)'],sp:'O(1)',st:false,fix:true,note:'比较次数恒为 n(n−1)/2，与初始序列无关',
+  trap:'远距离交换会把相同关键字的前后顺序打乱，所以<b>不稳定</b>。试输入 2 2 1：第一趟 1 和第一个 2 交换，结果 1 2* 2。'},
+ {k:'heap',name:'堆',grp:'选择',idea:'先建大根堆（从 ⌊n/2⌋ 往前逐个下沉），然后堆顶与末尾交换，再把新堆顶下沉，重复。',
+  t:['O(n log n)','O(n log n)','O(n log n)'],sp:'O(1)',st:false,fix:true,note:'建堆 O(n)；只能顺序表',
+  trap:'下标从 1 开始时，i 的孩子是 2i 和 2i+1。<b>下沉时先比较左右孩子，再和大的那个比</b>，所以每层最多比较 2 次。试输入 1 2 2，结果是 1 2* 2，不稳定。'},
+ {k:'merge',name:'二路归并',grp:'归并',idea:'第 1 趟两两合并成长度 2 的有序段，第 2 趟合成 4，依此类推。',
+  t:['O(n log n)','O(n log n)','O(n log n)'],sp:'O(n)',st:true,fix:false,note:'趟数 ⌈log₂ n⌉；链表也能做',
+  trap:'合并时相等取左边那段的，所以稳定。<b>辅助数组要 O(n)</b>，是唯一 O(n) 空间的。'},
+ {k:'radix',name:'基数',grp:'其他',idea:'从个位到最高位，每一趟按当前位分配进 0～9 号桶，再按桶号顺序收集。',
+  t:['O(d(n+r))','O(d(n+r))','O(d(n+r))'],sp:'O(r)',st:true,fix:false,note:'不比较关键字；d 为位数，r 为基数',
+  trap:'必须从<b>最低位</b>开始（LSD），每趟收集要保持桶内先进先出，否则不稳定。'}
+];
+
+const EX=[49,38,65,97,76,13,27,49];
+let data=EX.slice(), cur=SORTS[0], frames=[], passes=[], at=0, timer=null;
+const $=id=>document.getElementById(id);
+const lab=x=>x?x.v+x.t:'';
+
+function items(vals){const seen={};return vals.map((v,i)=>{seen[v]=(seen[v]||0)+1;return{v,t:'*'.repeat(seen[v]-1),id:i}})}
+
+function Rec(a){this.a=a;this.F=[];this.P=[];this.fin=new Set();this.ext={}}
+Rec.prototype.s=function(note,o){this.F.push(Object.assign({arr:this.a.map(x=>x&&{...x}),fin:[...this.fin],note,np:this.P.length,cmp:[],mv:[],ptrs:{}},this.ext,o||{}))};
+Rec.prototype.pass=function(label,o){const seq=this.a.map(lab).join(' ');this.P.push({label,seq});this.s(`${label}结束：${seq}`,o)};
+Rec.prototype.done=function(){this.a.forEach((_,i)=>this.fin.add(i));this.ext={};this.s('排序完成。')};
+
+const G={
+ ins(r){const a=r.a,n=a.length;r.s('初始：第 1 个元素自成有序区。',{zone:[0,0]});
+  for(let i=1;i<n;i++){r.s(`第 ${i} 趟：把 ${lab(a[i])} 插入前面的有序区，先和前一个 ${lab(a[i-1])} 比`,{cmp:[i-1,i],zone:[0,i-1]});
+   if(a[i].v<a[i-1].v){const t=a[i];a[i]=null;let j=i-1;r.s(`${lab(t)} 更小，取出放到 temp，原位置空出`,{temp:t,tl:'temp',zone:[0,i],ptrs:{j}});
+    while(true){if(j<0){r.s('j 已到最前面，停',{temp:t,tl:'temp',zone:[0,i],ptrs:{}});break}
+     const gt=a[j].v>t.v;r.s(`比较 ${lab(a[j])} 和 temp ${lab(t)}：`+(gt?'更大，要后移':'不大于，停下（相等也停，所以稳定）'),{temp:t,tl:'temp',cmp:[j],zone:[0,i],ptrs:{j}});if(!gt)break;
+     a[j+1]=a[j];a[j]=null;r.s(`${lab(a[j+1])} 后移一位，空位左移`,{temp:t,tl:'temp',mv:[j+1],zone:[0,i],ptrs:{j}});j--}
+    a[j+1]=t;r.s(`${lab(t)} 放进空位`,{mv:[j+1],zone:[0,i]})}
+   else r.s(`${lab(a[i])} 不小于前一个，原地不动`,{zone:[0,i]});
+   r.pass(`第 ${i} 趟`,{zone:[0,i]})}
+  r.done()},
+ bin(r){const a=r.a,n=a.length;r.s('初始：第 1 个元素自成有序区。',{zone:[0,0]});
+  for(let i=1;i<n;i++){const t=a[i];a[i]=null;let lo=0,hi=i-1;r.s(`第 ${i} 趟：取出 ${lab(t)}，在 [1..${i}] 里折半查找`,{temp:t,tl:'temp',zone:[0,i-1],ptrs:{low:lo,high:hi}});
+   while(lo<=hi){const m=(lo+hi)>>1;const go=a[m].v>t.v;r.s(`mid=${m+1}：${lab(a[m])} ${go?'>':'≤'} ${lab(t)}，${go?'high=mid−1':'low=mid+1（相等也往右，所以稳定）'}`,{temp:t,tl:'temp',cmp:[m],zone:[0,i-1],ptrs:{low:lo,high:hi,mid:m}});if(go)hi=m-1;else lo=m+1}
+   r.s(`low > high，插入位置是 high+1 = ${hi+2}`,{temp:t,tl:'temp',zone:[0,i-1],ptrs:{low:lo,high:hi}});
+   for(let j=i-1;j>hi;j--){a[j+1]=a[j];a[j]=null;r.s(`${lab(a[j+1])} 后移`,{temp:t,tl:'temp',mv:[j+1],zone:[0,i]})}
+   a[hi+1]=t;r.s(`${lab(t)} 放进第 ${hi+2} 位`,{mv:[hi+1],zone:[0,i]});r.pass(`第 ${i} 趟`,{zone:[0,i]})}
+  r.done()},
+ shell(r){const a=r.a,n=a.length;
+  for(let d=n>>1;d>=1;d>>=1){r.ext={gap:d};r.s(`增量 d=${d}：下标相差 ${d} 的元素是一组（同色），各组内部做直接插入`);
+   for(let i=d;i<n;i++){if(a[i].v<a[i-d].v){const t=a[i];a[i]=null;let j=i-d;r.s(`${lab(t)} < ${lab(a[j])}，取出`,{temp:t,tl:'temp',cmp:[j]});
+     while(true){if(j<0){r.s('同组前面没有元素了，停',{temp:t,tl:'temp'});break}
+      const gt=a[j].v>t.v;r.s(`同组比较 ${lab(a[j])} 和 temp ${lab(t)}：`+(gt?'更大，要后移':'不大于，停'),{temp:t,tl:'temp',cmp:[j]});if(!gt)break;
+      a[j+d]=a[j];a[j]=null;r.s(`${lab(a[j+d])} 后移 ${d} 位`,{temp:t,tl:'temp',mv:[j+d]});j-=d}
+     a[j+d]=t;r.s(`${lab(t)} 放入`,{mv:[j+d]})}
+    else r.s(`${lab(a[i-d])} 和 ${lab(a[i])} 同组，已有序`,{cmp:[i-d,i]})}
+   r.pass(`d=${d}`)}
+  r.done()},
+ bub(r){const a=r.a,n=a.length;
+  for(let i=0;i<n-1;i++){let f=false;r.s(`第 ${i+1} 趟：从最后一个往前两两比较`);
+   for(let j=n-1;j>i;j--){const gt=a[j-1].v>a[j].v;r.s(`比较第 ${j} 位 ${lab(a[j-1])} 和第 ${j+1} 位 ${lab(a[j])}：`+(gt?'前面大，逆序':'不逆序，不换'),{cmp:[j-1,j]});
+    if(gt){[a[j-1],a[j]]=[a[j],a[j-1]];f=true;r.s(`交换，${lab(a[j-1])} 往前冒`,{mv:[j-1,j]})}}
+   r.fin.add(i);r.pass(`第 ${i+1} 趟`);
+   if(!f){r.s('这一趟没有任何交换，说明已经有序，提前结束。');break}}
+  r.done()},
+ bub2(r){const a=r.a,n=a.length;
+  for(let i=0;i<n-1;i++){let f=false;const e=n-1-i;r.s(`第 ${i+1} 趟：从第一个往后两两比较`);
+   for(let j=0;j<e;j++){const gt=a[j].v>a[j+1].v;r.s(`比较第 ${j+1} 位 ${lab(a[j])} 和第 ${j+2} 位 ${lab(a[j+1])}：`+(gt?'前面大，逆序':'不逆序，不换'),{cmp:[j,j+1]});
+    if(gt){[a[j],a[j+1]]=[a[j+1],a[j]];f=true;r.s(`交换，${lab(a[j+1])} 往后沉`,{mv:[j,j+1]})}}
+   r.fin.add(e);r.pass(`第 ${i+1} 趟`);
+   if(!f){r.s('这一趟没有任何交换，说明已经有序，提前结束。');break}}
+  r.done()},
+ quick(r){const a=r.a,n=a.length;let lv=[[0,n-1]],k=0;
+  while(lv.length){const nx=[];let did=false;
+   for(const[lo,hi]of lv){if(lo>hi)continue;if(lo===hi){r.fin.add(lo);continue}
+    if(!did){k++;did=true}
+    r.ext={range:[lo,hi]};const p=a[lo];a[lo]=null;let L=lo,H=hi;
+    r.s(`第 ${k} 趟，划分 [${lo+1}..${hi+1}]：取 ${lab(p)} 作枢轴，low 处空出`,{temp:p,tl:'枢轴',ptrs:{low:L,high:H}});
+    const P=()=>({temp:p,tl:'枢轴',ptrs:{low:L,high:H}});
+    while(L<H){while(L<H){const ge=a[H].v>=p.v;r.s(`high 指向 ${lab(a[H])}，和枢轴 ${lab(p)} 比：`+(ge?'不小于，high 左移':'更小，停下'),Object.assign(P(),{cmp:[H]}));if(!ge)break;H--;r.s('high 左移一位',P())}
+     if(L<H){a[L]=a[H];a[H]=null;r.s(`${lab(a[L])} 填到左边 low 的空位，high 处空出`,Object.assign(P(),{mv:[L]}))}
+     while(L<H){const le=a[L].v<=p.v;r.s(`low 指向 ${lab(a[L])}，和枢轴 ${lab(p)} 比：`+(le?'不大于，low 右移':'更大，停下'),Object.assign(P(),{cmp:[L]}));if(!le)break;L++;r.s('low 右移一位',P())}
+     if(L<H){a[H]=a[L];a[L]=null;r.s(`${lab(a[H])} 填到右边 high 的空位，low 处空出`,Object.assign(P(),{mv:[H]}))}}
+    a[L]=p;r.fin.add(L);r.s(`low = high，枢轴 ${lab(p)} 放入，最终位置确定`,{mv:[L],ptrs:{'low=high':L}});
+    nx.push([lo,L-1],[L+1,hi])}
+   r.ext={};if(did)r.pass(`第 ${k} 趟`);lv=nx}
+  r.done()},
+ sel(r){const a=r.a,n=a.length;
+  for(let i=0;i<n-1;i++){let m=i;r.s(`第 ${i+1} 趟：在 [${i+1}..${n}] 找最小值，先假设是 ${lab(a[i])}`,{ptrs:{min:m}});
+   for(let j=i+1;j<n;j++){const lt=a[j].v<a[m].v;r.s(`${lab(a[j])} ${lt?'<':'≥'} 当前最小 ${lab(a[m])}`+(lt?'，更新 min':''),{cmp:[j,m],ptrs:{min:lt?j:m}});if(lt)m=j}
+   if(m!==i){[a[i],a[m]]=[a[m],a[i]];r.s(`把最小值 ${lab(a[i])} 和第 ${i+1} 位交换`,{mv:[i,m]})}
+   r.fin.add(i);r.pass(`第 ${i+1} 趟`)}
+  r.done()},
+ heap(r){const a=r.a,n=a.length;
+  const sink=(k,len)=>{while(2*k+1<len){let c=2*k+1;if(c+1<len){r.s(`比较 ${k+1} 号的左右孩子 ${lab(a[c])} 和 ${lab(a[c+1])}`,{cmp:[c,c+1]});if(a[c+1].v>a[c].v)c++}
+    else r.s(`${k+1} 号只有左孩子 ${lab(a[c])}`,{cmp:[c]});
+    r.s(`较大的孩子是 ${lab(a[c])}，和父亲 ${lab(a[k])} 比`,{cmp:[k,c]});
+    if(a[c].v>a[k].v){[a[k],a[c]]=[a[c],a[k]];r.s(`孩子更大，交换，${lab(a[c])} 继续往下沉`,{mv:[k,c]});k=c}
+    else{r.s(`父亲不小于孩子，停`,{cmp:[k]});break}}};
+  r.ext={heap:n};r.s(`把序列看成完全二叉树。从最后一个非叶结点 ⌊n/2⌋ = ${n>>1} 号往前，依次下沉`);
+  for(let i=(n>>1)-1;i>=0;i--){r.s(`调整以 ${i+1} 号（${lab(a[i])}）为根的子树`,{cmp:[i]});sink(i,n)}
+  r.pass('建大根堆');
+  for(let e=n-1;e>0;e--){[a[0],a[e]]=[a[e],a[0]];r.fin.add(e);r.ext={heap:e};r.s(`堆顶最大值 ${lab(a[e])} 与第 ${e+1} 位交换，它的位置确定`,{mv:[0,e]});sink(0,e);r.pass(`第 ${n-e} 趟`)}
+  r.done()},
+ merge(r){const a=r.a,n=a.length;let k=0;
+  for(let w=1;w<n;w*=2){k++;r.s(`第 ${k} 趟：把长度 ${w} 的有序段两两合并`);
+   for(let lo=0;lo<n-w;lo+=2*w){const md=lo+w-1,hi=Math.min(lo+2*w-1,n-1),b=a.slice(lo,hi+1).map(x=>({...x}));let i=0,j=w,p=lo;const used=new Set();
+    r.ext={range:[lo,hi]};const ax=()=>({aux:{b,used:[...used],w}});
+    r.s(`合并 [${lo+1}..${md+1}] 和 [${md+2}..${hi+1}]，先复制到辅助数组 B`,ax());
+    while(i<w&&j<b.length){r.s(`比较 B 中左段的 ${lab(b[i])} 和右段的 ${lab(b[j])}`,Object.assign({aux:{b,used:[...used],w,cmp:[i,j]}}));const L=b[i].v<=b[j].v;const x=L?b[i]:b[j];used.add(L?i:j);L?i++:j++;a[p]=x;r.s(`B 中 ${lab(L?b[i-1]:b[j-1])} 更小`+(L&&b[i-1].v===(b[j]||{}).v?'（相等取左段，所以稳定）':'')+`，放回 A 的第 ${p+1} 位`,Object.assign({mv:[p]},ax()));p++}
+    while(i<w){used.add(i);a[p]=b[i++];r.s(`左段剩下的 ${lab(a[p])} 直接放回`,Object.assign({mv:[p]},ax()));p++}
+    while(j<b.length){used.add(j);a[p]=b[j++];r.s(`右段剩下的 ${lab(a[p])} 直接放回`,Object.assign({mv:[p]},ax()));p++}}
+   r.ext={};r.pass(`第 ${k} 趟`)}
+  r.done()},
+ radix(r){let a=r.a;const n=a.length,mx=Math.max(...a.map(x=>x.v)),d=String(mx).length,nm=['个位','十位','百位','千位'];
+  for(let p=0,base=1;p<d;p++,base*=10){const bk=Array.from({length:10},()=>[]);r.s(`第 ${p+1} 趟：按${nm[p]}分配`,{buckets:bk.map(x=>x.slice())});
+   a.forEach((x,i)=>{const g=Math.floor(x.v/base)%10;bk[g].push(x);r.s(`${lab(x)} 的${nm[p]}是 ${g}，放进 ${g} 号桶`,{cmp:[i],buckets:bk.map(y=>y.slice())})});
+   const c=bk.flat();c.forEach((x,i)=>a[i]=x);r.s('按 0→9 的桶号顺序收集，桶内先进先出',{buckets:bk.map(y=>y.slice())});r.pass(`第 ${p+1} 趟（${nm[p]}）`)}
+  r.done()}
+};
+
+function build(){stop();const r=new Rec(items(data));G[cur.k](r);frames=r.F;passes=r.P;at=0;$('scrub').max=frames.length-1;draw()}
+
+const GC=['var(--g1)','var(--g2)','var(--g3)','var(--g4)','var(--g5)'];
+function draw(){const f=frames[at];$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('note').textContent=f.note;
+ const vals=data,mx=Math.max(...vals,1),fin=new Set(f.fin);
+ const old={};document.querySelectorAll('#bars .bar').forEach(b=>old[b.dataset.id]=b.getBoundingClientRect().left);
+ $('bars').innerHTML=f.arr.map((x,i)=>{const pt=Object.entries(f.ptrs).filter(([,v])=>v===i).map(([k])=>k).join(' ');
+  const dim=f.range&&(i<f.range[0]||i>f.range[1])||(f.heap!==undefined&&i>=f.heap&&!fin.has(i));
+  if(!x)return`<div class="slot${dim?' dim':''}"><div class="hole"></div><div class="idx">${i+1}</div><div class="ptr">${pt}</div></div>`;
+  let c='var(--bar)';if(f.gap)c=GC[i%f.gap%5];if(f.zone&&i>=f.zone[0]&&i<=f.zone[1])c='var(--zone)';if(fin.has(i))c='var(--fin)';if(f.cmp.includes(i))c='var(--cmp)';if(f.mv.includes(i))c='var(--mv)';
+  const h=Math.max(10,Math.round(x.v/mx*150));
+  return`<div class="slot${dim?' dim':''}"><div class="bar" data-id="${x.id}" style="height:${h}px;background:${c}"><span>${lab(x)}</span></div><div class="idx">${i+1}</div><div class="ptr">${pt}</div></div>`}).join('');
+ if(!matchMedia('(prefers-reduced-motion: reduce)').matches)document.querySelectorAll('#bars .bar').forEach(b=>{const o=old[b.dataset.id];if(o===undefined)return;const dx=o-b.getBoundingClientRect().left;if(Math.abs(dx)<1)return;b.animate([{transform:`translateX(${dx}px)`},{transform:'none'}],{duration:Math.min(450,delay()*0.6),easing:'ease-out'})});
+ $('side').innerHTML=f.temp?`<div class="temp">${f.tl}：<b>${lab(f.temp)}</b></div>`:(f.gap?`<div class="temp">增量 d = <b>${f.gap}</b></div>`:'');
+ let ex='';
+ if(f.buckets)ex=`<div class="buckets">${f.buckets.map((b,i)=>`<div class="bk">${'<span class="n">'+i+'</span>'+b.map(x=>`<span class="it">${lab(x)}</span>`).join('')}</div>`).join('')}</div>`;
+ if(f.aux){const u=new Set(f.aux.used);ex=`<div class="aux">辅助数组 B：${f.aux.b.map((x,i)=>`<span class="it ${i<f.aux.w?'L':'R'}${u.has(i)?' used':''}${(f.aux.cmp||[]).includes(i)?' c':''}">${lab(x)}</span>`).join('')}</div>`}
+ if(cur.k==='heap')ex=tree(f,fin);
+ $('extra').innerHTML=ex;
+ $('passes').innerHTML=passes.length?passes.map((p,i)=>`<li class="${i===f.np-1?'cur':''}" ${i>=f.np?'hidden':''}><span class="lb">${p.label}</span><span class="sq">${p.seq}</span></li>`).join(''):'';
+ if(!f.np)$('passes').innerHTML='<li class="empty">还没走完第一趟。</li>';
+ $('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+
+function tree(f,fin){const n=f.arr.length,W=640,lv=Math.floor(Math.log2(n))+1,H=lv*58+10;let e='',nd='';
+ const pos=i=>{const d=Math.floor(Math.log2(i+1)),p=i+1-2**d;return[(p+.5)*W/2**d,26+d*58]};
+ for(let i=1;i<n;i++){const[x1,y1]=pos(i),[x2,y2]=pos((i-1)>>1);const off=f.heap!==undefined&&i>=f.heap;e+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--line)" stroke-width="2" ${off?'stroke-dasharray="4 4"':''}/>`}
+ f.arr.forEach((x,i)=>{const[cx,cy]=pos(i);let c='var(--panel)';if(fin.has(i))c='var(--fin)';if(f.cmp.includes(i))c='var(--cmp)';if(f.mv.includes(i))c='var(--mv)';const off=f.heap!==undefined&&i>=f.heap;
+  nd+=`<g opacity="${off?.45:1}"><circle cx="${cx}" cy="${cy}" r="18" fill="${c}" stroke="var(--accent)" stroke-width="1.5"/><text x="${cx}" y="${cy+4.5}" text-anchor="middle">${lab(x)}</text><text x="${cx+20}" y="${cy-14}" style="font-size:10px;fill:var(--muted)">${i+1}</text></g>`});
+ return`<div class="tree"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="当前堆的完全二叉树视图">${e}${nd}</svg></div>`}
+
+function facts(){const s=cur;$('facts').innerHTML=`<h2>${s.name}排序</h2><p class="idea">${s.idea}</p>
+ <div class="chips"><span class="chip ${s.st?'good':'bad'}">${s.st?'稳定':'不稳定'}</span><span class="chip">平均 ${s.t[1]}</span><span class="chip">空间 ${s.sp}</span><span class="chip ${s.fix?'good':''}">${s.fix?'每趟定一个最终位置':'不能一趟定最终位置'}</span></div>
+ <p class="trap">${s.trap}</p>`}
+
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+const SPD=[3000,2000,1400,1000,700,450,250];
+function delay(){return SPD[+$('speed').value]}
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function tick(){if(at<frames.length-1){at++;draw();timer=setTimeout(tick,delay())}else{timer=null;draw()}}
+function play(){if(timer){stop();draw();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());draw()}
+
+$('tabs').innerHTML=SORTS.map((s,i)=>`<button class="tab" role="tab" id="tab-${s.k}" aria-selected="${i===0}" data-i="${i}">${s.name}<small>${s.grp}</small></button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('.tab');if(!b)return;cur=SORTS[+b.dataset.i];document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t===b));facts();build();play()};
+$('tbody').innerHTML=SORTS.filter(s=>!s.tableSkip).map(s=>`<tr><td>${s.name}</td><td class="m">${s.t[0]}</td><td class="m">${s.t[1]}</td><td class="m">${s.t[2]}</td><td class="m">${s.sp}</td><td class="${s.st?'y':'n'}">${s.st?'稳定':'不稳定'}</td><td class="${s.fix?'y':''}">${s.fix?'能':'不能'}</td><td>${s.note}</td></tr>`).join('');
+$('play').onclick=play;
+$('next').onclick=()=>{stop();if(at<frames.length-1)at++;draw()};
+$('prev').onclick=()=>{stop();if(at>0)at--;draw()};
+$('first').onclick=()=>{stop();at=0;draw()};
+$('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};showSpd();
+$('scrub').oninput=e=>{stop();at=+e.target.value;draw()};
+$('use').onclick=()=>{const v=$('seq').value.trim().split(/[\s,，]+/).filter(Boolean).map(Number);
+ if(v.some(x=>!Number.isInteger(x)||x<0||x>9999)){$('err').textContent='请输入 0～9999 的整数，用空格或逗号隔开。';return}
+ if(v.length<2||v.length>12){$('err').textContent='请输入 2～12 个数。';return}
+ $('err').textContent='';data=v;build();play()};
+$('reset').onclick=()=>{$('seq').value=EX.join(' ');$('err').textContent='';data=EX.slice();build();play()};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+facts();build();play();
+</script>
+</body>
+</html>
