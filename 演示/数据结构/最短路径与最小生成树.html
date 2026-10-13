@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>最短路径与生成树</title>
+<style>
+/* Four tabs on one graph canvas: Dijkstra round table, Floyd A(k)/path matrices, Prim lowcost table, Kruskal sorted edges + union-find. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:80ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{font:600 14px var(--sans);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:6px 16px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--green);border-color:var(--green);color:var(--bg)}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.ctrl .muted{color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.q{font-size:14px;padding:8px 12px;border:1px dashed var(--line);border-radius:5px;margin-top:10px}
+.q .ans{color:var(--done);font-weight:600}
+.q summary{cursor:pointer;color:var(--muted);font-size:13px}
+#graph{overflow-x:auto}
+#graph svg{min-width:358px;max-width:640px;margin:0 auto}
+svg{width:100%;height:auto;display:block}
+.g-e{stroke:var(--muted);stroke-width:1.6;fill:none}
+.g-e.b{stroke:var(--q);stroke-width:2.6}
+.g-e.o{stroke:var(--cmp);stroke-width:3.6}
+.g-e.g{stroke:var(--done);stroke-width:3.6}
+.g-e.r{stroke:var(--mv);stroke-width:3.4;stroke-dasharray:7 4}
+.g-e.d{stroke:var(--line);stroke-dasharray:4 4}
+.g-w{font:13px var(--mono);fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4px;text-anchor:middle;dominant-baseline:central}
+.g-w.o{fill:var(--cmp);font-weight:700}.g-w.r{fill:var(--mv);font-weight:700}.g-w.g{fill:var(--done);font-weight:700}
+.g-n{fill:var(--paper);stroke:var(--green);stroke-width:2;cursor:default}
+.g-n.s{fill:color-mix(in srgb,var(--done) 28%,var(--paper));stroke:var(--done)}
+.g-n.o{fill:color-mix(in srgb,var(--cmp) 35%,var(--paper));stroke:var(--cmp);stroke-width:3.4}
+.g-n.r{stroke:var(--mv);stroke-width:3.4}
+.g-n.click{cursor:pointer}
+.g-t{font:600 14px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.g-l{font:12px var(--mono);fill:var(--q);text-anchor:middle;paint-order:stroke;stroke:var(--paper);stroke-width:3px;pointer-events:none}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:10px}
+.note b{color:var(--done)}
+.note .bad b,.note b.bad{color:var(--mv)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:6em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+.tw{overflow-x:auto;margin-top:10px}
+.twin{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:760px){.twin{grid-template-columns:minmax(0,1fr)}}
+table.t{border-collapse:collapse;font:13px var(--mono)}
+table.t th,table.t td{border:1px solid var(--line);padding:3px 7px;text-align:center;min-width:2.6em;white-space:nowrap}
+table.t th{color:var(--muted);font-weight:400;background:var(--bg)}
+.cap{font:13px var(--sans);color:var(--muted);padding-bottom:4px}
+table.t td.pick{color:var(--mv);font-weight:700;background:color-mix(in srgb,var(--cmp) 26%,transparent)}
+table.t td.frz{color:var(--muted);opacity:.55}
+table.t td.upd{color:var(--done);font-weight:700}
+table.t td.cur{background:color-mix(in srgb,var(--cmp) 30%,transparent);font-weight:700}
+table.t td.rk,table.t th.rk{background:color-mix(in srgb,var(--cmp) 20%,transparent)}
+table.t td.ask{background:color-mix(in srgb,var(--cmp) 45%,transparent);font-weight:700}
+table.t td.skip{color:var(--mv)}
+table.t td.sel{color:var(--done);font-weight:700}
+table.t td.click{cursor:pointer}
+table.t td.click:hover{outline:2px solid var(--accent)}
+table.t tr.cur td{background:color-mix(in srgb,var(--cmp) 22%,transparent)}
+table.t small{display:block;font-size:10.5px;color:var(--muted);font-weight:400;line-height:1.2}
+table.t sub{font-size:10.5px;color:var(--q);font-weight:400;margin-left:2px}
+.mini{font:11px var(--sans);border:1px solid var(--line);background:var(--bg);color:var(--q);border-radius:4px;padding:0 6px;cursor:pointer}
+.cands{display:flex;flex-wrap:wrap;gap:6px;font:13px var(--mono);margin-top:8px;align-items:center}
+.cands span.c{border:1px solid var(--line);border-radius:4px;padding:1px 7px;background:var(--bg)}
+.cands span.c.min{border-color:var(--cmp);color:var(--mv);font-weight:700}
+.cands button.c{font:13px var(--mono);border:1px dashed var(--cmp);border-radius:4px;padding:1px 7px;background:var(--bg);color:var(--mv);cursor:pointer}
+.out{font:14px var(--mono);margin-top:8px;line-height:1.8}
+.out b{color:var(--mv)}
+.sets{font:13px var(--mono);margin-top:6px}
+textarea{width:100%;min-height:9em;font:13px/1.5 var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:6px}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:13px;margin-top:6px}
+.form input[type=text]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:2px 6px;width:5em}
+.quiz{display:grid;gap:10px}
+.quiz .q{margin-top:0}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="关键路径.html">关键路径</a></div>
+  <header>
+    <h1>最短路径与最小生成树</h1>
+    <p class="sub">按罗素《第六章 图（下）》的做法一步一步填：Dijkstra 每轮一列（p29–47），Floyd 逐个中转点算 A(k)（p48–66），Prim 和 Kruskal 在同一张图上对照（p7–27、p99）。最短路径在 408 考过 2009、2012、2016、2021、2023、2025 等年，最小生成树考过 2012、2015、2017、2020、2023 等年。</p>
+  </header>
+  <section class="panel">
+    <div class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-m="dij" type="button">Dijkstra</button>
+      <button class="tab" role="tab" data-m="floyd" type="button">Floyd</button>
+      <button class="tab" role="tab" data-m="prim" type="button">Prim</button>
+      <button class="tab" role="tab" data-m="krus" type="button">Kruskal</button>
+    </div>
+    <h2 style="margin-top:12px" id="rulesTitle">几句话</h2>
+    <ol class="rules" id="rules"></ol>
+  </section>
+  <section class="panel">
+    <div class="chips" id="presets">例题：</div>
+    <div class="q" id="question"></div>
+    <div style="margin-top:10px" id="graph"></div>
+    <p class="legend" id="legend"></p>
+  </section>
+  <section class="panel">
+    <div class="ctrl">
+      <button class="btn" id="reset" type="button">从头</button>
+      <button class="btn" id="prev" type="button">上一步</button>
+      <button class="btn primary" id="next" type="button">下一步</button>
+      <button class="btn" id="all" type="button">全部（跑到底）</button>
+      <label class="muted"><input type="checkbox" id="guessMode" checked> 先猜再看</label>
+      <span class="muted" id="prog"></span>
+    </div>
+    <div class="guess hidden" id="gbox"><span id="gq"></span><span id="gctl"></span></div>
+    <div class="note" id="note"></div>
+    <div id="cands"></div>
+    <div id="tables"></div>
+    <div class="out" id="out"></div>
+  </section>
+  <section class="panel">
+    <h2>输入自己的图</h2>
+    <p class="legend">每行一条边：<code>起点 终点 权</code>，例如 <code>a b 8</code>。顶点名 1～3 个字符，最多 8 个顶点、20 条边，权是整数（可以负，看 Dijkstra 怎么出错）。Prim、Kruskal 一律当无向图。</p>
+    <textarea id="src" spellcheck="false"></textarea>
+    <div class="form">
+      <label><input type="checkbox" id="dir"> 有向图（Dijkstra、Floyd 用）</label>
+      <label>源点 / 起点 <input type="text" id="start" autocomplete="off"></label>
+      <button class="btn primary" id="load" type="button">用这个图</button>
+    </div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <h2>概念判断题（不用画图）</h2>
+    <div class="quiz" id="quiz"></div>
+  </section>
+  <section class="panel">
+    <h2>例题从哪来</h2>
+    <p class="sub" id="srcnote"></p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const INF=Infinity,fm=x=>x===INF?'∞':String(x);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const RULES={
+ dij:['<b>集合 S 放已经确定最短路径的点</b>，开始只有源点。dist[v] 是目前知道的源点到 v 的最短长度，path[v] 是这条路上 v 的前一个点（没有记 −1）。',
+  '<b>每轮选不在 S 里、dist 最小的点 u 并入 S</b>，它从此冻结（表里灰掉）。比的是从源点出发的总长，不是某一条边的长短。',
+  '<b>用 u 松弛</b>：看 u 的每条出边 &lt;u, v&gt;（v 不在 S），若 dist[u] + w &lt; dist[v]，改 dist[v] = dist[u] + w，path[v] = u。',
+  '<b>找路径就倒着跟 path</b>：终点 → path[终点] → … → 源点，再反过来。时间复杂度 O(|V|²)。',
+  '<b>有负权边不能用 Dijkstra</b>：已冻结的点后来可能有更短的路，算法不会回头改（讲义 p47 反例）。'],
+ floyd:['<b>A(−1) 就是邻接矩阵</b>：对角线 0，没有边 ∞。',
+  '<b>A(k) 允许 v0…vk 中转</b>，每格 A(k)[i][j] = min( A(k−1)[i][j], A(k−1)[i][k] + A(k−1)[k][j] )。',
+  '<b>只看第 k 行和第 k 列</b>：i 到 k 那段在第 k 列，k 到 j 那段在第 k 行。第 k 行、第 k 列和对角线这一轮不会变。',
+  '<b>path[i][j] 记中转点</b>（王道写法：初始 −1，更新时记 k）。找路径时按 path 拆成 i→k、k→j 两段，再各自往下拆。',
+  '三重循环 O(|V|³)。<b>允许负权边，不允许负权回路</b>；无向图也能用。'],
+ prim:['<b>从一个点长成一棵树</b>：集合 S 开始只有起点。',
+  '<b>每轮选“S 到外面”的所有候选边里最短的一条</b>，把外面那个点并入 S。看的是整个集合，不只是刚加入的那个点。',
+  '<b>lowcost[v] 存的是一条边的权</b>（v 到 S 里最近的点），新点 u 加入后只要 w(u, v) &lt; lowcost[v] 就更新。<b>不要加 lowcost[u]</b>，那是 Dijkstra。',
+  '时间复杂度 O(|V|²)，和边数无关，<b>适合边稠密的图</b>。',
+  '<b>同权边选哪条都行</b>，树的形状可能不唯一，但总权值一定唯一。'],
+ krus:['<b>所有边按权从小到大排好</b>，一条一条看。',
+  '<b>两端已经连通就跳过</b>（再加会成环），否则选它；选够 n − 1 条就停，后面的边不用看。',
+  '<b>用并查集判环</b>：find(u) == find(v) 说明 u、v 已在同一集合。选边后合并，这里把 v 的根挂到 u 的根下：parent[find(v)] = find(u)。',
+  '时间复杂度 O(|E|log|E|)，主要花在排序，<b>适合边稀疏、顶点多的图</b>。',
+  '<b>同权边先看哪条都行</b>，结果可能不唯一，总权值不变。']};
+const LEGEND={dij:'绿色圆是已并入 S 的点，橙色是这一轮选中的点；蓝色边是这一轮松弛看过的边，橙色边是让 dist 变小的边，红色虚线是想改却因终点已冻结改不了的边。圆上方蓝字是当前 dist。跑完后点任一顶点看 path 回溯。',
+ floyd:'橙色圆是这一轮的中转点 k，蓝色边是进出 k 的边。矩阵里橙底是第 k 行和第 k 列，绿色粗体是这一轮变小的格子。跑完后点 A 矩阵的任一格看路径。',
+ prim:'绿色圆和绿色粗边是已经长出来的树，蓝色边是“树到外面”的候选边，橙色是这一轮选中的边。圆上方蓝字是 lowcost。',
+ krus:'绿色粗边是已选的边，橙色是正在看的边，红色虚线是会成环被跳过的边，灰色虚线是早就跳过的边。'};
+const PRESETS=[
+ {m:['dij'],t:'讲义例题（源点 a）',dir:true,start:'a',src:'a b 8\na c 16\na d 2\na e 30\nd b 3\nd e 20\nb c 1\nb e 10\nc e 15',W:560,H:260,pos:{a:[62,144],b:[185,33],c:[275,101],d:[148,226],e:[505,123]},
+  q:'用 Dijkstra 算法求下图中从源点 a 到其余各顶点的最短路径，写出每一轮的 dist 和集合 S（讲义《第六章 图（下）》p29–46）。',
+  a:'S 依次并入 d、b、c、e。第一轮 dist：b 8，c 16，d 2，e 30；第二轮 b 5，c 16，e 22；第三轮 c 6，e 15；第四轮 e 15。最终 dist：b 5，c 6，d 2，e 15；路径 a→d→b，a→d→b→c，a→d，a→d→b→e（e 在第二轮由 b 改成 5 + 10 = 15，之后 c 给出 6 + 15 = 21 不更短）。',
+  note:'讲义第六章 图（下）p29–46 的有向图，源点 a。表格的行列和讲义 p46 一样：行是顶点，每轮一列，红字是这一轮选中的；讲义选中后的格子留空，这里改成灰显冻结值，方便对照。'},
+ {m:['dij'],t:'讲义负权反例',dir:true,start:'A',src:'A B 5\nA C 4\nB C -3',W:440,H:250,pos:{A:[70,60],B:[340,60],C:[340,205]},
+  q:'有向图 A→B 权 5，A→C 权 4，B→C 权 −3。用 Dijkstra 求 A 到各顶点的最短路径，结果对吗？（讲义 p47）',
+  a:'不对。第一轮 dist：B 5，C 4，C 最小先并入 S 冻结；之后用 B 松弛时 5 + (−3) = 2 < 4，但 C 已经冻结，不再改。Dijkstra 给出 dist[C] = 4，真实最短是 A→B→C = 2。所以 Dijkstra 不适用于有负权边的图。',
+  note:'讲义 p47：dist = 0 5 4，path = −1 0 0，S = {A, C} → {A, C, B}。同一张图到 Floyd 标签里点“负权图换 Floyd”，能算出正确的 2。'},
+ {m:['dij'],t:'2012 统考',dir:true,start:'a',src:'a b 2\na c 5\nb c 1\nb d 3\nc e 4\nc f 1\nd e 1',W:560,H:270,pos:{a:[50,135],b:[190,45],c:[190,225],d:[350,45],f:[350,225],e:[510,135]},
+  q:'【2012 统考真题】对下图所示的有向带权图，若采用 Dijkstra 算法求从源点 a 到其他各顶点的最短路径，则得到的第一条最短路径的目标顶点是 b，第二条最短路径的目标顶点是 c，后续得到的其余各最短路径的目标顶点依次是（ ）。A. d, e, f　B. e, d, f　C. f, d, e　D. f, e, d',
+  a:'C。并入顺序 b(2)、c(3)、f(4)、d(5)、e(6)：c 进来后 f 变成 3 + 1 = 4，比 d 的 5 小；d 进来后 e 由 7 改成 5 + 1 = 6。',
+  note:'2012 年 408 第 29 题（王道《数据结构》6.4 节选择题 29）。王道 Markdown 里没有收录原题图，这里的 7 条边是按王道解析的逐轮 dist 表反推的（a→b 2、a→c 5、b→c 1、b→d 3、c→e 4、c→f 1、d→e 1），每一轮的 dist 都和解析表一致；原图可能还有不影响结果的边。'},
+ {m:['dij'],t:'2016 统考',dir:true,start:'1',src:'1 2 5\n1 5 4\n2 3 2\n5 6 5\n5 4 7',W:560,H:260,pos:{'1':[60,130],'2':[210,40],'5':[210,220],'3':[370,40],'6':[370,220],'4':[510,130]},
+  q:'【2016 统考真题】使用 Dijkstra 算法求下图中从顶点 1 到其他各顶点的最短路径，依次得到的各最短路径的目标顶点是（ ）。A. 5, 2, 3, 4, 6　B. 5, 2, 3, 6, 4　C. 5, 2, 4, 3, 6　D. 5, 2, 6, 3, 4',
+  a:'B。最终 dist：2 是 5，3 是 5 + 2 = 7，4 是 11，5 是 4，6 是 4 + 5 = 9；按 dist 从小到大并入：5、2、3、6、4。',
+  note:'2016 年 408 第 35 题。原题图没有收录，边按王道解析表和“快速解法”里的 dist 反推：1→2 5、1→5 4、2→3 2、5→6 5、5→4 7。解析表第 2 轮把到 4 的路径印成 v1→v3→v4，那时 3 还没进 S，应是 v1→v5→v4。原图可能还有不影响结果的边。'},
+ {m:['dij'],t:'2021 统考',dir:true,start:'1',src:'1 2 26\n1 3 3\n1 5 6\n3 2 22\n5 2 15\n5 4 8',W:560,H:260,pos:{'1':[60,130],'3':[230,40],'5':[230,220],'2':[460,40],'4':[460,220]},
+  q:'【2021 统考真题】使用 Dijkstra 算法求下图中从顶点 1 到其余各顶点的最短路径，将当前找到的从顶点 1 到顶点 2, 3, 4, 5 的最短路径长度保存在数组 dist 中，求出第二条最短路径后，dist 中的内容更新为（ ）。A. 26, 3, 14, 6　B. 25, 3, 14, 6　C. 21, 3, 14, 6　D. 15, 3, 14, 6',
+  a:'C。初始 {26, 3, ∞, 6}；第一条最短路径到 3，用 3 松弛后 {25, 3, ∞, 6}；第二条到 5，用 5 松弛后 {21, 3, 14, 6}。看表的第 3 列。',
+  note:'2021 年 408 第 44 题。原题图没有收录，边按王道解析里的 dist 变化 {26,3,∞,6} → {25,3,∞,6} → {21,3,14,6} 反推：1→2 26、1→3 3、1→5 6、3→2 22、5→2 15、5→4 8。题目只问到第二条最短路径，这几条边已经足够；后面几轮原图可能还有别的边。'},
+ {m:['dij'],t:'2009 统考（反例）',dir:false,start:'A',src:'A B 1\nB C 5\nA D 2\nD C 2',W:520,H:260,pos:{A:[60,130],B:[260,40],D:[260,220],C:[460,130]},
+  q:'【2009 统考真题】带权图（权值非负，表示边连接的两顶点间的距离）的最短路径问题是找出从初始顶点到目标顶点之间的一条最短路径。假设从初始顶点到目标顶点之间存在路径，现有一种解决该问题的方法：① 设最短路径初始时仅包含初始顶点，令当前顶点 u 为初始顶点。② 选择离 u 最近且尚未在最短路径中的一个顶点 v，加入最短路径，修改当前顶点 u = v。③ 重复步骤②，直到 u 是目标顶点时为止。请问上述方法能否求得最短路径？若该方法可行，请证明；否则，请举例说明。',
+  a:'不能。反例（这张图，求 A 到 C）：按题中方法，离 A 最近的是 B（1），再从 B 走到 C（5），得 A→B→C = 6；而 A→D→C = 4 更短。题中方法只看“离当前点最近”，Dijkstra 看“离源点最近”（dist 最小），而且每并入一个点都会更新所有 dist。跑一遍看 Dijkstra 第二轮选的是 D。',
+  note:'2009 年 408 第 41 题。王道解析的反例图（A→D→C 才是最短）没有收录权值，这张无向图的权值是这里自拟的，结论和解析一致。'},
+ {m:['floyd'],t:'讲义例 1',dir:true,src:'A B 1\nA C 2\nA D 5\nB D 2\nC A 1\nC D 8',W:520,H:260,pos:{A:[72,218],B:[96,60],C:[271,39],D:[463,218]},
+  q:'用 Floyd 算法求下图各顶点之间的最短路径，写出 A(−1) 到 A(3)（讲义 p48–59）。',
+  a:'A(0)（允许 A 中转）：C→B 改成 1 + 1 = 2，C→D 由 8 改成 1 + 5 = 6。A(1)（允许 B）：A→D 由 5 改成 1 + 2 = 3，C→D 由 6 改成 2 + 2 = 4。A(2)、A(3) 不再变。最终：A 行 0 1 2 3，B 行 ∞ 0 ∞ 2，C 行 1 2 0 4，D 行 ∞ ∞ ∞ 0。',
+  note:'讲义 p48–59 的有向图（A→C 2 和 C→A 1 是两条方向相反的边）。讲义 p49–52 用“红色结点不能作为中转点”一步步讲 dis′(C, D) 怎么更新，就是这里 A(0) 那一步。path 矩阵讲义没画，这里按王道教材的写法补上。'},
+ {m:['floyd'],t:'讲义例 2',dir:true,src:'A B 3\nA C 2\nB D 5\nC B 4\nC D 4',W:560,H:270,pos:{A:[65,140],B:[259,48],C:[281,236],D:[509,236]},
+  q:'用 Floyd 算法求下图各顶点之间的最短路径（讲义 p60–64：绕行 A、绕行 B、绕行 C、绕行 D）。',
+  a:'绕行 A：A 没有入边，不变。绕行 B：A→D 由 ∞ 改成 3 + 5 = 8。绕行 C：A→D 由 8 改成 2 + 4 = 6。绕行 D：D 没有出边，不变。最终：A 行 0 3 2 6，B 行 ∞ 0 ∞ 5，C 行 ∞ 4 0 4，D 行 ∞ ∞ ∞ 0。',
+  note:'讲义 p60–64。讲义 p63 右边“绕行 C”的结果矩阵把 D→D 印成 ∞，应为 0（对角线永远是 0，p64 又印回了 0）。另外 p62–64 等号左边标的 A(1)、A(2)、A(3) 其实是绕行前的矩阵，按 p60 的定义应依次叫 A(0)、A(1)、A(2)，右边的结果才是 A(1)、A(2)、A(3)。这里按定义标。'},
+ {m:['floyd'],t:'负权图换 Floyd',dir:true,src:'A B 5\nA C 4\nB C -3',W:440,H:250,pos:{A:[70,60],B:[340,60],C:[340,205]},
+  q:'讲义 p47 让 Dijkstra 出错的负权图（A→B 5、A→C 4、B→C −3）改用 Floyd，A 到 C 的最短路径是多少？',
+  a:'2，路径 A→B→C。允许 B 中转那一轮，A→C 由 4 改成 5 + (−3) = 2。Floyd 允许负权边，只要没有负权回路（讲义 p66）。',
+  note:'讲义 p47 的负权反例，配合 p66“可以计算带负权值边的图中最短路径问题，但是不能有包含负权值边组成的回路”。强化第三讲 p22 的判断题 D 就是在考这一点。'},
+ {m:['prim','krus'],t:'讲义例题（权 15）',start:'a',src:'a b 1\na c 4\nb c 5\nb d 2\nb e 3\nc e 2\nc f 7',W:480,H:300,pos:{a:[70,40],b:[70,150],c:[250,150],d:[70,260],e:[250,260],f:[430,260]},
+  q:'分别用 Prim 算法（从 a 开始）和 Kruskal 算法求下图的最小生成树，写出依次选中的边（讲义 p7–22）。',
+  a:'Prim：(a,b)1 → (b,d)2 → (b,e)3 → (e,c)2 → (c,f)7。Kruskal：(a,b)1 → (b,d)2 → (c,e)2 → (b,e)3 → 跳过 (a,c)4 和 (b,c)5（都成环）→ (c,f)7。两种算法得到同一棵树，权值 1 + 2 + 3 + 2 + 7 = 15。',
+  note:'讲义 p7–14（Prim）和 p15–22（Kruskal）用的是同一张图。讲义 p15 的排序结果 (a,b), (b,d), (c,e), (b,e), (a,c), (b,c), (c,f) 和这里一样（同权的 (b,d)、(c,e) 按输入顺序）。'},
+ {m:['krus','prim'],t:'讲义并查集例',start:'a',src:'a b 5\na e 4\na d 5\na f 8\nb c 1\nc d 3\nc f 5\ne d 7\ne f 9',W:480,H:300,pos:{a:[180,38],b:[420,46],c:[420,172],d:[348,268],e:[132,264],f:[48,130]},
+  q:'用 Kruskal 算法（并查集判环）求下图的最小生成树（讲义 p23–27）。',
+  a:'(b,c)1 → (c,d)3 → (a,e)4 → (a,b)5 → 跳过 (a,d)5（a、d 已经连通）→ (c,f)5，已选 5 条边，结束。权值 1 + 3 + 4 + 5 + 5 = 18。三条权 5 的边 (a,b)、(a,d)、(c,f) 先看哪条都行：先看 (a,d) 会选 (a,d) 跳过 (a,b)，树不一样，权值还是 18。',
+  note:'讲义 p23–27。讲义 p23 的候选边写成 {(b,c),(c,d),(a,e),(a,b),(a,d),(c,f),(a,d),(e,d),(a,f),(f,e)}，把 (a,d) 列了两次，图上一共只有 9 条边。'},
+ {m:['krus','prim'],t:'2015 统考 / 讲义 p99',start:'V4',src:'V1 V2 10\nV1 V4 5\nV1 V3 8\nV2 V3 8\nV3 V4 8\nV2 V4 11',W:480,H:300,pos:{V1:[80,50],V2:[400,50],V3:[80,250],V4:[400,250]},
+  q:'【2015 统考真题】求下面带权图的最小（代价）生成树时，可能是 Kruskal 算法第 2 次选中但不是 Prim 算法（从 V4 开始）第 2 次选中的边是（ ）。A. (V1, V3)　B. (V1, V4)　C. (V2, V3)　D. (V3, V4)',
+  a:'C。Kruskal 第 1 次一定选最小的 (V1,V4)5；第 2 次在三条权 8 的边 (V1,V3)、(V2,V3)、(V3,V4) 里选哪条都行。Prim 从 V4 出发，第 1 次也选 (V1,V4)，第 2 次只能从 {V1, V4} 往外连：(V1,V3)8、(V3,V4)8、(V1,V2)10、(V2,V4)11，只能是 (V1,V3) 或 (V3,V4)。所以 (V2,V3) 可能是 Kruskal 第 2 次选的，却不可能是 Prim 第 2 次选的。在 Kruskal 表里给 (V2,V3) 点“先看这条”试试。',
+  note:'讲义第六章 图（下）p99 的例题就是 2015 年 408 第 33 题，讲义没给答案；王道《数据结构》6.4 节选择题 33 答案 C，和这里推的一致。'}
+];
+const QUIZ=[
+ {q:'【强化第三讲 p20 例题】下列说法正确的是（ ）。A. 图中若存在多条权值相同的边，其最小生成树形状一定不唯一　B. 并查集可以应用在 prim 算法中，用以排除可能生成回路的边　C. prim 算法适合求边稀疏的图的最小生成树　D. kruskal 算法的时间复杂度取决于图中边数',
+  a:'D。A 错：讲义例题里 (b,d)、(c,e) 都是 2，两条都会被选，树仍然唯一；同权边只是“可能”导致不唯一。B 错：并查集用在 Kruskal 里判环，Prim 从集合往外长，本来就不会成环。C 错：Prim O(|V|²) 适合稠密图。D 对：Kruskal O(|E|log|E|)。'},
+ {q:'【强化第三讲 p22 例题】下列说法错误的是（ ）。A. 图中若存在权值为负的边，不能使用迪杰斯特拉算法求解单源最短路径　B. 弗洛伊德算法虽然时间复杂度是 O(n³)，但是对于中等规模输入的数据依旧是相当有效的　C. 迪杰斯特拉也可以用来求解图中任意顶点之间的最短路径　D. 弗洛伊德算法可以求解所有类型的图，包括带有负权值的边',
+  a:'D。Floyd 允许负权边，但不允许负权回路，所以不是“所有类型的图”。C 是对的：对每个顶点各跑一次 Dijkstra 就是任意两点，总共 O(|V|³)。A 见 Dijkstra 标签的“讲义负权反例”。'},
+ {q:'【2012 统考真题】下列关于最小生成树的叙述中，正确的是（ ）。I. 最小生成树的代价唯一　II. 所有权值最小的边一定会出现在所有的最小生成树中　III. 使用 Prim 算法从不同顶点开始得到的最小生成树一定相同　IV. 使用 Prim 算法和 Kruskal 算法得到的最小生成树总不相同　A. 仅 I　B. 仅 II　C. 仅 I、III　D. 仅 II、IV',
+  a:'A。代价一定唯一（I 对）。若几条最小权边围成环，总有一条进不了某棵最小生成树（II 错）。同权边多时起点不同可能得到不同的树（III 错）。讲义例题里 Prim 和 Kruskal 得到的就是同一棵树（IV 错）。'},
+ {q:'【2023 统考真题】已知无向连通图 G 中各边的权值均为 1。在下列算法中，一定能够求出图 G 中从某顶点到其余各顶点最短路径的是（ ）。I. Prim 算法　II. Kruskal 算法　III. 图的广度优先搜索算法　A. 仅 I　B. 仅 III　C. 仅 I、II　D. I、II、III',
+  a:'B。边权都相等时 BFS 按层访问，层数就是最短路径长度。Prim、Kruskal 求的是最小生成树，树上的路径不一定最短：三角形 a、b、c 三条边权都是 1，生成树可能是 (a,b)、(b,c)，树上 a 到 c 要走 2，实际直达只要 1。'}
+];
+/* ---------- graph ---------- */
+let MODE='dij',G=null,pi=0,frames=[],pos=0,answered=new Set(),choiceAt={},korder=null,sel=null;
+function parse(txt,dir){const E=[],V=[];const lines=txt.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!lines.length)throw '至少要一条边。';if(lines.length>20)throw '最多 20 条边。';
+  for(const ln of lines){const p=ln.split(/[\s,，]+/);if(p.length!==3)throw `这一行要 3 项（起点 终点 权）：${ln}`;
+    const [u,v]=p,w=Number(p[2]);if(!/^[^\s]{1,3}$/.test(u)||!/^[^\s]{1,3}$/.test(v))throw `顶点名要 1～3 个字符：${ln}`;
+    if(!Number.isInteger(w)||Math.abs(w)>999)throw `权要是 −999～999 的整数：${ln}`;if(u===v)throw `不能有自环：${ln}`;
+    if(E.some(e=>(e.u===u&&e.v===v)||(!dir&&e.u===v&&e.v===u)))throw `边重复了：${ln}`;
+    E.push({u,v,w});[u,v].forEach(x=>{if(!V.includes(x))V.push(x)})}
+  if(V.length>8)throw `最多 8 个顶点，现在有 ${V.length} 个。`;return {V,E,dir}}
+function layout(g){const n=g.V.length,W=520,H=300,p={};g.V.forEach((v,i)=>{const a=-Math.PI/2+2*Math.PI*i/n;p[v]=[W/2+200*Math.cos(a),H/2+120*Math.sin(a)]});return {W,H,pos:p}}
+function outE(u){const r=[];G.E.forEach((e,i)=>{if(e.u===u)r.push({i,to:e.v,w:e.w});else if(!G.dir&&e.v===u)r.push({i,to:e.u,w:e.w})});return r}
+function eIdx(a,b){return G.E.findIndex(e=>(e.u===a&&e.v===b)||(!G.dir&&e.u===b&&e.v===a))}
+const eName=i=>{const e=G.E[i];return `(${e.u},${e.v})`};
+function drawGraph(h){h=h||{};const {W,H,pos}=G;const ec=h.e||{},vc=h.v||{},lab=h.lab||{};
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="带权图"><defs>${['n','b','o','g','r'].map(k=>`<marker id="ah-${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(${({n:'--muted',b:'--q',o:'--cmp',g:'--done',r:'--mv'})[k]})"/></marker>`).join('')}</defs>`;
+  const lbl=[];
+  G.E.forEach((e,i)=>{const [x1,y1]=pos[e.u],[x2,y2]=pos[e.v];const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy)||1,r=20;
+    const rev=G.dir&&G.E.some(f=>f.u===e.v&&f.v===e.u);const bend=rev?24:0;
+    const sx=x1+dx/len*r,sy=y1+dy/len*r,ex=x2-dx/len*(r+(G.dir?3:0)),ey=y2-dy/len*(r+(G.dir?3:0));
+    const mx=(sx+ex)/2-dy/len*bend,my=(sy+ey)/2+dx/len*bend;const c=ec[i]||'';
+    s+=`<path class="g-e ${c}" d="M${sx.toFixed(1)},${sy.toFixed(1)} Q${mx.toFixed(1)},${my.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}"${G.dir?` marker-end="url(#ah-${({b:'b',o:'o',g:'g',r:'r'})[c]||'n'})"`:''}/>`;
+    const off=rev?11:10,t=rev?.5:.4;const bx=(1-t)*(1-t)*sx+2*t*(1-t)*mx+t*t*ex,by=(1-t)*(1-t)*sy+2*t*(1-t)*my+t*t*ey;const lx=bx-dy/len*off,ly=by+dx/len*off;
+    lbl.push(`<text class="g-w ${c==='o'||c==='r'||c==='g'?c:''}" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}">${e.w}</text>`)});
+  s+=lbl.join('');
+  G.V.forEach(v=>{const [x,y]=pos[v];s+=`<circle class="g-n ${vc[v]||''}${h.click?' click':''}" data-v="${esc(v)}" cx="${x}" cy="${y}" r="19"/><text class="g-t" x="${x}" y="${y}">${esc(v)}</text>`;
+    if(lab[v]!==undefined)s+=`<text class="g-l" x="${x}" y="${y-25}">${lab[v]}</text>`});
+  $('graph').innerHTML=s+'</svg>';
+  if(h.click)$('graph').querySelectorAll('circle[data-v]').forEach(c=>c.onclick=()=>h.click(c.dataset.v))}
+/* ---------- Dijkstra ---------- */
+function bellman(){const d={};G.V.forEach(v=>d[v]=INF);d[G.start]=0;for(let k=0;k<G.V.length;k++)G.E.forEach(e=>{if(d[e.u]+e.w<d[e.v])d[e.v]=d[e.u]+e.w;if(!G.dir&&d[e.v]+e.w<d[e.u])d[e.u]=d[e.v]+e.w});return d}
+function buildDij(){const V=G.V,s=G.start,F=[];const d={},p={};V.forEach(v=>{d[v]=INF;p[v]=null});d[s]=0;const S=[s];
+  const o0=outE(s);o0.forEach(x=>{if(x.w<d[x.to]){d[x.to]=x.w;p[x.to]=s}});
+  const cols=[{d:{...d},p:{...p},pick:null,S:null}],frozenBad=[];
+  const snap=o=>({S:[...S],d:{...d},p:{...p},cols:cols.map(c=>({d:{...c.d},p:{...c.p},pick:c.pick,S:c.S&&[...c.S]})),...o});
+  const neg=G.E.some(e=>e.w<0);
+  F.push(snap({k:'init',cur:s,eb:o0.map(x=>x.i),txt:`初始化：S = {${s}}，dist[${s}] = 0。${o0.length?`${s} 的出边 ${o0.map(x=>`${s}→${x.to} ${x.w}`).join('、')} 直接填进 dist，path 填 ${s}；`:''}没有边的填 ∞，path 填 −1。这就是表的第 1 列。${neg?'<span class="bad">这张图有负权边，</span>留意后面哪一步出问题。':''}`}));
+  let round=0,last=null;
+  while(S.length<V.length){const cand=V.filter(v=>!S.includes(v));const m=Math.min(...cand.map(v=>d[v]));const col=cols[cols.length-1];
+    if(m===INF){F.push(snap({k:'end',txt:`剩下的 ${cand.join('、')} 的 dist 都是 ∞，从 ${s} 到不了，算法结束。`}));break}
+    const tie=cand.filter(v=>d[v]===m);const u=tie.includes(choiceAt[round])?choiceAt[round]:tie[0];
+    S.push(u);col.pick=u;col.S=[...S];const lu=last;
+    const edgeMin=lu?outE(lu).filter(x=>cand.includes(x.to)).sort((a,b)=>a.w-b.w)[0]:null;
+    F.push(snap({k:'pick',round,cur:u,eo:p[u]!=null?[eIdx(p[u],u)]:[],
+      txt:`第 ${round+1} 轮：不在 S 里的 ${cand.map(v=>`dist[${v}] = ${fm(d[v])}`).join('，')}，最小的是 <b>${u}</b>（${m}），并入 S，S = {${S.join(', ')}}。${u} 从此冻结。${tie.length>1?`（${tie.join('、')} 一样小，选哪个都行，最后的 dist 不变。）`:''}`,
+      ask:{type:'pick',l:`第 ${round+1} 轮并入 S 的是`,q:`第 ${round+1} 轮：在不在 S 里的顶点中，选 dist 最小的并入 S。看表里第 ${round+1} 列，选哪个？`,opts:cand,ans:u,ok:v=>d[v]===m,
+        take:v=>{if(v!==u&&d[v]===m){choiceAt[round]=v;return true}},
+        hint:v=>edgeMin&&v===edgeMin.to&&d[v]!==m?`${lu}→${v} 这条边最短，但 Dijkstra 比的是 dist（从 ${s} 出发的总长），不是刚加入的点连出去的边。`:`dist[${v}] = ${fm(d[v])}，不是最小（最小是 ${m}）。`}}));
+    last=u;
+    const ou=outE(u);
+    if(ou.length){const lines=[],eb=[],eo=[],er=[];let first=null;
+      ou.forEach(x=>{const v=x.to,nd=d[u]+x.w,old=d[v];
+        if(S.includes(v)){if(nd<old){er.push(x.i);frozenBad.push({u,v,nd,old});lines.push(`<span class="bad">${v} 已在 S（冻结）：dist[${u}] + ${x.w} = ${nd} &lt; ${fm(old)}，可是不再改了</span>`)}else{eb.push(x.i);lines.push(`${v} 已在 S，跳过`)}}
+        else if(nd<old){d[v]=nd;p[v]=u;eo.push(x.i);lines.push(`${v}：${d[u]} + ${x.w} = ${nd} &lt; ${fm(old)}，改 dist[${v}] = <b>${nd}</b>，path[${v}] = ${u}`);if(!first)first={v,nd,old,w:x.w}}
+        else{eb.push(x.i);lines.push(`${v}：${d[u]} + ${x.w} = ${nd} ≥ ${fm(old)}，不变`)}});
+      if(S.length<V.length)cols.push({d:{...d},p:{...p},pick:null,S:null});
+      F.push(snap({k:'relax',round,cur:u,eb,eo,er,askV:first&&first.v,txt:`用 ${u} 松弛（dist[${u}] = ${d[u]}）：${lines.join('；')}。${S.length<V.length?`得到第 ${round+2} 列。`:''}`,
+        ask:first?{type:'num',l:`dist[${first.v}] = `,q:`${u} 刚并入 S。看 ${u} 的出边（蓝色），算 ${first.v} 的新 dist：dist[${u}] + w(${u}, ${first.v}) 和原来的 ${fm(first.old)} 比，取小的。`,ans:first.nd,ok:v=>v===first.nd,
+          hint:v=>v===first.old?`${d[u]} + ${first.w} = ${first.nd} 比原来的 ${fm(first.old)} 小，要更新。`:v===first.w?`要加上 dist[${u}] = ${d[u]}，dist 是从源点出发的总长。`:''}:null}))}
+    round++}
+  if(S.length===V.length){const bf=neg?bellman():null;const wrong=bf?V.filter(v=>bf[v]!==d[v]):[];
+    F.push(snap({k:'end',txt:`所有顶点都进了 S，结束。并入顺序：${S.join(' → ')}。最终 dist：${V.filter(v=>v!==s).map(v=>`${v} ${fm(d[v])}`).join('，')}。<b>点图上任一顶点</b>看 path 怎么回溯。`+
+      (frozenBad.length?`<br><span class="bad">出错了：</span>${frozenBad.map(b=>`${b.v} 早已冻结在 ${fm(b.old)}，后来 ${b.u} 能给出 ${b.nd} 却改不了`).join('；')}。真实最短：${wrong.map(v=>`${s} 到 ${v} 是 ${fm(bf[v])}`).join('，')}（Dijkstra 给的是 ${wrong.map(v=>fm(d[v])).join('、')}）。有负权边时 Dijkstra 不适用。`:'')}))}
+  return F}
+function renderDij(f,pend){const V=G.V,s=G.start,ask=pend&&f.ask;
+  const vc={};f.S.forEach(v=>vc[v]='s');if(f.k==='pick'||f.k==='relax'){if(ask&&f.k==='pick')delete vc[f.cur];else vc[f.cur]='o'}
+  const ec={};(f.eb||[]).forEach(i=>ec[i]='b');(f.eo||[]).forEach(i=>ec[i]=ask?'b':'o');(f.er||[]).forEach(i=>ec[i]='r');if(f.k==='pick'&&ask)(f.eo||[]).forEach(i=>delete ec[i]);
+  const done=f.k==='end';let pathV=[];
+  if(done){V.forEach(v=>{if(f.p[v]!=null)ec[eIdx(f.p[v],v)]='g'});if(sel&&f.d[sel]!==INF){let x=sel;while(x!=null){pathV.push(x);x=f.p[x]}pathV.reverse();for(let k=1;k<pathV.length;k++)ec[eIdx(pathV[k-1],pathV[k])]='o';vc[sel]='o'}}
+  const lab={};V.forEach(v=>{lab[v]=(ask&&f.k==='relax'&&v===f.askV)?'?':fm(f.d[v])});
+  drawGraph({v:vc,e:ec,lab,click:done?v=>{sel=v;render()}:null});
+  /* lecture table: rows = vertices, one column per round */
+  const rows=V.filter(v=>v!==s);const nC=f.cols.length;const pickedAt={};f.cols.forEach((c,ci)=>{if(c.pick&&!(ask&&f.k==='pick'&&ci===nC-1))pickedAt[c.pick]=ci});
+  let h=`<div class="cap">讲义的表：每轮一列，格子里是 dist，右下小字是 path</div><table class="t"><tr><th>顶点</th>${f.cols.map((_,i)=>`<th>第 ${i+1} 轮</th>`).join('')}</tr>`;
+  rows.forEach(v=>{h+=`<tr><th>${esc(v)}</th>`+f.cols.map((c,ci)=>{const pa=pickedAt[v];
+    if(pa!==undefined&&ci>pa)return `<td class="frz">${fm(c.d[v])}</td>`;
+    const isAsk=ask&&f.k==='relax'&&ci===nC-1&&v===f.askV;if(isAsk)return `<td class="ask">?</td>`;
+    const cls=pa===ci?'pick':(f.k==='relax'&&ci===nC-1&&ci>0&&c.d[v]!==f.cols[ci-1].d[v]?'upd':'');
+    return `<td class="${cls}">${fm(c.d[v])}${c.d[v]!==INF?`<sub>${esc(c.p[v])}</sub>`:''}</td>`}).join('')+'</tr>'});
+  h+=`<tr><th>集合 S</th>${f.cols.map((c,ci)=>`<td style="font-size:12px">${c.S&&!(ask&&f.k==='pick'&&ci===nC-1)?`{${c.S.join(',')}}`:''}</td>`).join('')}</tr></table>`;
+  /* current arrays */
+  let a=`<div class="cap">当前的 dist[ ] 和 path[ ] 数组（path 写前驱顶点，没有写 −1）</div><table class="t"><tr><th></th>${V.map((v,i)=>`<th>${i}<small>${esc(v)}</small></th>`).join('')}</tr>`;
+  a+=`<tr><th>dist</th>${V.map(v=>`<td>${ask&&f.k==='relax'&&v===f.askV?'?':fm(f.d[v])}</td>`).join('')}</tr>`;
+  a+=`<tr><th>path</th>${V.map(v=>`<td>${ask&&f.k==='relax'&&v===f.askV?'?':f.p[v]==null?'−1':esc(f.p[v])}</td>`).join('')}</tr>`;
+  a+=`<tr><th>在 S</th>${V.map(v=>`<td>${f.S.includes(v)&&!(ask&&f.k==='pick'&&v===f.cur)?'✓':''}</td>`).join('')}</tr></table>`;
+  $('tables').innerHTML=`<div class="tw">${h}</div><div class="tw">${a}</div>`;
+  let out='';if(done&&sel){if(f.d[sel]===INF)out=`${esc(sel)} 从 ${esc(s)} 到不了。`;else if(sel===s)out=`${esc(s)} 是源点，path[${esc(s)}] = −1。`;else{const ch=[];let x=sel;while(f.p[x]!=null){ch.push(`path[${esc(x)}] = ${esc(f.p[x])}`);x=f.p[x]}ch.push(`path[${esc(s)}] = −1 停`);
+    out=`回溯：${ch.join('，')}。<br>倒过来：<b>${pathV.map(esc).join(' → ')}</b>，长度 ${pathV.slice(1).map((v,k)=>G.E[eIdx(pathV[k],v)].w).join(' + ')} = <b>${f.d[sel]}</b>。`}}
+  else if(done)out='点图上的顶点看回溯。';
+  $('out').innerHTML=out;$('cands').innerHTML=''}
+/* ---------- Floyd ---------- */
+function buildFloyd(){const V=G.V,n=V.length,F=[];const A=V.map((_,i)=>V.map((_,j)=>i===j?0:INF)),P=V.map(()=>V.map(()=>-1));
+  G.E.forEach(e=>{const i=V.indexOf(e.u),j=V.indexOf(e.v);A[i][j]=e.w;if(!G.dir)A[j][i]=e.w});
+  const cp=M=>M.map(r=>[...r]);
+  F.push({k:'init',A:cp(A),P:cp(P),K:-1,txt:`A(−1) 就是邻接矩阵：对角线 0，有边填权，没边 ∞。path 全填 −1（还没经过任何中转点）。`});
+  for(let k=0;k<n;k++){const vk=V[k];const colEmpty=V.every((_,i)=>i===k||A[i][k]===INF),rowEmpty=V.every((_,j)=>j===k||A[k][j]===INF);
+    F.push({k:'hl',A:cp(A),P:cp(P),K:k,txt:`第 ${k+1} 轮，求 A(${k})：允许 <b>${vk}</b> 中转。橙色是第 ${vk} 行和第 ${vk} 列：i 到 ${vk} 那段在第 ${vk} 列，${vk} 到 j 那段在第 ${vk} 行，每格比 A[i][j] 和 A[i][${vk}] + A[${vk}][j]。${colEmpty?`第 ${vk} 列除对角线全是 ∞（没有边进 ${vk}），这一轮什么都不会变。`:rowEmpty?`第 ${vk} 行除对角线全是 ∞（${vk} 没有出边），这一轮什么都不会变。`:''}`});
+    const prev=cp(A),chg=[];
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++){if(i===k||j===k)continue;const s2=prev[i][k]+prev[k][j];if(s2<A[i][j]){A[i][j]=s2;P[i][j]=k;chg.push([i,j])}}
+    const desc=chg.map(([i,j])=>`${V[i]}→${V[j]}：min(${fm(prev[i][j])}, ${prev[i][k]} + ${prev[k][j]}) = <b>${A[i][j]}</b>，path = ${vk}`);
+    const f={k:'res',A:cp(A),prev,P:cp(P),K:k,chg,txt:`A(${k})：${chg.length?desc.join('；')+'。其余格子不变。':`没有格子变小，A(${k}) = A(${k-1})。`}`};
+    if(chg.length){const [i,j]=chg[0];f.askC=[i,j];f.ask={type:'num',l:`A(${k})[${V[i]}][${V[j]}] = `,q:`A(${k})[${V[i]}][${V[j]}] = min( A[${V[i]}][${V[j]}], A[${V[i]}][${vk}] + A[${vk}][${V[j]}] ) 是多少？去橙色的第 ${vk} 列找 ${V[i]}→${vk}，第 ${vk} 行找 ${vk}→${V[j]}。`,ans:A[i][j],ok:v=>v===A[i][j],
+      hint:v=>v===prev[i][j]?`经过 ${vk} 是 ${prev[i][k]} + ${prev[k][j]} = ${A[i][j]}，更小，要换。`:(v===prev[i][k]||v===prev[k][j])?'两段要加起来。':''}}
+    else{f.askCount=true;f.ask={type:'num',l:'这一轮变小的格子数 = ',q:`允许 ${vk} 中转后，A 里有几个格子会变小？`,ans:0,ok:v=>v===0,hint:()=>colEmpty?`第 ${vk} 列（除对角线）全是 ∞，A[i][${vk}] + A[${vk}][j] 永远是 ∞。`:rowEmpty?`第 ${vk} 行（除对角线）全是 ∞。`:'把每个 A[i][k] + A[k][j] 都算一下，没有一个比原来小。'}}
+    F.push(f)}
+  const neg=V.some((_,i)=>A[i][i]<0);
+  F.push({k:'end',A:cp(A),P:cp(P),K:-1,txt:neg?'<span class="bad">对角线出现负数：图里有负权回路，Floyd 算出来的不是最短路径（负权回路可以无限绕）。</span>':`A(${n-1}) 就是任意两点的最短路径长度。<b>点 A 矩阵的任一格</b>看 path 怎么拆出路径。`});
+  return F}
+function fpath(P,i,j,acc){const k=P[i][j];if(k===-1){acc.push(j);return}fpath(P,i,k,acc);fpath(P,k,j,acc)}
+function renderFloyd(f,pend){const V=G.V,n=V.length,K=f.K,ask=pend&&f.ask;
+  const vc={},ec={};if(K>=0){vc[V[K]]='o';G.E.forEach((e,i)=>{if(e.u===V[K]||e.v===V[K])ec[i]='b'})}
+  let out='',sp=null;
+  if(f.k==='end'&&sel){const [i,j]=sel;if(i===j)out=`${V[i]} 到自己是 0。`;else if(f.A[i][j]===INF)out=`${esc(V[i])} 到 ${esc(V[j])} 没有路径（∞）。`;else{const acc=[i];fpath(f.P,i,j,acc);sp=acc;
+      const steps=[];const exp=(a,b)=>{const k=f.P[a][b];if(k===-1)steps.push(`path[${V[a]}][${V[b]}] = −1，直达`);else{steps.push(`path[${V[a]}][${V[b]}] = ${V[k]}，拆成 ${V[a]}→${V[k]} 和 ${V[k]}→${V[b]}`);exp(a,k);exp(k,b)}};exp(i,j);
+      out=`${steps.join('；')}。<br>路径：<b>${acc.map(x=>esc(V[x])).join(' → ')}</b>，长度 ${acc.slice(1).map((x,t)=>G.E[eIdx(V[acc[t]],V[x])].w).join(' + ')} = <b>${f.A[i][j]}</b>。`;
+      for(let t=1;t<acc.length;t++)ec[eIdx(V[acc[t-1]],V[acc[t]])]='o';vc[V[i]]='s';vc[V[j]]='s'}}
+  else if(f.k==='end')out='点 A 矩阵的格子看路径。';
+  drawGraph({v:vc,e:ec});
+  const name=f.k==='init'?'A(−1)':f.k==='hl'?`A(${K-1})（本轮的输入）`:f.k==='res'?`A(${K})`:`A(${n-1})（最终）`;
+  const isA=(i,j)=>ask&&f.askC&&f.askC[0]===i&&f.askC[1]===j;const chg=new Set((f.chg||[]).map(([i,j])=>i+','+j));
+  let a=`<div class="cap">${name}</div><table class="t"><tr><th></th>${V.map((v,j)=>`<th class="${j===K?'rk':''}">${esc(v)}</th>`).join('')}</tr>`;
+  V.forEach((vi,i)=>{a+=`<tr><th class="${i===K?'rk':''}">${esc(vi)}</th>`+V.map((_,j)=>{let cls=(i===K||j===K)&&K>=0&&f.k!=='end'?'rk':'';let body=fm(f.A[i][j]);
+    if(f.k==='res'){if(ask){body=isA(i,j)?'?':fm(f.prev[i][j]);if(isA(i,j))cls+=' ask'}
+      else{if(i!==K&&j!==K&&i!==j){const s2=f.prev[i][K]+f.prev[K][j];body=s2===INF?`${fm(f.A[i][j])}<small>经${esc(V[K])}是∞</small>`:`${fm(f.A[i][j])}<small>min(${fm(f.prev[i][j])}, ${f.prev[i][K]}+${f.prev[K][j]})</small>`}
+        if(chg.has(i+','+j))cls+=' upd'}}
+    if(f.k==='end')cls+=' click'+(sel&&sel[0]===i&&sel[1]===j?' cur':'');
+    return `<td class="${cls}" data-i="${i}" data-j="${j}">${body}</td>`}).join('')+'</tr>'});a+='</table>';
+  let p=`<div class="cap">path（中转点，−1 表示直达或无路）</div><table class="t"><tr><th></th>${V.map((v,j)=>`<th class="${j===K?'rk':''}">${esc(v)}</th>`).join('')}</tr>`;
+  const PP=ask&&f.k==='res'?frames[pos-1].P:f.P;
+  V.forEach((vi,i)=>{p+=`<tr><th class="${i===K?'rk':''}">${esc(vi)}</th>`+V.map((_,j)=>{let cls=(i===K||j===K)&&K>=0&&f.k!=='end'?'rk':'';if(chg.has(i+','+j)&&!ask)cls+=' upd';const val=PP[i][j]===-1?'−1':esc(V[PP[i][j]]);return `<td class="${cls}">${val}</td>`}).join('')+'</tr>'});p+='</table>';
+  $('tables').innerHTML=`<div class="twin"><div class="tw">${a}</div><div class="tw">${p}</div></div>`;
+  if(f.k==='end')$('tables').querySelectorAll('td.click').forEach(td=>td.onclick=()=>{sel=[+td.dataset.i,+td.dataset.j];render()});
+  $('out').innerHTML=out;$('cands').innerHTML=''}
+/* ---------- Prim ---------- */
+function buildPrim(){const V=G.V,s=G.start,F=[];const low={},adj={};V.forEach(v=>{low[v]=INF;adj[v]=null});low[s]=0;const S=[s],T=[];
+  const o0=outE(s);o0.forEach(x=>{if(x.w<low[x.to]){low[x.to]=x.w;adj[x.to]=s}});
+  const cols=[{d:{...low},p:{...adj},pick:null,S:null}];
+  const snap=o=>({S:[...S],d:{...low},p:{...adj},T:[...T],cols:cols.map(c=>({d:{...c.d},p:{...c.p},pick:c.pick,S:c.S&&[...c.S]})),...o});
+  F.push(snap({k:'init',cur:s,txt:`从 ${s} 开始：S = {${s}}。lowcost[v] 填 ${s} 到 v 的边权（没边 ∞），adjvex（表里小字）记是 S 里哪个点连过去的。`,cross:o0.map(x=>x.i)}));
+  let round=0,last=null;
+  while(S.length<V.length){const cand=V.filter(v=>!S.includes(v));const m=Math.min(...cand.map(v=>low[v]));const col=cols[cols.length-1];
+    const cross=[];G.E.forEach((e,i)=>{if(S.includes(e.u)!==S.includes(e.v))cross.push(i)});
+    if(m===INF){F.push(snap({k:'end',cross:[],txt:`<span class="bad">剩下的 ${cand.join('、')} 和 S 之间没有边，图不连通，没有生成树。</span>`}));break}
+    const tieE=cross.filter(i=>G.E[i].w===m);let ei=eIdx(adj[cand.find(v=>low[v]===m)],cand.find(v=>low[v]===m));if(tieE.includes(choiceAt[round]))ei=choiceAt[round];
+    const u=S.includes(G.E[ei].u)?G.E[ei].v:G.E[ei].u;adj[u]=S.includes(G.E[ei].u)?G.E[ei].u:G.E[ei].v;col.p[u]=adj[u];
+    const lastMin=last?outE(last).filter(x=>cand.includes(x.to)).sort((a,b)=>a.w-b.w)[0]:null;
+    const wrongEdge=G.E.map((e,i)=>({e,i})).filter(({e})=>!S.includes(e.u)&&!S.includes(e.v)).sort((a,b)=>a.e.w-b.e.w)[0];
+    const pre=snap({});T.push(ei);S.push(u);col.pick=u;col.S=[...S];
+    F.push({...snap({}),k:'pick',round,cur:u,cross,tieE,eo:[ei],preS:pre.S,
+      txt:`第 ${round+1} 轮：S = {${pre.S.join(', ')}} 到外面的候选边 ${cross.map(i=>`${eName(i)}${G.E[i].w}`).join('、')}，最短的是 <b>(${adj[u]},${u}) ${m}</b>，把 ${u} 并入 S。${tieE.length>1?`<br>同权：${tieE.map(i=>eName(i)).join('、')} 都是 ${m}，<b>选哪条都行，结果可能不唯一</b>（点上面候选边里另一条试试）。`:''}`,
+      ask:{type:'pick',l:`第 ${round+1} 轮并入 S 的点是`,q:`第 ${round+1} 轮：S = {${pre.S.join(', ')}}。在“S 到外面”的候选边（蓝色）里挑最短的，外面那头是哪个点？`,opts:cand,ans:u,ok:v=>low[v]===m,
+        take:v=>{if(v!==u&&low[v]===m){choiceAt[round]=eIdx(adj[v],v);return true}},
+        hint:v=>lastMin&&v===lastMin.to&&low[v]!==m?`这是离刚加入的 ${last} 最近的点，但 Prim 要看整个 S 到外面的所有边。`:(wrongEdge&&(v===wrongEdge.e.u||v===wrongEdge.e.v)&&wrongEdge.e.w<m)?`${eName(wrongEdge.i)} 虽然更短，但它两头都不在 S 里，不是候选边。`:`lowcost[${v}] = ${fm(low[v])}，不是最小（最小是 ${m}）。`}});
+    last=u;
+    const ou=outE(u).filter(x=>!S.includes(x.to));
+    if(S.length<V.length){const lines=[],eb=[],eo=[];let first=null;
+      ou.forEach(x=>{const v=x.to,old=low[v];if(x.w<old){low[v]=x.w;adj[v]=u;eo.push(x.i);lines.push(`${v}：w(${u},${v}) = ${x.w} &lt; ${fm(old)}，改 lowcost[${v}] = <b>${x.w}</b>，adjvex = ${u}`);if(!first)first={v,w:x.w,old}}else{eb.push(x.i);lines.push(`${v}：${x.w} ≥ ${fm(old)}，不变`)}});
+      cols.push({d:{...low},p:{...adj},pick:null,S:null});
+      F.push(snap({k:'upd',round,cur:u,eb,eo,askV:first&&first.v,txt:`${u} 加入后，用 ${u} 的边更新外面各点的 lowcost：${lines.length?lines.join('；'):`${u} 连不到外面的点`}。得到第 ${round+2} 列。`,
+        ask:first?{type:'num',l:`lowcost[${first.v}] = `,q:`${u} 刚并入 S。${first.v} 原来 lowcost = ${fm(first.old)}，现在多了边 (${u},${first.v})。新的 lowcost[${first.v}] 是多少？`,ans:first.w,ok:v=>v===first.w,
+          hint:v=>v===low[u]+first.w&&low[u]!==0?`Prim 的 lowcost 只存一条边的权，不加 lowcost[${u}]；加上就成了 Dijkstra。`:v===first.old?`新边 ${first.w} 比 ${fm(first.old)} 短，要更新。`:''}:null}))}
+    round++}
+  if(S.length===V.length){const W=T.reduce((a,i)=>a+G.E[i].w,0);F.push(snap({k:'end',txt:`所有顶点都进了 S。依次选中的边：${T.map(i=>{const e=G.E[i];return `${eName(i)}${e.w}`}).join(' → ')}，最小生成树权值 = ${T.map(i=>G.E[i].w).join(' + ')} = <b>${W}</b>。`}))}
+  return F}
+function renderPrim(f,pend){const V=G.V,s=G.start,ask=pend&&f.ask;
+  const vc={},ec={};const S=f.k==='pick'&&ask?f.preS:f.S;S.forEach(v=>vc[v]='s');const T=f.k==='pick'&&ask?f.T.slice(0,-1):f.T;
+  (f.cross||[]).forEach(i=>ec[i]='b');T.forEach(i=>ec[i]='g');
+  if(f.k==='pick'){if(ask){ec[f.eo[0]]='b'}else{ec[f.eo[0]]='o';vc[f.cur]='o'}}
+  if(f.k==='upd'){vc[f.cur]='o';(f.eb||[]).forEach(i=>ec[i]='b');(f.eo||[]).forEach(i=>ec[i]=ask?'b':'o')}
+  const lab={};V.forEach(v=>{if(!S.includes(v))lab[v]=(ask&&f.k==='upd'&&v===f.askV)?'?':fm(f.d[v])});
+  drawGraph({v:vc,e:ec,lab});
+  /* candidates */
+  let c='';if(f.k==='pick'||f.k==='init'){const cr=f.cross||[];const m=Math.min(...cr.map(i=>G.E[i].w));
+    c=`<div class="cands"><span style="font:13px var(--sans);color:var(--muted)">S 到外面的候选边：</span>${cr.map(i=>{const w=G.E[i].w;const isT=f.k==='pick'&&!ask&&f.tieE.length>1&&f.tieE.includes(i)&&i!==f.eo[0];
+      if(isT)return `<button type="button" class="c" data-e="${i}" title="改选这条">${eName(i)} ${w} 换这条</button>`;
+      return `<span class="c${f.k==='pick'&&!ask&&w===m?' min':''}">${eName(i)} ${w}</span>`}).join('')}</div>`}
+  $('cands').innerHTML=c;
+  $('cands').querySelectorAll('button[data-e]').forEach(b=>b.onclick=()=>{choiceAt[f.round]=+b.dataset.e;rebuild()});
+  const rows=V.filter(v=>v!==s);const nC=f.cols.length;const pickedAt={};f.cols.forEach((cc,ci)=>{if(cc.pick&&!(ask&&f.k==='pick'&&ci===nC-1))pickedAt[cc.pick]=ci});
+  let h=`<div class="cap">lowcost 表：每轮一列，格子里是 lowcost，右下小字是 adjvex（连到 S 里的哪个点）</div><table class="t"><tr><th>顶点</th>${f.cols.map((_,i)=>`<th>第 ${i+1} 轮</th>`).join('')}</tr>`;
+  rows.forEach(v=>{h+=`<tr><th>${esc(v)}</th>`+f.cols.map((cc,ci)=>{const pa=pickedAt[v];if(pa!==undefined&&ci>pa)return `<td class="frz">0</td>`;
+    if(ask&&f.k==='upd'&&ci===nC-1&&v===f.askV)return `<td class="ask">?</td>`;
+    const cls=pa===ci?'pick':(f.k==='upd'&&ci===nC-1&&ci>0&&cc.d[v]!==f.cols[ci-1].d[v]?'upd':'');
+    return `<td class="${cls}">${fm(cc.d[v])}${cc.d[v]!==INF?`<sub>${esc(cc.p[v])}</sub>`:''}</td>`}).join('')+'</tr>'});
+  h+=`<tr><th>集合 S</th>${f.cols.map((cc,ci)=>`<td style="font-size:12px">${cc.S&&!(ask&&f.k==='pick'&&ci===nC-1)?`{${cc.S.join(',')}}`:''}</td>`).join('')}</tr></table>`;
+  $('tables').innerHTML=`<div class="tw">${h}</div><p class="legend">已并入 S 的点 lowcost 记 0（灰色）。和 Dijkstra 的表长得一样，区别只在格子里是“一条边的权”而不是“从起点出发的总长”。</p>`;
+  $('out').innerHTML=T.length?`已选的边：${T.map(i=>`${eName(i)}${G.E[i].w}`).join(' → ')}，权值和 <b>${T.reduce((a,i)=>a+G.E[i].w,0)}</b>`:''}
+/* ---------- Kruskal ---------- */
+function defOrder(){return G.E.map((_,i)=>i).sort((a,b)=>G.E[a].w-G.E[b].w||a-b)}
+function buildKrus(){const V=G.V,n=V.length,F=[];const order=korder&&korder.length===G.E.length?korder:defOrder();const par={};V.forEach(v=>par[v]=v);const T=[],st={};
+  const chain=x=>{const c=[x];while(par[x]!==x){x=par[x];c.push(x)}return c};
+  const snap=o=>({par:{...par},T:[...T],st:{...st},order:[...order],...o});
+  F.push(snap({k:'init',at:-1,txt:`把 ${G.E.length} 条边按权从小到大排好（同权按输入顺序）。并查集初始每个点自成一个集合：parent[v] = v。`}));
+  for(let k=0;k<order.length;k++){if(T.length===n-1)break;const i=order[k],e=G.E[i];const cu=chain(e.u),cv=chain(e.v),ru=cu[cu.length-1],rv=cv[cv.length-1],cyc=ru===rv;
+    const rest=order.slice(k+1).filter(j=>G.E[j].w===e.w);const firstOfGroup=k===0||G.E[order[k-1]].w!==e.w;
+    let cycTxt='';if(cyc){/* path between u and v in current forest */const adjT={};V.forEach(v=>adjT[v]=[]);T.forEach(j=>{const f=G.E[j];adjT[f.u].push(f.v);adjT[f.v].push(f.u)});const prev={[e.u]:null},q=[e.u];while(q.length){const x=q.shift();adjT[x].forEach(y=>{if(!(y in prev)){prev[y]=x;q.push(y)}})}const pth=[];let x=e.v;while(x!=null){pth.push(x);x=prev[x]}cycTxt=`已选的边里 ${pth.reverse().join('–')} 已经连通，再加 ${eName(i)} 就成环`}
+    const tieTxt=rest.length&&firstOfGroup?`<br>同权：${[i,...rest].map(eName).join('、')} 都是 ${e.w}，<b>先看哪条都行，结果可能不唯一</b>（在表里点同权边的“先看这条”试试）。`:'';
+    const txt=`看第 ${k+1} 条 ${eName(i)}，权 ${e.w}：find(${e.u}) = ${ru}${cu.length>1?`（${cu.join('→')}）`:''}，find(${e.v}) = ${rv}${cv.length>1?`（${cv.join('→')}）`:''}。`+(cyc?`根相同，${cycTxt}，<b class="bad">跳过</b>。`:`根不同，<b>选</b>。合并：parent[${rv}] = ${ru}。`)+tieTxt;
+    const ask={type:'pick',l:`${eName(i)} ${e.w}：`,q:`下一条是 ${eName(i)}，权 ${e.w}。选还是跳过？先用并查集 find 两头的根。`,opts:['选','跳过'],ans:cyc?'跳过':'选',ok:v=>v===(cyc?'跳过':'选'),
+      hint:v=>cyc?`find(${e.u}) = find(${e.v}) = ${ru}，两头已在同一集合，加了成环。`:`find(${e.u}) = ${ru}，find(${e.v}) = ${rv}，根不同，不成环，要选。`};
+    if(!cyc){par[rv]=ru;T.push(i);st[i]='sel'}else st[i]='skip';
+    F.push(snap({k:'edge',at:k,cur:i,cyc,txt,ask,rest}))}
+  const W=T.reduce((a,j)=>a+G.E[j].w,0);const left=order.filter(j=>!(j in st));
+  F.push(snap({k:'end',at:order.length,txt:T.length===n-1?`已经选够 n − 1 = ${n-1} 条边，结束${left.length?`；后面的 ${left.map(eName).join('、')} 不用再看`:''}。选中：${T.map(j=>`${eName(j)}${G.E[j].w}`).join(' → ')}，最小生成树权值 = <b>${W}</b>。`:`<span class="bad">边都看完了只选了 ${T.length} 条，图不连通，得到的是生成森林。</span>`}));
+  return F}
+function renderKrus(f,pend){const V=G.V,ask=pend&&f.ask;const ec={},vc={};
+  Object.entries(f.st).forEach(([i,s])=>{ec[i]=s==='sel'?'g':'d'});
+  if(f.k==='edge'){const e=G.E[f.cur];ec[f.cur]=ask?'o':(f.cyc?'r':'o');vc[e.u]='o';vc[e.v]='o'}
+  drawGraph({v:vc,e:ec});
+  let h=`<div class="cap">排好序的边表</div><table class="t"><tr><th>#</th><th>边</th><th>权</th><th>结果</th></tr>`;
+  f.order.forEach((i,k)=>{const e=G.E[i];const isCur=f.k==='edge'&&k===f.at;let r='';let cls='';
+    if(isCur&&ask)r='?';else if(f.st[i]==='sel'){r='选 ✓';cls='sel'}else if(f.st[i]==='skip'){r='成环，跳过';cls='skip'}
+    else if(f.k==='edge'&&k>f.at&&e.w===G.E[f.cur].w)r=`<button type="button" class="mini" data-k="${k}">先看这条</button>`;
+    else if(f.k==='end')r='不用看';
+    h+=`<tr class="${isCur?'cur':''}"><td>${k+1}</td><td>${eName(i)}</td><td>${e.w}</td><td class="${cls}">${r}</td></tr>`});h+='</table>';
+  const pp=f.k==='edge'&&ask?prevPar(f):f.par;
+  let u=`<div class="cap">并查集 parent[ ]（根指向自己）</div><table class="t"><tr><th>顶点</th>${V.map(v=>`<th>${esc(v)}</th>`).join('')}</tr><tr><th>parent</th>${V.map(v=>`<td class="${pp[v]===v?'':'upd'}">${esc(pp[v])}</td>`).join('')}</tr></table>`;
+  const root=x=>{while(pp[x]!==x)x=pp[x];return x};const groups={};V.forEach(v=>{(groups[root(v)]=groups[root(v)]||[]).push(v)});
+  u+=`<div class="sets">集合：${Object.values(groups).map(g=>`{${g.join(', ')}}`).join('　')}</div>`;
+  $('tables').innerHTML=`<div class="twin"><div class="tw">${h}</div><div class="tw">${u}</div></div>`;
+  $('tables').querySelectorAll('button[data-k]').forEach(b=>b.onclick=()=>{const o=[...f.order];const [x]=o.splice(+b.dataset.k,1);o.splice(f.at,0,x);korder=o;rebuild()});
+  const T=f.k==='edge'&&ask&&!f.cyc?f.T.slice(0,-1):f.T;
+  $('out').innerHTML=T.length?`已选的边：${T.map(i=>`${eName(i)}${G.E[i].w}`).join(' → ')}，权值和 <b>${T.reduce((a,i)=>a+G.E[i].w,0)}</b>`:'';$('cands').innerHTML=''}
+function prevPar(f){const p=frames[pos-1];return p?p.par:f.par}
+/* ---------- engine ---------- */
+const BUILD={dij:buildDij,floyd:buildFloyd,prim:buildPrim,krus:buildKrus},RENDER={dij:renderDij,floyd:renderFloyd,prim:renderPrim,krus:renderKrus};
+function pending(){const f=frames[pos];return $('guessMode').checked&&f&&f.ask&&!answered.has(pos)}
+function render(msg){const f=frames[pos];if(!f)return;const pend=pending();RENDER[MODE](f,pend);
+  $('note').innerHTML=msg||(pend?f.ask.q:f.txt);
+  $('prog').textContent=`第 ${pos} / ${frames.length-1} 步`;$('prev').disabled=pos===0;$('next').disabled=pos===frames.length-1&&!pend;
+  $('gbox').classList.toggle('hidden',!pend);
+  if(pend){$('gq').textContent=f.ask.l;if(f.ask.type==='num')$('gctl').innerHTML=`<input id="gin" type="text" inputmode="numeric" aria-label="你的答案"> <button class="btn" id="gbtn" type="button">对答案</button>`;
+    else $('gctl').innerHTML=f.ask.opts.map(o=>`<button class="btn" type="button" data-o="${esc(o)}">${esc(o)}</button>`).join(' ');
+    const gin=$('gin');if(gin){$('gbtn').onclick=()=>check(gin.value);gin.onkeydown=e=>{if(e.key==='Enter')check(gin.value)}}
+    $('gctl').querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>check(b.dataset.o))}}
+function check(raw){const f=frames[pos];const a=f.ask;let v=raw;if(a.type==='num'){v=String(raw).trim().replace('−','-');if(v==='')return;v=/^(∞|inf)$/i.test(v)?INF:Number(v);if(Number.isNaN(v)){render('<span class="bad">请填一个数（无穷填 ∞）。</span> '+a.q);return}}
+  const ok=a.ok(v);let extra='';
+  if(ok&&a.take&&a.take(v)){const keep=pos,ans=new Set(answered);frames=BUILD[MODE]();pos=keep;answered=ans;extra=`（${esc(v)} 和 ${esc(a.ans)} 一样小，选哪个都行；这里就按你选的 ${esc(v)} 往下走。）`}
+  answered.add(pos);const nf=frames[pos];
+  render((ok?`<span class="ok">对了。</span>${extra} `:`<span class="bad">你${a.type==='num'?'填':'选'} ${esc(fm(v))}，应为 ${esc(fm(a.ans))}。</span>${a.hint?a.hint(v):''} `)+nf.txt)}
+function step(d){if(d>0&&pending()){const g=$('gin');if(g)g.focus();return}pos=Math.max(0,Math.min(frames.length-1,pos+d));render()}
+function rebuild(){const keep=pos,ans=new Set([...answered].filter(i=>i<keep));frames=BUILD[MODE]();pos=Math.min(keep,frames.length-1);answered=ans;answered.add(pos);render()}
+function restart(){choiceAt={};korder=null;sel=null;frames=BUILD[MODE]();pos=0;answered=new Set();render()}
+$('next').onclick=()=>step(1);$('prev').onclick=()=>step(-1);$('reset').onclick=restart;
+$('all').onclick=()=>{frames.forEach((_,i)=>answered.add(i));pos=frames.length-1;render()};$('guessMode').onchange=()=>render();
+/* ---------- presets / modes ---------- */
+function setGraph(g,P){G=g;if(P&&P.pos){G.W=P.W;G.H=P.H;G.pos=P.pos}else Object.assign(G,layout(G))}
+function usePreset(i){pi=i;const P=PRESETS[i];let g;try{g=parse(P.src,MODE==='prim'||MODE==='krus'?false:!!P.dir)}catch(e){$('err').textContent=e;return}
+  g.start=P.start||g.V[0];setGraph(g,P);$('err').textContent='';$('src').value=P.src;$('dir').checked=!!P.dir;$('start').value=g.start;
+  $('question').innerHTML=`${esc(P.q)}<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${esc(P.a)}</span></details>`;$('srcnote').textContent=P.note;
+  $('presets').querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===i));restart()}
+function setMode(m){MODE=m;document.querySelectorAll('#tabs [data-m]').forEach(b=>b.setAttribute('aria-selected',b.dataset.m===m));
+  $('rules').innerHTML=RULES[m].map(r=>`<li>${r}</li>`).join('');$('legend').textContent=LEGEND[m];
+  $('rulesTitle').textContent={dij:'Dijkstra 五句话',floyd:'Floyd 五句话',prim:'Prim 五句话',krus:'Kruskal 五句话'}[m];
+  const list=PRESETS.map((p,i)=>({p,i})).filter(x=>x.p.m.includes(m));
+  $('presets').innerHTML='例题：'+list.map(({p,i})=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p.t}</button>`).join('');
+  const keep=PRESETS[pi]&&PRESETS[pi].m.includes(m)&&!G.custom;
+  if(keep)usePreset(pi);else if(G&&G.custom){loadCustom(true)}else usePreset(list[0].i)}
+$('tabs').onclick=e=>{const b=e.target.closest('[data-m]');if(b&&b.dataset.m!==MODE)setMode(b.dataset.m)};
+$('presets').onclick=e=>{const b=e.target.closest('[data-p]');if(b)usePreset(+b.dataset.p)};
+function loadCustom(quiet){const und=MODE==='prim'||MODE==='krus';let g;try{g=parse($('src').value,und?false:$('dir').checked)}catch(e){$('err').textContent=e;return false}
+  const st=$('start').value.trim()||g.V[0];if(!g.V.includes(st)){$('err').textContent=`源点 / 起点 ${st} 不在图里，图里的顶点有 ${g.V.join('、')}。`;return false}
+  g.start=st;g.custom=true;
+  if(MODE==='floyd'){const n=g.V.length;const A=g.V.map((_,i)=>g.V.map((_,j)=>i===j?0:INF));g.E.forEach(e=>{const i=g.V.indexOf(e.u),j=g.V.indexOf(e.v);A[i][j]=Math.min(A[i][j],e.w);if(!g.dir)A[j][i]=Math.min(A[j][i],e.w)});for(let k=0;k<n;k++)for(let i=0;i<n;i++)for(let j=0;j<n;j++)if(A[i][k]+A[k][j]<A[i][j])A[i][j]=A[i][k]+A[k][j];
+    if(g.V.some((_,i)=>A[i][i]<0)){$('err').textContent='这张图有负权回路（无向图里一条负权边来回走也算回路），Floyd 不适用。照样演示，最后一步会指出来。'}else $('err').textContent=''}
+  else $('err').textContent=und&&$('dir').checked?'Prim、Kruskal 只对无向图，这里把边当无向处理。':'';
+  setGraph(g,null);$('presets').querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed','false'));
+  $('question').textContent='自己输入的图。';$('srcnote').textContent='自己输入的图。';restart();return true}
+$('load').onclick=()=>loadCustom(false);
+$('quiz').innerHTML=QUIZ.map(x=>`<div class="q">${esc(x.q)}<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${esc(x.a)}</span></details></div>`).join('');
+G={};setMode('dij');
+</script>
+</body>
+</html>
