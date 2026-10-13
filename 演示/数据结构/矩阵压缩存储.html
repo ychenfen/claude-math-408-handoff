@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>矩阵压缩存储</title>
+<style>
+/* Settings on top; the matrix grid (stored cells tinted, cells counted before the target filled) beside the 1-D array; a counting breakdown below. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input,.form select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.form input[type=number]{width:5.5em}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.stage{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:760px){.stage{grid-template-columns:minmax(0,1fr)}}
+.gridwrap{overflow-x:auto}
+.grid{border-collapse:collapse;font:12px var(--mono)}
+.grid th{color:var(--muted);font-weight:400;padding:0 4px;text-align:center}
+.grid td{width:34px;height:30px;border:1px solid var(--line);text-align:center;cursor:pointer;color:var(--muted);padding:0}
+.grid td.st{background:color-mix(in srgb,var(--q) 10%,transparent);color:var(--ink)}
+.grid td.before{background:color-mix(in srgb,var(--cmp) 34%,transparent);color:var(--ink)}
+.grid td.tgt{background:var(--done);color:var(--paper);font-weight:700}
+.grid td.mirror{outline:2px dashed var(--mv);outline-offset:-3px}
+.grid td.zero{color:var(--line)}
+.arr{display:flex;flex-wrap:wrap;gap:3px;font:11px var(--mono)}
+.arr div{min-width:38px;border:1px solid var(--line);border-radius:3px;text-align:center;padding:1px 2px;background:var(--bg)}
+.arr div small{display:block;color:var(--muted);font-size:9px}
+.arr div.before{background:color-mix(in srgb,var(--cmp) 30%,transparent)}
+.arr div.tgt{background:var(--done);color:var(--paper);font-weight:700}
+.arr div.tgt small{color:var(--paper)}
+.arr div.cur{outline:2px solid var(--q)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;margin-top:10px}
+.note b{color:var(--done)}
+.formula{font:15px var(--mono);margin-top:8px}
+.formula b{color:var(--done)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:6em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+.bd{border-collapse:collapse;font:13px var(--mono);margin-top:6px}
+.bd td,.bd th{border:1px solid var(--line);padding:2px 8px;text-align:left}
+.bd th{color:var(--muted);font-weight:400}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.legend span{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin:0 4px 0 10px}
+.tbl{border-collapse:collapse;font-size:13px;width:100%}
+.tbl td,.tbl th{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+.tbl th{color:var(--muted);font-weight:400}
+.hidden{display:none}
+#rebuild .tgt{outline:3px solid var(--mv)!important;outline-offset:-3px}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="散列表ASL.html">查找成功与失败</a></div>
+  <header>
+    <h1>矩阵压缩存储：元素存在第几格</h1>
+    <p class="sub">对称矩阵、三角矩阵、三对角矩阵和普通二维数组，点矩阵里任意一格，看它前面按存储顺序已经存了几个元素，它在一维数组里的下标就出来了。408 选择题 2016–2023 年考了 6 次，2011 年 41 题还把上三角压缩和关键路径放进了应用题。</p>
+  </header>
+  <section class="panel">
+    <h2>不背公式，只数“前面有几个”</h2>
+    <ol class="rules">
+      <li>下标 k = <b>前面存了几个元素</b> + 数组起始下标（C 语言数组从 0 开始就 +0，从 1 开始就 +1）。</li>
+      <li>“前面”按存储顺序算：行优先就先数完整的前几行，再数本行前面几个；列优先就先数完整的前几列，再数本列上面几个。<b>只数真正存进去的格子</b>（上三角就只数上三角那部分）。</li>
+      <li>对称矩阵只存一半：要找的格子不在存的那一半，先把 i、j 交换（a<sub>ij</sub> = a<sub>ji</sub>）。</li>
+      <li>先看清三件事：矩阵下标从 1 还是从 0 开始（题目没说默认从 1）；数组从 0 还是从 1 开始（C 语言是 0）；行优先还是列优先。</li>
+    </ol>
+  </section>
+  <section class="panel">
+    <div class="form">
+      <label>矩阵类型<select id="kind"><option value="sym">对称矩阵</option><option value="tri">三角矩阵</option><option value="band">三对角矩阵</option><option value="full">普通二维数组</option></select></label>
+      <label id="lpart">存哪一半<select id="part"><option value="lower">下三角（i ≥ j）</option><option value="upper">上三角（i ≤ j）</option></select></label>
+      <label id="ldiag" style="flex-direction:row;display:flex;gap:4px;align-items:center;color:var(--ink)"><input type="checkbox" id="diag" checked>含主对角线</label>
+      <label id="lord">存储顺序<select id="ord"><option value="row">行优先</option><option value="col">列优先</option></select></label>
+      <label>阶数 n<input id="n" type="number" min="2" max="200" value="6"></label>
+      <label>矩阵下标从<select id="mb"><option value="1">1 开始</option><option value="0">0 开始</option></select></label>
+      <label>数组下标从<select id="ab"><option value="0">0 开始</option><option value="1">1 开始</option></select></label>
+      <label>i<input id="ti" type="number" value="4"></label>
+      <label>j<input id="tj" type="number" value="3"></label>
+      <button class="btn primary" id="go" type="button">定位</button>
+    </div>
+    <div class="chips" id="presets" style="margin-top:8px">真题：</div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="guess"><span>先自己算 k：</span><input id="guessIn" type="text" inputmode="numeric" aria-label="你算的下标"><button class="btn" id="guessBtn" type="button">对答案</button><span id="guessRes"></span><label style="margin-left:auto;font-size:13px;color:var(--muted)"><input type="checkbox" id="hide" checked> 对答案前先遮住结果</label></div>
+    <div id="result"></div>
+  </section>
+  <section class="panel">
+    <h2>真题清单</h2>
+    <table class="tbl">
+      <tr><th>年份</th><th>考什么</th><th>答案</th><th>数法</th></tr>
+      <tr><td>2011-41</td><td>6 个顶点的有向图，邻接矩阵上三角（不含对角线）按行存成 15 个数，还原矩阵、画图、求关键路径</td><td>关键路径长 16</td><td>每行存 5、4、3、2、1 个，切段放回去（见下面“还原”）</td></tr>
+      <tr><td>2016</td><td>100 阶三对角，行优先，矩阵从 1、数组从 0，求 m<sub>30,30</sub></td><td>B. 87</td><td>第 1 行 2 个，第 2–29 行各 3 个共 84，第 30 行前面还有 m<sub>30,29</sub> 1 个：2 + 84 + 1 = 87</td></tr>
+      <tr><td>2017</td><td>适合压缩存储稀疏矩阵的两种结构</td><td>A. 三元组表和十字链表</td><td>概念题</td></tr>
+      <tr><td>2018</td><td>12 阶对称矩阵存上三角，行优先，求 m<sub>6,6</sub></td><td>A. 50</td><td>前 5 行上三角长度 12、11、10、9、8，共 50；本行前面 0 个</td></tr>
+      <tr><td>2020</td><td>10 阶对称矩阵存上三角，列优先，求 m<sub>7,2</sub></td><td>C. 22</td><td>7 > 2 在下三角，交换成 m<sub>2,7</sub>；前 6 列上三角长度 1～6 共 21，本列上面 1 个：22</td></tr>
+      <tr><td>2021</td><td>行优先，A[0][0] 地址 100，A[3][3] 地址 220，求 A[5][5]</td><td>B. 300</td><td>设每行 c 个：3c + 3 = 120，c = 39；A[5][5] = 100 + 5×39 + 5 = 300</td></tr>
+      <tr><td>2023</td><td>三元组表外还要保存什么</td><td>A. 仅 M 的行数和列数</td><td>三元组只记非零元素的 (行, 列, 值)，不知道矩阵多大，所以要另存行数和列数</td></tr>
+    </table>
+    <p class="legend" style="margin-top:8px">题目和答案取自王道《数据结构》第 3.4 节“本节试题精选”第 11–16 题。</p>
+  </section>
+  <section class="panel">
+    <h2>应用题：从一维数组还原邻接矩阵</h2>
+    <p class="sub" style="margin-bottom:8px">打卡表第 1 章和 4.5 节说的就是这个：有向无环图按拓扑序编号后，邻接矩阵是上三角，可以压缩成一维数组。2011 年 41 题就是给你这个数组，让你还原矩阵、画图、求关键路径。做法是先算每一行存几个，把数组切成段，一段放回一行。</p>
+    <div class="chips" id="rbtn"><button type="button" class="chip" data-r="0" aria-pressed="true">2011-41：6 个顶点，不含对角线</button><button type="button" class="chip" data-r="1" aria-pressed="false">打卡表 4.5：8 个顶点，含对角线</button></div>
+    <div class="stage" id="rebuild" style="margin-top:10px"></div>
+    <p class="legend" id="rnote"></p>
+  </section>
+  <section class="panel">
+    <h2>稀疏矩阵的三元组表（2017、2023 考概念）</h2>
+    <div class="stage" id="sparse"></div>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const PRESETS=[
+ ['2016 三对角 m30,30',{kind:'band',ord:'row',n:100,mb:1,ab:0,i:30,j:30}],
+ ['2018 对称上三角行优先 m6,6',{kind:'sym',part:'upper',ord:'row',n:12,mb:1,ab:0,i:6,j:6}],
+ ['2020 对称上三角列优先 m7,2',{kind:'sym',part:'upper',ord:'col',n:10,mb:1,ab:0,i:7,j:2}],
+ ['2021 二维数组 A[5][5]',{kind:'full',ord:'row',n:39,mb:0,ab:0,i:5,j:5,note2021:true}],
+ ['2011-41 有向图上三角（不含对角线）a[2][4]',{kind:'tri',part:'upper',diag:false,ord:'row',n:6,mb:0,ab:0,i:2,j:4}],
+ ['打卡表 4.5 DAG 上三角 a[1][6]',{kind:'tri',part:'upper',ord:'row',n:8,mb:0,ab:0,i:1,j:6}],
+ ['Relax1000 10 阶对称下三角 A[8][5]→B[1] 起',{kind:'sym',part:'lower',ord:'row',n:10,mb:1,ab:1,i:8,j:5}],
+ ['小例子：6 阶对称下三角',{kind:'sym',part:'lower',ord:'row',n:6,mb:1,ab:0,i:4,j:3}]
+];
+let cur=null,revealed=false,animTimer=null;
+function stored(c,i,j){/* i,j 1-based */const {kind,part}=c;
+  if(kind==='full')return true;if(kind==='band')return Math.abs(i-j)<=1;if(i===j)return c.diag!==false;return part==='lower'?i>j:i<j}
+function order(c){const o=[],n=c.n;if(c.ord==='row'){for(let i=1;i<=n;i++)for(let j=1;j<=n;j++)if(stored(c,i,j))o.push([i,j])}else{for(let j=1;j<=n;j++)for(let i=1;i<=n;i++)if(stored(c,i,j))o.push([i,j])}return o}
+function formula(c,i,j){/* i,j 1-based, already mapped into stored half */const n=c.n,ab=c.ab;let txt,val;
+  if(c.kind==='full'){if(c.ord==='row'){val=(i-1)*n+(j-1);txt=`(i−1)·n + (j−1) = ${i-1}×${n} + ${j-1}`}else{val=(j-1)*n+(i-1);txt=`(j−1)·n + (i−1) = ${j-1}×${n} + ${i-1}`}}
+  else if(c.kind==='band'){if(c.ord==='row'){val=2*i+j-3;txt=`2i + j − 3 = 2×${i} + ${j} − 3`}else{val=i+2*j-3;txt=`i + 2j − 3 = ${i} + 2×${j} − 3`}}
+  else if(c.diag===false){const lower=c.part==='lower',row=c.ord==='row';
+    if(lower&&row){val=(i-1)*(i-2)/2+j-1;txt=`(i−1)(i−2)/2 + (j−1) = ${i-1}×${i-2}/2 + ${j-1}`}
+    else if(lower&&!row){val=(j-1)*(2*n-j)/2+(i-j-1);txt=`(j−1)(2n−j)/2 + (i−j−1) = ${j-1}×${2*n-j}/2 + ${i-j-1}`}
+    else if(!lower&&row){val=(i-1)*(2*n-i)/2+(j-i-1);txt=`(i−1)(2n−i)/2 + (j−i−1) = ${i-1}×${2*n-i}/2 + ${j-i-1}`}
+    else{val=(j-1)*(j-2)/2+i-1;txt=`(j−1)(j−2)/2 + (i−1) = ${j-1}×${j-2}/2 + ${i-1}`}}
+  else{const lower=c.part==='lower',row=c.ord==='row';
+    if(lower&&row){val=i*(i-1)/2+j-1;txt=`i(i−1)/2 + (j−1) = ${i}×${i-1}/2 + ${j-1}`}
+    else if(lower&&!row){val=(j-1)*(2*n-j+2)/2+(i-j);txt=`(j−1)(2n−j+2)/2 + (i−j) = ${j-1}×${2*n-j+2}/2 + ${i-j}`}
+    else if(!lower&&row){val=(i-1)*(2*n-i+2)/2+(j-i);txt=`(i−1)(2n−i+2)/2 + (j−i) = ${i-1}×${2*n-i+2}/2 + ${j-i}`}
+    else{val=j*(j-1)/2+i-1;txt=`j(j−1)/2 + (i−1) = ${j}×${j-1}/2 + ${i-1}`}}
+  return {txt:`前面个数 = ${txt} = ${val}`,before:val,k:val+ab}}
+function breakdown(c,ti,tj){/* group lines before the target's line by count */const n=c.n,row=c.ord==='row';const line=row?ti:tj;const groups=[];
+  for(let L=1;L<line;L++){let cnt=0;for(let t=1;t<=n;t++){const [i,j]=row?[L,t]:[t,L];if(stored(c,i,j))cnt++}const g=groups[groups.length-1];if(g&&g.cnt===cnt&&g.to===L-1)g.to=L;else groups.push({from:L,to:L,cnt})}
+  let within=0;const wl=[];for(let t=1;t<=n;t++){const [i,j]=row?[line,t]:[t,line];if(i===ti&&j===tj)break;if(stored(c,i,j)){within++;wl.push(`m${i},${j}`)}}
+  return {groups,within,wl,word:row?'行':'列'}}
+function read(){return {kind:$('kind').value,part:$('part').value,diag:$('diag').checked,ord:$('ord').value,n:+$('n').value,mb:+$('mb').value,ab:+$('ab').value,i:+$('ti').value,j:+$('tj').value}}
+function syncUI(){const k=$('kind').value;$('lpart').classList.toggle('hidden',!(k==='sym'||k==='tri'));$('ldiag').classList.toggle('hidden',!(k==='sym'||k==='tri'))}
+function run(){if(animTimer){clearInterval(animTimer);animTimer=null}const c=read();syncUI();
+  const lo=c.mb,hi=c.mb+c.n-1;
+  if(!(c.n>=2&&c.n<=200))return err('n 取 2～200。');if(!(c.i>=lo&&c.i<=hi&&c.j>=lo&&c.j<=hi))return err(`i、j 要在 ${lo}～${hi} 之间。`);err('');
+  let i=c.i-c.mb+1,j=c.j-c.mb+1;/* to 1-based */const steps=[];
+  if(c.mb===0)steps.push(`矩阵下标从 0 开始：先各加 1 换成从 1 开始的 (${i}, ${j})，套下面的数法。`);
+  let mirrored=null;
+  if(!stored(c,i,j)){
+    if(c.kind==='sym'){if(i===j){cur={c,i,j,zero:true};render(steps);return}mirrored=[i,j];[i,j]=[j,i];steps.push(`(${mirrored[0]}, ${mirrored[1]}) 不在存的${c.part==='lower'?'下':'上'}三角里。对称矩阵 a<sub>ij</sub> = a<sub>ji</sub>，交换成 (${i}, ${j}) 再数。`)}
+    else if(c.kind==='tri'){cur={c,i,j,zero:true};render(steps);return}
+    else{cur={c,i,j,zero:true};render(steps);return}}
+  cur={c,i,j,mirrored};render(steps)}
+function err(t){$('err').textContent=t;return false}
+function render(steps){const {c,i,j}=cur;const o=order(c);revealed=!$('hide').checked;$('guessRes').textContent='';$('guessIn').value='';
+  const R=$('result');
+  if(cur.zero){const total=o.length;R.innerHTML=`<div class="note">(${c.i}, ${c.j}) 在不存的那部分。${c.kind==='tri'&&c.diag===false?'这一格题目约定不存（有向无环图的邻接矩阵：对角线是 0，另一半是 ∞ 或 0），去掉它的那部分只看存了的格子。':c.kind==='sym'?'对角线没存。':c.kind==='tri'?`三角矩阵另一半全是同一个常数 c，c 只存一份，放在所有元素后面：下标 = ${total} + ${c.ab} = <b>${total+c.ab}</b>（${c.n}(${c.n}+1)/2 = ${total} 个元素之后）。`:'三对角矩阵带外面都是 0，不存。'}</div>`;$('guessRes').textContent='';cur.k=c.kind==='tri'&&c.diag!==false?total+c.ab:null;drawAll(o,-1,steps);return}
+  const idx=o.findIndex(([a,b])=>a===i&&b===j);const f=formula(c,i,j);
+  if(f.before!==idx){R.innerHTML=`<div class="err">公式和逐个数的结果不一致（${f.before} ≠ ${idx}），请把这组数据告诉我。</div>`;return}
+  cur.k=idx+c.ab;cur.f=f;cur.idx=idx;drawAll(o,idx,steps)}
+function drawAll(o,idx,steps){const {c,i,j}=cur;const R=$('result');const show=c.n<=12;const k=cur.k;
+  let grid='';if(show){grid=`<div class="gridwrap"><table class="grid" aria-label="矩阵"><tr><th></th>${Array.from({length:c.n},(_,t)=>`<th>${t+c.mb}</th>`).join('')}</tr>`;
+    const pos={};o.forEach(([a,b],t)=>pos[a+','+b]=t);
+    for(let a=1;a<=c.n;a++){grid+=`<tr><th>${a-1+c.mb}</th>`;for(let b=1;b<=c.n;b++){const st=stored(c,a,b),t=pos[a+','+b];let cls=st?'st':'zero';if(idx>=0&&st&&t<idx)cls+=' before';if(idx>=0&&a===i&&b===j)cls+=' tgt';if(cur.mirrored&&a===cur.mirrored[0]&&b===cur.mirrored[1])cls+=' mirror';
+      grid+=`<td class="${cls}" data-a="${a}" data-b="${b}" title="m${a-1+c.mb},${b-1+c.mb}">${st?(t+c.ab):(c.kind==='sym'?'·':c.kind==='tri'?'c':'0')}</td>`}grid+='</tr>'}grid+='</table></div><div class="legend">格子里的数是它在一维数组里的下标（遮住时先自己数）。<span style="background:color-mix(in srgb,var(--cmp) 34%,transparent)"></span>排在它前面的<span style="background:var(--done)"></span>要找的'+(cur.mirrored?'<span style="outline:2px dashed var(--mv);background:none"></span>题目问的那格（对称过去）':'')+'</div>'}
+  else grid=`<p class="legend">n = ${c.n} 太大，矩阵不画全，下面按${c.ord==='row'?'行':'列'}分组数。想看整张图，把 n 改到 12 以内看同样的规律。</p>`;
+  let arr='';if(o.length<=78&&idx>=0)arr=`<h2 style="margin-top:12px">一维数组 N</h2><div class="arr">${o.map(([a,b],t)=>`<div class="${t<idx?'before':t===idx?'tgt':''}" data-t="${t}">m${a-1+c.mb},${b-1+c.mb}<small>[${t+c.ab}]</small></div>`).join('')}</div>`;
+  let bd='';if(idx>=0){const B=breakdown(c,i,j);const rows=B.groups.map(g=>`<tr><td>第 ${g.from}${g.to>g.from?'–'+g.to:''} ${B.word}</td><td>${g.to>g.from?`每${B.word} ${g.cnt} 个 × ${g.to-g.from+1} = ${g.cnt*(g.to-g.from+1)}`:`${g.cnt} 个`}</td></tr>`).join('');
+    const sum=B.groups.reduce((s,g)=>s+g.cnt*(g.to-g.from+1),0);
+    bd=`<h2 style="margin-top:12px">逐${B.word}数（按从 1 开始的行列号）</h2><table class="bd"><tr><th>哪几${B.word}</th><th>存了几个</th></tr>${rows||`<tr><td colspan="2">它在第 1 ${B.word}，前面没有完整的${B.word}</td></tr>`}<tr><td>本${B.word}在它前面</td><td>${B.within} 个${B.wl.length&&B.wl.length<=4?'（'+B.wl.join('、')+'）':''}</td></tr><tr><th>合计</th><th>${sum} + ${B.within} = ${sum+B.within}</th></tr></table>`}
+  const ans=idx>=0?`<div class="note">${steps.map(s=>s+'<br>').join('')}m<sub>${c.i},${c.j}</sub> 前面存了 <b>${cur.idx}</b> 个元素，数组从 ${c.ab} 开始，下标 k = ${cur.idx} + ${c.ab} = <b>${k}</b>。</div><div class="formula">${cur.f.txt}（套公式也一样，但数比背快）</div>`:'';
+  R.innerHTML=`<div class="stage"><div>${grid}</div><div><div id="ans" class="${revealed?'':'hidden'}">${ans}${bd}${arr}</div>${revealed?'':'<p class="legend">结果先遮住了：在上面填你算的 k 再对答案，或者取消“先遮住结果”。</p>'}${idx>=0&&o.length<=78?`<div class="ctrl"><button class="btn" id="anim" type="button">按存储顺序一格格放进数组</button></div>`:''}</div></div>`;
+  if(!revealed&&show)R.querySelectorAll('.grid td').forEach(td=>{if(!td.classList.contains('zero'))td.textContent=''});
+  if(cur.zero){$('ans')&&($('ans').className='');R.querySelector('.stage').insertAdjacentHTML('afterbegin','')}
+  const an=$('anim');if(an)an.onclick=()=>animate(o,idx);
+  R.querySelectorAll('.grid td').forEach(td=>td.onclick=()=>{$('ti').value=+td.dataset.a-1+c.mb;$('tj').value=+td.dataset.b-1+c.mb;run()})}
+function animate(o,idx){if(animTimer)clearInterval(animTimer);revealed=true;$('ans').className='';const cells=[...document.querySelectorAll('.arr div')];const tds={};document.querySelectorAll('.grid td').forEach(td=>tds[td.dataset.a+','+td.dataset.b]=td);
+  cells.forEach(d=>d.classList.remove('before','tgt','cur'));Object.values(tds).forEach(td=>td.classList.remove('before','tgt'));let t=0;
+  animTimer=setInterval(()=>{if(t>idx){clearInterval(animTimer);animTimer=null;return}const [a,b]=o[t];const td=tds[a+','+b];cells.forEach(d=>d.classList.remove('cur'));
+    if(t<idx){cells[t].classList.add('before');if(td){td.classList.add('before');td.textContent=t+cur.c.ab}}else{cells[t].classList.add('tgt');if(td){td.classList.add('tgt');td.textContent=t+cur.c.ab}}cells[t].classList.add('cur');t++},o.length>40?160:420)}
+$('guessBtn').onclick=()=>{if(!cur||cur.k===null||cur.k===undefined)return;const g=+$('guessIn').value;const ok=$('guessIn').value.trim()!==''&&g===cur.k;
+  $('guessRes').innerHTML=ok?'<span class="ok">对了。</span>':`<span class="bad">不对，是 ${cur.k}。</span>${cur.idx!==undefined&&g===cur.idx+1-cur.c.ab+cur.c.ab&&cur.c.ab===0?' 差 1：多半是把“前面个数”和“第几个”搞混了。':''}`;revealed=true;const a=$('ans');if(a)a.className='';document.querySelectorAll('.grid td').forEach(td=>{});run2()};
+function run2(){/* redraw revealed */const keep=$('guessRes').innerHTML,gv=$('guessIn').value,h=$('hide').checked;$('hide').checked=false;run();$('hide').checked=h;$('guessRes').innerHTML=keep;$('guessIn').value=gv}
+$('go').onclick=run;['kind','part','diag','ord','mb','ab'].forEach(id=>$(id).onchange=run);$('hide').onchange=run;
+$('guessIn').onkeydown=e=>{if(e.key==='Enter')$('guessBtn').click()};
+$('presets').insertAdjacentHTML('beforeend',PRESETS.map(([t],i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${t}</button>`).join(''));
+$('presets').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const v=PRESETS[+b.dataset.p][1];$('kind').value=v.kind;if(v.part)$('part').value=v.part;$('diag').checked=v.diag!==false;$('ord').value=v.ord;$('n').value=v.n;$('mb').value=v.mb;$('ab').value=v.ab;$('ti').value=v.i;$('tj').value=v.j;
+  $('presets').querySelectorAll('[data-p]').forEach(x=>x.setAttribute('aria-pressed',x===b));run();
+  if(v.note2021)$('result').insertAdjacentHTML('afterbegin','<div class="note" style="margin-bottom:10px">2021 年这题没给每行几个元素，要自己反推：A[3][3] − A[0][0] = 220 − 100 = 120 = 3c + 3，所以每行 c = 39 个。这里取 n = 39：A[5][5] 前面有 5 整行 × 39 + 本行 5 个 = 200 个元素，每个占 1 个地址单位，地址 = 100 + 200 = 300。</div>')};
+/* 稀疏矩阵 */
+(function(){const M=[[0,0,3,0,0,0],[0,0,0,0,0,7],[0,0,0,0,0,0],[5,0,0,0,0,0],[0,0,0,2,0,0]];const tr=[];M.forEach((r,i)=>r.forEach((v,j)=>{if(v)tr.push([i,j,v])}));
+  $('sparse').innerHTML=`<div class="gridwrap"><table class="grid"><tr><th></th>${M[0].map((_,j)=>`<th>${j}</th>`).join('')}</tr>${M.map((r,i)=>`<tr><th>${i}</th>${r.map(v=>`<td class="${v?'tgt':'zero'}" style="cursor:default">${v}</td>`).join('')}</tr>`).join('')}</table></div><div><table class="bd"><tr><th>行</th><th>列</th><th>值</th></tr>${tr.map(([i,j,v])=>`<tr><td>${i}</td><td>${j}</td><td>${v}</td></tr>`).join('')}</table><p class="legend">左边 5×6 的矩阵只有 4 个非零元素，三元组表只存这 4 行。光看三元组表，看不出矩阵最后一行（第 4 行）、最后两列是不是还有全 0 的行列，所以还要另存<b>行数 5 和列数 6</b>（2023 年答案 A）。三元组表和十字链表是稀疏矩阵的两种存法（2017 年答案 A）；三元组表压缩后就失去了随机存取。</p></div>`})();
+/* 还原 */
+const RB=[
+ {n:6,diag:false,arr:['4','6','∞','∞','∞','5','∞','∞','∞','4','3','∞','∞','3','3'],note:'第 0–4 行主对角线右边分别有 5、4、3、2、1 个元素，数组切成 5|4|3|2|1 五段。对角线填 0，下三角填 ∞。还原后边是 0→1(4)、0→2(6)、1→2(5)、2→3(4)、2→4(3)、3→5(3)、4→5(3)，关键路径 0→1→2→3→5，长度 16。题目取自王道《数据结构》第 6 章综合应用题第 9 题（2011 统考真题）。'},
+ {n:8,diag:true,arr:(()=>{const a=Array(36).fill('');Object.entries({1:6,3:5,9:4,11:5,13:5,16:9,19:1,23:1,28:3,31:3,34:2}).forEach(([k,v])=>a[k]=String(v));return a})(),note:'含对角线时第 0–7 行各存 8、7、6、5、4、3、2、1 个，共 36 个。空格表示没有边。查边 &lt;i, j&gt; 时用 k = i(2n−i+1)/2 + (j−i)（矩阵从 0 开始）；矩阵从 1 开始就变成 (i−1)(2n−i+2)/2 + (j−i)，这是打卡表 4.5.3 特意提醒的两种答案。数组和图取自《2027数据结构应用题打卡表参考文档》4.5 节。'}];
+const PAL=['#8ec5d6','#a8d58c','#e3a6e0','#eba4a0','#aeb0ec','#c4c4c4','#7fd27a','#dccf8d'];
+function rebuild(x){const {n,diag,arr}=RB[x];const pos=[];for(let i=0;i<n;i++)for(let j=diag?i:i+1;j<n;j++)pos.push([i,j]);
+  const at={};pos.forEach(([i,j],k)=>at[i+','+j]=k);
+  const cell=(i,j)=>{const k=at[i+','+j];if(k===undefined)return `<td class="zero" style="cursor:default">${i===j?'0':'∞'}</td>`;return `<td data-k="${k}" style="background:color-mix(in srgb,${PAL[i%8]} 45%,transparent);color:var(--ink)" title="k=${k}">${arr[k]||''}</td>`};
+  $('rebuild').innerHTML=`<div class="gridwrap"><table class="grid"><tr><th></th>${Array.from({length:n},(_,j)=>`<th>${j}</th>`).join('')}</tr>${Array.from({length:n},(_,i)=>`<tr><th>${i}</th>${Array.from({length:n},(_,j)=>cell(i,j)).join('')}</tr>`).join('')}</table></div><div><div class="arr">${pos.map(([i,j],k)=>`<div data-k="${k}" style="background:color-mix(in srgb,${PAL[i%8]} 45%,transparent)">${arr[k]||'&nbsp;'}<small>[${k}] ${i},${j}</small></div>`).join('')}</div><p class="legend">同一种颜色是同一行。点数组或矩阵里任意一格，两边对应的格子一起亮。</p></div>`;
+  $('rnote').innerHTML=RB[x].note;
+  $('rebuild').querySelectorAll('[data-k]').forEach(el=>el.onclick=()=>{const k=el.dataset.k;$('rebuild').querySelectorAll('[data-k]').forEach(e=>e.classList.toggle('tgt',e.dataset.k===k))})}
+$('rbtn').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;$('rbtn').querySelectorAll('[data-r]').forEach(x=>x.setAttribute('aria-pressed',x===b));rebuild(+b.dataset.r)};
+rebuild(0);
+syncUI();run();
+</script>
+</body>
+</html>
