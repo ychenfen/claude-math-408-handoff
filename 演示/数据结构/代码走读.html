@@ -73,6 +73,17 @@ h2{font:14px var(--serif);font-weight:600;margin:0 0 6px}
 svg text{font-family:var(--mono)}
 .legend{font-size:11px;color:var(--muted)}
 .also{font-size:12px;color:var(--muted)}
+.sbox{display:inline-block;vertical-align:top;border:1.5px solid var(--ink);border-radius:5px;min-width:190px;font:12.5px var(--mono);margin:0 10px 10px 0;background:var(--paper)}
+.sbh{background:var(--hl);padding:2px 8px;font-weight:600;border-bottom:1px solid var(--line)}
+.sbr{display:flex;justify-content:space-between;gap:14px;padding:2px 8px;border-top:1px dashed var(--line)}
+.sbr:first-of-type{border-top:0}
+.sbr b{color:var(--q);font-weight:600}
+.sbr.new,.sbr.mv{background:color-mix(in srgb,var(--mv) 16%,transparent)}
+.mtx{border-collapse:collapse;font:13px var(--mono)}
+.mtx th,.mtx td{border:1px solid var(--line);padding:2px 9px;text-align:center}
+.mtx th{color:var(--muted);font-weight:400}
+.mtx td.cmp{background:color-mix(in srgb,var(--cmp) 24%,transparent)}
+.mtx td.mv{background:color-mix(in srgb,var(--mv) 30%,transparent);font-weight:700}
 .idea{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--q);border-radius:6px;padding:8px 14px;font-size:14px}
 .idea summary{cursor:pointer;font-weight:600;color:var(--q)}
 .idea ol{margin:6px 0 2px;padding-left:1.4em}
@@ -104,7 +115,7 @@ svg text{font-family:var(--mono)}
   <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="代码骨架背诵页.html">骨架背诵页</a></div>
   <header>
     <h1>代码骨架走读</h1>
-    <p class="sub">手册第 5、6 章的骨架逐行执行：每执行一行停一步，左边亮的是正在执行的那一行，右边是这一刻的数组、链表、树、队列和递归栈。每个例子先看三句思路；播放时关键步骤会先停下来让你猜；每个模板后面有“错法”对照；最后用“默写自测”挖空检查。</p>
+    <p class="sub">手册第 4 章的结构体和第 5、6 章的骨架逐行执行：每执行一行停一步，左边亮的是正在执行的那一行，右边是这一刻的数组、链表、树、队列和递归栈。每个例子先看三句思路；播放时关键步骤会先停下来让你猜；每个模板后面有“错法”对照；最后用“默写自测”挖空检查。</p>
   </header>
   <div class="chips" id="tpl" role="group" aria-label="模板"></div>
   <div class="progs" id="progs"></div>
@@ -696,7 +707,130 @@ P.bs2x={tpl:'二分',bug:true,name:'错法：L <= R 配 R = mid',when:P.bs1.when
    if(ge){const same=Rr===mid;Rr=mid;R.S('r',same?`R = mid = ${mid}，L、R 都没变！`:`R = ${Rr}。`,V({c:{[mid]:'mv'}}));if(same&&++rep>=2){R.S('w',`L = R = ${L}，条件 L <= R 永远成立，R = mid 又不缩小区间：死循环。L < R 配 R = mid，L <= R 配 mid ± 1，不能混。`,V({c:{[L]:'mv'}}));return}}
    else{L=mid+1;R.S('l',`L = ${L}。`,V())}}}};
 
-const TPL=[['T1','多重循环'],['T2','辅助数组'],['T3','有序合并'],['T4','链表转数组'],['T5','二叉树递归'],['T6','邻接矩阵'],['T7','增删'],['T8','层序'],['T9','DFS 拓扑'],['T10','邻接表'],['T11','孩子兄弟'],['快排',''],['二分',''],['归并','']];
+/* ---------- 结构体（手册第 4 章）：逐行讲字段，画出内存里的样子 ---------- */
+function box(title,rows,o={}){return `<div class="sbox${o.cls?' '+o.cls:''}"><div class="sbh">${esc(title)}</div>${rows.map(([f,v,c])=>`<div class="sbr ${c||''}"><span>${esc(f)}</span><b>${esc(v)}</b></div>`).join('')||'<div class="sbr"><span>（还没有字段）</span></div>'}</div>`}
+const H=(...b)=>['html',`<div><h2>内存里的样子</h2><div>${b.join('')}</div></div>`];
+const SWHEN='代码题第一步就是写结构体。平时只用手册第 4 章这一套；考试题目给了结构体，就一字不差照抄题目的。';
+P.sq={tpl:'结构体',name:'顺序表 Sqlist',when:SWHEN,
+ idea:['顺序表 = 一个数组 + 一个“现在放了几个”的计数。','把这两样用 typedef struct 捆成一个新类型 Sqlist。','变量用 . 取字段，指针用 -> 取字段。'],
+ why:{def:'#define 后面不写等号、不写分号。数组大小必须是常量，所以容量用 #define。',len:'length 是实际个数，maxsize 是容量。插入删除都要改 length（T7 丢分点）。',name:'名字写在右大括号后面、分号前面。',dot:'L 是结构体变量，用 .。',arrow:'q 是指针，用 ->。q->length 就等于 (*q).length。T7 的顺序表插入里 L 是指针，所以写 L->length。'},
+ blanks:['def','ts','data','len','name'],
+ code:[['#define maxsize 50','// 容量：最多放 50 个','def'],['typedef struct{','// 开始打包，下面的字段捆成一个新类型','ts'],['    int data[maxsize];','// 存元素的数组','data'],['    int length;','// 现在实际放了几个','len'],['} Sqlist;','// 新类型叫 Sqlist','name'],['',''],['Sqlist L;','// 定义一个顺序表变量','var'],['L.length = 0;','// 变量用 .','dot'],['Sqlist *q = &L;','// 函数参数常传指针','ptr'],['q->data[q->length++] = 7;','// 指针用 ->','arrow']],
+ run(R){const fld=[];const d=['?','?','?','?','?','?'];let len='?';
+  const A=(o={})=>['arr',{name:'L.data[ ]（只画前 6 格，一共 maxsize = 50 格）',vals:d,cls:o.c||{},ptrs:o.p||{}}];
+  R.S('def','先定容量：maxsize 就是 50。',[H(box('maxsize',[['值','50']]))]);
+  R.S('ts','typedef struct{ ：开始定义一个“打包类型”，大括号里写它有哪些字段。',[H(box('新类型（还没起名）',fld))]);
+  fld.push(['int data[50]','数组','new']);R.S('data','第一个字段：存元素的数组，能放 maxsize 个 int。',[H(box('新类型（还没起名）',fld))]);
+  fld[0][2]='';R.Q('还要加一个 length。为什么不能直接用 maxsize 当个数？',['maxsize 就够了','maxsize 是容量，表里实际可能只放了几个'],1,'maxsize 永远是 50；表里现在放了几个要单独记，这就是 length。');
+  fld.push(['int length','实际个数','new']);R.S('len','第二个字段：length，现在实际放了几个。',[H(box('新类型（还没起名）',fld))]);
+  fld[1][2]='';R.S('name','} Sqlist; ：给这个类型起名叫 Sqlist。以后 Sqlist 就像 int 一样能定义变量。',[H(box('Sqlist',fld))]);
+  R.S('var','Sqlist L; ：定义一个顺序表变量 L，它肚子里有 data 数组和 length 两样。',[H(box('L（类型 Sqlist）',[['data','50 格数组'],['length','?']])),A()]);
+  len=0;R.S('dot','L.length = 0：L 是变量，用 . 取字段。空表长度为 0。',[H(box('L（类型 Sqlist）',[['data','50 格数组'],['length','0','mv']])),A()]);
+  R.S('ptr','Sqlist *q = &L; ：q 是指向 L 的指针。函数要改顺序表时，参数传的就是这种指针。',[H(box('q（Sqlist *）',[['指向','L']]),box('L（类型 Sqlist）',[['data','50 格数组'],['length','0']])),A()]);
+  R.Q('q 是指针。要取长度，写 q.length 还是 q->length？',['q.length','q->length'],1,'指针取字段用 ->。q->length 等于 (*q).length。');
+  d[0]=7;len=1;R.S('arrow','q->data[q->length++] = 7：先用 length（0）当下标放进 7，再把 length 加 1。',[H(box('q（Sqlist *）',[['指向','L']]),box('L（类型 Sqlist）',[['data','50 格数组'],['length','1','mv']])),A({c:{0:'mv'},p:{'length':1}})])}};
+P.lnode={tpl:'结构体',name:'单链表 LNode / LinkList',when:SWHEN,
+ idea:['一个结点 = 数据 + 指向下一个结点的指针。','结构体里要用到自己，所以 struct 后面要写标签 LNode。','最后起两个名字：LNode 是结点类型，LinkList 是“指向结点的指针”类型。'],
+ why:{ts:'struct 后面的 LNode 叫标签。下面 next 要写 struct LNode *，靠的就是它，不能省。',next:'这时 typedef 还没结束，LNode、LinkList 这两个名字还不存在，只能写 struct LNode *。',name:'LinkList 就是 LNode *，两者完全等价。习惯上表示“一条链表 / 头指针”用 LinkList，表示“一个结点指针”也可以写 LNode *。',mal:'sizeof 里写 LNode（结点有多大），不能写 LinkList（那只是一个指针的大小）。前面的 (LinkList) 是把 malloc 返回的地址转成结点指针。',nul:'带头结点的空表：头结点的 next 为 NULL。'},
+ blanks:['ts','data','next','name','mal'],
+ code:[['typedef struct LNode{','// 标签 LNode：下面要用','ts'],['    int data;','// 数据域','data'],['    struct LNode *next;','// 指针域：指向下一个结点','next'],['} LNode, *LinkList;','// 两个名字：结点、结点指针','name'],['',''],['LinkList L = (LinkList)malloc(sizeof(LNode));','// 申请头结点','mal'],['L->next = NULL;','// 空表','nul'],['LinkList s = (LinkList)malloc(sizeof(LNode));','// 申请一个新结点','mal2'],['s->data = 5;','','sd'],['s->next = L->next; L->next = s;','// 头插进表里','ins']],
+ run(R){const fld=[];
+  R.S('ts','typedef struct LNode{ ：开始定义结点类型，标签叫 LNode。',[H(box('struct LNode',fld))]);
+  fld.push(['int data','数据','new']);R.S('data','第一个字段：data，存这个结点的数据。',[H(box('struct LNode',fld))]);
+  fld[0][2]='';R.Q('第二个字段是指向下一个结点的指针。类型为什么写 struct LNode *，不直接写 LinkList？',['两种都行','这时 LinkList 还没定义出来'],1,'typedef 要到右大括号后面才生效，大括号里面只能用标签 struct LNode。');
+  fld.push(['struct LNode *next','→ 下一个结点','new']);R.S('next','第二个字段：next，指向下一个同类型的结点。结点就是靠它一个个串起来的。',[H(box('struct LNode',fld))]);
+  fld[1][2]='';R.S('name','} LNode, *LinkList; ：一次起两个名字。LNode 是结点；*LinkList 表示 LinkList 是“指向 LNode 的指针”。',[H(box('LNode（一个结点）',fld),box('LinkList（≡ LNode *）',[['里面存','一个结点的地址']]))]);
+  const nodes={L:'L'},order=['L'],next={L:'?'};const LV=(o={})=>['list',{nodes,order,next,head:'L',ptrs:o.p||{L:'L'},cls:o.c||{}}];
+  R.Q('申请头结点：sizeof 里写 LNode 还是 LinkList？',['sizeof(LNode)','sizeof(LinkList)'],0,'要的是一个结点那么大的空间。sizeof(LinkList) 只是一个指针的大小。');
+  next.L=null;R.S('mal','申请一个结点当头结点，地址交给 L。头结点的 data 不用。',[LV({c:{L:'mv'}})]);
+  R.S('nul','L->next = NULL：头结点后面什么都没有，就是空表。L 是指针，所以用 ->。',[LV()]);
+  nodes.s='?';order.push('s');next.s=null;R.S('mal2','再申请一个新结点 s，还没挂进表里。',[LV({p:{L:'L',s:'s'},c:{s:'mv'}})]);
+  nodes.s=5;R.S('sd','s->data = 5。',[LV({p:{L:'L',s:'s'},c:{s:'mv'}})]);
+  next.L='s';R.S('ins','头插两句：s 先连后（s->next = L->next，也就是 NULL），L 再连 s。现在表是 L → 5。',[LV({p:{L:'L',s:'s'},c:{s:'done'}})])}};
+P.btn={tpl:'结构体',name:'二叉链表 BTNode / BiTree',when:SWHEN,
+ idea:['和单链表一样，只是一个结点有两个指针：左孩子、右孩子。','手册统一用 char data、lchild、rchild。','没有孩子的那边是 NULL，递归的出口就靠它。'],
+ why:{ch:'* 跟着变量走：*lchild, *rchild 两个都要写 *，少写一个就变成了一整个结构体而不是指针。',name:'2014 题给的是 left、weight、right，2026 给的是 BSTNode；考试照抄题目。',nul:'新结点的孩子先置 NULL，否则是随机地址，递归会走飞。',acc:'T->lchild 是 B 的地址，再 ->data 取 B 的数据。'},
+ blanks:['ts','data','ch','name'],
+ code:[['typedef struct BTNode{','','ts'],['    char data;','// 手册统一 char','data'],['    struct BTNode *lchild, *rchild;','// 左、右孩子','ch'],['} BTNode, *BiTree;','','name'],['',''],['BiTree T = (BiTree)malloc(sizeof(BTNode));','','mal'],["T->data = 'A';",'','d'],['T->lchild = NULL; T->rchild = NULL;','// 孩子先置空','nul'],['BiTree B = (BiTree)malloc(sizeof(BTNode));','','malb'],["B->data = 'B'; B->lchild = NULL; B->rchild = NULL;",'','bd'],['T->lchild = B;','// B 挂到 A 的左边','link'],['printf("%c", T->lchild->data);','// 输出 B','acc']],
+ run(R){const fld=[];
+  R.S('ts','typedef struct BTNode{ ：开始定义二叉树结点，标签 BTNode。',[H(box('struct BTNode',fld))]);
+  fld.push(['char data','数据','new']);R.S('data','data：结点里存的字符。',[H(box('struct BTNode',fld))]);fld[0][2]='';
+  R.Q('如果写成 struct BTNode *lchild, rchild; rchild 是什么？',['也是指针','一整个结构体，不是指针（写错了）'],1,'* 只管紧挨着的那个变量，所以两个都要写 *。');
+  fld.push(['struct BTNode *lchild','→ 左孩子','new'],['struct BTNode *rchild','→ 右孩子','new']);R.S('ch','两个指针：lchild 指左孩子，rchild 指右孩子。',[H(box('struct BTNode',fld))]);
+  fld[1][2]=fld[2][2]='';R.S('name','起两个名字：BTNode 是结点，BiTree 是结点指针。一棵树用它的根指针表示，所以叫 BiTree。',[H(box('BTNode',fld),box('BiTree（≡ BTNode *）',[['里面存','根结点地址']]))]);
+  const tv=(nodes,o={})=>['tree',{nodes,root:'T',cls:o.c||{},title:'二叉树'}];
+  R.S('mal','申请一个结点，地址给 T。',[tv({T:{t:'?',l:null,r:null}},{c:{T:'cmp'}})]);
+  R.S('d',"T->data = 'A'。",[tv({T:{t:'A',l:null,r:null}},{c:{T:'cmp'}})]);
+  R.S('nul','两个孩子置 NULL：现在是只有一个结点的树。',[tv({T:{t:'A',l:null,r:null}}),H(box('T 指向的结点',[['data','A'],['lchild','NULL','mv'],['rchild','NULL','mv']]))]);
+  R.S('malb','再申请一个结点 B（还没挂上）。',[tv({T:{t:'A',l:null,r:null}}),H(box('B 指向的结点',[['data','?'],['lchild','?'],['rchild','?']]))]);
+  R.S('bd',"B 的数据是 'B'，孩子置空。",[tv({T:{t:'A',l:null,r:null}}),H(box('B 指向的结点',[['data','B'],['lchild','NULL'],['rchild','NULL']]))]);
+  R.Q('要把 B 挂成 A 的左孩子，写哪句？',['T->lchild = B;','T.lchild = B;','B->lchild = T;'],0,'T 是指针，用 ->；挂到 A 的左边，改的是 A 的 lchild。');
+  R.S('link','T->lchild = B：A 的左指针指向 B。',[tv({T:{t:'A',l:'B',r:null},B:{t:'B',l:null,r:null}},{c:{B:'mv'}})]);
+  R.S('acc','T->lchild->data：先顺着 A 的左指针到 B，再取 B 的 data，输出 B。',[tv({T:{t:'A',l:'B',r:null},B:{t:'B',l:null,r:null}},{c:{B:'done'}})])}};
+P.mg={tpl:'结构体',name:'邻接矩阵 MGraph',when:SWHEN,
+ idea:['顶点编号 0..n−1，再开一个 n×n 的二维数组 Edge。','Edge[i][j] = 1 表示有边 i → j，0 表示没有。','第 i 行加起来是出度，第 i 列加起来是入度。'],
+ why:{name:'2021–2024 真题给的就是这个结构体，字段名 numVertices、VerticesList、Edge 一字不差照抄。',row:'行和 Edge[i][j] 是出度（手册 T6 丢分点）。',col:'列和 Edge[j][i] 是入度。',vl:'VerticesList[i] 是顶点 i 的名字；代码里用的都是下标 i。',var:'G 是变量，用 . 取字段。'},
+ blanks:['ts','num','vl','e','name'],
+ code:[['#define MAXV 100','','def'],['typedef struct{','','ts'],['    int numVertices, numEdges;','// 顶点数、边数','num'],['    char VerticesList[MAXV];','// 顶点名','vl'],['    int Edge[MAXV][MAXV];','// 邻接矩阵：有边 1，无边 0','e'],['} MGraph;','','name'],['',''],['MGraph G;','// 假设读进来 4 个顶点 A B C D','var'],['G.Edge[0][1] = 1;','// 边 A → B','set'],['for (int j = 0; j < G.numVertices; j++) out += G.Edge[i][j];','// 第 i 行：出度','row'],['for (int j = 0; j < G.numVertices; j++) in += G.Edge[j][i];','// 第 i 列：入度','col']],
+ run(R){const fld=[];const E=[[0,0,1,0],[0,0,1,0],[0,0,0,1],[0,0,0,0]];const nm='ABCD';
+  const M=(o={})=>['html',`<div><h2>G.Edge（行 = 起点，列 = 终点）</h2><table class="mtx"><tr><th></th>${[0,1,2,3].map(j=>`<th>${j} ${nm[j]}</th>`).join('')}</tr>${E.map((r,i)=>`<tr><th>${i} ${nm[i]}</th>${r.map((x,j)=>`<td class="${(o.row===i||o.col===j)?'cmp':''}${o.cell&&o.cell[0]===i&&o.cell[1]===j?' mv':''}">${x}</td>`).join('')}</tr>`).join('')}</table></div>`];
+  R.S('def','MAXV：最多 100 个顶点。',[H(box('MAXV',[['值','100']]))]);
+  R.S('ts','开始打包。',[H(box('新类型',fld))]);
+  fld.push(['int numVertices','顶点数','new'],['int numEdges','边数','new']);R.S('num','顶点数和边数：循环时用 G.numVertices 当上界。',[H(box('新类型',fld))]);fld.forEach(f=>f[2]='');
+  fld.push(['char VerticesList[100]','顶点名','new']);R.S('vl','顶点名数组：VerticesList[i] 是顶点 i 的名字。',[H(box('新类型',fld))]);fld[2][2]='';
+  fld.push(['int Edge[100][100]','邻接矩阵','new']);R.S('e','二维数组 Edge：Edge[i][j] 是 1 就有边 i → j。',[H(box('新类型',fld))]);fld[3][2]='';
+  R.S('name','起名 MGraph。',[H(box('MGraph',fld))]);
+  E[0][1]=0;R.S('var','G 是一个 MGraph 变量：numVertices = 4，VerticesList = A B C D。',[H(box('G',[['numVertices','4'],['numEdges','3'],['VerticesList','A B C D'],['Edge','右边的矩阵']])),M()]);
+  E[0][1]=1;R.S('set','G.Edge[0][1] = 1：加一条边 A → B。现在 4 条边。',[M({cell:[0,1]})]);
+  R.Q('求顶点 0 的出度，加的是第 0 行还是第 0 列？',['第 0 行 Edge[0][j]','第 0 列 Edge[j][0]'],0,'行 = 起点。第 0 行就是从 0 出发的边。');
+  R.S('row','i = 0：第 0 行 0 1 1 0，出度 2（A → B、A → C）。',[M({row:0})]);
+  R.Q('求顶点 2 的入度，加的是哪个？',['Edge[2][j]','Edge[j][2]'],1,'列 = 终点。第 2 列就是指向 2 的边。');
+  R.S('col','i = 2：第 2 列 1 1 0 0，入度 2（A → C、B → C）。邻接矩阵版拓扑排序求入度就是这一句。',[M({col:2})])}};
+P.al={tpl:'结构体',name:'邻接表 ANode / Vnode / Graph',when:SWHEN,
+ idea:['三层：边结点 ANode → 顶点 Vnode → 整张图 Graph。','边结点像链表结点：adjvex 记这条边指向谁，nextarc 指同一个顶点的下一条边。','顶点里有 firstarc 指向它的第一条边；图里是顶点数组加顶点数、边数。'],
+ why:{adj:'邻接点是 p->adjvex，不是 p（手册 T9、T10 丢分点）。',na:'nextarc 和单链表的 next 一模一样，所以也要写 struct ANode *。',n1:'Node 就是 ANode *，循环变量 p 用它。',fa:'firstarc 是边链表的头；为 NULL 就是没有出边。',walk:'G.adjlist[i] 是顶点（不是指针），用 .；p 是指针，用 ->。'},
+ blanks:['ts','adj','na','n1','ts2','fa','n2','ts3','al','num','n3'],
+ code:[['typedef struct ANode{','// ① 边结点','ts'],['    int adjvex;','// 这条边指向的顶点下标','adj'],['    struct ANode *nextarc;','// 下一条边','na'],['} ANode, *Node;','','n1'],['typedef struct{','// ② 顶点','ts2'],['    int data;','','vd'],['    ANode *firstarc;','// 第一条边','fa'],['} Vnode;','','n2'],['typedef struct{','// ③ 整张图','ts3'],['    Vnode adjlist[MAXV];','// 顶点数组','al'],['    int numVertices, numEdges;','','num'],['} Graph;','','n3'],['',''],['for (Node p = G.adjlist[i].firstarc; p != NULL; p = p->nextarc)','// 走 i 的边表','walk'],['    w = p->adjvex;','// 边 i → w','w']],
+ run(R){const a=[],v=[],g=[];const adj=[[1,2],[2],[3],[]];
+  R.S('ts','第一层：边结点。每条边一个结点。',[H(box('struct ANode（边）',a))]);
+  a.push(['int adjvex','指向的顶点','new']);R.S('adj','adjvex：这条边的终点下标。',[H(box('struct ANode（边）',a))]);a[0][2]='';
+  a.push(['struct ANode *nextarc','→ 下一条边','new']);R.S('na','nextarc：同一个顶点的下一条边。和单链表的 next 一样。',[H(box('struct ANode（边）',a))]);a[1][2]='';
+  R.S('n1','起名：ANode 是边结点，Node 是边结点指针。',[H(box('ANode',a),box('Node（≡ ANode *）',[['里面存','一条边的地址']]))]);
+  R.S('ts2','第二层：顶点。',[H(box('ANode',a),box('顶点（还没起名）',v))]);
+  v.push(['int data','顶点信息','new']);R.S('vd','data：顶点的信息。',[H(box('ANode',a),box('顶点（还没起名）',v))]);v[0][2]='';
+  v.push(['ANode *firstarc','→ 第一条边','new']);R.S('fa','firstarc：这个顶点的边链表的头。',[H(box('ANode',a),box('顶点（还没起名）',v))]);v[1][2]='';
+  R.S('n2','起名 Vnode。',[H(box('ANode',a),box('Vnode',v))]);
+  R.S('ts3','第三层：整张图。',[H(box('ANode',a),box('Vnode',v),box('图（还没起名）',g))]);
+  g.push(['Vnode adjlist[100]','顶点数组','new']);R.S('al','adjlist：顶点数组，adjlist[i] 就是顶点 i。',[H(box('Vnode',v),box('图（还没起名）',g))]);g[0][2]='';
+  g.push(['int numVertices','顶点数','new'],['int numEdges','边数','new']);R.S('num','顶点数、边数。',[H(box('Vnode',v),box('图（还没起名）',g))]);g[1][2]=g[2][2]='';
+  R.S('n3','起名 Graph。画出来就是右边这张表：左边一列顶点，每个顶点后面挂一串边结点。',[H(box('Graph',g)),['adj',{adj,cur:null,vis:[]}]]);
+  R.Q('G.adjlist[0] 后面取 firstarc，写 . 还是 ->？',['G.adjlist[0].firstarc','G.adjlist[0]->firstarc'],0,'adjlist[0] 是一个 Vnode（不是指针），用 .；拿到的 firstarc 是指针，后面再用 ->。');
+  R.S('walk','i = 0：p = G.adjlist[0].firstarc，指向 0 的第一条边。',[['adj',{adj,cur:[0,0],vis:[]}]]);
+  R.Q('现在 w = p->adjvex 是几？',['0','1','p 本身'],1,'p 指的边结点里 adjvex = 1，这是边 0 → 1。邻接点是 p->adjvex，不是 p。');
+  R.S('w','w = p->adjvex = 1：边 0 → 1。',[['adj',{adj,cur:[0,0],vis:[]}]]);
+  R.S('walk','p = p->nextarc：下一条边。',[['adj',{adj,cur:[0,1],vis:[]}]]);
+  R.S('w','w = 2：边 0 → 2。',[['adj',{adj,cur:[0,1],vis:[]}]]);
+  R.S('walk','p = p->nextarc = NULL，0 的边走完。这个循环就是 T10 的骨架。',[['adj',{adj,cur:null,vis:[],curV:0}]])}};
+P.csn={tpl:'结构体',name:'孩子兄弟 CSNode / CSTree',when:SWHEN,
+ idea:['普通的树孩子个数不定，没法给每个孩子留一个指针。','办法：每个结点只留两个指针，左边指第一个孩子，右边指自己右边的兄弟。','所以它长得和二叉链表一样，叶子就是 firstchild 为 NULL。'],
+ why:{ch:'左 = firstchild（往下一层），右 = nextsibling（同一层往右）。',b1:'A 的孩子 B C D 里，只有第一个 B 挂在 A 的 firstchild 上。',b2:'C、D 是 B 的兄弟，依次挂在 nextsibling 上，不挂在 A 上。',leaf:'叶子只看 firstchild == NULL，有没有兄弟不影响（T11 丢分点）。'},
+ blanks:['ts','d','ch','name'],
+ code:[['typedef struct CSNode{','','ts'],['    char data;','','d'],['    struct CSNode *firstchild, *nextsibling;','// 第一个孩子、右边相邻的兄弟','ch'],['} CSNode, *CSTree;','','name'],['',''],['A->firstchild = B;','// 原树：A 的孩子 B C D','b1'],['B->nextsibling = C; C->nextsibling = D;','','b2'],['B->firstchild = E; E->nextsibling = F;','// B 的孩子 E F','b3'],['D->firstchild = G;','// D 的孩子 G','b4'],['if (p->firstchild == NULL) leaf++;','// 叶子：E F C G','leaf']],
+ run(R){const fld=[];const T={};Object.entries(CS).forEach(([k,n])=>T[k]={t:n.t,l:null,r:null});
+  const tv=(o={})=>['tree',{nodes:clone(T),root:'A',cls:o.c||{},title:'孩子兄弟链表（原树：A 的孩子 B C D，B 的孩子 E F，D 的孩子 G）',edgeLabel:['孩子','兄弟'],sibDash:true,legend:'左下实线 = firstchild；右下虚线 = nextsibling。'}];
+  R.S('ts','开始定义树结点。',[H(box('struct CSNode',fld))]);
+  fld.push(['char data','数据','new']);R.S('d','data。',[H(box('struct CSNode',fld))]);fld[0][2]='';
+  fld.push(['struct CSNode *firstchild','→ 第一个孩子','new'],['struct CSNode *nextsibling','→ 右边的兄弟','new']);R.S('ch','两个指针：firstchild 往下，nextsibling 往右。',[H(box('struct CSNode',fld))]);fld[1][2]=fld[2][2]='';
+  R.S('name','起名：CSNode 是结点，CSTree 是结点指针。下面把一棵普通的树存进去。',[H(box('CSNode',fld))]);
+  T.A.l='B';R.S('b1','A 的第一个孩子是 B：A->firstchild = B。',[tv({c:{B:'mv'}})]);
+  R.Q('C 也是 A 的孩子。它挂在哪个指针上？',['A 的 nextsibling','B 的 nextsibling'],1,'A 只有一个 firstchild 指针，C 是 B 右边的兄弟，挂在 B->nextsibling 上。A 是根，没有兄弟，A->nextsibling 是 NULL。');
+  T.B.r='C';T.C.r='D';R.S('b2','C 挂在 B 的右边，D 挂在 C 的右边：同一层的兄弟连成一串。',[tv({c:{C:'mv',D:'mv'}})]);
+  T.B.l='E';T.E.r='F';R.S('b3','B 的孩子：第一个 E 挂在 B->firstchild，F 挂在 E->nextsibling。',[tv({c:{E:'mv',F:'mv'}})]);
+  T.D.l='G';R.S('b4','D 的孩子 G 挂在 D->firstchild。存完了。',[tv({c:{G:'mv'}})]);
+  R.Q('C 右边连着 D。C 是叶子吗？',['是','不是'],0,'C 的 firstchild 是 NULL，没有孩子，就是叶子。右边连着兄弟不影响。');
+  R.S('leaf','叶子就是 firstchild 为 NULL 的结点：E、F、C、G，一共 4 个。T11 的 CountLeafCS 就是数这个。',[tv({c:{E:'done',F:'done',C:'done',G:'done'}})])}};
+
+const TPL=[['结构体','第 4 章'],['T1','多重循环'],['T2','辅助数组'],['T3','有序合并'],['T4','链表转数组'],['T5','二叉树递归'],['T6','邻接矩阵'],['T7','增删'],['T8','层序'],['T9','DFS 拓扑'],['T10','邻接表'],['T11','孩子兄弟'],['快排',''],['二分',''],['归并','']];
 
 /* ---------- player ---------- */
 let curTpl='T4',curProg=null,frames=[],at=0,timer=null,asking=null,resume=false,dict=false;const answered=new Set();
