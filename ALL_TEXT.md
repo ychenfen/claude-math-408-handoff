@@ -7088,6 +7088,22 @@ A. I→V→VI→II→VII　B. III→I→V→VII　C. III→IV→V→VI→VII　D
 
 如果要做这几块，可视化页面会以王道 27 版为依据，并注明来源。
 
+## 21:10　可视化　按选题做 5 个交互页
+
+**用户**：做一下吧（接上一条“可视化选题”）。
+
+**做法**：先做选题里排前 5 的页面，放在网站“可视化”目录。每页的预设结果都和 PPT 例题或已核过的真题答案对过；没有出处的预设标“自拟”。
+
+| 页面 | 内容 | 核对结果 |
+|---|---|---|
+| [浮点数加减五步走](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8A%A0%E5%87%8F%E4%BA%94%E6%AD%A5%E8%B5%B0.html) | 对阶、尾数加减、规格化、舍入、判溢出，双符号位补码逐位显示，可开“闭卷” | 2009-13 得阶码 8、溢出；第二章 p285 得 −3.5；p290 的 x − y 得 2⁻³ × (−0.100111)，与 PPT 一致 |
+| [I/O 方式占 CPU 时间](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/IO%E6%96%B9%E5%BC%8F%E5%8D%A0CPU%E6%97%B6%E9%97%B4.html) | 程序查询、中断、DMA 统一换算成时钟周期；DMA 三种访存方式时间轴 | 2009-43 两问得 2.5%、0.1% |
+| [单总线数据通路逐拍](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%8D%95%E6%80%BB%E7%BA%BF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E9%80%90%E6%8B%8D.html) | 2009-44 的结构，逐拍点亮总线和控制信号；取指、ADD (R1),R0、间址 MOV、三寄存器 ADD、存数、JMP | ADD (R1),R0 的 C5–C10 按 2009-44 标准答案；迁移题 ADD R1,(R0) 没放进去，留给你自己做 |
+| [单周期数据通路与五段流水线](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%8D%95%E5%91%A8%E6%9C%9F%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E4%B8%8E%E4%BA%94%E6%AE%B5%E6%B5%81%E6%B0%B4%E7%BA%BF.html) | 单周期 add/addi/lw/sw/beq 的有效路径、无效数据流、控制信号；五段流水线时空图可写指令，比较转发与不转发 | 控制信号按强化 3 p25–33（RegDst = 1 选 rt）；第六章 p58 例不转发停 2 拍、转发不停；load-use 转发后仍停 1 拍；beq 在 MEM 段更新 PC（强化 3 p40），冻结时插 3 个气泡 |
+| [Cache 访问序列模拟](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E8%AE%BF%E9%97%AE%E5%BA%8F%E5%88%97.html) | 地址序列逐次看命中、装入、替换、LRU 计数器、脏位；三种映射、LRU/FIFO、三种写策略；二维数组遍历生成地址 | 存储器（中）p40 的序列依次淘汰块 3、4、5、1，命中 4/12；2010-44 程序 A 15/16、程序 B 0 |
+
+**说明**：强化 3 的 RegDst 约定和部分英文教材相反，页面里注明了“以题目说明为准”。PPT 对 add、beq 把 ExtOp 写成 0，页面记作 x，因为 ALUSrc = 0 时扩展器输出不被选用。
+
 
 ---
 

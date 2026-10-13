@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>浮点数加减五步走</title>
+<style>
+/* Floating-point add/subtract with double-sign two's-complement exponent and mantissa: align, add, normalize, round, overflow, step by step. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --tag:#c8553d; --idx:#4d6fa8; --off:#3f7d4f; --ctl:#d99a1e;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:14px var(--serif);font-weight:600;margin:12px 0 6px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number],select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:7.5em}
+select{font-family:var(--sans);width:auto}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink)}
+.btn,.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.chip{border-radius:999px;padding:2px 12px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:10px}
+.err{color:var(--mv);font-size:13px;min-height:1em;margin-top:6px}
+.bar{display:flex;width:100%;border-radius:5px;overflow:hidden;font:13px/1.3 var(--mono);color:#fff;min-height:54px}
+.bar div{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 4px;min-width:64px;text-align:center}
+.bar small{font-size:11px;opacity:.9;font-family:var(--sans)}
+.f-tag{background:var(--tag)}.f-idx{background:var(--idx)}.f-off{background:var(--off)}.f-ctl{background:var(--ctl);color:#1d1d1d}.f-data{background:var(--muted)}
+.scale{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--muted);margin-top:2px}
+.calc{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.calc code,.mono{font-family:var(--mono)}
+.big{font:20px var(--serif);font-weight:600;color:var(--green)}
+.ans{border-radius:3px;transition:filter .15s}
+body.closed .ans:not(.shown){filter:blur(6px);background:var(--hl);cursor:pointer;user-select:none}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;min-width:520px;width:100%}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--hl);font-weight:600}
+.bits{font:13px var(--mono);word-break:break-all;line-height:1.9}
+.bits span{padding:1px 2px;border-radius:2px}
+.b-tag{background:color-mix(in srgb,var(--tag) 28%,transparent)}.b-idx{background:color-mix(in srgb,var(--idx) 28%,transparent)}.b-off{background:color-mix(in srgb,var(--off) 28%,transparent)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.steps{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+.step{min-width:0}
+.step{border-left:4px solid var(--line);padding:4px 0 4px 12px}
+.step.on{border-left-color:var(--accent)}
+.step h3{margin:0 0 4px}
+.step .who{font-size:12px;color:var(--muted)}
+.mach{font:15px/1.9 var(--mono);white-space:pre;overflow-x:auto;background:var(--bg);border-radius:4px;padding:6px 10px;margin:6px 0}
+.sg{color:var(--mv);font-weight:600}
+.lost{color:var(--muted);text-decoration:line-through}
+.warn{color:var(--mv);font-weight:600}
+.ok{color:var(--done);font-weight:600}
+.nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>浮点数加减五步走</h1>
+    <p class="sub">阶码、尾数都用双符号位补码，按“对阶 → 尾数求和 → 规格化 → 舍入 → 溢出判断”一步一步算，每一步都显示机器数怎么变。对应 2009-13、第二章 PPT p285–294、强化 1 p72–79。改任何条件，下面的步骤都会重算。</p>
+  </header>
+
+  <section class="panel">
+    <h2>五步口诀</h2>
+    <ol class="rules">
+      <li><b>对阶</b>：求阶差 ΔE = [Ex]补 + [−Ey]补；<b>小阶向大阶看齐</b>，阶小的尾数算术右移 |ΔE| 位，阶码加 |ΔE|。右移会丢低位，要舍入。</li>
+      <li><b>尾数求和</b>：双符号位补码直接相加；减法先把 [My]补 变成 [−My]补。符号位 01 或 10 只是尾数暂时溢出，不是结果溢出。</li>
+      <li><b>规格化</b>：补码尾数规格化要求<b>符号位与最高数值位不同</b>（00.1×× 或 11.0××）。出现 01.×× 或 10.×× 右规 1 位、阶码加 1；出现 00.0×× 或 11.1×× 左规，每左移 1 位阶码减 1，可能要左规多次。</li>
+      <li><b>舍入</b>：对阶和右规丢掉的位才需要舍入。“0 舍 1 入”：移掉的最高位是 1 就在末位加 1，加完可能又要右规；“截断”：直接丢掉。</li>
+      <li><b>溢出判断</b>：只看<b>规格化之后的阶码</b>。阶码超过最大值是上溢（真溢出，转中断处理）；小于最小值是下溢，按机器零处理。</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <h2>条件</h2>
+    <div class="form">
+      <label>阶码数值位 m<input id="m" type="number" min="1" max="8" value="3"></label>
+      <label>尾数数值位 n<input id="n" type="number" min="2" max="16" value="5"></label>
+      <label>X 的阶码（十进制）<input id="ex" type="text" value="7"></label>
+      <label>X 的尾数<input id="mx" type="text" value="29/32"></label>
+      <label>运算<select id="op"><option value="+">X + Y</option><option value="-">X − Y</option></select></label>
+      <label>Y 的阶码（十进制）<input id="ey" type="text" value="5"></label>
+      <label>Y 的尾数<input id="my" type="text" value="5/8"></label>
+      <label>舍入<select id="rnd"><option value="r">0 舍 1 入</option><option value="t">截断</option></select></label>
+    </div>
+    <p class="tip">尾数可写分数（29/32）或二进制小数（−0.101000，只含 0 和 1）。阶码字段共 m+2 位、尾数字段共 n+2 位（都含 2 位符号位）。阶码可表示 −2ᵐ ～ 2ᵐ−1。</p>
+    <div class="presets">预设：
+      <button class="chip" data-p="0">2009-13</button>
+      <button class="chip" data-p="1">第二章 p285 例（x+y）</button>
+      <button class="chip" data-p="2">第二章 p290 例（x−y）</button>
+      <button class="chip" data-p="3">相近两数相减要多次左规</button>
+    </div>
+    <p class="tip" id="presetNote"></p>
+    <div class="err" id="err"></div>
+    <p class="tip"><label class="chk" style="display:inline-flex;gap:6px"><input id="closed" type="checkbox"> 闭卷：遮住每一步的结果，自己算完再点灰块对答案</label></p>
+  </section>
+
+  <section class="panel">
+    <h2>逐步计算</h2>
+    <div class="steps" id="steps"></div>
+  </section>
+
+  <section class="panel">
+    <h2>IEEE 754 时有什么不同</h2>
+    <ul class="rules">
+      <li>阶码是<b>移码</b>：两个阶码的机器数直接相减，结果就是阶差真值的补码（强化 1 p72）。对阶时不会出现阶码上溢。</li>
+      <li>尾数是<b>原码</b>、带隐藏的 1：规格化形式是 1.××…×。右移时符号位不动、空位补 0，移出 1 要舍入。</li>
+      <li>求和后得到 ±1×.×× 要右规（阶码加 1，加到全 1 就上溢）；得到 0.0…01×× 要左规（阶码减 1，减到全 0 就成了非规格化数，甚至下溢）（强化 1 p75）。</li>
+      <li>单精度对阶时，阶差 |ΔE| 大到一定程度，小数右移后完全落在 24 位有效位之外，加了也不改变大数，可以直接取大数作结果。强化 1 p78–79 用“尾数全 1 也影响不到结果”逐个检验了 |ΔE| = 24、25 两种情况。</li>
+    </ul>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const PRE=[
+ {m:3,n:5,ex:'7',mx:'29/32',op:'+',ey:'5',my:'5/8',rnd:'r',note:'2009-13：阶码 5 位、尾数 7 位（都含 2 位符号位），X = 2⁷×29/32，Y = 2⁵×5/8，求 X+Y。最后一步阶码变成 8，超出 3 位数值位能表示的 7，结果溢出。'},
+ {m:2,n:4,ex:'1',mx:'0.1101',op:'+',ey:'3',my:'-0.1010',rnd:'r',note:'第二章 PPT p285–288：x = 0.1101×2⁰¹，y = (−0.1010)×2¹¹，阶符、阶码数值、数符、尾数数值分别取 2、2、2、4 位。'},
+ {m:3,n:6,ex:'-5',mx:'-0.101000',op:'-',ey:'-4',my:'0.111011',rnd:'r',note:'第二章 PPT p290–294：x = 2⁻¹⁰¹×(−0.101000)，y = 2⁻¹⁰⁰×(+0.111011)，求 x−y。右规丢掉一个 1，0 舍 1 入后末位加 1。'},
+ {m:3,n:5,ex:'2',mx:'0.11010',op:'-',ey:'2',my:'0.11001',rnd:'r',note:'自拟：两个很接近的数相减，尾数差很小，要连续左规，阶码一路减小。'}
+];
+function frac(s){s=String(s).trim().replace(/\s+/g,'').replace('−','-');let m;
+  if((m=s.match(/^([+-]?)(\d+)\/(\d+)$/))){const d=+m[3];if(!d)return null;return {v:(m[1]==='-'?-1:1)*(+m[2])/d}}
+  if((m=s.match(/^([+-]?)0?\.([01]+)$/))||(m=s.match(/^([+-]?)(0)$/))){const b=m[2]==='0'&&!s.includes('.')?'':m[2];let v=0;for(let i=0;i<b.length;i++)if(b[i]==='1')v+=2**-(i+1);return {v:(m[1]==='-'?-1:1)*v}}
+  return null}
+function nf(x){return String(x).replace('-','−')}
+function bits(x,w){const mod=2**w;return ((x%mod)+mod)%mod}
+function bin(x,w){return bits(x,w).toString(2).padStart(w,'0')}
+function mstr(M,n){const s=bin(M,n+2);return s.slice(0,2)+','+s.slice(2)}
+function estr(E,m){const s=bin(E,m+2);return s.slice(0,2)+','+s.slice(2)}
+function mhtml(M,n){const s=bin(M,n+2);return `<span class="sg">${s.slice(0,2)}</span>,${s.slice(2)}`}
+function ehtml(E,m){const s=bin(E,m+2);return `<span class="sg">${s.slice(0,2)}</span>,${s.slice(2)}`}
+function bfrac(M,n){const a=Math.abs(M);return (M<0?'−':'+')+'0.'+a.toString(2).padStart(n,'0')}
+function sup(k){return String(k).replace('-','⁻').split('').map(c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'['0123456789'.indexOf(c)]??c).join('')}
+function shr(M,k,rnd){ // arithmetic right shift of two's complement integer, returns {M,lost,lostStr,rounded}
+  if(k<=0)return {M,lost:'',up:0};const f=Math.floor(M/2**k),lost=M-f*2**k;const ls=lost.toString(2).padStart(k,'0');
+  const up=rnd==='r'&&ls[0]==='1'?1:0;return {pre:f,M:f+up,lost:ls,up}}
+function normd(M,n){return M>=2**(n-1)||M<-(2**(n-1))}
+function compute(){
+  const m=+$('m').value,n=+$('n').value,rnd=$('rnd').value,op=$('op').value;const err=[];
+  if(!(m>=1&&m<=8))err.push('阶码数值位取 1～8。');if(!(n>=2&&n<=16))err.push('尾数数值位取 2～16。');
+  const Ex=+$('ex').value,Ey=+$('ey').value;
+  if(!Number.isInteger(Ex)||!Number.isInteger(Ey))err.push('阶码写十进制整数，例如 −5。');
+  const fx=frac($('mx').value),fy=frac($('my').value);
+  if(!fx||!fy)err.push('尾数写成 29/32 或 −0.101 的形式。');
+  if(err.length){$('err').textContent=err.join(' ');return null}
+  const Emin=-(2**m),Emax=2**m-1;
+  if(Ex<Emin||Ex>Emax||Ey<Emin||Ey>Emax)err.push(`阶码要在 ${nf(Emin)}～${Emax} 之间。`);
+  const Mx=fx.v*2**n,My=fy.v*2**n;
+  if(!Number.isInteger(Mx)||!Number.isInteger(My))err.push(`尾数要能用 ${n} 位数值位精确表示。`);
+  if(Mx<-(2**n)||Mx>=2**n||My<-(2**n)||My>=2**n)err.push('尾数要满足 −1 ≤ M < 1。');
+  if(err.length){$('err').textContent=err.join(' ');return null}
+  $('err').textContent='';
+  return {m,n,rnd,op,Ex,Ey,Mx,My,Emin,Emax}}
+function render(){
+  const c=compute();if(!c){$('steps').innerHTML='';return}
+  const {m,n,rnd,op,Ex,Ey,Mx,My,Emin,Emax}=c;const out=[];
+  const name=op==='+'?'X+Y':'X−Y';
+  // step 0: machine numbers
+  const My2=op==='+'?My:-My;
+  let s0=`<div class="mach">[X]补 = ${ehtml(Ex,m)} ; ${mhtml(Mx,n)}     （阶码 ${nf(Ex)}，尾数 ${bfrac(Mx,n)}）\n[Y]补 = ${ehtml(Ey,m)} ; ${mhtml(My,n)}     （阶码 ${nf(Ey)}，尾数 ${bfrac(My,n)}）`;
+  if(op==='-')s0+=`\n[−My]补 = ${mhtml(My2,n)}   （减法：尾数取负后相加）`;
+  s0+='</div>';
+  const nx=normd(Mx,n)&&normd(My,n)?'':'<p class="tip warn">注意：输入的尾数不是规格化数，下面照样计算。</p>';
+  out.push(['写出机器数','分号前是阶码，分号后是尾数；红色两位是双符号位。',s0+nx]);
+  // step 1: align
+  const dE=Ex-Ey;let E=Math.max(Ex,Ey),A=Mx,B=My2,s1;
+  s1=`<div class="mach">ΔE = [Ex]补 + [−Ey]补 = ${estr(Ex,m)} + ${estr(-Ey,m)} = ${estr(dE,m)}   （${nf(dE)}）</div>`;
+  let r1=null;
+  if(dE===0)s1+='<p>阶码相等，不用对阶。</p>';
+  else{const small=dE<0?'X':'Y',k=Math.abs(dE);r1=shr(dE<0?A:B,k,rnd);
+    s1+=`<p>${dE<0?'X 的阶码小':'Y 的阶码小'}，${small} 的尾数算术右移 ${k} 位，阶码加 ${k} 变成 ${nf(E)}。</p>`;
+    s1+=`<div class="mach">${small} 尾数：${mstr(dE<0?A:B,n)}  →  ${mhtml(r1.pre,n)}  移出 <span class="lost">${r1.lost}</span>`+(r1.up?`\n0 舍 1 入：移出的最高位是 1，末位加 1 → ${mhtml(r1.M,n)}`:(rnd==='r'?'\n移出的最高位是 0，舍去。':'\n截断：直接舍去。'))+`</div>`;
+    if(dE<0)A=r1.M;else B=r1.M}
+  out.push(['① 对阶','阶码部件算阶差，尾数送移位器右移。',s1]);
+  // step 2: add
+  let S=A+B;const s2=`<div class="mach">  ${mstr(A,n)}\n+ ${mstr(B,n)}\n= ${mhtml(S,n)}</div>`+
+    (S>=2**n||S<-(2**n)?`<p>符号位是 <b>${bin(S,n+2).slice(0,2)}</b>，尾数暂时溢出，下一步右规。</p>`:'');
+  out.push(['② 尾数求和',`尾数加法器做双符号位补码加法（${name}）。`,s2]);
+  // step 3 & 4: normalize + round
+  let s3='',s4='',zero=false;const log3=[],log4=[];
+  if(S===0){zero=true;s3='<p>尾数为 0，结果是机器零，不需要规格化。</p>'}
+  else{
+    let guard=0;
+    while(S>=2**n||S<-(2**n)){const r=shr(S,1,rnd);log3.push(`右规：${mstr(S,n)} → ${mstr(r.pre,n)}，阶码 ${nf(E)} → ${nf(E+1)}，移出 ${r.lost}`);
+      log4.push(r.up?`右规移出 1，0 舍 1 入：${mstr(r.pre,n)} → ${mstr(r.M,n)}`:(rnd==='r'?'右规移出的是 0，舍去，尾数不变。':'截断：移出位直接丢掉。'));
+      S=r.M;E+=1;if(r.up&&(S>=2**n||S<-(2**n)))log4.push('舍入后又出现溢出形式，再右规一次。');if(++guard>4)break}
+    while(!normd(S,n)){log3.push(`左规：${mstr(S,n)} → ${mstr(S*2,n)}，阶码 ${nf(E)} → ${nf(E-1)}`);S*=2;E-=1}
+    if(!log3.length)log3.push('尾数已经是规格化形式（符号位与最高数值位不同），不用调整。');
+    s3=`<div class="mach">${log3.join('\n')}</div>`;
+  }
+  out.push(['③ 规格化','看双符号位和最高数值位：01/10 右规一次，00.0/11.1 左规。',s3]);
+  if(!zero){
+    const al=r1&&r1.lost?`对阶时移出 ${r1.lost}，${r1.up?'第 ① 步已在末位加 1':(rnd==='r'?'最高位是 0，第 ① 步已舍去':'第 ① 步已截断')}。`:'对阶没有移出位。';
+    s4=`<p>${al}</p>`+(log4.length?`<div class="mach">${log4.join('\n')}</div>`:'<p>规格化只做了左规或没有调整，没有新的移出位，不需要舍入。</p>');
+  }else s4='<p>结果为 0，不需要舍入。</p>';
+  out.push(['④ 舍入',rnd==='r'?'规则：0 舍 1 入。':'规则：截断。',s4]);
+  // step 5 overflow
+  let s5;
+  if(zero)s5=`<p class="ok">结果为 0。</p>`;
+  else if(E>Emax)s5=`<p class="warn">阶码 ${E} &gt; 最大阶码 ${Emax}：上溢，结果溢出（转中断处理）。</p><div class="mach">阶码 ${E} 用 ${m+2} 位双符号位补码写出来是 ${ehtml(E,m)}，符号位 01 表示正溢出。</div>`;
+  else if(E<Emin)s5=`<p class="warn">阶码 ${nf(E)} &lt; 最小阶码 ${nf(Emin)}：下溢，按机器零处理。</p>`;
+  else s5=`<p class="ok">阶码 ${nf(E)} 在 ${nf(Emin)}～${Emax} 之内，没有溢出。</p><div class="mach">[${name}]补 = ${ehtml(E,m)} ; ${mhtml(S,n)}\n${name} = 2${sup(E)} × (${bfrac(S,n)}) = ${nf(S/2**n*2**E)}</div>`;
+  out.push(['⑤ 溢出判断','只看规格化后的阶码。',s5]);
+  $('steps').innerHTML=out.map(([h,w,b],i)=>`<div class="step on"><h3>${h}</h3><div class="who">${w}</div><div class="ans">${b}</div></div>`).join('');
+  // first step (machine numbers) always visible
+  const f=document.querySelector('.step .ans');if(f)f.classList.add('shown');
+  bindAns();
+}
+function bindAns(){document.querySelectorAll('.ans').forEach(e=>e.onclick=()=>e.classList.add('shown'))}
+function load(p){for(const k of ['m','n','ex','mx','op','ey','my','rnd'])$(k).value=p[k];$('presetNote').textContent=p.note;render()}
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>load(PRE[+b.dataset.p]));
+document.querySelectorAll('input,select').forEach(e=>{if(e.id!=='closed')e.addEventListener('input',()=>{$('presetNote').textContent='';render()})});
+$('closed').addEventListener('change',()=>{document.body.classList.toggle('closed',$('closed').checked);render()});
+load(PRE[0]);
+</script>
+</body>
+</html>

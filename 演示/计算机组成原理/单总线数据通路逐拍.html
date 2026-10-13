@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>单总线数据通路逐拍走</title>
+<style>
+/* Single-bus datapath (2009-44 layout): step through fetch and execute beats, highlighting the bus driver, receivers and control signals. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --tag:#c8553d; --idx:#4d6fa8; --off:#3f7d4f; --ctl:#d99a1e;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:14px var(--serif);font-weight:600;margin:12px 0 6px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number],select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:7.5em}
+select{font-family:var(--sans);width:auto}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink)}
+.btn,.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.chip{border-radius:999px;padding:2px 12px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:10px}
+.err{color:var(--mv);font-size:13px;min-height:1em;margin-top:6px}
+.bar{display:flex;width:100%;border-radius:5px;overflow:hidden;font:13px/1.3 var(--mono);color:#fff;min-height:54px}
+.bar div{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 4px;min-width:64px;text-align:center}
+.bar small{font-size:11px;opacity:.9;font-family:var(--sans)}
+.f-tag{background:var(--tag)}.f-idx{background:var(--idx)}.f-off{background:var(--off)}.f-ctl{background:var(--ctl);color:#1d1d1d}.f-data{background:var(--muted)}
+.scale{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--muted);margin-top:2px}
+.calc{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.calc code,.mono{font-family:var(--mono)}
+.big{font:20px var(--serif);font-weight:600;color:var(--green)}
+.ans{border-radius:3px;transition:filter .15s}
+body.closed .ans:not(.shown){filter:blur(6px);background:var(--hl);cursor:pointer;user-select:none}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;min-width:520px;width:100%}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--hl);font-weight:600}
+.bits{font:13px var(--mono);word-break:break-all;line-height:1.9}
+.bits span{padding:1px 2px;border-radius:2px}
+.b-tag{background:color-mix(in srgb,var(--tag) 28%,transparent)}.b-idx{background:color-mix(in srgb,var(--idx) 28%,transparent)}.b-off{background:color-mix(in srgb,var(--off) 28%,transparent)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+svg{display:block;width:100%;height:auto;max-width:900px}
+svg text{font:13px var(--mono);fill:var(--ink)}
+svg .lbl{font:12px var(--sans);fill:var(--muted)}
+svg .box{fill:var(--paper);stroke:var(--muted);stroke-width:1.5}
+svg .ln{stroke:var(--muted);stroke-width:2;fill:none}
+svg .bus{stroke:var(--line);stroke-width:10;stroke-linecap:round}
+svg .src{stroke:var(--q);stroke-width:3.5}
+svg .dst{fill:var(--hl);stroke:var(--done);stroke-width:3.5}
+svg .act{stroke:var(--mv);stroke-width:4}
+svg .busact{stroke:color-mix(in srgb,var(--mv) 55%,transparent)}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0;font-size:13px}
+.cap{font-size:15px;margin:6px 0 0;min-height:1.6em}
+.cap b{color:var(--mv)}
+tr.cur td{background:var(--hl)}
+tr.cur td:first-child{box-shadow:inset 4px 0 var(--accent)}
+td.sig{font-family:var(--mono)}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.lg i{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:0;margin-right:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>单总线数据通路逐拍走</h1>
+    <p class="sub">选一条指令，一拍一拍看：谁把数据放上内总线、谁从总线接收、发了哪些控制信号、哪一拍走的是 CPU 外面的地址总线和数据总线。数据通路按 2009-44 原题图重绘，节拍写法与第六章 PPT p23–38、第七章 p33–41、p120–125 一致。</p>
+  </header>
+
+  <section class="panel">
+    <h2>写节拍前先记住</h2>
+    <ol class="rules">
+      <li><b>一拍内只能有一个部件往内总线输出</b>（“××out”最多一个），可以有多个部件同时接收。</li>
+      <li><b>MAR 的输出一直使能</b>：地址送进 MAR 就挂在地址总线 AB 上，没有 MARout；地址一直保持到被下一次 MARin 覆盖。</li>
+      <li><b>MDR 有四个信号</b>：带 E 的连 CPU 外的数据总线 DB（MDRinE 读主存时打入，MDRoutE 写主存时送出）；不带 E 的连内总线（MDRin、MDRout）。</li>
+      <li><b>ALU 一端接暂存器 A，另一端直接接内总线</b>：两个操作数不能同一拍上总线，必须先把一个送进 A；结果先进 AC，下一拍再 ACout 送走。</li>
+      <li>假设访存一拍完成（MemR 或 MemW 那一拍），取指和译码固定占 C1～C4，执行阶段从 C5 编号。</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <div class="form">
+      <label>指令<select id="ins"></select></label>
+      <label class="chk"><input id="closed" type="checkbox"> 闭卷：表里的功能和信号先遮住，点灰块再看</label>
+    </div>
+    <p class="tip" id="insNote"></p>
+    <div class="ctrl">
+      <button class="btn" id="prev">← 上一拍</button>
+      <button class="btn" id="next">下一拍 →</button>
+      <button class="btn" id="play">自动播放</button>
+      <span id="pos"></span>
+    </div>
+    <svg id="dp" viewBox="0 0 900 380" role="img" aria-label="单总线数据通路"></svg>
+    <div class="lg"><span><i style="background:var(--q)"></i>本拍输出到总线的部件</span><span><i style="background:var(--done)"></i>本拍接收的部件</span><span><i style="background:var(--mv)"></i>本拍用到的连线和总线</span></div>
+    <p class="cap" id="cap"></p>
+  </section>
+
+  <section class="panel">
+    <h2>节拍表</h2>
+    <div class="tw"><table><thead><tr><th>节拍</th><th>功能</th><th>有效控制信号</th><th>说明</th></tr></thead><tbody id="tb"></tbody></table></div>
+    <p class="tip">迁移题 ADD R1,(R0)（功能 (R1)+((R0))→R1，结果写回寄存器）还在等你作答，这里不放答案。写完可以对照“ADD (R1),R0”和“MOV R1,@05H”两条的写法自查。</p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+// geometry
+const B={PC:[40,70],IR:[140,70],R0:[260,70],R1:[340,70],R2:[420,70],R3:[500,70],MAR:[40,250],MDR:[150,250],A:[290,250],AC:[520,250]};
+const BW=64,BH=40,BUSY=180,ALU=[400,240,80,60];
+function svg(){let s='';
+  s+=`<line id="l-bus" class="bus" x1="20" y1="${BUSY}" x2="620" y2="${BUSY}"/><text class="lbl" x="560" y="${BUSY-10}">内总线</text>`;
+  for(const [k,[x,y]] of Object.entries(B)){const top=y<BUSY;const cx=x+BW/2;
+    s+=`<line id="c-${k}" class="ln" x1="${cx}" y1="${top?y+BH:BUSY}" x2="${cx}" y2="${top?BUSY:y}"/>`}
+  s+=`<line id="c-ALU" class="ln" x1="${ALU[0]+60}" y1="${BUSY}" x2="${ALU[0]+60}" y2="${ALU[1]}"/>`;
+  s+=`<path id="e-A" class="ln" d="M${B.A[0]+BW} ${B.A[1]+20} L${ALU[0]+20} ${B.A[1]+20} L${ALU[0]+20} ${ALU[1]}"/>`;
+  s+=`<path id="e-AC" class="ln" d="M${ALU[0]+40} ${ALU[1]+ALU[3]} L${ALU[0]+40} 330 L${B.AC[0]+BW/2} 330 L${B.AC[0]+BW/2} ${B.AC[1]+BH}"/>`;
+  s+=`<path id="l-AB" class="ln" d="M${B.MAR[0]+BW/2} ${B.MAR[1]+BH} L${B.MAR[0]+BW/2} 360 L720 360 L720 330"/><text class="lbl" x="230" y="356">地址总线 AB</text>`;
+  s+=`<path id="l-DB" class="ln" d="M${B.MDR[0]+BW/2} ${B.MDR[1]+BH} L${B.MDR[0]+BW/2} 340 L800 340 L800 330"/><text class="lbl" x="230" y="336">数据总线 DB</text>`;
+  s+=`<path id="e-PC1" class="ln" d="M${B.PC[0]+BW} ${B.PC[1]+10} q16 -24 0 -30" style="display:none"/>`;
+  for(const [k,[x,y]] of Object.entries(B))s+=`<rect id="b-${k}" class="box" x="${x}" y="${y}" width="${BW}" height="${BH}" rx="4"/><text x="${x+BW/2}" y="${y+25}" text-anchor="middle">${k}</text>`;
+  s+=`<path id="b-ALU" class="box" d="M${ALU[0]} ${ALU[1]} h${ALU[2]} l-14 ${ALU[3]} h${-(ALU[2]-28)} z"/><text x="${ALU[0]+40}" y="${ALU[1]+35}" text-anchor="middle">ALU</text>`;
+  s+=`<rect id="b-MEM" class="box" x="680" y="230" width="180" height="100" rx="4"/><text x="770" y="275" text-anchor="middle">主存</text><text class="lbl" x="770" y="298" text-anchor="middle">MemR / MemW</text>`;
+  s+=`<rect class="box" x="680" y="40" width="180" height="80" rx="4" style="stroke-dasharray:4 3"/><text x="770" y="76" text-anchor="middle">CU</text><text class="lbl" x="770" y="98" text-anchor="middle">由 OP(IR) 译码出控制信号</text>`;
+  s+=`<path id="e-IR" class="ln" style="stroke-dasharray:4 3" d="M${B.IR[0]+BW/2} ${B.IR[1]} L${B.IR[0]+BW/2} 30 L770 30 L770 40"/>`;
+  s+=`<text id="pcinc" class="lbl" x="${B.PC[0]+BW/2}" y="${B.PC[1]-8}" text-anchor="middle" style="display:none;fill:var(--mv);font-weight:600">+1</text>`;
+  $('dp').innerHTML=s}
+// programs: each beat {f:function, s:signals, n:note, src:[], dst:[], ln:[], bus:bool}
+const FETCH=[
+ {f:'MAR←(PC)',s:'PCout, MARin',n:'PC 里是下一条指令的地址，经内总线送 MAR，随即挂上地址总线。',src:['PC'],dst:['MAR'],ln:['c-PC','c-MAR'],bus:1},
+ {f:'MDR←M(MAR)，PC←(PC)+1',s:'MemR, MDRinE, PC+1',n:'读主存，指令从 DB 进 MDR，所以用带 E 的 MDRinE；PC 自增不占内总线，可同拍完成。',src:['MEM'],dst:['MDR','PC'],ln:['l-AB','l-DB'],pc:1},
+ {f:'IR←(MDR)',s:'MDRout, IRin',n:'指令从 MDR 经内总线送 IR。',src:['MDR'],dst:['IR'],ln:['c-MDR','c-IR'],bus:1},
+ {f:'指令译码',s:'无',n:'OP(IR) 送 CU 译码，决定后面的执行节拍。',src:['IR'],dst:[],ln:['e-IR']}];
+const PROG={
+ add2009:{name:'ADD (R1),R0　(R0)+((R1))→(R1)　2009-44',note:'2009-44 原题：R0 的数与 R1 所指主存单元的数相加，结果写回 R1 所指的主存单元。标准答案执行阶段 C5～C10 共 6 拍。',beats:[
+  {f:'MAR←(R1)',s:'R1out, MARin',n:'R1 里是地址，经内总线送 MAR。',src:['R1'],dst:['MAR'],ln:['c-R1','c-MAR'],bus:1},
+  {f:'MDR←M(MAR)',s:'MemR, MDRinE',n:'读主存，数据从 DB 进 MDR，带 E。这一拍不占内总线。',src:['MEM'],dst:['MDR'],ln:['l-AB','l-DB']},
+  {f:'A←(R0)',s:'R0out, Ain',n:'一个加数先进暂存器 A。这一步也可以放在 C5 之前，顺序不唯一。',src:['R0'],dst:['A'],ln:['c-R0','c-A'],bus:1},
+  {f:'AC←(MDR)+(A)',s:'MDRout, Add, ACin',n:'MDR 上内总线作 ALU 另一个输入，结果进 AC。别漏 Add。',src:['MDR','A'],dst:['AC'],ln:['c-MDR','c-ALU','e-A','e-AC'],bus:1,alu:1},
+  {f:'MDR←(AC)',s:'ACout, MDRin',n:'结果要写主存，必须先进 MDR；从内总线来，不带 E。',src:['AC'],dst:['MDR'],ln:['c-AC','c-MDR'],bus:1},
+  {f:'M(MAR)←(MDR)',s:'MDRoutE, MemW',n:'MAR 里仍是 C5 送入的地址，MDR 经 DB 写回主存。',src:['MDR'],dst:['MEM'],ln:['l-DB','l-AB']}]},
+ mov:{name:'MOV R1,@05H　((05H))→R1　间接寻址',note:'第六章 PPT p28–38 的例子：源操作数 05H 是间接地址。PPT 取指只写 3 拍、没有单独的译码拍，这里套用 2009-44 的取指 4 拍，所以从 C5 开始。2009-44 原图没有 IR 到内总线的通路，这里按 PPT 补上 Ad(IR)out。',beats:[
+  {f:'MAR←Ad(IR)',s:'Ad(IR)out, MARin',n:'间址周期第 1 拍：指令里的形式地址 05H 送 MAR。',src:['IR'],dst:['MAR'],ln:['c-IR','c-MAR'],bus:1},
+  {f:'MDR←M(MAR)',s:'MemR, MDRinE',n:'间址周期第 2 拍：读出 05H 单元的内容，它是操作数的有效地址。',src:['MEM'],dst:['MDR'],ln:['l-AB','l-DB']},
+  {f:'MAR←(MDR)',s:'MDRout, MARin',n:'执行周期：有效地址从 MDR 送 MAR。',src:['MDR'],dst:['MAR'],ln:['c-MDR','c-MAR'],bus:1},
+  {f:'MDR←M(MAR)',s:'MemR, MDRinE',n:'按有效地址读出操作数。',src:['MEM'],dst:['MDR'],ln:['l-AB','l-DB']},
+  {f:'R1←(MDR)',s:'MDRout, R1in',n:'操作数送 R1。间接寻址取操作数共访存 2 次。',src:['MDR'],dst:['R1'],ln:['c-MDR','c-R1'],bus:1}]},
+ add3:{name:'ADD R3,R1,R2　(R1)+(R2)→R3',note:'第七章 PPT p120–125：单总线下两个寄存器相加也要 3 拍，因为两个操作数不能同时上总线。PPT 里暂存器叫 T、结果寄存器叫 Y，对应这里的 A、AC。',beats:[
+  {f:'A←(R1)',s:'R1out, Ain',n:'第一个操作数先进 A。',src:['R1'],dst:['A'],ln:['c-R1','c-A'],bus:1},
+  {f:'AC←(A)+(R2)',s:'R2out, Add, ACin',n:'第二个操作数此时才上总线，直接进 ALU。',src:['R2','A'],dst:['AC'],ln:['c-R2','c-ALU','e-A','e-AC'],bus:1,alu:1},
+  {f:'R3←(AC)',s:'ACout, R3in',n:'结果送 R3。',src:['AC'],dst:['R3'],ln:['c-AC','c-R3'],bus:1}]},
+ store:{name:'MOV (R2),R0　(R0)→(R2)　存数',note:'自拟：把 R0 存到 R2 所指的主存单元。写主存同样要先送 MAR、再送 MDR、最后 MemW。',beats:[
+  {f:'MAR←(R2)',s:'R2out, MARin',n:'地址先送 MAR。',src:['R2'],dst:['MAR'],ln:['c-R2','c-MAR'],bus:1},
+  {f:'MDR←(R0)',s:'R0out, MDRin',n:'要写的数从内总线进 MDR，不带 E。',src:['R0'],dst:['MDR'],ln:['c-R0','c-MDR'],bus:1},
+  {f:'M(MAR)←(MDR)',s:'MDRoutE, MemW',n:'经 DB 写主存，带 E。',src:['MDR'],dst:['MEM'],ln:['l-DB','l-AB']}]},
+ jmp:{name:'JMP X　X→PC　无条件转移',note:'第七章 PPT p40：执行周期只要一拍。同样借用 Ad(IR)out。',beats:[
+  {f:'PC←Ad(IR)',s:'Ad(IR)out, PCin',n:'转移地址直接送 PC，下一条指令从 X 取。',src:['IR'],dst:['PC'],ln:['c-IR','c-PC'],bus:1}]}
+};
+let cur='add2009',k=0,timer=null;
+function beats(){return FETCH.concat(PROG[cur].beats)}
+function draw(){
+  const bs=beats(),b=bs[k];
+  document.querySelectorAll('#dp .src,#dp .dst,#dp .act,#dp .busact').forEach(e=>e.classList.remove('src','dst','act','busact'));
+  b.src.forEach(x=>$('b-'+x).classList.add('src'));b.dst.forEach(x=>$('b-'+x).classList.add('dst'));
+  b.ln.forEach(x=>$(x).classList.add('act'));if(b.bus)$('l-bus').classList.add('busact');
+  $('pcinc').style.display=b.pc?'':'none';
+  $('pos').textContent=`C${k+1} / C${bs.length}　${k<4?'取指和译码':'执行阶段'}`;
+  $('cap').innerHTML=`<b>C${k+1}</b>　${b.f}　｜　${b.s}`;
+  document.querySelectorAll('#tb tr').forEach((r,i)=>r.classList.toggle('cur',i===k));
+  $('prev').disabled=k===0;$('next').disabled=k===bs.length-1;
+}
+function table(){
+  $('tb').innerHTML=beats().map((b,i)=>`<tr data-i="${i}"><td>C${i+1}</td><td><span class="ans">${b.f}</span></td><td class="sig"><span class="ans">${b.s}</span></td><td>${b.n}</td></tr>`).join('');
+  document.querySelectorAll('#tb tr').forEach(r=>r.onclick=e=>{if(e.target.classList.contains('ans')&&!e.target.classList.contains('shown')){e.target.classList.add('shown');return}k=+r.dataset.i;draw()});
+}
+function setIns(id){cur=id;k=0;$('insNote').textContent=PROG[id].note;table();draw()}
+function stop(){clearInterval(timer);timer=null;$('play').textContent='自动播放'}
+svg();
+$('ins').innerHTML=Object.entries(PROG).map(([id,p])=>`<option value="${id}">${p.name}</option>`).join('');
+$('ins').onchange=()=>{stop();setIns($('ins').value)};
+$('prev').onclick=()=>{stop();if(k>0){k--;draw()}};
+$('next').onclick=()=>{stop();if(k<beats().length-1){k++;draw()}};
+$('play').onclick=()=>{if(timer){stop();return}$('play').textContent='暂停';timer=setInterval(()=>{if(k<beats().length-1){k++;draw()}else stop()},1400)};
+$('closed').onchange=()=>{document.body.classList.toggle('closed',$('closed').checked);document.querySelectorAll('.ans').forEach(e=>e.classList.remove('shown'))};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='SELECT')return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click()});
+setIns(cur);
+</script>
+</body>
+</html>

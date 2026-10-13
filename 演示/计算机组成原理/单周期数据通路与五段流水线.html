@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>单周期数据通路与五段流水线</title>
+<style>
+/* Single-cycle MIPS datapath and 5-stage pipeline hazards */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --tag:#c8553d; --idx:#4d6fa8; --off:#3f7d4f; --ctl:#d99a1e;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:14px var(--serif);font-weight:600;margin:12px 0 6px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number],select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:7.5em}
+select{font-family:var(--sans);width:auto}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink)}
+.btn,.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.chip{border-radius:999px;padding:2px 12px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:10px}
+.err{color:var(--mv);font-size:13px;min-height:1em;margin-top:6px}
+.bar{display:flex;width:100%;border-radius:5px;overflow:hidden;font:13px/1.3 var(--mono);color:#fff;min-height:54px}
+.bar div{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 4px;min-width:64px;text-align:center}
+.bar small{font-size:11px;opacity:.9;font-family:var(--sans)}
+.f-tag{background:var(--tag)}.f-idx{background:var(--idx)}.f-off{background:var(--off)}.f-ctl{background:var(--ctl);color:#1d1d1d}.f-data{background:var(--muted)}
+.scale{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--muted);margin-top:2px}
+.calc{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.calc code,.mono{font-family:var(--mono)}
+.big{font:20px var(--serif);font-weight:600;color:var(--green)}
+.ans{border-radius:3px;transition:filter .15s}
+body.closed .ans:not(.shown){filter:blur(6px);background:var(--hl);cursor:pointer;user-select:none}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;min-width:520px;width:100%}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--hl);font-weight:600}
+.bits{font:13px var(--mono);word-break:break-all;line-height:1.9}
+.bits span{padding:1px 2px;border-radius:2px}
+.b-tag{background:color-mix(in srgb,var(--tag) 28%,transparent)}.b-idx{background:color-mix(in srgb,var(--idx) 28%,transparent)}.b-off{background:color-mix(in srgb,var(--off) 28%,transparent)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+[hidden]{display:none!important}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:5px 14px;cursor:pointer}
+.tab[aria-selected=true]{background:var(--green);color:var(--paper);border-color:var(--green)}
+svg{display:block;width:100%;height:auto}
+#dp{max-width:960px}
+#dp text{font:12px var(--mono);fill:var(--ink)}
+#dp .lbl{font:11px var(--sans);fill:var(--muted)}
+#dp .box{fill:var(--paper);stroke:var(--muted);stroke-width:1.5}
+#dp .w{stroke:var(--line);stroke-width:2;fill:none}
+#dp .w.on{stroke:var(--mv);stroke-width:3.5}
+#dp .w.bad{stroke:var(--cmp);stroke-width:3;stroke-dasharray:6 4}
+#dp .sig{font:11px var(--mono);fill:var(--q)}
+#dp .sig.hot{font-weight:700;fill:var(--mv)}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+.lg i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:3px;margin-right:4px}
+td.c{font-family:var(--mono);text-align:center}
+textarea{font:14px/1.6 var(--mono);width:100%;min-height:8.5em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:6px 8px}
+.st{border-collapse:collapse;font:12px var(--mono);min-width:0;width:auto}
+.st th,.st td{border:1px solid var(--line);padding:3px 0;text-align:center;width:38px;min-width:38px}
+.st th:first-child,.st td:first-child{width:auto;min-width:150px;text-align:left;padding:3px 8px;font-family:var(--mono)}
+.s-IF{background:color-mix(in srgb,var(--q) 30%,transparent)}
+.s-ID{background:color-mix(in srgb,var(--accent) 35%,transparent)}
+.s-EX{background:color-mix(in srgb,var(--cmp) 35%,transparent)}
+.s-MEM{background:color-mix(in srgb,var(--mv) 28%,transparent)}
+.s-WB{background:color-mix(in srgb,var(--done) 30%,transparent)}
+.s-stall{background:repeating-linear-gradient(45deg,var(--line) 0 4px,transparent 4px 8px);color:var(--muted)}
+.fw{color:var(--mv);font-weight:700}
+.kpi{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;margin:8px 0}
+.kpi b{font:18px var(--serif);color:var(--green)}
+.haz{font-size:14px;margin:6px 0 0;padding-left:1.3em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>单周期数据通路与五段流水线</h1>
+    <p class="sub">上半部分：单周期 MIPS 数据通路，选一条指令看哪些线有效、哪些是“无效数据流”、每个控制信号取什么（强化 3 p8–34）。下半部分：五段流水线时空图，写一段指令，看数据冒险、load-use、控制冒险各要插几个气泡，有无转发差多少（第六章 p44–60，强化 3 p36–60）。</p>
+  </header>
+
+  <section class="panel">
+    <h2>单周期数据通路</h2>
+    <div class="tabs" id="itabs"></div>
+    <p class="tip" id="ifun"></p>
+    <svg id="dp" viewBox="0 0 960 400" role="img" aria-label="单周期 MIPS 数据通路"></svg>
+    <div class="lg"><span><i style="border-color:var(--mv)"></i>有效数据流</span><span><i style="border-color:var(--cmp);border-top-style:dashed"></i>无效数据流（照样流过去，但结果没人用）</span></div>
+    <div class="two" style="margin-top:10px">
+      <div class="tw"><table><thead><tr><th>控制信号</th><th>取值</th><th>为什么</th></tr></thead><tbody id="sigt"></tbody></table></div>
+      <div>
+        <h3 style="margin-top:0">这条指令的路径</h3><p class="mono" id="path" style="font-size:13px"></p>
+        <h3>无效数据流</h3><ul class="haz" id="bad"></ul>
+        <h3>为什么单周期能这样</h3>
+        <ul class="haz">
+          <li>寄存器堆读是自动的、不要信号，写才要 RegWr；数据存储器读也是组合逻辑，只有写要 MemWr（强化 3 p15、p26）。</li>
+          <li>一个时钟周期里每个部件只能用一次，所以指令存储器和数据存储器必须分开（p12）；单总线做不了单周期（p14）。</li>
+          <li>控制信号在整个周期内不变；时钟周期由最慢的 lw 决定（p8、p16）。</li>
+        </ul>
+      </div>
+    </div>
+    <p class="tip">RegDst 按强化 3 的约定：<b>RegDst = 1 选 rt，RegDst = 0 选 rd</b>（与部分英文教材相反，做题以题目说明为准）。PPT 对 add、beq 把 ExtOp 写成 0，因为 ALUSrc = 0 时扩展器的输出不被选用，取 0 或 1 都不影响结果，表里记作 x。</p>
+  </section>
+
+  <section class="panel">
+    <h2>五段流水线时空图</h2>
+    <ol class="rules">
+      <li><b>五段</b>：IF 取指、ID 译码并读寄存器、EX 执行或算地址、MEM 访存、WB 写回。控制信号在 ID 段生成，随段寄存器往后传：EX 用 ExtOp、ALUSrc、ALUctr、RegDst，MEM 用 MemWr、Branch，WB 用 MemtoReg、RegWr（强化 3 p42–52）。</li>
+      <li><b>寄存器前半周期写、后半周期读</b>：同一个时钟周期里 WB 写进去的值，ID 当拍就能读到（强化 3 p54）。</li>
+      <li><b>不转发</b>：后面的指令最早在前面指令 WB 的那一拍做 ID。<b>转发</b>：ALU 结果在 EX 末尾就能送给下一条的 EX；lw 的数据要到 MEM 末尾才有，紧跟的指令仍要停 1 拍（load-use）。</li>
+      <li><b>beq</b>：EX 段比较并算目标地址，MEM 段更新 PC（强化 3 p39–40）。选“冻结”时，后面的指令要等 beq 的 MEM 段结束才取，插 3 个气泡。</li>
+    </ol>
+    <div class="form" style="margin-top:10px">
+      <label>转发<select id="fwd"><option value="0">不转发（插气泡）</option><option value="1">转发（旁路）</option></select></label>
+      <label>分支<select id="br"><option value="freeze">冻结，等 MEM 段更新 PC</option><option value="pnt">预测不跳转，且预测正确</option></select></label>
+      <label>时钟周期 Δt（ns）<input id="dt" type="number" min="0.1" step="any" value="2"></label>
+    </div>
+    <label style="display:block;margin-top:8px;font-size:13px;color:var(--muted)">指令（目的寄存器写在前面：add rd, rs, rt　addi rt, rs, imm　lw rt, off(rs)　sw rt, off(rs)　beq rs, rt, L　nop）
+      <textarea id="code" spellcheck="false"></textarea></label>
+    <div class="presets">预设：
+      <button class="chip" data-p="0">写后读（第六章 p58）</button>
+      <button class="chip" data-p="1">load-use</button>
+      <button class="chip" data-p="2">分支（第六章 p59）</button>
+      <button class="chip" data-p="3">连续相关</button>
+    </div>
+    <p class="tip" id="presetNote"></p>
+    <div class="err" id="err"></div>
+    <div class="kpi" id="kpi"></div>
+    <div class="tw"><table class="st" id="st"></table></div>
+    <p class="tip">斜纹格是阻塞（气泡）：指令停在 IF 或 ID 段不往后走。红字 ← 表示这一段用到了转发来的数据。</p>
+    <h3>冒险分析</h3>
+    <ul class="haz" id="hz"></ul>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+/* ---------- single-cycle datapath ---------- */
+const W={ // wires: id -> path
+ 'pc-rs':'M150 120 H270','rt-a':'M150 175 H200','pc-rt':'M200 175 H270','pc-rd':'M150 200 H180 V235 H205','pc-rt2':'M200 175 V215 H205','pc-imm':'M150 300 H260',
+ 'rd-mux':'M235 225 H260 V200 H270','rw':'M235 225 H262',
+ 'busA':'M370 130 H520','busB':'M370 180 H430','busB-mux':'M430 180 V200 H455','busB-din':'M430 180 V330 H640',
+ 'ext-mux':'M320 300 H440 V230 H455','mux-alu':'M480 215 H520','alu-adr':'M600 190 H640','alu-mux2':'M600 190 V120 H780 V200 H800',
+ 'dout-mux2':'M740 250 H800','mux2-busW':'M825 225 H860 V380 H340 V230','zero':'M600 160 H620 V40 H90 V100'
+};
+const BOX=`<rect class="box" x="30" y="100" width="120" height="230" rx="4"/><text x="90" y="215" text-anchor="middle">取指部件</text><text class="lbl" x="90" y="235" text-anchor="middle">PC＋指令存储器</text>
+<text class="lbl" x="160" y="115">rs</text><text class="lbl" x="160" y="170">rt</text><text class="lbl" x="160" y="195">rd</text><text class="lbl" x="160" y="295">imm16</text>
+<path class="box" d="M205 195 L235 205 L235 245 L205 255 Z"/><text class="lbl" x="208" y="272">RegDst</text>
+<rect class="box" x="270" y="100" width="100" height="130" rx="4"/><text x="320" y="150" text-anchor="middle">寄存器堆</text><text class="lbl" x="276" y="124">Ra(rs)</text><text class="lbl" x="276" y="178">Rb(rt)</text><text class="lbl" x="276" y="212">Rw</text><text class="lbl" x="345" y="224">busW</text><text class="lbl" x="372" y="124">busA</text><text class="lbl" x="372" y="174">busB</text>
+<rect class="box" x="260" y="285" width="60" height="30" rx="4"/><text x="290" y="305" text-anchor="middle">扩展</text>
+<path class="box" d="M455 190 L480 200 L480 230 L455 240 Z"/><text class="lbl" x="448" y="258">ALUSrc</text>
+<path class="box" d="M520 110 L600 150 L600 230 L520 270 L520 205 L540 190 L520 175 Z"/><text x="572" y="195" text-anchor="middle">ALU</text>
+<rect class="box" x="640" y="170" width="100" height="180" rx="4"/><text x="690" y="235" text-anchor="middle">数据存储器</text><text class="lbl" x="646" y="194">Adr</text><text class="lbl" x="646" y="334">Din</text><text class="lbl" x="706" y="254">Dout</text>
+<path class="box" d="M800 190 L825 200 L825 250 L800 260 Z"/><text class="lbl" x="778" y="278">MemtoReg</text><text class="lbl" x="868" y="300">busW</text><text class="lbl" x="606" y="155">Zero</text>`;
+const SIGPOS={RegDst:[205,290],RegWr:[300,92],ExtOp:[176,330],ALUSrc:[440,275],ALUctr:[530,292],MemWr:[660,365],MemtoReg:[790,295],Branch:[30,350]};
+const SC={
+ add:{t:'add rd, rs, rt',f:'R[rd] ← R[rs] + R[rt]',p:'Registers(rs, rt) → busA、busB → ALU(add) → busW → Registers(rd)',
+  s:{RegDst:['0','选 rd 作写寄存器'],ExtOp:['x','扩展器输出没被选用（PPT 写 0）'],ALUSrc:['0','ALU 第二个输入取 busB'],ALUctr:['add','做加法'],MemWr:['0','不写存储器'],MemtoReg:['0','写回的是 ALU 结果'],RegWr:['1','要写寄存器'],Branch:['0','不是分支']},
+  on:['pc-rs','pc-rt','pc-rd','rd-mux','busA','busB','busB-mux','mux-alu','alu-mux2','mux2-busW'],bad:['pc-imm','ext-mux','alu-adr','busB-din','dout-mux2'],
+  badT:['imm16 照样被扩展送到 ALUSrc 多路选择器，但没被选中。','ALU 的结果照样送到数据存储器 Adr，存储器把它当地址读出一个数，结果被 MemtoReg 丢掉（强化 3 p30）。','busB 照样连到数据存储器 Din，但 MemWr = 0 不会写进去。']},
+ addi:{t:'addi rt, rs, imm16',f:'R[rt] ← R[rs] + SignExt(imm16)',p:'Registers(rs) → busA，扩展器(imm16) → ALU(add) → busW → Registers(rt)',
+  s:{RegDst:['1','选 rt 作写寄存器'],ExtOp:['1','符号扩展'],ALUSrc:['1','ALU 第二个输入取扩展后的立即数'],ALUctr:['add','做加法'],MemWr:['0','不写存储器'],MemtoReg:['0','写回 ALU 结果'],RegWr:['1','要写寄存器'],Branch:['0','不是分支']},
+  on:['pc-rs','pc-rt2','rd-mux','pc-imm','ext-mux','busA','mux-alu','alu-mux2','mux2-busW'],bad:['pc-rt','busB','busB-mux','busB-din','alu-adr','dout-mux2'],
+  badT:['寄存器堆读是自动的，rt 里的旧值照样读到 busB（强化 3 p24），但 ALUSrc = 1 没选它。','ALU 结果照样送到数据存储器 Adr 读出一个数，被 MemtoReg 丢掉。']},
+ lw:{t:'lw rt, imm16(rs)',f:'R[rt] ← M[R[rs] + SignExt(imm16)]',p:'Registers(rs) → busA，扩展器(imm16) → ALU(add) → 数据存储器 → busW → Registers(rt)',
+  s:{RegDst:['1','选 rt 作写寄存器'],ExtOp:['1','偏移量符号扩展'],ALUSrc:['1','取立即数'],ALUctr:['add','算有效地址'],MemWr:['0','读存储器不要信号，写才要'],MemtoReg:['1','写回存储器读出的数'],RegWr:['1','要写寄存器'],Branch:['0','不是分支']},
+  on:['pc-rs','pc-rt2','rd-mux','pc-imm','ext-mux','busA','mux-alu','alu-adr','dout-mux2','mux2-busW'],bad:['pc-rt','busB','busB-din','alu-mux2'],
+  badT:['rt 的旧值照样读到 busB、送到 Din，MemWr = 0 不写（强化 3 p27–28）。','ALU 结果（地址）也照样送到 MemtoReg 的 0 号输入，没被选。']},
+ sw:{t:'sw rt, imm16(rs)',f:'M[R[rs] + SignExt(imm16)] ← R[rt]',p:'Registers(rs) → busA，扩展器(imm16) → ALU(add) → 数据存储器 Adr；Registers(rt) → busB → Din',
+  s:{RegDst:['x','不写寄存器，选谁都行'],ExtOp:['1','偏移量符号扩展'],ALUSrc:['1','取立即数'],ALUctr:['add','算有效地址'],MemWr:['1','写存储器'],MemtoReg:['x','不写寄存器，选谁都行'],RegWr:['0','不写寄存器'],Branch:['0','不是分支']},
+  on:['pc-rs','pc-rt','pc-imm','ext-mux','busA','busB','busB-din','mux-alu','alu-adr'],bad:['dout-mux2','alu-mux2','mux2-busW'],
+  badT:['MemtoReg 选出来的值照样送到 busW，但 RegWr = 0 写不进寄存器（强化 3 p32）。']},
+ beq:{t:'beq rs, rt, imm16',f:'if (R[rs] = R[rt]) PC ← PC + 4 + SignExt(imm16)×4',p:'Registers(rs, rt) → busA、busB → ALU(sub) → Zero；Zero 与 Branch 控制取指部件选目标地址',
+  s:{RegDst:['x','不写寄存器'],ExtOp:['x','ALU 不用立即数（PPT 写 0）；目标地址在取指部件里算'],ALUSrc:['0','比较 busA 和 busB'],ALUctr:['sub','相减看 Zero'],MemWr:['0','不写存储器'],MemtoReg:['x','不写寄存器'],RegWr:['0','不写寄存器'],Branch:['1','是分支，Zero = 1 时跳']},
+  on:['pc-rs','pc-rt','busA','busB','busB-mux','mux-alu','zero'],bad:['pc-imm','ext-mux','alu-adr','busB-din','alu-mux2','dout-mux2','mux2-busW'],
+  badT:['imm16 照样经扩展器送到 ALUSrc 多路选择器，没被选中；转移目标地址由取指部件自己算。','ALU 的差照样送到数据存储器 Adr 读出一个数，没人用。','RegWr = 0、MemWr = 0，所以这些值都写不进去。']}
+};
+let ci='add';
+function drawDP(){const c=SC[ci];let s=BOX;const on=c.on.concat(c.on.some(x=>x==='pc-rt'||x==='pc-rt2')?['rt-a']:[]);
+  for(const [id,d] of Object.entries(W)){const cl=on.includes(id)?'w on':c.bad.includes(id)?'w bad':'w';s=`<path class="${cl}" d="${d}"/>`+s}
+  for(const [k,[x,y]] of Object.entries(SIGPOS)){const v=c.s[k][0];s+=`<text class="sig${v!=='0'&&v!=='x'?' hot':''}" x="${x}" y="${y}">${k}=${v}</text>`}
+  $('dp').innerHTML=s;
+  $('ifun').innerHTML=`<b class="mono">${c.t}</b>　功能：<span class="mono">${c.f}</span>`;
+  $('path').textContent=c.p;
+  $('sigt').innerHTML=Object.entries(c.s).map(([k,[v,w]])=>`<tr><td class="mono">${k}</td><td class="c">${v}</td><td>${w}</td></tr>`).join('');
+  $('bad').innerHTML=c.badT.map(x=>`<li>${x}</li>`).join('');
+  document.querySelectorAll('#itabs .tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.i===ci));}
+$('itabs').innerHTML=Object.keys(SC).map(k=>`<button class="tab" data-i="${k}">${k}</button>`).join('');
+document.querySelectorAll('#itabs .tab').forEach(t=>t.onclick=()=>{ci=t.dataset.i;drawDP()});
+drawDP();
+/* ---------- pipeline ---------- */
+const PRE=[
+ {c:'add r3, r2, r1\nadd r5, r4, r3',note:'第六章 PPT p58 的例子：I2 要读 I1 写的 R3，写后读相关。按“前半拍写、后半拍读”，不转发停 2 拍；转发后不用停。'},
+ {c:'lw r1, 0(r2)\nadd r3, r1, r4\nadd r5, r3, r1',note:'load-use：lw 的数据 MEM 段末尾才有，就算转发，紧跟的 add 也要停 1 拍（强化 3 p58）。'},
+ {c:'add r1, r2, r3\nbeq r4, r5, L\nadd r6, r7, r8\nadd r9, r10, r11\nadd r12, r13, r14',note:'第六章 PPT p59 的指令序列：beq 之后的指令要等 PC 更新才能确定从哪取。'},
+ {c:'lw r2, 0(r1)\naddi r2, r2, 1\nsw r2, 0(r1)\naddi r1, r1, 4\nbeq r1, r3, L',note:'自拟：数组元素加 1 的循环体，几乎每条都依赖上一条。'}
+];
+function parse(line){const s=line.trim().toLowerCase().replace(/#.*/,'').replace(/\$/g,'');if(!s)return null;
+  const m=s.match(/^(\w+)\s*(.*)$/);const op=m[1],a=m[2].split(/[\s,()]+/).filter(Boolean);const R=x=>/^r\d+$/.test(x)?x:null;
+  if(op==='nop')return {op,src:[],dst:null};
+  if(['add','sub','and','or','slt'].includes(op)&&a.length===3&&R(a[0])&&R(a[1])&&R(a[2]))return {op,dst:a[0],src:[a[1],a[2]]};
+  if(['addi','andi','ori'].includes(op)&&a.length===3&&R(a[0])&&R(a[1]))return {op,dst:a[0],src:[a[1]]};
+  if(op==='lw'&&a.length===3&&R(a[0])&&R(a[2]))return {op,dst:a[0],src:[a[2]],load:1};
+  if(op==='sw'&&a.length===3&&R(a[0])&&R(a[2]))return {op,dst:null,src:[a[2],a[0]]};
+  if(op==='beq'&&a.length>=2&&R(a[0])&&R(a[1]))return {op,dst:null,src:[a[0],a[1]],br:1};
+  return {err:line}}
+function sched(){
+  const lines=$('code').value.split('\n').filter(l=>l.trim()),fwd=$('fwd').value==='1',br=$('br').value;
+  const I=lines.map(parse).filter(Boolean);const bad=I.filter(x=>x.err);
+  if(bad.length){$('err').textContent='看不懂这几行：'+bad.map(b=>b.err).join('；');return null}
+  if(!I.length||I.length>12){$('err').textContent='写 1～12 条指令。';return null}
+  $('err').textContent='';const T=[],H=[];
+  I.forEach((x,i)=>{x.txt=lines[i].trim();let IF=i?T[i-1].IF+1:1;let why=[];
+    if(i&&I[i-1].br&&br==='freeze'){const need=T[i-1].MEM+1;if(need>IF){H.push(`I${i+1} 要等 I${i}（beq）在第 ${T[i-1].MEM} 拍的 MEM 段更新 PC，才知道从哪取，控制冒险，取指推迟到第 ${need} 拍。`);IF=need}}
+    let ID=Math.max(IF+1,i?T[i-1].ID+1:0);const fwdFrom=[];
+    x.src.forEach(r=>{if(r==='r0')return;for(let j=i-1;j>=0;j--){if(I[j].dst===r){const p=T[j];let need,how;
+      if(!fwd){need=p.WB;how=`不转发：I${i+1} 最早在 I${j+1} 写回的第 ${p.WB} 拍做 ID（前半拍写、后半拍读）`}
+      else if(I[j].load){need=p.MEM;how=`转发：lw 的数据第 ${p.MEM} 拍 MEM 末尾才有，I${i+1} 的 EX 最早在第 ${p.MEM+1} 拍`;fwdFrom.push(r)}
+      else{need=p.EX;how=`转发：I${j+1} 第 ${p.EX} 拍 EX 末尾出结果，直接送 I${i+1} 下一拍的 EX`;fwdFrom.push(r)}
+      const stall=Math.max(0,need-Math.max(IF+1,i?T[i-1].ID+1:0));
+      why.push(`I${i+1} 读 ${r}，I${j+1} 写 ${r}：写后读相关。${how}${stall?`，要停 ${stall} 拍`:'，不用停'}。`);ID=Math.max(ID,need);break}}});
+    H.push(...why);T.push({IF,ID,EX:ID+1,MEM:ID+2,WB:ID+3,fw:fwd&&fwdFrom.length&&ID+1})});
+  return {I,T,H}}
+function render(){const r=sched();if(!r){$('st').innerHTML='';$('kpi').innerHTML='';$('hz').innerHTML='';return}
+  const {I,T,H}=r,n=I.length,last=T[n-1].WB,dt=+$('dt').value||1;let stalls=0;
+  let h='<tr><th>指令＼时钟</th>'+Array.from({length:last},(_,i)=>`<th>${i+1}</th>`).join('')+'</tr>';
+  I.forEach((x,i)=>{const t=T[i];h+=`<tr><td>I${i+1} ${x.txt}</td>`;for(let c=1;c<=last;c++){let cl='',v='';
+      if(c===t.IF){cl='s-IF';v='IF'}else if(c>t.IF&&c<t.ID){cl='s-stall';}
+      else if(c===t.ID){cl='s-ID';v='ID'}else if(c===t.EX){cl='s-EX';v=t.fw?'<span class="fw">←</span>EX':'EX'}else if(c===t.MEM){cl='s-MEM';v='MEM'}else if(c===t.WB){cl='s-WB';v='WB'}
+      h+=`<td class="${cl}">${v}</td>`}h+='</tr>'});
+  $('st').innerHTML=h;
+  T.forEach((t,i)=>{stalls+=t.ID-t.IF-1});
+  const ideal=n+4;
+  $('kpi').innerHTML=`<span>总时钟数 <b>${last}</b>（理想 ${ideal}）</span><span>阻塞 <b>${last-ideal}</b> 拍</span><span>吞吐率 TP = ${n} ÷ (${last}×${dt}ns) = <b>${+(n/(last*dt)*1e3).toPrecision(4)}</b> 条/μs</span><span>加速比 = ${n}×5 ÷ ${last} = <b>${+(n*5/last).toPrecision(4)}</b></span>`;
+  $('hz').innerHTML=(H.length?H:['没有冒险，流水线一拍出一条。']).map(x=>`<li>${x}</li>`).join('')+'<li>结构冒险：假设指令存储器和数据存储器分开、寄存器堆前写后读，所以不考虑（第六章 p55–56）。</li>';
+}
+function load(p){$('code').value=p.c;$('presetNote').textContent=p.note;render()}
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>load(PRE[+b.dataset.p]));
+['fwd','br','dt','code'].forEach(id=>$(id).addEventListener('input',()=>{if(id==='code')$('presetNote').textContent='';render()}));
+load(PRE[0]);
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>I/O 方式占 CPU 时间</title>
+<style>
+/* I/O cost calculator: polling, interrupt and DMA converted to clock cycles per second, plus timelines of the three DMA memory-sharing modes. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --tag:#c8553d; --idx:#4d6fa8; --off:#3f7d4f; --ctl:#d99a1e;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:14px var(--serif);font-weight:600;margin:12px 0 6px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number],select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:7.5em}
+select{font-family:var(--sans);width:auto}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink)}
+.btn,.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.chip{border-radius:999px;padding:2px 12px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:10px}
+.err{color:var(--mv);font-size:13px;min-height:1em;margin-top:6px}
+.bar{display:flex;width:100%;border-radius:5px;overflow:hidden;font:13px/1.3 var(--mono);color:#fff;min-height:54px}
+.bar div{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 4px;min-width:64px;text-align:center}
+.bar small{font-size:11px;opacity:.9;font-family:var(--sans)}
+.f-tag{background:var(--tag)}.f-idx{background:var(--idx)}.f-off{background:var(--off)}.f-ctl{background:var(--ctl);color:#1d1d1d}.f-data{background:var(--muted)}
+.scale{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--muted);margin-top:2px}
+.calc{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.calc code,.mono{font-family:var(--mono)}
+.big{font:20px var(--serif);font-weight:600;color:var(--green)}
+.ans{border-radius:3px;transition:filter .15s}
+body.closed .ans:not(.shown){filter:blur(6px);background:var(--hl);cursor:pointer;user-select:none}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;min-width:520px;width:100%}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--hl);font-weight:600}
+.bits{font:13px var(--mono);word-break:break-all;line-height:1.9}
+.bits span{padding:1px 2px;border-radius:2px}
+.b-tag{background:color-mix(in srgb,var(--tag) 28%,transparent)}.b-idx{background:color-mix(in srgb,var(--idx) 28%,transparent)}.b-off{background:color-mix(in srgb,var(--off) 28%,transparent)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+[hidden]{display:none!important}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:5px 14px;cursor:pointer}
+.tab[aria-selected=true]{background:var(--green);color:var(--paper);border-color:var(--green)}
+.calc li{margin:2px 0}
+.unitnote{font-size:13px;background:var(--hl);border-radius:4px;padding:6px 10px;margin-top:8px}
+svg{display:block;width:100%;height:auto}
+svg text{font:12px var(--sans);fill:var(--ink)}
+svg .mut{fill:var(--muted)}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+.lg i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>I/O 方式占 CPU 时间</h1>
+    <p class="sub">程序查询、中断、DMA 三种方式下，CPU 每秒花多少时钟周期在这个外设上，占 CPU 时间的百分之几。全部统一换算成时钟周期再除。下面还有 DMA 三种访存方式的时间轴。对应 2009-43、第八章 PPT p18–22、p53–61，强化 5 p59–65。</p>
+  </header>
+
+  <section class="panel">
+    <h2>这一类怎么做</h2>
+    <ol class="rules">
+      <li><b>每秒几次</b>：中断 = 数据传输率 ÷ 每次中断传送的字节数；DMA = 数据传输率 ÷ 块大小；程序查询 = 题目给的查询频率（或为了不丢数据，按传输率 ÷ 每次传送字节数算）。</li>
+      <li><b>每次多少周期</b>：给的是指令条数就 × CPI；给的是周期数直接用。中断要把“其他开销”（响应、保存现场等）一起算进去。DMA 只算预处理和后处理，<b>数据传送本身由 DMA 控制器做，不占 CPU 时间</b>。</li>
+      <li><b>占比</b> = 每秒次数 × 每次周期数 ÷ 主频。也可以用时间算：每次花的时间 ÷ 两次之间的间隔，分子分母单位一致，结果相同。</li>
+      <li><b>单位</b>：数据传输率里的 MB/s、KB/s 一般按 10⁶、10³ 算（2009-43 标准答案就是这样）；存储容量的 KB、MB 才是 2¹⁰、2²⁰。还要分清 B（字节）和 b（位）。</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <h2>条件</h2>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-m="poll">程序查询</button>
+      <button class="tab" role="tab" data-m="int">中断</button>
+      <button class="tab" role="tab" data-m="dma">DMA</button>
+    </div>
+    <div class="form">
+      <label>CPU 主频（MHz）<input id="f" type="number" min="1" value="500"></label>
+      <label>CPI<input id="cpi" type="number" min="0.1" step="0.1" value="5"></label>
+      <label id="rateBox">外设数据传输率<input id="rate" type="number" min="0" step="any" value="0.5"></label>
+      <label id="rateUBox">单位<select id="rateU"><option value="1e6">MB/s（10⁶）</option><option value="1048576">MB/s（2²⁰）</option><option value="1e3">KB/s（10³）</option><option value="1024">KB/s（2¹⁰）</option><option value="1">B/s</option></select></label>
+      <label id="pollSrcBox">查询频率<select id="pollSrc"><option value="k">题目给每秒次数</option><option value="r">按传输率算，保证不丢数据</option></select></label>
+      <label id="kBox">每秒查询次数<input id="k" type="number" min="0" value="30"></label>
+      <label id="wBox">每次传送（字节）<input id="w" type="number" min="1" step="any" value="4"></label>
+      <label id="blkBox">DMA 块大小（字节）<input id="blk" type="number" min="1" value="5000"></label>
+      <label id="costBox">每次开销<input id="cost" type="number" min="0" step="any" value="18"></label>
+      <label id="costUBox">开销单位<select id="costU"><option value="i">条指令</option><option value="c">个时钟周期</option></select></label>
+      <label id="extraBox">其他开销（条指令）<input id="extra" type="number" min="0" step="any" value="2"></label>
+    </div>
+    <div class="presets">预设：
+      <button class="chip" data-p="0">2009-43 (1) 中断</button>
+      <button class="chip" data-p="1">2009-43 (2) DMA</button>
+      <button class="chip" data-p="2">程序查询（自拟）</button>
+    </div>
+    <p class="tip" id="presetNote"></p>
+    <div class="err" id="err"></div>
+    <p class="tip"><label class="chk" style="display:inline-flex;gap:6px"><input id="closed" type="checkbox"> 闭卷：遮住算式结果，自己算完再点灰块对答案</label></p>
+  </section>
+
+  <section class="panel">
+    <h2>算式</h2>
+    <ol class="calc" id="calc"></ol>
+    <h3>一次事件放大看</h3>
+    <div id="tl"></div>
+    <p class="tip" id="tlNote"></p>
+  </section>
+
+  <section class="panel">
+    <h2>DMA 三种访存方式的时间轴</h2>
+    <p class="tip">DMA 控制器和 CPU 共用主存，冲突时按下面三种办法之一分配。每格是一个存储周期（第八章 p56，强化 5 p60）。题目没说时，408 多数按周期挪用。</p>
+    <div id="dmaTl"></div>
+    <div class="lg"><span><i style="background:var(--q)"></i>CPU 访存</span><span><i style="background:var(--mv)"></i>DMA 访存</span><span><i style="background:var(--line)"></i>主存空闲</span></div>
+    <p class="tip">CPU 停止法那一行：CPU 被整段停下，但 DMA 只在外设准备好数据的周期才用主存，中间的灰格主存空着，这就是它的浪费。</p>
+    <div class="tw" style="margin-top:10px"><table>
+      <tr><th>方式</th><th>怎么分</th><th>代价</th></tr>
+      <tr><td>CPU 停止法</td><td>DMA 发停止信号，CPU 让出总线，整块传完再还</td><td>控制简单；传送期间 CPU 不能访存，外设两次数据之间主存也闲着</td></tr>
+      <tr><td>周期挪用</td><td>每准备好一个字，DMA 挪用一个存储周期，用完立刻还</td><td>单字传送，CPU 只被打断一个周期；DMA 和 CPU 同时要访存时 DMA 优先</td></tr>
+      <tr><td>交替分时</td><td>每个存储周期分两半，一半给 CPU、一半给 DMA</td><td>互不等待，但要求存储器足够快，硬件更复杂</td></tr>
+    </table></div>
+  </section>
+
+  <section class="panel">
+    <h2>DMA 和中断的区别</h2>
+    <div class="tw"><table>
+      <tr><th></th><th>中断</th><th>DMA</th></tr>
+      <tr><td>谁传数据</td><td>CPU 执行中断服务程序传，软件传送</td><td>DMA 控制器直接在主存和外设间传，硬件传送</td></tr>
+      <tr><td>CPU 花在哪</td><td>每传一次数据都要进一次中断：响应、保存现场、服务程序、恢复</td><td>只花在预处理（设主存地址、长度等参数）和后处理（传完发一次中断做校验等）</td></tr>
+      <tr><td>和 CPU 争什么</td><td>争 CPU 的处理时间</td><td>争总线（主存）控制权</td></tr>
+      <tr><td>何时响应</td><td>指令执行结束后的中断周期</td><td>每个机器周期（一次总线事务）结束后都可以响应，不必等整条指令结束</td></tr>
+    </table></div>
+    <p class="tip">依据：第八章 p53–61、强化 5 p63–64。</p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let mode='int';
+const PRE=[
+ {mode:'int',f:500,cpi:5,rate:0.5,rateU:'1e6',w:4,cost:18,costU:'i',extra:2,note:'2009-43 (1)：主频 500MHz、CPI 5；外设传输率 0.5MB/s，中断方式，每次传送 32 位；中断服务程序 18 条指令，其他开销相当于 2 条指令。答案 2.5%。'},
+ {mode:'dma',f:500,cpi:5,rate:5,rateU:'1e6',blk:5000,cost:500,costU:'c',note:'2009-43 (2)：传输率提高到 5MB/s，改用 DMA，块大小 5000B，预处理和后处理总开销 500 个时钟周期。答案 0.1%。'},
+ {mode:'poll',f:50,cpi:1,pollSrc:'k',k:30,cost:100,costU:'c',note:'自拟：主频 50MHz，鼠标每秒查询 30 次，每次查询（含调用和返回）100 个时钟周期。'}
+];
+function fmt(x){if(!isFinite(x))return '—';if(x===0)return '0';const a=Math.abs(x);if(a>=1e9)return +(x/1e9).toPrecision(6)+'G';if(a>=1e6)return +(x/1e6).toPrecision(6)+'M';if(a>=1e4)return +(x/1e3).toPrecision(6)+'K';return String(+x.toPrecision(6))}
+function grp(x){return (+x.toPrecision(8)).toLocaleString('en-US')}
+function ft(sec){const a=Math.abs(sec);if(a>=1e-3)return +(sec*1e3).toPrecision(5)+' ms';if(a>=1e-6)return +(sec*1e6).toPrecision(5)+' μs';return +(sec*1e9).toPrecision(5)+' ns'}
+function pct(x){return +(x*100).toPrecision(4)+'%'}
+function show(id,on){$(id).hidden=!on}
+function setMode(m){mode=m;document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.m===m));render()}
+function render(){
+  const ps=$('pollSrc').value;
+  show('rateBox',mode!=='poll'||ps==='r');show('rateUBox',mode!=='poll'||ps==='r');show('pollSrcBox',mode==='poll');show('kBox',mode==='poll'&&ps==='k');
+  show('wBox',mode==='int'||(mode==='poll'&&ps==='r'));show('blkBox',mode==='dma');show('extraBox',mode==='int');
+  $('costBox').firstChild.textContent=mode==='int'?'中断服务程序':mode==='dma'?'每块预处理＋后处理':'每次查询';
+  const f=+$('f').value*1e6,cpi=+$('cpi').value,R=+$('rate').value*+$('rateU').value,w=+$('w').value,blk=+$('blk').value,cost=+$('cost').value,cu=$('costU').value,extra=+$('extra').value;
+  const err=[];if(!(f>0))err.push('主频要大于 0。');if(cu==='i'||mode==='int')if(!(cpi>0))err.push('CPI 要大于 0。');
+  $('err').textContent=err.join(' ');if(err.length){$('calc').innerHTML='';$('tl').innerHTML='';return}
+  const rUnit=$('rateU').selectedOptions[0].textContent;const L=[];let n,c,what;
+  const tc=1/f;L.push(`时钟周期 = 1 ÷ ${$('f').value}MHz = <span class="ans">${fmt(tc*1e9)} ns</span>`);
+  if(mode==='int'){n=R/w;what='中断';
+    L.push(`每秒中断次数 = ${$('rate').value}${rUnit.split('（')[0]} ÷ ${w}B = ${grp(R)}B/s ÷ ${w}B = <span class="ans">${fmt(n)} 次/秒</span>`);
+    if(cu==='i'){c=(cost+extra)*cpi;L.push(`每次中断周期数 = (${cost} + ${extra}) 条 × CPI ${cpi} = <span class="ans">${fmt(c)} 个周期</span>`)}
+    else{c=cost+extra*cpi;L.push(`每次中断周期数 = ${cost} 个周期 + 其他开销 ${extra} 条 × ${cpi} = <span class="ans">${fmt(c)} 个周期</span>`)}}
+  else if(mode==='dma'){n=R/blk;what='DMA 块';
+    L.push(`每秒传送块数 = ${grp(R)}B/s ÷ ${blk}B = <span class="ans">${fmt(n)} 块/秒</span>`);
+    c=cu==='i'?cost*cpi:cost;L.push(`每块 CPU 周期数 = ${cu==='i'?`${cost} 条 × CPI ${cpi} = `:''}<span class="ans">${fmt(c)} 个周期</span>（只有预处理和后处理，数据传送不占 CPU）`)}
+  else{what='查询';
+    if(ps==='k'){n=+$('k').value;L.push(`每秒查询 <span class="ans">${fmt(n)} 次</span>（题目给定）`)}
+    else{n=R/w;L.push(`为不丢数据，每准备好 ${w}B 就要查一次：${grp(R)}B/s ÷ ${w}B = <span class="ans">${fmt(n)} 次/秒</span>`)}
+    c=cu==='i'?cost*cpi:cost;L.push(`每次查询周期数 = ${cu==='i'?`${cost} 条 × CPI ${cpi} = `:''}<span class="ans">${fmt(c)} 个周期</span>`)}
+  const tot=n*c,p=tot/f;
+  L.push(`每秒用于该外设的周期 = ${fmt(n)} × ${fmt(c)} = <span class="ans">${fmt(tot)} 个周期</span>`);
+  L.push(`占比 = ${fmt(tot)} ÷ ${fmt(f)} = <span class="ans big">${pct(p)}</span>${p>1?' <b style="color:var(--mv)">超过 100%：CPU 根本来不及，这种方式不可行</b>':''}`);
+  const gap=1/n,busy=c*tc;
+  L.push(`用时间验算：每次 ${fmt(c)} × ${fmt(tc*1e9)}ns = ${ft(busy)}，两次之间隔 1 ÷ ${fmt(n)} 秒 = ${ft(gap)}，两者相除 = <span class="ans">${pct(busy/gap)}</span>`);
+  $('calc').innerHTML=L.map(x=>`<li>${x}</li>`).join('');
+  // timeline of one interval
+  const W=1000,H=58,frac=Math.min(1,busy/gap),bw=Math.max(frac*W,3);
+  $('tl').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="一个间隔内 CPU 处理该外设的时间占比"><rect x="0" y="10" width="${W}" height="24" rx="3" fill="var(--hl)"/><rect x="0" y="10" width="${bw}" height="24" rx="3" fill="var(--mv)"/>
+  <text x="${Math.min(bw+6,W-200)}" y="27">CPU 处理 ${ft(busy)}</text><text x="${W}" y="52" text-anchor="end" class="mut">两次${what}之间 ${ft(gap)}，其余时间 CPU 执行别的程序</text><text x="0" y="52" class="mut">一次${what}开始</text></svg>`;
+  $('tlNote').textContent=frac<0.01?'红色部分太窄，图上按最小宽度画出，实际比例见上面的占比。':'';
+  bindAns();
+}
+function dmaTl(){
+  const N=12,cw=70,x0=96,rows=[['CPU 停止法',i=>i<2?'c':i<10?(i%2===0?'d':'x'):'c'],['周期挪用',i=>[3,7,11].includes(i)?'d':'c'],['交替分时',i=>'h']];
+  const H=rows.length*46+24;let s=`<svg viewBox="0 0 ${x0+N*cw+4} ${H}" role="img" aria-label="DMA 三种方式时间轴">`;
+  for(let i=0;i<N;i++)s+=`<text x="${x0+i*cw+cw/2}" y="14" text-anchor="middle" class="mut">${i+1}</text>`;
+  rows.forEach(([name,fn],r)=>{const y=24+r*46;s+=`<text x="0" y="${y+22}">${name}</text>`;
+    for(let i=0;i<N;i++){const t=fn(i),x=x0+i*cw;
+      if(t==='h')s+=`<rect x="${x+1}" y="${y+4}" width="${cw/2-2}" height="28" rx="2" fill="var(--q)"/><rect x="${x+cw/2+1}" y="${y+4}" width="${cw/2-2}" height="28" rx="2" fill="var(--mv)"/>`;
+      else s+=`<rect x="${x+1}" y="${y+4}" width="${cw-2}" height="28" rx="2" fill="${t==='c'?'var(--q)':t==='d'?'var(--mv)':'var(--line)'}"/>`}
+});
+  $('dmaTl').innerHTML=s+'</svg>';
+}
+function bindAns(){document.querySelectorAll('.ans').forEach(e=>e.onclick=()=>e.classList.add('shown'))}
+function load(p){for(const k of ['f','cpi','rate','rateU','w','blk','cost','costU','extra','pollSrc','k'])if(p[k]!==undefined)$(k).value=p[k];$('presetNote').textContent=p.note;setMode(p.mode)}
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{$('presetNote').textContent='';setMode(t.dataset.m)});
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>load(PRE[+b.dataset.p]));
+document.querySelectorAll('input,select').forEach(e=>{if(e.id!=='closed')e.addEventListener('input',()=>{$('presetNote').textContent='';render()})});
+$('closed').addEventListener('change',()=>{document.body.classList.toggle('closed',$('closed').checked);document.querySelectorAll('.ans').forEach(e=>e.classList.remove('shown'))});
+dmaTl();load(PRE[0]);
+</script>
+</body>
+</html>

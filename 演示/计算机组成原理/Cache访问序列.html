@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cache 访问序列模拟</title>
+<style>
+/* Cache access-sequence simulator: mapping, LRU/FIFO, write policies */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --tag:#c8553d; --idx:#4d6fa8; --off:#3f7d4f; --ctl:#d99a1e;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:14px var(--serif);font-weight:600;margin:12px 0 6px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number],select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:7.5em}
+select{font-family:var(--sans);width:auto}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink)}
+.btn,.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.chip{border-radius:999px;padding:2px 12px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:10px}
+.err{color:var(--mv);font-size:13px;min-height:1em;margin-top:6px}
+.bar{display:flex;width:100%;border-radius:5px;overflow:hidden;font:13px/1.3 var(--mono);color:#fff;min-height:54px}
+.bar div{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 4px;min-width:64px;text-align:center}
+.bar small{font-size:11px;opacity:.9;font-family:var(--sans)}
+.f-tag{background:var(--tag)}.f-idx{background:var(--idx)}.f-off{background:var(--off)}.f-ctl{background:var(--ctl);color:#1d1d1d}.f-data{background:var(--muted)}
+.scale{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--muted);margin-top:2px}
+.calc{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.calc code,.mono{font-family:var(--mono)}
+.big{font:20px var(--serif);font-weight:600;color:var(--green)}
+.ans{border-radius:3px;transition:filter .15s}
+body.closed .ans:not(.shown){filter:blur(6px);background:var(--hl);cursor:pointer;user-select:none}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;min-width:520px;width:100%}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--hl);font-weight:600}
+.bits{font:13px var(--mono);word-break:break-all;line-height:1.9}
+.bits span{padding:1px 2px;border-radius:2px}
+.b-tag{background:color-mix(in srgb,var(--tag) 28%,transparent)}.b-idx{background:color-mix(in srgb,var(--idx) 28%,transparent)}.b-off{background:color-mix(in srgb,var(--off) 28%,transparent)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+[hidden]{display:none!important}
+textarea{font:14px/1.6 var(--mono);width:100%;min-height:4.5em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:6px 8px}
+.seq{border-collapse:collapse;font:12px var(--mono)}
+.seq th,.seq td{border:1px solid var(--line);padding:3px 6px;text-align:center;white-space:nowrap}
+.seq td.hit{color:var(--done);font-weight:700}
+.seq td.miss{color:var(--cmp);font-weight:700}
+.seq td.ln{min-width:62px}
+.seq td.ln.new{background:color-mix(in srgb,var(--cmp) 22%,transparent)}
+.seq td.ln.use{background:color-mix(in srgb,var(--done) 22%,transparent)}
+.seq td.ln sub{color:var(--muted);font-size:10px}
+.seq td.ln .d{color:var(--cmp);font-size:10px;font-weight:700}
+.seq tr.cur td{outline:2px solid var(--green);outline-offset:-2px}
+.seq td.act{text-align:left;font-family:var(--sans);white-space:normal;min-width:180px}
+.kpi{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;margin:10px 0}
+.kpi b{font:18px var(--serif);color:var(--green)}
+.split{font:13px var(--mono);margin:8px 0}
+.split span{display:inline-block;padding:3px 8px;border:1px solid var(--line);margin-right:-1px}
+.split .t{background:color-mix(in srgb,var(--tag) 25%,transparent)}
+.split .i{background:color-mix(in srgb,var(--idx) 25%,transparent)}
+.split .o{background:color-mix(in srgb,var(--off) 25%,transparent)}
+.flow{font-size:13px;margin:6px 0 0;padding-left:1.3em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>Cache 访问序列模拟</h1>
+    <p class="sub">输入一串主存地址（写操作前面加 W），逐次看命中还是缺失、装进哪一行、替换谁、LRU 计数器怎么变、脏块什么时候写回。可切直接映射、组相联、全相联，也可以按二维数组遍历自动生成地址（存储器（中）p26–61，强化 4 p19–28）。地址拆分和总容量见 <a href="Cache地址与容量.html">Cache 地址与容量</a>。</p>
+  </header>
+
+  <section class="panel">
+    <h2>规则</h2>
+    <ol class="rules">
+      <li><b>块号 = 地址 ÷ 块大小</b>（取整），<b>组号 = 块号 mod 组数</b>，标记 = 块号 ÷ 组数。直接映射是每组 1 行，全相联是只有 1 组。</li>
+      <li><b>LRU 计数器</b>（存储器（中）p41）：命中时，被访问行清零，比它小的计数器加 1，其余不变；缺失且组内有空行，新行置 0，其余全加 1；缺失且组满，淘汰计数值最大（k 路时为 k − 1）的行，新行置 0，其余加 1。</li>
+      <li><b>FIFO</b>：淘汰最早装入的行，命中不改变顺序。计数器显示“装入了多久”。</li>
+      <li><b>写策略</b>（存储器（中）p58–59）：全写法写命中时同时写 Cache 和主存；写缺失时写分配先调块再写，非写分配只写主存。回写法写命中只写 Cache 并置脏位，脏块被替换时才写回主存，写缺失用写分配。</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <h2>参数</h2>
+    <div class="form">
+      <label>映射<select id="map"><option value="d">直接映射</option><option value="s">组相联</option><option value="f">全相联</option></select></label>
+      <label id="wl">每组行数 k<input id="ways" type="number" min="2" step="1" value="2"></label>
+      <label>Cache 总行数<input id="lines" type="number" min="1" step="1" value="4"></label>
+      <label>块大小（B）<input id="bs" type="number" min="1" step="1" value="4"></label>
+      <label>替换<select id="rep"><option value="lru">LRU（计数器）</option><option value="fifo">FIFO</option></select></label>
+      <label>写策略<select id="wp"><option value="wb">回写 + 写分配</option><option value="wta">全写 + 写分配</option><option value="wtn">全写 + 非写分配</option></select></label>
+    </div>
+    <div class="form" style="margin-top:10px">
+      <label>地址来源<select id="src"><option value="seq">手写序列</option><option value="arr">二维数组遍历</option></select></label>
+      <label class="arr">数组 行 × 列<input id="ar" type="number" min="1" value="256" style="width:5em"></label>
+      <label class="arr">列数<input id="ac" type="number" min="1" value="256" style="width:5em"></label>
+      <label class="arr">元素字节<input id="ae" type="number" min="1" value="4" style="width:4em"></label>
+      <label class="arr">首地址（十进制）<input id="ab" type="number" min="0" value="320"></label>
+      <label class="arr">遍历<select id="ao"><option value="row">按行（程序 A）</option><option value="col">按列（程序 B）</option></select></label>
+      <label class="arr">读/写<select id="aw"><option value="r">只读</option><option value="rw">a[i][j] += 1（先读后写）</option></select></label>
+    </div>
+    <label id="seqL" style="display:block;margin-top:8px;font-size:13px;color:var(--muted)">地址序列（空格或逗号分隔；04H、0x1C 为十六进制，其余按十进制；写操作写成 W0CH 或 W 12）
+      <textarea id="seq" spellcheck="false"></textarea></label>
+    <div class="presets">预设：
+      <button class="chip" data-p="0">LRU 全相联（存储器（中）p40）</button>
+      <button class="chip" data-p="1">2010-44 程序 A</button>
+      <button class="chip" data-p="2">2010-44 程序 B</button>
+      <button class="chip" data-p="3">直接映射的抖动</button>
+      <button class="chip" data-p="4">回写与脏块</button>
+      <button class="chip" data-p="5">同一序列改全写非写分配</button>
+    </div>
+    <p class="tip" id="presetNote"></p>
+    <p class="tip"><label class="chk" style="display:inline-flex;gap:6px"><input id="closed" type="checkbox"> 闭卷：遮住命中与否和每行的内容，自己推完再点灰块对答案</label></p>
+    <div class="err" id="err"></div>
+  </section>
+
+  <section class="panel">
+    <h2>结果</h2>
+    <div class="split" id="split"></div>
+    <div class="kpi" id="kpi"></div>
+    <div class="tw"><table class="seq" id="tbl"></table></div>
+    <p class="tip" id="more"></p>
+    <p class="tip">每格是这次访问之后该行的状态：块号，下标是计数器，<span style="color:var(--cmp);font-weight:700">D</span> 是脏位。红底是刚装入的行，绿底是命中的行。</p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const PRE=[
+ {map:'f',lines:4,bs:4,rep:'lru',wp:'wb',src:'seq',seq:'04H 08H 0CH 10H 05H 09H 14H 06H 0AH 0DH 11H 15H',note:'存储器（中）p40–45：全相联，4 行，块 4B。块号序列 1,2,3,4,1,2,5,1,2,3,4,5，用 p41 的计数器规则逐次推。'},
+ {map:'d',lines:8,bs:64,rep:'lru',wp:'wb',src:'arr',ar:256,ac:256,ae:4,ab:320,ao:'row',aw:'r',note:'2010-44(3)：直接映射 8 行、每行 64B，int a[256][256] 首地址 320，按行遍历。每块 16 个 int，第 1 个缺失、后 15 个命中，命中率 15/16。'},
+ {map:'d',lines:8,bs:64,rep:'lru',wp:'wb',src:'arr',ar:256,ac:256,ae:4,ab:320,ao:'col',aw:'r',note:'2010-44(3)：按列遍历。一行 1024B 正好 16 块，16 mod 8 = 0，同一列的元素全映射到同一 Cache 行，互相挤掉，命中率 0。'},
+ {map:'d',lines:4,bs:16,rep:'lru',wp:'wb',src:'seq',seq:'0 64 0 64 0 64 16 80',note:'自拟：块 0 和块 4 都映射到第 0 行，交替访问次次缺失。改成 2 路组相联或全相联再看。'},
+ {map:'s',ways:2,lines:4,bs:16,rep:'lru',wp:'wb',src:'seq',seq:'W0 W16 0 W64 W0 32 W96 64',note:'自拟：2 路组相联、回写。块被写过就置脏，被替换时要先写回主存。'},
+ {map:'s',ways:2,lines:4,bs:16,rep:'lru',wp:'wtn',src:'seq',seq:'W0 W16 0 W64 W0 32 W96 64',note:'自拟：和上一个同样的序列，改全写 + 非写分配。写缺失不调块，每次写都直接写主存。'}
+];
+function num(t){t=t.trim();if(/^0x[0-9a-f]+$/i.test(t))return parseInt(t,16);if(/^[0-9a-f]+h$/i.test(t))return parseInt(t.slice(0,-1),16);if(/^\d+$/.test(t))return +t;return NaN}
+function hx(n){return n.toString(16).toUpperCase().padStart(2,'0')+'H'}
+function getSeq(){
+  if($('src').value==='arr'){const R=+$('ar').value,C=+$('ac').value,E=+$('ae').value,B=+$('ab').value,rw=$('aw').value==='rw',out=[];
+    if(!(R>0&&C>0&&E>0&&B>=0)||R*C>1e6)return {err:'数组元素数要在 1～1000000 之间。'};
+    const at=(i,j)=>B+(i*C+j)*E;
+    if($('ao').value==='row'){for(let i=0;i<R;i++)for(let j=0;j<C;j++){out.push({a:at(i,j),w:0,lab:`a[${i}][${j}]`});if(rw)out.push({a:at(i,j),w:1,lab:`a[${i}][${j}]`})}}
+    else{for(let j=0;j<C;j++)for(let i=0;i<R;i++){out.push({a:at(i,j),w:0,lab:`a[${i}][${j}]`});if(rw)out.push({a:at(i,j),w:1,lab:`a[${i}][${j}]`})}}
+    return {s:out}}
+  const toks=$('seq').value.replace(/\b[Ww]\s+/g,'W').split(/[\s,，;；]+/).filter(Boolean),out=[];
+  for(const t of toks){const w=/^w/i.test(t),a=num(w?t.slice(1):t);if(!(a>=0))return {err:`看不懂“${t}”。`};out.push({a,w:w?1:0})}
+  if(!out.length)return {err:'先输入地址序列。'};if(out.length>2000)return {err:'手写序列最多 2000 个。'};
+  return {s:out}}
+function sim(){
+  const map=$('map').value,L=+$('lines').value,bs=+$('bs').value,rep=$('rep').value,wp=$('wp').value;
+  let k=map==='d'?1:map==='f'?L:+$('ways').value;
+  if(!(L>=1&&Number.isInteger(L)&&bs>=1&&Number.isInteger(bs)))return {err:'行数、块大小要是正整数。'};
+  if(!(k>=1&&Number.isInteger(k))||L%k)return {err:'总行数要能被每组行数整除。'};
+  if(L>64)return {err:'总行数最多 64，方便画表。'};
+  const g=getSeq();if(g.err)return g;const S=L/k;
+  const sets=Array.from({length:S},()=>Array.from({length:k},()=>({v:0,b:-1,c:0,d:0})));
+  const rows=[];let hit=0,mw=0,mr=0,wbk=0;
+  const touch=(set,idx,isNew)=>{const ln=set[idx];
+    if(rep==='lru'){if(isNew){set.forEach((x,i)=>{if(i!==idx&&x.v)x.c++});ln.c=0}else{const c0=ln.c;set.forEach((x,i)=>{if(i!==idx&&x.v&&x.c<c0)x.c++});ln.c=0}}
+    else if(isNew){set.forEach((x,i)=>{if(i!==idx&&x.v)x.c++});ln.c=0}};
+  g.s.forEach((r,n)=>{const blk=Math.floor(r.a/bs),si=blk%S,tag=Math.floor(blk/S),set=sets[si];let idx=set.findIndex(x=>x.v&&x.b===blk),act=[],h=idx>=0,ne=-1;
+    if(h){hit++;touch(set,idx,false);act.push(`命中第 ${si*k+idx} 行`);
+      if(r.w){if(wp==='wb'){set[idx].d=1;act.push('只写 Cache，置脏位')}else{mw++;act.push('同时写主存')}}}
+    else if(r.w&&wp==='wtn'){mw++;act.push('写缺失，非写分配：只写主存，不调块')}
+    else{let e=set.findIndex(x=>!x.v);
+      if(e<0){e=set.reduce((m,x,i)=>x.c>set[m].c?i:m,0);const old=set[e];act.push(`组满，淘汰块 ${old.b}（计数 ${old.c}）`);if(old.d){wbk++;mw++;act.push('它是脏块，先写回主存')}}
+      else act.push(k>1?`装入空行第 ${si*k+e} 行`:`装入第 ${si*k+e} 行`);
+      mr++;set[e]={v:1,b:blk,c:0,d:0};touch(set,e,true);ne=e;
+      if(r.w){if(wp==='wb'){set[e].d=1;act.push('写分配：调块后写 Cache，置脏位')}else{mw++;act.push('写分配：调块后写 Cache，同时写主存')}}}
+    if(n<300)rows.push({r,blk,si,tag,h,idx,ne,act,snap:set.map(x=>({...x})),all:sets.map(s=>s.map(x=>({...x})))})});
+  return {rows,n:g.s.length,hit,mw,mr,wbk,S,k,L,bs,sets}}
+function render(){const R=sim();
+  if(R.err){$('err').textContent=R.err;['tbl','kpi','split','more'].forEach(i=>$(i).innerHTML='');return}$('err').textContent='';
+  const {rows,n,hit,S,k,L,bs}=R,closed=$('closed').checked,arr=$('src').value==='arr';
+  const lg=x=>Math.log2(x),ob=lg(bs),ib=lg(S);
+  $('split').innerHTML=Number.isInteger(ob)&&Number.isInteger(ib)?`地址 = <span class="t">标记</span><span class="i">${S>1?(k>1?'组号 ':'行号 ')+ib+' 位':'（全相联无索引）'}</span><span class="o">块内地址 ${ob} 位</span>　共 ${S} 组 × ${k} 行`:`共 ${S} 组 × ${k} 行（块大小或组数不是 2 的幂，按除法和取模算）`;
+  const fr=(a,b)=>{const g=(x,y)=>y?g(y,x%y):x,d=g(a,b)||1;return `${a/d}/${b/d}`};
+  $('kpi').innerHTML=`<span>访问 <b>${n}</b> 次</span><span class="ans">命中 <b>${hit}</b> 次，命中率 <b>${hit?fr(hit,n):'0'}</b> ≈ <b>${(hit/n*100).toFixed(2)}%</b></span><span class="ans">从主存调块 <b>${R.mr}</b> 次，写主存 <b>${R.mw}</b> 次${R.wbk?`（其中脏块写回 ${R.wbk} 次）`:''}</span>`;
+  const show=S*k<=16;const lineCols=show?Array.from({length:L},(_,i)=>i):Array.from({length:k},(_,i)=>i);
+  let h=`<tr><th>#</th><th>${arr?'元素':'读/写'}</th><th>地址</th><th>块号</th><th>${S>1?(k>1?'组号':'行号'):'—'}</th><th>结果</th>${show?lineCols.map(i=>`<th>行 ${i}${k>1&&S>1?`<br><sub>组 ${Math.floor(i/k)}</sub>`:''}</th>`).join(''):lineCols.map(i=>`<th>该组第 ${i} 路</th>`).join('')}<th>动作</th></tr>`;
+  rows.forEach((x,i)=>{const cells=show?x.all.flat():x.snap;
+    h+=`<tr><td>${i+1}</td><td>${arr?(x.r.w?'写 ':'')+x.r.lab:(x.r.w?'W':'R')}</td><td>${hx(x.r.a)}</td><td>${x.blk}</td><td>${S>1?x.si:'—'}</td><td class="${x.h?'hit':'miss'} ans">${x.h?'命中':'缺失'}</td>`;
+    cells.forEach((c,j)=>{const local=show?j-x.si*k:j,inSet=!show||Math.floor(j/k)===x.si;const cl=inSet&&local===x.ne?' new':inSet&&x.h&&local===x.idx?' use':'';
+      h+=`<td class="ln${cl}${inSet?' ans':''}">${c.v?`${c.b}<sub>${c.c}</sub>${c.d?'<span class="d">D</span>':''}`:'—'}</td>`});
+    h+=`<td class="act ans">${x.act.join('；')}</td></tr>`});
+  $('tbl').innerHTML=h;
+  $('more').textContent=n>rows.length?`共 ${n} 次访问，表里只列前 ${rows.length} 次；命中率按全部访问统计。`:'';
+  document.querySelectorAll('.ans').forEach(e=>e.onclick=()=>e.classList.add('shown'));}
+function sync(){const m=$('map').value;$('wl').hidden=m!=='s';const a=$('src').value==='arr';document.querySelectorAll('.arr').forEach(e=>e.hidden=!a);$('seqL').hidden=a}
+function load(p){for(const k of ['map','ways','lines','bs','rep','wp','src','seq','ar','ac','ae','ab','ao','aw'])if(p[k]!==undefined)$(k).value=p[k];$('presetNote').textContent=p.note;sync();render()}
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>load(PRE[+b.dataset.p]));
+document.querySelectorAll('input,select,textarea').forEach(e=>{if(e.id!=='closed')e.addEventListener('input',()=>{$('presetNote').textContent='';sync();render()})});
+$('closed').addEventListener('change',()=>{document.body.classList.toggle('closed',$('closed').checked);render()});
+load(PRE[0]);
+</script>
+</body>
+</html>
