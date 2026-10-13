@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>栈和队列</title>
+<style>
+/* Three tabs: stack-permutation simulator + enumerator, infix->postfix with the lecture's result/temp stacks (+ evaluation), and a circular queue ring with three full/empty schemes. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --pur:#7b4fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b48ee0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b48ee0; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:80ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:17px var(--serif);font-weight:600;margin:0 0 8px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tab{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:5px 14px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.tabs .muted{color:var(--muted);font-size:13px;margin-left:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.btn.sm{padding:1px 8px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:default}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px;margin-top:10px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form select{font:15px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;max-width:100%}
+.form input.w16{width:16em}.form input.w4{width:4.5em}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.ctrl .muted{color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.q{font-size:14px;padding:8px 12px;border:1px dashed var(--line);border-radius:5px;margin-top:8px}
+.q .ans{color:var(--done);font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font-size:13px;align-items:center;color:var(--muted)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.2em;margin-top:10px}
+.note b{color:var(--done)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:7em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+.red{color:var(--mv);font-weight:700}.grn{color:var(--done);font-weight:700}.org{color:var(--cmp);font-weight:700}
+.viz{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end;margin-top:10px}
+.viz>div{min-width:0}
+.strips{display:grid;gap:6px;min-width:0;flex:1 1 240px}
+.strip{overflow-x:auto}
+.row{display:flex;gap:2px;align-items:center;font:14px var(--mono)}
+.row .lab{width:5.2em;color:var(--muted);flex:none;font:12px var(--sans)}
+.cell{min-width:30px;height:30px;padding:0 4px;flex:none;display:grid;place-items:center;border:1px solid var(--line);border-radius:3px;background:var(--bg)}
+.cell.ok{background:color-mix(in srgb,var(--done) 30%,transparent);color:var(--ink);font-weight:400}
+.cell.cmp{background:var(--cmp);color:#222;font-weight:700}
+.cell.bad{background:var(--mv);color:#fff;font-weight:700}
+.cell.ghost{border-style:dashed;color:var(--muted);background:none}
+.cell.empty{border-style:dashed;background:none}
+svg{display:block;height:auto;max-width:100%}
+.s-well{fill:none;stroke:var(--green);stroke-width:2.2}
+.s-cell{fill:var(--bg);stroke:var(--line);stroke-width:1}
+.s-cell.cur{fill:var(--cmp);stroke:var(--cmp)}
+.s-cell.ok{fill:color-mix(in srgb,var(--done) 30%,transparent)}
+.s-cell.bad{fill:var(--mv);stroke:var(--mv)}
+.s-cell.par{fill:none;stroke:var(--muted);stroke-dasharray:3 2}
+.s-txt{font:600 14px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.s-txt.cur{fill:#222}.s-txt.bad{fill:#fff}
+.s-name{font:12px var(--sans);fill:var(--muted);text-anchor:middle}
+.s-cap{stroke:var(--mv);stroke-width:1.5;stroke-dasharray:5 3}
+.s-capt{font:11px var(--sans);fill:var(--mv)}
+.s-top{font:11px var(--sans);fill:var(--q)}
+.r-sec{fill:var(--bg);stroke:var(--line);stroke-width:1.2}
+.r-sec.ok{fill:color-mix(in srgb,var(--done) 30%,var(--paper))}
+.r-sec.cur{fill:var(--cmp)}
+.r-sec.bad{fill:var(--mv)}
+.r-sec.waste{fill:var(--paper);stroke-dasharray:4 3}
+.r-idx{font:11px var(--mono);fill:var(--muted);text-anchor:middle;dominant-baseline:central}
+.r-val{font:600 15px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.r-ptr{font:600 12px var(--mono);text-anchor:middle;dominant-baseline:central}
+.r-f{fill:var(--q)}.r-r{fill:var(--mv)}
+.r-arrow-f{stroke:var(--q);stroke-width:2}.r-arrow-r{stroke:var(--mv);stroke-width:2}
+.r-center{font:13px var(--sans);fill:var(--muted);text-anchor:middle;dominant-baseline:central}
+.r-center b{fill:var(--ink)}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font:14px var(--mono);margin-top:8px}
+.stats b{color:var(--mv)}
+.formula{font:13px var(--mono);display:grid;gap:3px;margin-top:8px}
+.formula .t{color:var(--done);font-weight:700}.formula .f{color:var(--muted)}
+.dial{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;margin-top:8px}
+.dial span.v{font:600 15px var(--mono);min-width:1.6em;display:inline-block;text-align:center}
+.seqs{display:flex;flex-wrap:wrap;gap:4px;font:13px var(--mono);margin-top:6px;max-height:16em;overflow-y:auto}
+.seqs span{border:1px solid var(--line);border-radius:3px;padding:0 5px;background:var(--bg)}
+.seqs span.hit{border-color:var(--done);color:var(--done);font-weight:700}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.warn{font-size:13px;padding:8px 12px;border-left:3px solid var(--mv);background:color-mix(in srgb,var(--mv) 8%,transparent);margin-top:8px}
+.hidden{display:none!important}
+details summary{cursor:pointer;color:var(--muted);font-size:13px}
+.tabpane{display:grid;gap:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>栈和队列：出栈序列、表达式、循环队列</h1>
+    <p class="sub">按罗素讲义第三章（p18–29 出栈序列，p38–46 循环队列，p62–73 表达式）和强化第一讲（p48–61）的原题一步步走。统考考过：出栈序列 2009、2010、2011、2013、2020、2022；中缀转后缀和求值 2012、2014、2018、2024；循环队列 2011、2014。</p>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button class="tab" type="button" role="tab" data-tab="t1" aria-selected="true">① 出栈序列</button>
+    <button class="tab" type="button" role="tab" data-tab="t2" aria-selected="false">② 中缀转后缀和求值</button>
+    <button class="tab" type="button" role="tab" data-tab="t3" aria-selected="false">③ 循环队列</button>
+    <label class="muted"><input type="checkbox" id="guessMode" checked> 先猜再看</label>
+  </nav>
+
+  <!-- ================= TAB 1 ================= -->
+  <div class="tabpane" id="t1">
+    <section class="panel">
+      <h2>五句话</h2>
+      <ol class="rules">
+        <li><b>后进先出</b>：入栈顺序是定死的，但什么时候出栈随意，所以同一个入栈序列能得到很多种出栈序列。</li>
+        <li><b>判断一个出栈序列</b>：按顺序看每个要出的元素：<b>在栈顶就出栈</b>；<b>还没进栈就一直入栈</b>直到它进来；它<b>已经在栈里却不在栈顶</b>（被压在下面），这个序列就不合法。</li>
+        <li><b>快速判别</b>：出栈序列里不能出现“先出大的，后面两个小的顺序还是从小到大”，比如入栈 1 2 3 时的 3 1 2（3 出来时 1 压在 2 下面）。</li>
+        <li><b>栈容量</b>：模拟时栈里最多同时有几个元素，就是需要的最小容量；容量不够的序列也不合法。</li>
+        <li><b>n 个不同元素</b>的合法出栈序列个数是卡特兰数 <b>C(2n, n) / (n + 1)</b>：n = 1, 2, 3, 4, 5 时是 1, 2, 5, 14, 42。</li>
+      </ol>
+    </section>
+    <section class="panel">
+      <div class="chips" id="pre1">例题：</div>
+      <div class="form">
+        <label>入栈序列<input id="in1" class="w16" type="text" spellcheck="false" autocomplete="off"></label>
+        <label>给的是<select id="mode1"><option value="out">出栈序列</option><option value="ops">Push / Pop 操作</option></select></label>
+        <label id="lab1">候选出栈序列<input id="out1" class="w16" type="text" spellcheck="false" autocomplete="off"></label>
+        <label>栈容量（空 = 不限）<input id="cap1" class="w4" type="text" inputmode="numeric" autocomplete="off"></label>
+        <label>最多连续出栈几次（空 = 不限）<input id="k1" class="w4" type="text" inputmode="numeric" autocomplete="off"></label>
+        <button class="btn primary" id="go1" type="button">模拟</button>
+      </div>
+      <p class="legend">元素可以是单个字符连写（abcde），也可以用空格或逗号隔开（1 2 3 10）。操作写 Push/Pop，或 I/O、入/出。</p>
+      <div class="err" id="err1" role="alert"></div>
+      <div class="q" id="q1"></div>
+    </section>
+    <section class="panel" id="sec1">
+      <h2>逐步模拟</h2>
+      <div class="ctrl"><button class="btn" data-a="reset" type="button">从头</button><button class="btn" data-a="prev" type="button">上一步</button><button class="btn primary" data-a="next" type="button">下一步</button><button class="btn" data-a="all" type="button">跑到底</button><span class="muted" data-r="prog"></span></div>
+      <div class="guess hidden" data-r="gbox"></div>
+      <div class="note" data-r="note"></div>
+      <div class="viz"><div data-r="stack"></div><div class="strips" data-r="strips"></div></div>
+      <div class="stats" data-r="stats"></div>
+      <p class="legend">橙色是这一步刚入栈或刚出栈的元素，绿色是已经按要求出栈的，红色是卡住的那个（被压在下面，或者栈满压不进去）。红色虚线是容量上限。</p>
+    </section>
+    <section class="panel">
+      <h2>枚举全部合法出栈序列</h2>
+      <div class="form" style="margin-top:0">
+        <label>只看这样的（? 表示任意，空 = 全部）<input id="pat1" class="w16" type="text" spellcheck="false" autocomplete="off" placeholder="例如 d 或 ? 3"></label>
+        <button class="btn primary" id="enum1" type="button">枚举</button>
+      </div>
+      <div class="err" id="eerr1" role="alert"></div>
+      <div id="enumOut"></div>
+    </section>
+  </div>
+
+  <!-- ================= TAB 2 ================= -->
+  <div class="tabpane hidden" id="t2">
+    <section class="panel">
+      <h2>五句话</h2>
+      <ol class="rules">
+        <li><b>两个栈</b>：结果栈 result、临时栈 temp（讲义叫法）。<b>操作数直接入 result</b>。</li>
+        <li><b>“(” 直接入 temp</b>；<b>“)”</b> 把 temp 里 “(” 上面的运算符依次弹出入 result，直到遇到 “(”，括号不进 result。</li>
+        <li><b>+ − * /</b>：只要 temp 栈顶是运算符并且<b>优先级大于等于</b>当前运算符，就弹出入 result，一直比下去；停下后当前运算符入 temp。</li>
+        <li>扫完把 temp 剩下的依次弹出入 result，<b>result 从栈底读到栈顶</b>就是后缀表达式。</li>
+        <li><b>后缀求值</b>：数入栈；遇到运算符连弹两个，<b>先弹出的是 a，后弹出的是 b，算 b op a</b> 再入栈。<b>中缀直接求值</b>：照转后缀的做法走，但每从 temp 弹出一个运算符，就从 result 弹两个数算 b op a 再压回。</li>
+      </ol>
+      <p class="warn">讲义文字（第三章 p62、强化第一讲 p51）写的是“栈顶优先级更高才弹出”，但讲义所有动画帧同级也弹出，这里按大于等于做。只弹更高的会算错：(2+3)*2−3*(8/4)+5−2 会变成 23+2*384/*52−+−，值成了 1，正确是 7。</p>
+    </section>
+    <section class="panel">
+      <div class="chips" id="pre2">例题：</div>
+      <div class="form">
+        <label>表达式<input id="ex2" class="w16" type="text" spellcheck="false" autocomplete="off" style="width:20em"></label>
+        <label>它是<select id="kind2"><option value="in">中缀</option><option value="post">后缀</option></select></label>
+        <button class="btn primary" id="go2" type="button">开始</button>
+      </div>
+      <p class="legend">中缀可用 + − * / 和括号，操作数是整数或单个字母（字母只能化简不能算值）。后缀连写时每个字符一项，有多位数就用空格隔开。</p>
+      <div class="err" id="err2" role="alert"></div>
+      <div class="q" id="q2"></div>
+    </section>
+    <section class="panel" id="sec2a">
+      <h2>中缀转后缀：result 和 temp</h2>
+      <div class="ctrl"><button class="btn" data-a="reset" type="button">从头</button><button class="btn" data-a="prev" type="button">上一步</button><button class="btn primary" data-a="next" type="button">下一步</button><button class="btn" data-a="all" type="button">跑到底</button><span class="muted" data-r="prog"></span></div>
+      <div class="guess hidden" data-r="gbox"></div>
+      <div class="note" data-r="note"></div>
+      <div class="viz"><div data-r="stack"></div><div class="strips" data-r="strips"></div></div>
+      <div class="stats" data-r="stats"></div>
+      <p class="legend">上面一行是表达式，橙色是正在扫的字符。栈里橙色是这一步新进来的；虚线框是 “(”。</p>
+    </section>
+    <section class="panel" id="sec2b">
+      <h2>后缀求值：一个栈 OP</h2>
+      <div class="ctrl"><button class="btn" data-a="reset" type="button">从头</button><button class="btn" data-a="prev" type="button">上一步</button><button class="btn primary" data-a="next" type="button">下一步</button><button class="btn" data-a="all" type="button">跑到底</button><span class="muted" data-r="prog"></span></div>
+      <div class="guess hidden" data-r="gbox"></div>
+      <div class="note" data-r="note"></div>
+      <div class="viz"><div data-r="stack"></div><div class="strips" data-r="strips"></div></div>
+    </section>
+    <section class="panel" id="sec2c">
+      <h2>中缀直接求值：转后缀时边弹边算（第三章 p72–73）</h2>
+      <div class="ctrl"><button class="btn" data-a="reset" type="button">从头</button><button class="btn" data-a="prev" type="button">上一步</button><button class="btn primary" data-a="next" type="button">下一步</button><button class="btn" data-a="all" type="button">跑到底</button><span class="muted" data-r="prog"></span></div>
+      <div class="guess hidden" data-r="gbox"></div>
+      <div class="note" data-r="note"></div>
+      <div class="viz"><div data-r="stack"></div><div class="strips" data-r="strips"></div></div>
+    </section>
+  </div>
+
+  <!-- ================= TAB 3 ================= -->
+  <div class="tabpane hidden" id="t3">
+    <section class="panel">
+      <h2>五句话</h2>
+      <ol class="rules">
+        <li><b>取模成环</b>：数组 0 到 M − 1，指针后移一律写 <b>(p + 1) % M</b>，走到 M − 1 后回到 0。</li>
+        <li><b>讲义默认约定</b>：front 指队头元素，rear 指队尾元素的<b>下一个位置</b>，初值 front = rear = 0；入队先存再移 rear，出队先取再移 front；<b>队空 front == rear</b>。</li>
+        <li><b>区分队空和队满三种办法</b>：① <b>牺牲一个单元</b>，队满是 (rear + 1) % M == front，最多存 M − 1 个；② <b>增设 size</b>，空 size == 0，满 size == M；③ <b>增设 tag</b>，front == rear 时 tag = 0 是空、tag = 1 是满（入队置 1，出队置 0）。</li>
+        <li><b>长度 = (rear − front + M) % M</b>（rear 指队尾下一位，或 front 指队头前一位时都是这个）。</li>
+        <li><b>约定会变，先读题干</b>：rear 指向队尾元素时，入队先移 rear 再存，要让第一个元素进 A[0]，rear 初值就是 <b>M − 1</b>；这时长度是 (rear − front + 1 + M) % M。</li>
+      </ol>
+    </section>
+    <section class="panel">
+      <div class="chips" id="pre3">例题：</div>
+      <div class="form">
+        <label>格数 M<input id="m3" class="w4" type="text" inputmode="numeric" autocomplete="off" value="8"></label>
+        <label>指针约定<select id="conv3">
+          <option value="A">front 指队头，rear 指队尾下一位</option>
+          <option value="B">front 指队头，rear 指队尾元素</option>
+          <option value="C">front 指队头前一位，rear 指队尾元素</option>
+        </select></label>
+        <label>区分空满<select id="sch3">
+          <option value="sac">牺牲一个单元</option>
+          <option value="size">增设 size</option>
+          <option value="tag">增设 tag</option>
+        </select></label>
+      </div>
+      <div class="dial">
+        <span>初始 front <button class="btn sm" data-d="f-" type="button">−</button><span class="v" id="fv">0</span><button class="btn sm" data-d="f+" type="button">+</button></span>
+        <span>初始 rear <button class="btn sm" data-d="r-" type="button">−</button><span class="v" id="rv">0</span><button class="btn sm" data-d="r+" type="button">+</button></span>
+        <span id="amb3">指针显示“空”还是“满”时算 <select id="full3" style="font:13px var(--sans)"><option value="0">空</option><option value="1">满</option></select></span>
+        <button class="btn sm" id="init3" type="button">按约定的初值</button>
+      </div>
+      <div class="form">
+        <label>操作（字母 = 入队这个元素，− = 出队）<input id="ops3" class="w16" type="text" spellcheck="false" autocomplete="off" style="width:20em"></label>
+        <button class="btn primary" id="go3" type="button">开始</button>
+        <button class="btn" id="enq3" type="button">再入队一个</button>
+        <button class="btn" id="deq3" type="button">再出队一个</button>
+      </div>
+      <div class="err" id="err3" role="alert"></div>
+      <div class="q" id="q3"></div>
+    </section>
+    <section class="panel" id="sec3">
+      <h2>环形图和数组</h2>
+      <div class="ctrl"><button class="btn" data-a="reset" type="button">从头</button><button class="btn" data-a="prev" type="button">上一步</button><button class="btn primary" data-a="next" type="button">下一步</button><button class="btn" data-a="all" type="button">跑到底</button><span class="muted" data-r="prog"></span></div>
+      <div class="guess hidden" data-r="gbox"></div>
+      <div class="note" data-r="note"></div>
+      <div class="viz" style="align-items:flex-start"><div data-r="ring" style="flex:0 1 300px"></div><div class="strips" style="flex:1 1 260px"><div class="strip" data-r="arr"></div><div class="formula" data-r="formula"></div></div></div>
+      <p class="legend">绿色格是队列里的元素，橙色是这一步刚入队或刚出队的位置，红色是入队失败（满）或出队失败（空）。蓝色箭头 front，红色箭头 rear。牺牲单元法下队满时空着的那一格画成虚线。</p>
+    </section>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const GM=()=>$('guessMode').checked;
+const norm=s=>String(s).replace(/[\s,，、]/g,'').toLowerCase();
+const fmtNum=v=>Number.isInteger(v)?String(v):String(+v.toFixed(4));
+const LET='abcdefghijklmnopqrstuvwxyz';
+
+/* ---------- generic stepper (same idea as the KMP page) ---------- */
+function Stepper(id,build,draw){const el=$(id);const r=n=>el.querySelector(`[data-r="${n}"]`);let frames=[],pos=0,done=new Set();
+  const pending=()=>{const f=frames[pos];return GM()&&f&&f.ask&&!done.has(pos)};
+  function render(msg){const f=frames[pos];if(!f)return;const pd=pending();draw(frames,pos,pd,r);
+    r('note').innerHTML=msg||(pd?f.ask.q:f.txt);
+    r('prog').textContent=`第 ${pos} / ${frames.length-1} 步`;
+    el.querySelector('[data-a="prev"]').disabled=pos===0;
+    el.querySelector('[data-a="next"]').disabled=pos===frames.length-1&&!pd;
+    const g=r('gbox');g.classList.toggle('hidden',!pd);if(!pd)g.innerHTML='';
+    if(pd){const a=f.ask;g.innerHTML=`<span>${a.l||''}</span>`+(a.choices?a.choices.map(c=>`<button type="button" class="btn" data-c="${esc(c)}">${esc(c)}</button>`).join('')
+      :`<input type="text" data-r="gin" aria-label="你的答案" autocomplete="off"${a.num?' inputmode="decimal"':''}><button class="btn" type="button" data-c="">对答案</button>`)}}
+  function answer(v){const f=frames[pos],a=f.ask;v=String(v).trim();if(v==='')return;
+    const ok=a.num?Math.abs(+v.replace('−','-')-a.a)<1e-9:norm(v)===norm(a.a);done.add(pos);
+    const h=ok?'':((a.hint&&a.hint(v))||'');
+    render((ok?'<span class="ok">对了。</span> ':`<span class="bad">你${a.choices?'选':'填'}的是 ${esc(v)}，应为 ${esc(a.show??a.a)}。</span>${h} `)+f.txt)}
+  r('gbox').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;const f=frames[pos];answer(f.ask.choices?b.dataset.c:(r('gin')||{}).value||'')});
+  r('gbox').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('input'))answer(e.target.value)});
+  const focus=()=>{const i=r('gbox').querySelector('input,button');if(i)i.focus({preventScroll:true})};
+  el.querySelector('[data-a="next"]').onclick=()=>{if(pending()){focus();return}if(pos<frames.length-1){pos++;render();if(pending())focus()}};
+  el.querySelector('[data-a="prev"]').onclick=()=>{if(pos>0){pos--;render()}};
+  el.querySelector('[data-a="reset"]').onclick=()=>{pos=0;done=new Set();render()};
+  el.querySelector('[data-a="all"]').onclick=()=>{frames.forEach((_,i)=>done.add(i));pos=frames.length-1;render()};
+  return {load(f){frames=f||build();pos=0;done=new Set();render()},render:()=>render(),end(){frames.forEach((_,i)=>done.add(i));pos=frames.length-1;render()},get frames(){return frames}}}
+
+/* ---------- vertical stacks drawn as wells ---------- */
+function stackSVG(cols,rows){const cw=62,ch=26,gap=34,pad=12,top=14;const yb=top+rows*ch;const H=yb+26;const W=pad*2+cols.length*cw+(cols.length-1)*gap+14;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="${cols.map(c=>c.name).join('、')}">`;
+  cols.forEach((c,ci)=>{const x=pad+ci*(cw+gap);
+    if(c.cap&&c.cap<=rows){const yc=yb-c.cap*ch;s+=`<line class="s-cap" x1="${x-6}" x2="${x+cw+6}" y1="${yc}" y2="${yc}"/><text class="s-capt" x="${x+cw/2}" y="${yc-3}" text-anchor="middle">容量 ${c.cap}</text>`}
+    c.items.forEach((it,k)=>{const y=yb-(k+1)*ch;s+=`<rect class="s-cell ${it.c||''}" x="${x+2}" y="${y+2}" width="${cw-4}" height="${ch-4}" rx="3"/><text class="s-txt ${it.c==='cur'||it.c==='bad'?it.c:''}" x="${x+cw/2}" y="${y+ch/2}">${esc(it.t)}</text>`});
+    if(c.items.length){const y=yb-c.items.length*ch+ch/2;s+=`<text class="s-top" x="${x+cw+5}" y="${y+4}">顶</text>`}
+    s+=`<path class="s-well" d="M${x-2} ${top} V${yb+2} H${x+cw+2} V${top}"/><text class="s-name" x="${x+cw/2}" y="${yb+18}">${esc(c.name)}</text>`});
+  return s+'</svg>'}
+const cellRow=(lab,items)=>`<div class="strip"><div class="row"><span class="lab">${lab}</span>${items.length?items.map(it=>`<div class="cell ${it.c||''}">${esc(it.t)}</div>`).join(''):'<span class="legend" style="margin:0">（空）</span>'}</div></div>`;
+
+/* ================= TAB 1: stack permutations ================= */
+const PRE1=[
+ {t:'三p18：3 个元素几种',inp:'abc',out:'cab',pat:'',q:'【例题】3 个不同的元素依次进栈，能得到（ ）种不同的出栈序列。A. 4　B. 5　C. 6　D. 7（第三章 p18）',a:'B。abc、acb、bac、bca、cba 共 5 种，6 种排列里只有 cab 不行：c 先出时 a 还压在 b 下面。卡特兰数 C(6,3)/4 = 20/4 = 5。下面模拟的就是 cab 卡在哪一步。'},
+ {t:'三p29 / 2013 统考：P2 = 3',inp:'1 2 3 4 5 6',out:'2 3 1 4 5 6',pat:'? 3',q:'【例题】若一个栈的输入序列是 1, 2, 3, …, n，输出序列是 P1, P2, P3, …, Pn，若 P2 = 3，则 P3 可能的取值个数为（ ）。A. n − 3　B. n − 2　C. n − 1　D. 无法确定（第三章 p29，即 2013 统考真题）这里取 n = 6 演示，枚举里筛“第 2 个是 3”。',a:'C，n − 1。P1 可以是 1、2 或 4（4 时 3 已在栈里），对应 P3 可取 2、1，以及 4 之后的任何数；合起来除了 3 自己都能取到。n = 6 时 P3 ∈ {1, 2, 4, 5, 6}，5 个 = n − 1。'},
+ {t:'强化p48：容量 3',inp:'12345',out:'32154',cap:3,pat:'',opts:[['A','43215'],['B','15432'],['C','54321'],['D','32154']],q:'【例题】一个最多容纳 3 个元素的栈，入栈顺序为 12345，可能的出栈顺序为？A. 43215　B. 15432　C. 54321　D. 32154（强化第一讲 p48）',a:'D。32154 栈里最多 3 个。A 要 4 先出，1234 得同时在栈里（4 个）；B 要 5 先出前 2345 同时在栈里（4 个）；C 要 5 个。点下面的选项按钮逐个代入看卡在哪。'},
+ {t:'2009 统考：容量至少',inp:'abcdefg',out:'bdcfeag',pat:'',q:'【2009 统考真题】设栈 S 和队列 Q 的初始状态均为空，元素 abcdefg 依次入栈 S。若每个元素出栈后立即进入队列 Q，且 7 个元素出队的顺序是 bdcfeag，则栈 S 的容量至少是（ ）。A. 1　B. 2　C. 3　D. 4',a:'C。队列不改顺序，出栈序列就是 bdcfeag。模拟时栈里最多同时 3 个（a c d，或 a e f），容量至少 3。'},
+ {t:'2010 统考：不许连出 3 次',inp:'abcdef',out:'afedcb',k:2,pat:'',opts:[['A','dcebfa'],['B','cbdaef'],['C','bcaefd'],['D','afedcb']],q:'【2010 统考真题】若元素 a, b, c, d, e, f 依次入栈，允许入栈、出栈操作交替进行，但不允许连续 3 次进行出栈操作，不可能得到的出栈序列是（ ）。A. dcebfa　B. cbdaef　C. bcaefd　D. afedcb',a:'D。afedcb 要先把 bcdef 全压进去，再连续出栈 f e d c b 五次。其余三个最多连续出 2 次。'},
+ {t:'2011 统考：以 d 开头',inp:'abcde',out:'dceba',pat:'d',q:'【2011 统考真题】元素 a, b, c, d, e 依次进入初始为空的栈中，若元素入栈后可停留、可出栈，直到所有元素都出栈，则在所有可能的出栈序列中，以元素 d 开头的序列个数是（ ）。A. 3　B. 4　C. 5　D. 6',a:'B。d 先出时 a b c 压在栈里，只能按 c b a 出，e 可以插在 d 后面 4 个空位里任一个：decba、dceba、dcbea、dcbae。'},
+ {t:'2020 统考：按操作走',inp:'abcde',ops:'Push Push Pop Push Pop Push Push Pop',pat:'',q:'【2020 统考真题】对空栈 S 进行 Push 和 Pop 操作，入栈序列为 a, b, c, d, e，经过 Push、Push、Pop、Push、Pop、Push、Push、Pop 操作后得到的出栈序列是（ ）。A. b, a, c　B. b, a, e　C. b, c, a　D. b, c, e',a:'D。Push a、Push b、Pop 出 b、Push c、Pop 出 c、Push d、Push e、Pop 出 e：b, c, e。'}
+];
+const P1N='【2022 统考】也考过概念：知道入栈序列就能用这种模拟判断任何出栈序列合不合法，反过来也能判断；每个元素进了就出，两序列相同；全进再全出，两序列互为倒序。';
+let M1=null;
+function parseList(s){s=s.trim();if(!s)return[];return /[\s,，、]/.test(s)?s.split(/[\s,，、]+/).filter(Boolean):[...s]}
+function parseOps(s){const t=s.replace(/push|pop|[io入出]/gi,'').replace(/[\s,，、]/g,'');if(t)throw '操作只能写 Push/Pop、I/O 或 入/出。';
+  return (s.match(/push|pop|[io入出]/gi)||[]).map(x=>/^(push|i|入)$/i.test(x)?'push':'pop')}
+function posInt(s,name){s=s.trim();if(!s)return 0;if(!/^\d+$/.test(s)||+s<1)throw `${name}要填正整数，或者留空。`;return +s}
+function askAct(ans,t,top,extra){const topS=top===undefined?null:top;const topD=topS===null?'现在栈是空的':`现在栈顶是 <b>${esc(topS)}</b>`;return {l:'下一步：',choices:['入栈','出栈','走不下去了'],a:ans,
+  q:`下一个要出的是 <b>${esc(t)}</b>，${topD}${extra||''}。下一步该做什么？`,
+  hint:v=>ans==='入栈'&&v==='出栈'?`${topS===null?'栈是空的，没东西可出':'栈顶是 '+esc(topS)+'，不是 '+esc(t)}；${esc(t)} 还没进栈，要先压进来。`:ans==='出栈'&&v==='入栈'?`${esc(t)} 就在栈顶，该出了，再压东西会把它埋住。`:ans==='走不下去了'?'':`还能走：${ans==='入栈'?esc(t)+' 还没进栈，压进来就行':esc(t)+' 就在栈顶'}。`}}
+function sim1(){const {inp,out,ops,cap,k}=M1;const F=[];let i=0,st=[],o=[],run=0,maxd=0;
+  const snap=x=>Object.assign({i,st:[...st],o:[...o],maxd},x);
+  if(ops){F.push(snap({txt:`入栈序列 ${inp.join(' ')}，按给的 ${ops.length} 个操作一个一个做。${cap?`栈容量 ${cap}。`:''}`}));
+    for(let s=0;s<ops.length;s++){const nm=`第 ${s+1} 个操作 ${ops[s]==='push'?'Push':'Pop'}`;
+      if(ops[s]==='push'){if(i>=inp.length){F.push(snap({fail:true,txt:`${nm}：入栈序列已经全进去了，没有可压的元素，操作序列不合法。`}));return F}
+        if(cap&&st.length>=cap){F.push(snap({fail:true,full:true,txt:`${nm}：栈里已经 ${cap} 个，满了，上溢。`}));return F}
+        const x=inp[i++];st.push(x);maxd=Math.max(maxd,st.length);F.push(snap({act:'push',el:x,txt:`${nm}：${esc(x)} 入栈。`}))}
+      else{if(!st.length){F.push(snap({fail:true,txt:`${nm}：栈是空的，下溢，操作序列不合法。`}));return F}
+        const top=st[st.length-1];st.pop();o.push(top);F.push(snap({act:'pop',el:top,txt:`${nm}：栈顶 ${esc(top)} 出栈。`,ask:{l:'出栈的是',q:`${nm}：这次出栈的是哪个元素？`,a:top,hint:v=>st.includes(v)?`${esc(v)} 在栈里，但不在栈顶，出栈只能出栈顶。`:''}}))}}
+    F.push(snap({end:true,txt:`操作做完。出栈序列：<b>${o.map(esc).join(', ')}</b>。栈里最多同时 ${maxd} 个元素${st.length?`，还有 ${st.map(esc).join(' ')} 留在栈里`:''}。`}));return F}
+  F.push(snap({txt:`入栈序列 ${inp.map(esc).join(' ')}，候选出栈序列 ${out.map(esc).join(' ')}。${cap?`栈容量 ${cap}。`:''}${k?`不允许连续 ${k+1} 次出栈。`:''}按要出的元素一个一个看。`}));
+  for(let q=0;q<out.length;q++){const t=out[q];
+    for(;;){const top=st[st.length-1];
+      if(top===t){if(k&&run>=k){F.push(snap({fail:true,tgt:q,buried:st.length-1,txt:`要出 ${esc(t)}，它在栈顶，但前面已经连续出栈 ${run} 次，题目不允许连续 ${k+1} 次出栈。<b class="red">卡在这一步，序列不合法。</b>`,ask:askAct('走不下去了',t,top,`，已经连续出栈 ${run} 次`)}));return F}
+        st.pop();o.push(t);run++;F.push(snap({act:'pop',el:t,tgt:q,txt:`要出 ${esc(t)}：它就在栈顶，出栈。`,ask:askAct('出栈',t,top)}));break}
+      const p=st.indexOf(t);
+      if(p>=0){F.push(snap({fail:true,tgt:q,buried:p,txt:`要出 ${esc(t)}：它已经在栈里，却被压在 ${st.slice(p+1).reverse().map(esc).join('、')} 下面（栈顶是 ${esc(top)}）。栈只能从顶上出，<b class="red">卡在这一步，序列不合法。</b>`,ask:askAct('走不下去了',t,top)}));return F}
+      if(cap&&st.length>=cap){F.push(snap({fail:true,full:true,tgt:q,txt:`要出 ${esc(t)}，还得把 ${esc(inp[i])} 压进来，可栈里已经 ${cap} 个，满了。<b class="red">超出容量，序列不合法。</b>`,ask:askAct('走不下去了',t,top,`，栈里已经 ${cap} 个（容量 ${cap}）`)}));return F}
+      const x=inp[i++];st.push(x);run=0;maxd=Math.max(maxd,st.length);
+      F.push(snap({act:'push',el:x,tgt:q,txt:`要出 ${esc(t)}：它还没进栈，把 ${esc(x)} 入栈${x===t?'（就是它）':''}。栈里现在 ${st.length} 个。`,ask:askAct('入栈',t,top)}))}}
+  F.push(snap({end:true,ok:true,txt:out.length===inp.length?`全部出完，<b>序列合法</b>。栈里最多同时 ${maxd} 个元素，所以容量至少要 ${maxd}。`:`给的 ${out.length} 个都能按顺序出来（序列只给了前 ${out.length} 个）。栈里最多同时 ${maxd} 个。`}));return F}
+const S1=Stepper('sec1',sim1,(F,pos,pd,r)=>{const f=F[pos];const s=pd&&pos>0?F[pos-1]:f;const {inp,out,ops,cap}=M1;
+  const items=s.st.map((t,k)=>({t,c:!pd&&f.fail&&k===f.buried?'bad':(!pd&&f.act==='push'&&k===s.st.length-1)?'cur':''}));
+  const rows=Math.max(4,cap||0,...F.map(x=>x.st.length))+(F.some(x=>x.full)?1:0);
+  r('stack').innerHTML=stackSVG([{name:'栈',items,cap}],rows);
+  let h=cellRow('待入栈',inp.map((t,k)=>({t,c:k<s.i?'ghost':(!pd&&f.full&&k===s.i?'bad':'')})));
+  if(!ops)h+=cellRow('要出的',out.map((t,k)=>({t,c:k<s.o.length?'ok':k===f.tgt?(f.fail&&!pd?'bad':'cmp'):''})));
+  h+=cellRow('已出栈',s.o.map((t,k)=>({t,c:!pd&&f.act==='pop'&&k===s.o.length-1?'cmp':'ok'})));
+  r('strips').innerHTML=h;
+  r('stats').innerHTML=`<span>栈里 <b>${s.st.length}</b> 个</span><span>最多同时 <b>${s.maxd}</b> 个</span><span>已出 <b>${s.o.length}</b> 个</span>${f.end?`<span class="${f.ok||ops?'ok':'bad'}">${ops?'完成':f.ok?'合法':'不合法'}</span>`:f.fail&&!pd?'<span class="bad">不合法</span>':''}`});
+function load1(){$('err1').textContent='';try{const inp=parseList($('in1').value);if(inp.length<1||inp.length>12)throw '入栈序列要 1～12 个元素。';
+    if(new Set(inp).size!==inp.length)throw '入栈序列里有重复元素，出栈序列会分不清是哪一个，请换成不同的元素。';
+    const cap=posInt($('cap1').value,'栈容量'),k=posInt($('k1').value,'连续出栈上限');let out=null,ops=null;
+    if($('mode1').value==='ops'){ops=parseOps($('out1').value);if(!ops.length)throw '请填操作序列，例如 Push Push Pop。'}
+    else{out=parseList($('out1').value);if(!out.length)throw '请填候选出栈序列。';const bad=out.filter(x=>!inp.includes(x));if(bad.length)throw `出栈序列里的 ${bad.join('、')} 不在入栈序列里。`;if(new Set(out).size!==out.length)throw '出栈序列里有重复元素。';
+      if(inp.length>1&&inp.every(x=>x.length===1)&&out.length===1&&out[0].length>1)throw '出栈序列写法和入栈序列不一致。'}
+    M1={inp,out,ops,cap,k};S1.load();enum1(true)}catch(e){$('err1').textContent=typeof e==='string'?e:'输入有误：'+e.message}}
+function enum1(silent){$('eerr1').textContent='';if(!M1)return;const {inp,cap,k}=M1;const n=inp.length;
+  if(n>8){$('enumOut').innerHTML='<p class="legend">枚举只做 8 个元素以内（8 个已有 1430 种）。</p>';return}
+  let pat=parseList($('pat1').value);if(pat.length>n){$('eerr1').textContent='筛选条件比序列还长。';pat=[]}
+  const bad=pat.filter(x=>x!=='?'&&!inp.includes(x));if(bad.length){$('eerr1').textContent=`筛选里的 ${bad.join('、')} 不在入栈序列里。`;pat=[]}
+  const all=[];(function dfs(i,st,o,run){if(o.length===n){all.push(o);return}
+    if(i<n&&(!cap||st.length<cap))dfs(i+1,[...st,inp[i]],o,0);
+    if(st.length&&(!k||run<k))dfs(i,st.slice(0,-1),[...o,st[st.length-1]],run+1)})(0,[],[],0);
+  const hit=all.filter(o=>pat.every((p,j)=>p==='?'||o[j]===p));
+  const C=(()=>{let c=1;for(let j=0;j<n;j++)c=c*(2*n-j)/(j+1);return Math.round(c)})();
+  const cat=Math.round(C/(n+1));const cur=M1.out?M1.out.join('|'):'';
+  let h=`<div class="stats"><span>n = <b>${n}</b></span><span>卡特兰数 C(${2*n}, ${n}) / ${n+1} = ${C} / ${n+1} = <b>${cat}</b></span><span>${cap||k?'加上限制后合法的':'合法出栈序列'} <b>${all.length}</b> 种</span>${pat.length?`<span>符合筛选的 <b>${hit.length}</b> 种</span>`:''}</div>`;
+  if(cap||k)h+=`<p class="legend">有${cap?`容量 ${cap}`:''}${cap&&k?'、':''}${k?`最多连续出栈 ${k} 次`:''}的限制，所以比卡特兰数少。</p>`;
+  if(pat.length&&pat.length<n&&hit.length){const j=pat.length;const vals=[...new Set(hit.map(o=>o[j]))].sort((a,b)=>inp.indexOf(a)-inp.indexOf(b));h+=`<p style="margin:6px 0 0;font-size:14px">这些序列里第 ${j+1} 个位置可能是：<b class="grn">${vals.map(esc).join('、')}</b>，共 <b class="red">${vals.length}</b> 个。</p>`}
+  const show=hit.slice(0,300);const sep=inp.some(x=>x.length>1)?' ':'';
+  h+=`<div class="seqs">${show.map(o=>`<span class="${o.join('|')===cur?'hit':''}">${o.map(esc).join(sep)}</span>`).join('')}</div>${hit.length>300?'<p class="legend">只列前 300 个。</p>':''}`;
+  h+=M1.out&&M1.out.length===n?`<p class="legend">绿框是上面正在模拟的候选序列${all.some(o=>o.join('|')===cur)?'':'（它不合法，所以不在表里）'}。</p>`:'';
+  $('enumOut').innerHTML=h}
+$('mode1').onchange=()=>{$('lab1').firstChild.textContent=$('mode1').value==='ops'?'操作序列':'候选出栈序列'};
+$('go1').onclick=()=>{press('pre1',null);$('q1').innerHTML='自己输入的序列。';load1()};
+['in1','out1','cap1','k1'].forEach(id=>$(id).onkeydown=e=>{if(e.key==='Enter')$('go1').click()});
+$('enum1').onclick=()=>enum1();$('pat1').onkeydown=e=>{if(e.key==='Enter')enum1()};
+
+/* ================= TAB 2: expressions ================= */
+const PRE2=[
+ {t:'三p62：a*(b+c)',ex:'a*(b+c)',kind:'in',q:'讲义第三章 p62（强化第一讲 p51 同）：如何将 a*(b+c) 转换为逆波兰表达式（后缀表达式）？',a:'abc+*。字母没法算值，求值部分只化简成 a*(b+c)。'},
+ {t:'三p63–73：(2+3−1)*2−3*(8/4)',ex:'(2+3-1)*2-3*(8/4)',kind:'in',q:'讲义第三章 p63–69：如何将 (2+3-1)*2-3*(8/4) 转换为逆波兰表达式？p70–71 计算后缀表达式 2 3+1-2*3 8 4/*- 的值；p72–73 利用栈直接计算 (2+3-1)*2-3*(8/4) 的值。',a:'后缀 23+1-2*384/*-，值 2。注意扫到 “−”（在 2+3 后面）时，栈顶 + 和 − 同级，讲义动画里 + 被弹出了（p65）。'},
+ {t:'强化p52–61：(2+3)*2−3*(8/4)+5−2',ex:'(2+3)*2-3*(8/4)+5-2',kind:'in',q:'强化第一讲 p52–59：如何将 (2+3)*2-3*(8/4)+5-2 转换为逆波兰表达式？p60–61 计算后缀表达式 23+2*384/*-5+2- 的值。',a:'后缀 23+2*384/*-5+2-（讲义 p59 写的就是这个），值 7（讲义没写出值：10 − 6 + 5 − 2 = 7）。扫到 “+”（5 前面）时 temp 是 − *，* 更高、− 同级，两个都弹（p57–58）。'},
+ {t:'2012 统考：栈里最多几个',ex:'a+b-a*((c+d)/e-f)+g',kind:'in',q:'【2012 统考真题】已知操作符包括 “+” “−” “*” “/” “(” 和 “)”。将中缀表达式 a+b−a*((c+d)/e−f)+g 转换为等价的后缀表达式 ab+acd+e/f−*−g+ 时，用栈来存放暂时还不能确定运算次序的操作符。栈初始时为空，转换过程中同时保存在栈中的操作符的最大个数是（ ）。A. 5　B. 7　C. 8　D. 11',a:'A。扫到 c 后面的 + 时，temp 从底到顶是 − * ( ( +，共 5 个（这题把括号也算操作符）。看下面的“temp 最多同时”。'},
+ {t:'2014 统考：扫到 f 时',ex:'a/b+(c*d-e*f)/g',kind:'in',q:'【2014 统考真题】假设栈初始为空，将中缀表达式 a/b+(c*d−e*f)/g 转换为等价的后缀表达式的过程中，当扫描到 f 时，栈中的元素依次是（ ）。A. +(*−　B. +(−*　C. /+(*−*　D. /+−*',a:'B。一步步走到扫 f 那一步，看 temp 从底到顶：+ ( − *。/ 在 + 来时就被弹了（同级以上都弹），c*d 的 * 在 − 来时被弹了。'},
+ {t:'2024 统考：选后缀',ex:'x+y*(z-u)/v',kind:'in',q:'【2024 统考真题】与表达式 x+y*(z−u)/v 等价的后缀表达式是（ ）。A. xyzu−*v/+　B. xyzu−v/*+　C. +x/*y−zuv　D. +x*y/−zuv',a:'A。扫到 / 时栈顶 * 和 / 同级，* 先弹出，所以是 …u−* 再 v/。'},
+ {t:'2018 统考：b op a',ex:'5 8 3 2 + - *',kind:'post',q:'【2018 统考真题】若栈 S1 中保存整数，栈 S2 中保存运算符，函数 F() 依次执行下述各步操作：1）从 S1 中依次弹出两个操作数 a 和 b；2）从 S2 中弹出一个运算符 op；3）执行相应的运算 b op a；4）将运算结果压入 S1 中。假定 S1 中的操作数依次是 5, 8, 3, 2（2 在栈顶），S2 中的运算符依次是 *、−、+（+ 在栈顶）。调用 3 次 F() 后，S1 栈顶保存的值是（ ）。A. −15　B. 15　C. −20　D. 20',a:'B。三次 F() 依次用 +、−、*，等价于后缀 5 8 3 2 + − *：3+2 = 5，8−5 = 3，5*3 = 15。顺序弄反（a op b）就会算出 −15 之类。'}
+];
+const prec=t=>t==='+'||t==='-'?1:t==='*'||t==='/'?2:0;
+const isOp=t=>'+-*/'.includes(t)&&t.length===1;
+const calc=(b,op,a)=>op==='+'?b+a:op==='-'?b-a:op==='*'?b*a:b/a;
+function tokInfix(s){s=s.replace(/[−—–]/g,'-').replace(/×/g,'*').replace(/÷/g,'/').replace(/（/g,'(').replace(/）/g,')').replace(/\s+/g,'');
+  if(!s)throw '请输入表达式。';const T=[];let i=0;
+  while(i<s.length){const c=s[i];if(/\d/.test(c)){let j=i;while(j<s.length&&/[\d.]/.test(s[j]))j++;T.push({t:s.slice(i,j),k:'num'});i=j}
+    else if(/[a-zA-Z]/.test(c)){T.push({t:c,k:'var'});i++}else if('+-*/()'.includes(c)){T.push({t:c,k:c==='('||c===')'?c:'op'});i++}
+    else throw `不认识的字符 “${c}”。只能用数字、字母、+ − * / 和括号。`}
+  let want='opnd',dep=0;for(const x of T){if(want==='opnd'){if(x.k==='num'||x.k==='var')want='opr';else if(x.k==='(')dep++;else throw `“${x.t}” 前面缺操作数（这里不支持负号）。`}
+    else{if(x.k==='op')want='opnd';else if(x.k===')'){if(--dep<0)throw '右括号多了。'}else throw `“${x.t}” 前面缺运算符。`}}
+  if(want==='opnd')throw '表达式不能以运算符或左括号结尾。';if(dep)throw '左括号没有配对的右括号。';
+  if(T.length>40)throw '表达式太长了（最多 40 项）。';return T}
+function tokPost(s){s=s.replace(/[−—–]/g,'-').replace(/×/g,'*').replace(/÷/g,'/').trim();if(!s)throw '请输入表达式。';
+  const raw=/\s|,/.test(s)?s.split(/[\s,]+/).filter(Boolean):[...s];
+  const T=raw.map(x=>{if(isOp(x))return {t:x,k:'op'};if(/^\d+(\.\d+)?$/.test(x))return {t:x,k:'num'};if(/^[a-zA-Z]$/.test(x))return {t:x,k:'var'};throw `后缀表达式里不认识 “${x}”。`});
+  let d=0;for(const x of T){d+=x.k==='op'?-1:1;if(d<1)throw `运算符 ${x.t} 前面不够两个操作数。`}if(d!==1)throw `扫完后栈里剩 ${d} 个数，不是合法的后缀表达式（运算符少了）。`;return T}
+const val=tk=>tk.k==='num'?{v:+tk.t,s:tk.t,p:3}:{v:null,s:tk.t,p:3};
+function combine(b,op,a){const pp=prec(op);const ls=b.p<pp?`(${b.s})`:b.s;const rs=a.p<pp||(a.p===pp&&(op==='-'||op==='/'))?`(${a.s})`:a.s;
+  if(op==='/'&&a.v===0)throw '除数是 0，算不下去。';return {v:a.v!==null&&b.v!==null?calc(b.v,op,a.v):null,s:ls+op+rs,p:pp}}
+const show=x=>x.v!==null?fmtNum(x.v):x.s;
+let EX=null;
+const joinTok=a=>a.every(x=>x.length===1)?a.join(''):a.join(' ');
+function strictPops(tmp,t){let c=0;for(let j=tmp.length-1;j>=0&&isOp(tmp[j])&&prec(tmp[j])>prec(t);j--)c++;return c}
+function convFrames(){const T=EX.T;const F=[];let res=[],tmp=[],mx=0,mxo=0;const upd=()=>{mx=Math.max(mx,tmp.length);mxo=Math.max(mxo,tmp.filter(isOp).length)};
+  const snap=x=>Object.assign({res:[...res],tmp:[...tmp],mx,mxo},x);
+  F.push(snap({ti:-1,txt:`从左往右扫 ${esc(EX.src)}，result 和 temp 都是空栈。`}));
+  T.forEach((tk,ti)=>{const t=tk.t;
+    if(tk.k==='num'||tk.k==='var'){res.push(t);F.push(snap({ti,nr:1,txt:`扫到操作数 ${esc(t)}：直接入 result。`}))}
+    else if(t==='('){tmp.push(t);upd();F.push(snap({ti,nt:1,txt:'扫到 “(”：直接入 temp。'}))}
+    else if(t===')'){const before=tmp.join(' ');const pp=[];while(tmp[tmp.length-1]!=='('){pp.push(tmp.pop());res.push(pp[pp.length-1])}tmp.pop();
+      F.push(snap({ti,nr:pp.length,txt:`扫到 “)”：把 temp 里 “(” 上面的 ${pp.join('、')||'（没有运算符）'} 依次弹出入 result，再扔掉 “(”，括号不进 result。`,
+        ask:{num:true,l:'弹出几个运算符？',q:`扫到 “)”，temp 从底到顶是 <b>${esc(before)}</b>。要弹出几个运算符到 result？`,a:pp.length,hint:()=>'弹到 “(” 为止，“(” 自己扔掉不算。'}}))}
+    else{const before=tmp.join(' ')||'（空）';const sc=strictPops(tmp,t);const pp=[],why=[];
+      while(tmp.length&&isOp(tmp[tmp.length-1])&&prec(tmp[tmp.length-1])>=prec(t)){const x=tmp.pop();pp.push(x);res.push(x);why.push(`${x}（${prec(x)>prec(t)?'比 '+t+' 高':'和 '+t+' 同级'}）`)}
+      const stop=tmp.length?(tmp[tmp.length-1]==='('?'栈顶是 “(”，停':`栈顶 ${tmp[tmp.length-1]} 比 ${t} 低，停`):'temp 空了，停';tmp.push(t);upd();
+      F.push(snap({ti,nr:pp.length,nt:1,txt:`扫到运算符 ${t}：${pp.length?`弹出 ${why.join('、')} 入 result；`:''}${stop}。${t} 入 temp。`,
+        ask:{num:true,l:'从 temp 弹出几个运算符？',q:`扫到 <b>${t}</b>，temp 从底到顶是 <b>${esc(before)}</b>。要从 temp 弹出几个运算符到 result？（不弹填 0）`,a:pp.length,
+          hint:v=>+v===sc&&sc!==pp.length?'同级的也要弹：栈顶优先级大于等于当前运算符就弹（讲义动画就是这样做的）。':+v>pp.length?'遇到 “(” 或比当前低的运算符就停。':''}}))}});
+  if(tmp.length){const pp=[];while(tmp.length){pp.push(tmp.pop());res.push(pp[pp.length-1])}F.push(snap({ti:T.length,nr:pp.length,txt:`扫完了。temp 里剩下的 ${pp.join('、')} 依次弹出入 result。`}))}
+  const post=joinTok(res);EX.post=res.slice();
+  F.push(snap({ti:T.length,end:true,txt:`后缀表达式（result 从栈底读到栈顶）：<b>${esc(post)}</b>。转换中 temp 最多同时有 ${mx} 个元素（含括号），只数运算符最多 ${mxo} 个。`}));return F}
+const S2a=Stepper('sec2a',convFrames,(F,pos,pd,r)=>{const f=F[pos];const s=pd&&pos>0?F[pos-1]:f;
+  const rows=Math.max(4,...F.map(x=>Math.max(x.res.length,x.tmp.length)));
+  const mark=(arr,n)=>arr.map((t,k)=>({t,c:t==='('?'par':(!pd&&k>=arr.length-n?'cur':'')}));
+  r('stack').innerHTML=stackSVG([{name:'result',items:mark(s.res,pd?0:(f.nr||0))},{name:'temp',items:mark(s.tmp,pd?0:(f.nt||0))}],rows);
+  r('strips').innerHTML=cellRow('表达式',EX.T.map((tk,k)=>({t:tk.t,c:k===f.ti?'cmp':k<f.ti?'ok':''})))+cellRow('后缀(读出)',s.res.map(t=>({t,c:'ok'})));
+  r('stats').innerHTML=`<span>temp 现在 <b>${s.tmp.length}</b> 个</span><span>temp 最多同时 <b>${s.mx}</b> 个（含括号）</span><span>运算符最多 <b>${s.mxo}</b> 个</span>`});
+function evalFrames(){const T=EX.kind==='post'?EX.T:EX.post.map(t=>isOp(t)?{t,k:'op'}:/^\d/.test(t)?{t,k:'num'}:{t,k:'var'});const F=[];let st=[];
+  const snap=x=>Object.assign({st:[...st]},x);
+  F.push(snap({ti:-1,txt:`后缀表达式 ${esc(joinTok(T.map(x=>x.t)))}：从左往右扫，数入栈，运算符弹两个算。`,T}));
+  T.forEach((tk,ti)=>{if(tk.k!=='op'){st.push(val(tk));F.push(snap({ti,T,n:1,txt:`扫到 ${esc(tk.t)}：入栈。`}));return}
+    const a=st.pop(),b=st.pop();const c=combine(b,tk.t,a);st.push(c);const num=c.v!==null;
+    const wrong=num&&!(tk.t==='/'&&b.v===0)?calc(a.v,tk.t,b.v):null;
+    F.push(snap({ti,T,n:1,txt:`扫到 ${tk.t}：先弹出 a = ${esc(show(a))}，再弹出 b = ${esc(show(b))}，算 b ${tk.t} a = ${esc(show(b))} ${tk.t} ${esc(show(a))} = <b>${esc(show(c))}</b>，入栈。`,
+      ask:num?{num:true,l:'b op a = ',q:`扫到 <b>${tk.t}</b>：栈顶两个是 ${esc(show(b))}（下）和 ${esc(show(a))}（顶）。弹出后算 b ${tk.t} a，结果是多少？`,a:c.v,show:fmtNum(c.v),hint:v=>wrong!==null&&Math.abs(+v-wrong)<1e-9&&wrong!==c.v?'顺序反了：先弹出的 a 是右边的操作数，算的是 b op a。':''}:undefined}))});
+  const fin=st[0];F.push(snap({ti:T.length,T,end:true,txt:`扫完，栈里只剩一个：<b>${esc(show(fin))}</b>${fin.v!==null?'，就是表达式的值':'（有字母，只能写成式子）'}。`}));return F}
+const S2b=Stepper('sec2b',evalFrames,(F,pos,pd,r)=>{const f=F[pos];const s=pd&&pos>0?F[pos-1]:f;const rows=Math.max(4,...F.map(x=>x.st.length));
+  r('stack').innerHTML=stackSVG([{name:'OP',items:s.st.map((x,k)=>({t:show(x),c:!pd&&f.n&&k===s.st.length-1?'cur':''}))}],rows);
+  r('strips').innerHTML=cellRow('后缀',f.T.map((tk,k)=>({t:tk.t,c:k===f.ti?'cmp':k<f.ti?'ok':''})))});
+function directFrames(){const T=EX.T;const F=[];let res=[],tmp=[];const snap=x=>Object.assign({res:[...res],tmp:[...tmp]},x);
+  F.push(snap({ti:-1,txt:`还是两个栈。这回 result 里放数，每从 temp 弹出一个运算符就当场算：从 result 弹出 a、b，算 b op a 压回。`}));
+  const apply=(ti,why)=>{const op=tmp.pop();const a=res.pop(),b=res.pop();const c=combine(b,op,a);res.push(c);const num=c.v!==null;
+    F.push(snap({ti,nr:1,txt:`${why}弹出 ${op}，从 result 弹出 a = ${esc(show(a))}、b = ${esc(show(b))}，算 ${esc(show(b))} ${op} ${esc(show(a))} = <b>${esc(show(c))}</b> 压回 result。`,
+      ask:num?{num:true,l:'压回的是',q:`${why}弹出 <b>${op}</b>。result 栈顶两个是 ${esc(show(b))}（下）和 ${esc(show(a))}（顶），算完压回的是多少？`,a:c.v,show:fmtNum(c.v),hint:v=>c.v!==calc(a.v,op,b.v)&&Math.abs(+v-calc(a.v,op,b.v))<1e-9?'顺序反了，算的是 b op a。':''}:undefined}))};
+  T.forEach((tk,ti)=>{const t=tk.t;
+    if(tk.k==='num'||tk.k==='var'){res.push(val(tk));F.push(snap({ti,nr:1,txt:`扫到 ${esc(t)}：入 result。`}))}
+    else if(t==='('){tmp.push(t);F.push(snap({ti,nt:1,txt:'扫到 “(”：入 temp。'}))}
+    else if(t===')'){while(tmp[tmp.length-1]!=='(')apply(ti,'扫到 “)”：');tmp.pop();F.push(snap({ti,txt:'“(” 露出来了，扔掉它，括号这一段算完。'}))}
+    else{while(tmp.length&&isOp(tmp[tmp.length-1])&&prec(tmp[tmp.length-1])>=prec(t)){const x=tmp[tmp.length-1];apply(ti,`扫到 ${t}：栈顶 ${x} ${prec(x)>prec(t)?'比它高':'和它同级'}，`)}
+      tmp.push(t);F.push(snap({ti,nt:1,txt:`${t} 入 temp。`}))}});
+  while(tmp.length)apply(T.length,'扫完了，temp 还有运算符：');
+  F.push(snap({ti:T.length,end:true,txt:`result 里只剩 <b>${esc(show(res[0]))}</b>${res[0].v!==null?'，和后缀求值的结果一样':''}。`}));return F}
+const S2c=Stepper('sec2c',directFrames,(F,pos,pd,r)=>{const f=F[pos];const s=pd&&pos>0?F[pos-1]:f;const rows=Math.max(4,...F.map(x=>Math.max(x.res.length,x.tmp.length)));
+  const mk=(arr,n,fn)=>arr.map((x,k)=>({t:fn(x),c:x==='('?'par':(!pd&&k>=arr.length-n?'cur':'')}));
+  r('stack').innerHTML=stackSVG([{name:'result',items:mk(s.res,f.nr||0,show)},{name:'temp',items:mk(s.tmp,f.nt||0,x=>x)}],rows);
+  r('strips').innerHTML=cellRow('表达式',EX.T.map((tk,k)=>({t:tk.t,c:k===f.ti?'cmp':k<f.ti?'ok':''})))});
+function load2(){$('err2').textContent='';try{const src=$('ex2').value.trim();const kind=$('kind2').value;const T=kind==='in'?tokInfix(src):tokPost(src);
+    EX={src,kind,T};
+    $('sec2a').classList.toggle('hidden',kind!=='in');$('sec2c').classList.toggle('hidden',kind!=='in');
+    if(kind==='in'){S2a.load();S2c.load()}S2b.load()}catch(e){$('err2').textContent=typeof e==='string'?e:'输入有误：'+e.message}}
+$('go2').onclick=()=>{press('pre2',null);$('q2').innerHTML='自己输入的表达式。';load2()};$('ex2').onkeydown=e=>{if(e.key==='Enter')$('go2').click()};
+
+/* ================= TAB 3: circular queue ================= */
+const PRE3=[
+ {t:'三p38–45：入队 a～h',M:8,conv:'A',sch:'sac',f:0,r:0,ops:'a b c d e f g h - - i j',q:'讲义第三章 p38–45：M = 8 的循环队列，初始 front = rear = 0，依次入队 a～h，再出队两个，再入队 i、j。切换“区分空满”的三种办法比一比：牺牲一个单元时 h 进不去；增设 size 或 tag 时 8 格都能用。',a:'牺牲单元：a～g 进去后 (rear + 1) % 8 == front，h 入队失败；size / tag：a～h 全进去，front == rear 且 size = 8 / tag = 1 表示满。'},
+ {t:'三p46 / 2011 统考：初值',M:8,conv:'B',sch:'sac',f:0,r:7,ops:'a b c',opts:true,q:'【例题】已知循环队列存储在一维数组 A[0…n−1] 中，且队列非空时 front 和 rear 分别指向队头元素和队尾元素。若初始队列为空，且要求第一个进入队列的元素存储在 A[0] 处，则初始时 front 和 rear 的值分别是（ ）。讲义第三章 p46 选项：A. 0, 0　B. n−1, 0　C. 0, n−1　D. n−1, n−1。（2011 统考原题选项顺序是 A. 0, 0　B. 0, n−1　C. n−1, 0　D. n−1, n−1。）这里取 n = 8。',a:'front = 0，rear = n − 1：讲义选 C，统考原卷是 B（同一个答案，选项顺序不同）。rear 指队尾元素，入队先 rear = (rear + 1) % n 再存，要存进 A[0]，rear 原来就得是 n − 1；front 指队头，第一个元素在 A[0]，所以 front = 0。'},
+ {t:'强化p50：front=5, rear=2',M:8,conv:'C',sch:'sac',f:5,r:2,ops:'- k',q:'【例题】已知循环队列的存储空间为数组 A[8]，front 指向队头元素的前一个位置，rear 指向队尾元素，假设当前 front 和 rear 的值分别为 5 和 2，则该队列的长度为（ ）。A. 5　B. 6　C. 16　D. 17（强化第一讲 p50）',a:'A。元素在 6、7、0、1、2 这 5 格，(2 − 5 + 8) % 8 = 5。front 指队头前一位、rear 指队尾时，长度公式和讲义默认约定一样。'},
+ {t:'2014 统考：判空判满',M:8,conv:'A',sch:'sac',f:0,r:0,ops:'a b c d e f g h',q:'【2014 统考真题】循环队列放在一维数组 A[0…M−1] 中，end1 指向队首元素，end2 指向队尾元素的后一个位置。假设队列两端均可进行入队和出队操作，队列中最多能容纳 M−1 个元素。初始时为空。下列判断队空和队满的条件中，正确的是（ ）。A. 队空：end1 == end2；队满：end1 == (end2 + 1) mod M　B. 队空：end1 == end2；队满：end2 == (end1 + 1) mod (M−1)　C. 队空：end2 == (end1 + 1) mod M；队满：end1 == (end2 + 1) mod M　D. 队空：end1 == (end2 + 1) mod M；队满：end2 == (end1 + 1) mod (M−1)。这里 end1 就是 front，end2 就是 rear，取 M = 8。',a:'A。最多 M − 1 个就是牺牲一个单元：队空 end1 == end2，队满 end1 == (end2 + 1) mod M。跑到底看 h 入队时判满条件为真。两端都能进出不影响这两个条件。'}
+];
+let Q=null;
+const CONV={A:'front 指队头元素，rear 指队尾元素的下一个位置',B:'front 指队头元素，rear 指队尾元素',C:'front 指队头元素的前一个位置，rear 指队尾元素'};
+function qHead(c,f,M){return c==='C'?(f+1)%M:f}
+function eqCond(c,f,r,M){return c==='B'?(r+1)%M===f:f===r}
+function lenF(c,f,r,M){return c==='B'?(r-f+1+M)%M:(r-f+M)%M}
+function lenTxt(c,f,r,M){return c==='B'?`(rear − front + 1 + M) % M = (${r} − ${f} + 1 + ${M}) % ${M} = ${lenF(c,f,r,M)}`:`(rear − front + M) % M = (${r} − ${f} + ${M}) % ${M} = ${lenF(c,f,r,M)}`}
+function condTxt(c,sch,s,M){const {f,r,size,tag}=s;const eq=c==='B'?`(rear + 1) % M == front：(${r} + 1) % ${M} = ${(r+1)%M}`:`front == rear：${f} == ${r}`;
+  if(sch==='sac'){const fullE=c==='B'?`(rear + 2) % M == front：(${r} + 2) % ${M} = ${(r+2)%M}`:`(rear + 1) % M == front：(${r} + 1) % ${M} = ${(r+1)%M}`;
+    const full=c==='B'?(r+2)%M===f:(r+1)%M===f;return {empty:[eq+(c==='B'?` ${eqCond(c,f,r,M)?'==':'≠'} ${f}`:''),eqCond(c,f,r,M)],full:[fullE+` ${full?'==':'≠'} ${f}`,full]}}
+  if(sch==='size')return {empty:[`size == 0：size = ${size}`,size===0],full:[`size == M：size = ${size}`,size===M]};
+  const e=eqCond(c,f,r,M);return {empty:[`${eq}${c==='B'?(e?' == '+f:' ≠ '+f):''} 且 tag == 0（tag = ${tag}）`,e&&tag===0],full:[`${eq}${c==='B'?(e?' == '+f:' ≠ '+f):''} 且 tag == 1（tag = ${tag}）`,e&&tag===1]}}
+function qFrames(){const {M,conv:c,sch,f0,r0,full0,ops}=Q;let f=f0,r=r0;
+  let L=lenF(c,f,r,M);if(sch!=='sac'&&eqCond(c,f,r,M))L=full0?M:0;
+  let cells=Array(M).fill(null);const h0=qHead(c,f,M);for(let j=0;j<L;j++)cells[(h0+j)%M]='x';
+  let size=L,tag=sch==='tag'&&L===M?1:0;const F=[];const snap=x=>Object.assign({f,r,size,tag,cells:[...cells]},x);
+  const pre=L?`现在队列里有 ${L} 个元素（画成 x）。`:'现在队列是空的。';
+  F.push(snap({txt:`M = ${M}，约定：${CONV[c]}。初始 front = ${f}，rear = ${r}。${pre}`,
+    ask:L?{num:true,l:'队列长度 = ',q:`约定：${CONV[c]}。M = ${M}，front = ${f}，rear = ${r}。队列里有几个元素？`,a:L,hint:v=>+v===(r-f)?'差是负数要加 M 再取模。':+v===M-L?'数反了：从队头往后数到队尾。':c==='B'&&+v===L-1?'rear 指着队尾元素本身，要加 1。':''}:undefined}));
+  for(const op of ops){const s0=snap({});const ct=condTxt(c,sch,s0,M);
+    if(op!=='-'){const x=op;if(ct.full[1]){F.push(snap({fail:true,at:c==='A'?r:(r+1)%M,txt:`入队 ${esc(x)}：先判满。${ct.full[0]}，<b class="red">队满，入队失败</b>（上溢）。${sch==='sac'?'牺牲单元法要空着一格来区分空和满。':''}`}));continue}
+      let nr,at;if(c==='A'){at=r;nr=(r+1)%M}else{nr=(r+1)%M;at=nr}
+      const how=c==='A'?`先存到 A[rear] = A[${r}]，再 rear = (${r} + 1) % ${M} = ${nr}`:`先 rear = (${r} + 1) % ${M} = ${nr}，再存到 A[${nr}]`;
+      cells[at]=x;r=nr;size++;if(sch==='tag')tag=1;
+      F.push(snap({act:'in',at,txt:`入队 ${esc(x)}：不满。${how}。${sch==='size'?`size 变成 ${size}。`:sch==='tag'?'入队把 tag 置 1。':''}`,
+        ask:{num:true,l:`入队后 rear = `,q:`入队 <b>${esc(x)}</b>（${c==='A'?'rear 指队尾下一位：先存再移':'rear 指队尾：先移再存'}），现在 rear = ${s0.r}，M = ${M}。入队后 rear 是几？`,a:nr,hint:v=>+v===s0.r+1&&nr!==s0.r+1?`要取模：(${s0.r} + 1) % ${M} = ${nr}。`:''}}))}
+    else{if(ct.empty[1]){F.push(snap({fail:true,at:qHead(c,f,M),txt:`出队：先判空。${ct.empty[0]}，<b class="red">队空，出队失败</b>（下溢）。`}));continue}
+      let nf,at;if(c==='C'){nf=(f+1)%M;at=nf}else{at=f;nf=(f+1)%M}const x=cells[at];
+      const how=c==='C'?`先 front = (${f} + 1) % ${M} = ${nf}，再取 A[${nf}] = ${x}`:`先取 A[front] = A[${f}] = ${x}，再 front = (${f} + 1) % ${M} = ${nf}`;
+      cells[at]=null;f=nf;size--;if(sch==='tag')tag=0;
+      F.push(snap({act:'out',at,outv:x,txt:`出队：不空。${how}。${sch==='size'?`size 变成 ${size}。`:sch==='tag'?'出队把 tag 置 0。':''}`,
+        ask:{num:true,l:'出队后 front = ',q:`出队（front ${c==='C'?'指队头前一位：先移再取':'指队头：先取再移'}），现在 front = ${s0.f}，M = ${M}。出队后 front 是几？`,a:nf,hint:v=>+v===s0.f+1&&nf!==s0.f+1?`要取模：(${s0.f} + 1) % ${M} = ${nf}。`:''}}))}}
+  F.push(snap({end:true,txt:`操作做完。front = ${f}，rear = ${r}，队列里 ${cells.filter(v=>v!==null).length} 个元素${sch==='sac'?`，长度公式算出 ${lenF(c,f,r,M)}`:''}。`}));return F}
+function ringSVG(s,pd,f0){const {M}=Q;const R1=118,R0=70,cx=150,cy=150;const W=300;let g=`<svg viewBox="0 0 ${W} ${W}" width="${W}" role="img" aria-label="循环队列环形图">`;
+  const ang=k=>(-90+k*360/M)*Math.PI/180;const pt=(rr,a)=>[cx+rr*Math.cos(a),cy+rr*Math.sin(a)];
+  const L=s.cells.filter(v=>v!==null).length;const fullSac=Q.sch==='sac'&&L===M-1;
+  for(let k=0;k<M;k++){const a0=ang(k-0.5),a1=ang(k+0.5);const [x0,y0]=pt(R1,a0),[x1,y1]=pt(R1,a1),[x2,y2]=pt(R0,a1),[x3,y3]=pt(R0,a0);
+    let c=s.cells[k]!==null?'ok':'';if(!pd&&f0.at===k)c=f0.fail?'bad':'cur';if(!c&&fullSac)c='waste';
+    g+=`<path class="r-sec ${c}" d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${R1} ${R1} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)} A${R0} ${R0} 0 0 0 ${x3.toFixed(1)} ${y3.toFixed(1)}Z"/>`;
+    const [vx,vy]=pt((R0+R1)/2+6,ang(k));const [ix,iy]=pt(R0+10,ang(k));
+    const v=s.cells[k]!==null?s.cells[k]:(!pd&&f0.act==='out'&&f0.at===k?f0.outv:'');
+    g+=`<text class="r-val" x="${vx.toFixed(1)}" y="${vy.toFixed(1)}"${!pd&&f0.act==='out'&&f0.at===k?' style="text-decoration:line-through"':''}>${esc(v)}</text><text class="r-idx" x="${ix.toFixed(1)}" y="${iy.toFixed(1)}">${k}</text>`}
+  const ptr=(k,cls,lab,off)=>{const a=ang(k);const [x0,y0]=pt(R0-4,a),[x1,y1]=pt(R0-24-off,a),[tx,ty]=pt(R0-36-off,a);
+    return `<line class="r-arrow-${cls}" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x0.toFixed(1)}" y2="${y0.toFixed(1)}"/><circle cx="${x0.toFixed(1)}" cy="${y0.toFixed(1)}" r="3" class="r-${cls}"/><text class="r-ptr r-${cls}" x="${tx.toFixed(1)}" y="${ty.toFixed(1)}">${lab}</text>`};
+  if(s.f===s.r)g+=ptr(s.f,'f','f,r',0);else{g+=ptr(s.f,'f','front',0);g+=ptr(s.r,'r','rear',0)}
+  g+=`<text class="r-center" x="${cx}" y="${cy}">M = ${M}</text>`;return g+'</svg>'}
+const S3=Stepper('sec3',qFrames,(F,pos,pd,r)=>{const f=F[pos];const s=pd&&pos>0?F[pos-1]:f;const {M,conv:c,sch}=Q;
+  r('ring').innerHTML=ringSVG(s,pd,f);
+  const idx=`<div class="row"><span class="lab"></span>${s.cells.map((_,k)=>`<div class="cell" style="border:none;background:none;color:var(--muted);font-size:11px;height:16px">${k}</div>`).join('')}</div>`;
+  const cl=k=>!pd&&f.at===k?(f.fail?'bad':'cmp'):s.cells[k]!==null?'ok':'empty';
+  const pr=`<div class="row"><span class="lab"></span>${s.cells.map((_,k)=>`<div class="cell" style="border:none;background:none;height:18px;font:11px var(--mono)">${k===s.f?'<span style="color:var(--q)">f</span>':''}${k===s.r?'<span style="color:var(--mv)">r</span>':''}</div>`).join('')}</div>`;
+  r('arr').innerHTML=idx+`<div class="row"><span class="lab">A[ ]</span>${s.cells.map((v,k)=>`<div class="cell ${cl(k)}">${v===null?(!pd&&f.act==='out'&&f.at===k?`<s>${esc(f.outv)}</s>`:''):esc(v)}</div>`).join('')}</div>`+pr;
+  const ct=condTxt(c,sch,s,M);const yes=b=>b?'<span class="t">成立</span>':'<span class="f">不成立</span>';
+  const n=s.cells.filter(v=>v!==null).length;
+  r('formula').innerHTML=`<div>front = <b>${s.f}</b>，rear = <b>${s.r}</b>${sch==='size'?`，size = <b>${s.size}</b>`:''}${sch==='tag'?`，tag = <b>${s.tag}</b>`:''}　实际 ${n} 个元素</div>`+
+    `<div>长度 = ${lenTxt(c,s.f,s.r,M)}${sch!=='sac'&&n===M?'（满时公式得 0，要靠 size / tag 区分）':''}</div>`+
+    `<div>队空：${esc(ct.empty[0])} → ${yes(ct.empty[1])}</div><div>队满：${esc(ct.full[0])} → ${yes(ct.full[1])}</div>`});
+function load3(keepPtr){$('err3').textContent='';try{const M=+$('m3').value.trim();if(!Number.isInteger(M)||M<3||M>12)throw '格数 M 要 3～12 的整数。';
+    const conv=$('conv3').value,sch=$('sch3').value;const raw=$('ops3').value.trim();
+    const ops=raw?raw.split(/[\s,，]+/).filter(Boolean).map(x=>x==='−'||x==='出'?'-':x):[];if(ops.length>30)throw '操作最多 30 个。';
+    if(ops.some(x=>x!=='-'&&x.length>3))throw '入队的元素名最多 3 个字符。';
+    if(!Q||Q.M!==M){Q=Object.assign(Q||{},{f0:0,r0:conv==='B'?M-1:0})}
+    Q=Object.assign(Q,{M,conv,sch,ops,full0:+$('full3').value});Q.f0=((Q.f0%M)+M)%M;Q.r0=((Q.r0%M)+M)%M;
+    $('fv').textContent=Q.f0;$('rv').textContent=Q.r0;$('amb3').classList.toggle('hidden',sch==='sac'||!eqCond(conv,Q.f0,Q.r0,M));
+    S3.load()}catch(e){$('err3').textContent=typeof e==='string'?e:'输入有误：'+e.message}}
+document.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{if(!Q)return;const d=b.dataset.d;if(d[0]==='f')Q.f0+=d[1]==='+'?1:-1;else Q.r0+=d[1]==='+'?1:-1;load3()});
+$('init3').onclick=()=>{if(!Q)return;Q.f0=0;Q.r0=$('conv3').value==='B'?(+$('m3').value||8)-1:0;load3()};
+$('go3').onclick=()=>{load3()};$('ops3').onkeydown=e=>{if(e.key==='Enter')load3()};
+['conv3','sch3','full3'].forEach(id=>$(id).onchange=()=>load3());$('m3').onchange=()=>{Q=null;load3()};
+$('enq3').onclick=()=>{const used=new Set($('ops3').value.split(/[\s,，]+/));const x=[...LET].find(ch=>!used.has(ch))||'z';$('ops3').value=($('ops3').value.trim()+' '+x).trim();load3();S3.end()};
+$('deq3').onclick=()=>{$('ops3').value=($('ops3').value.trim()+' -').trim();load3();S3.end()};
+
+/* ================= presets, tabs ================= */
+function press(id,b){$(id).querySelectorAll('[data-p]').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'))}
+function qHTML(p,extra){return `${esc(p.q)}${extra||''}<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${esc(p.a)}</span></details>`}
+function chips(id,list,fn){$(id).insertAdjacentHTML('beforeend',list.map((p,i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${esc(p.t)}</button>`).join(''));
+  $(id).onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;press(id,b);fn(list[+b.dataset.p])}}
+chips('pre1',PRE1,p=>{$('in1').value=p.inp;$('mode1').value=p.ops?'ops':'out';$('mode1').onchange();$('out1').value=p.ops||p.out;$('cap1').value=p.cap||'';$('k1').value=p.k||'';$('pat1').value=p.pat||'';
+  const opts=p.opts?`<div class="opts">代入选项：${p.opts.map(([l,s])=>`<button class="btn sm" type="button" data-o="${esc(s)}">${l}. ${esc(s)}</button>`).join('')}</div>`:'';
+  $('q1').innerHTML=qHTML(p,opts)+(p.ops?`<p class="legend">${esc(P1N)}</p>`:'');load1()});
+$('q1').addEventListener('click',e=>{const b=e.target.closest('[data-o]');if(!b)return;$('out1').value=b.dataset.o;load1()});
+chips('pre2',PRE2,p=>{$('ex2').value=p.ex;$('kind2').value=p.kind;$('q2').innerHTML=qHTML(p);load2()});
+chips('pre3',PRE3,p=>{$('m3').value=p.M;$('conv3').value=p.conv;$('sch3').value=p.sch;$('ops3').value=p.ops;$('full3').value='0';Q={f0:p.f,r0:p.r,M:p.M};
+  const opts=p.opts?`<div class="opts">试初值：${[['A','0','0'],['B','n−1','0'],['C','0','n−1'],['D','n−1','n−1']].map(([l,a,b])=>`<button class="btn sm" type="button" data-fr="${a},${b}">${l}. ${a}, ${b}</button>`).join('')}<span>（讲义选项顺序）</span></div>`:'';
+  $('q3').innerHTML=qHTML(p,opts);load3()});
+$('q3').addEventListener('click',e=>{const b=e.target.closest('[data-fr]');if(!b||!Q)return;const M=Q.M;const v=x=>x==='0'?0:M-1;const [a,c]=b.dataset.fr.split(',');Q.f0=v(a);Q.r0=v(c);load3();S3.end()});
+function showTab(t){document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t?'true':'false'));['t1','t2','t3'].forEach(x=>$(x).classList.toggle('hidden',x!==t));try{localStorage.setItem('stackq-tab',t)}catch(e){}}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$('guessMode').onchange=()=>{S1.render();S2a.render();S2b.render();S2c.render();S3.render()};
+$('pre1').querySelector('[data-p="0"]').click();$('pre2').querySelector('[data-p="1"]').click();$('pre3').querySelector('[data-p="0"]').click();
+let t0=null;try{t0=localStorage.getItem('stackq-tab')}catch(e){}const hs=location.hash.replace('#','');showTab(['t1','t2','t3'].includes(hs)?hs:['t1','t2','t3'].includes(t0)?t0:'t1');
+</script>
+</body>
+</html>
