@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>哈夫曼树与归并树</title>
+<style>
+/* Candidate queue on the left, the forest growing into one tree on the right; WPL two ways, codes, k-ary dummies and optimal merge trees below. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:80ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:17px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:14px var(--serif);font-weight:600;margin:0 0 6px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chips .grp{width:100%;font-size:12px;margin-top:4px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px;margin-top:10px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form select,.form input[type=number]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.form input.wide{width:min(22em,100%)}
+.form label.wide{flex:1 1 16em;min-width:0}
+.form label.wide input{width:100%}
+.form label.row{display:flex;gap:4px;align-items:center;color:var(--ink)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.ctrl .muted{color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.qbox{font-size:14px;padding:8px 12px;border:1px dashed var(--line);border-radius:5px;margin-top:8px}
+.qbox .ans{color:var(--done);font-weight:600}
+details summary{cursor:pointer;color:var(--muted);font-size:13px}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:10px}
+.note b{color:var(--done)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:6em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:14px;margin-top:12px}
+@media (max-width:760px){.stage{grid-template-columns:minmax(0,1fr)}}
+.queue{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0 8px}
+.qc{min-width:38px;padding:2px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);text-align:center;font:14px var(--mono);line-height:1.3}
+.qc small{display:block;font:11px var(--sans);color:var(--muted)}
+.qc.pick{background:var(--cmp);border-color:var(--cmp);color:#222}
+.qc.pick small{color:#222}
+.qc.new{border:2px solid var(--cmp)}
+.qc.dum{border-style:dashed;color:var(--muted)}
+.qc.fin{background:color-mix(in srgb,var(--done) 30%,transparent);border-color:var(--done)}
+.wplbar{font:14px var(--mono);margin-top:6px;word-break:break-all}
+.wplbar b{color:var(--mv)}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;font:13px var(--mono);width:100%}
+table.t th,table.t td{border:1px solid var(--line);padding:3px 6px;text-align:center}
+table.t th{color:var(--muted);font-weight:400;background:var(--bg);white-space:nowrap}
+table.t tr.cur td{background:color-mix(in srgb,var(--cmp) 28%,transparent)}
+table.t td.l{text-align:left}
+#tree{overflow-x:auto}
+#tree svg{display:block;height:auto}
+.e{stroke:var(--muted);stroke-width:1.6;fill:none}
+.e.cur{stroke:var(--cmp);stroke-width:3}
+.e.fin{stroke:var(--done);stroke-width:2}
+.bit{font:600 12px var(--mono);fill:var(--q);text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:var(--paper);stroke-width:4px}
+.nd{fill:var(--paper);stroke:var(--green);stroke-width:2}
+.nd.leaf{fill:var(--hl)}
+.nd.dum{stroke-dasharray:4 3;fill:none;stroke:var(--muted)}
+.nd.cur{stroke:var(--cmp);stroke-width:3.2;fill:color-mix(in srgb,var(--cmp) 25%,var(--paper))}
+.nd.fin{stroke:var(--done);stroke-width:2.6}
+.nw{font:600 13px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.nn{font:12px var(--sans);fill:var(--ink);text-anchor:middle}
+.nc{font:600 12px var(--mono);fill:var(--q);text-anchor:middle}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.res{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;margin-top:10px}
+@media (max-width:760px){.res{grid-template-columns:minmax(0,1fr)}}
+.sum{font-size:14px;display:grid;gap:4px}
+.sum b{color:var(--mv)}
+.sum .big{font:600 16px var(--mono)}
+.hidden{display:none}
+code{font:13px var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="排序演示.html">排序演示台</a></div>
+  <header>
+    <h1>哈夫曼树与归并树</h1>
+    <p class="sub">一轮一轮从候选队列里取最小的两个（k 叉取 k 个）合并，看森林怎么长成一棵树，WPL 怎么一边合并一边累计；最后读出左 0 右 1 的哈夫曼编码，和定长编码比。k 叉时先判断要不要补权为 0 的虚结点，外部排序的最佳归并树同理，I/O 次数 = 2 × WPL。依据罗素讲义第五章 树(下) p88–100、第八章 排序 p173–179，强化第二讲 p64–65、第四讲 p64–65。哈夫曼树统考选择题考过 2010、2014、2015、2017、2018、2019、2021、2023、2025 等年，补虚段考过 2019。</p>
+  </header>
+  <section class="panel">
+    <h2>五句话</h2>
+    <ol class="rules">
+      <li><b>每次取最小的两个合并</b>：把所有根（包括<b>刚合成的新结点</b>）放回一起比大小，取最小的两个，新结点权值 = 两者之和。新结点不一定马上参与下一轮。讲义约定<b>小的放左，大的放右</b>。</li>
+      <li><b>WPL = 所有分支结点（新建结点）权值之和</b>，也等于 Σ 叶子权值 × 路径长度。n 个叶子合并 n − 1 次，结点总数 2n − 1，没有度为 1 的结点。</li>
+      <li><b>编码左 0 右 1</b>：根到叶子的路径就是编码，任何一个都不是另一个的前缀（前缀码）。带权平均码长 = WPL ÷ 总频次；定长编码每个字符 ⌈log₂ n⌉ 位。</li>
+      <li><b>k 叉先判断虚结点</b>：若 (n₀ − 1) % (k − 1) ≠ 0，补 <b>k − 1 − (n₀ − 1) % (k − 1)</b> 个权为 0 的虚结点，再每轮取最小的 k 个。虚结点在第一轮就和最小的一起合并，落在最深处。</li>
+      <li><b>最佳归并树</b>：归并段长度当权值做 k 叉哈夫曼树，每个记录读一次写一次，<b>I/O 次数 = 2 × WPL</b>。同权值先取谁会改变树形和编码，但<b>不改变 WPL</b>。</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <div class="chips" id="presets"></div>
+    <div class="qbox" id="question"></div>
+    <div class="form">
+      <label class="wide">权值（名字可省：<code>A5 B2 C3</code> 或 <code>5 2 3</code>）<input id="inW" type="text" spellcheck="false" autocomplete="off"></label>
+      <label>k 叉<select id="inK"><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
+      <label>看作<select id="inMode"><option value="code">哈夫曼编码</option><option value="merge">归并段（算 I/O）</option></select></label>
+      <label>同权值先取<select id="inTie"><option value="late">后出现的（新结点算最后）</option><option value="early">先出现的</option></select></label>
+      <label class="row"><input type="checkbox" id="inDum" checked> k 叉时补虚结点</label>
+      <button class="btn primary" id="go" type="button">用这组权值</button>
+    </div>
+    <details style="margin-top:8px"><summary>从一段字符串数频次</summary>
+      <div class="form" style="margin-top:4px"><label class="wide">字符串<input id="inS" type="text" spellcheck="false" autocomplete="off" placeholder="AAABBACCCDEEA"></label><button class="btn" id="count" type="button">数频次填进去</button></div>
+    </details>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+
+  <section class="panel">
+    <div class="ctrl">
+      <button class="btn" id="reset" type="button">从头</button>
+      <button class="btn" id="prev" type="button">上一步</button>
+      <button class="btn primary" id="next" type="button">下一步</button>
+      <button class="btn" id="all" type="button">全部</button>
+      <label class="muted"><input type="checkbox" id="guessMode" checked> 先猜再看（每轮先自己算）</label>
+      <span class="muted" id="prog"></span>
+    </div>
+    <div class="guess hidden" id="gbox"><span id="gq"></span><input id="gin" type="text" inputmode="decimal" aria-label="你的答案"><button class="btn" id="gbtn" type="button">对答案</button></div>
+    <div class="note" id="note"></div>
+    <div class="stage">
+      <div>
+        <h3>候选队列（森林的根，从小到大）</h3>
+        <div class="queue" id="queue"></div>
+        <div class="wplbar" id="wplbar"></div>
+        <div class="tw" style="margin-top:8px" id="log"></div>
+      </div>
+      <div>
+        <h3 id="treeTitle">森林 → 树</h3>
+        <div id="tree"></div>
+        <p class="legend"><span style="color:var(--cmp)">橙色</span>是这一轮取出的和新合成的，<span style="color:var(--done)">绿色</span>是完成的树；圆圈里是权值，下面是名字；虚线圈是权为 0 的虚结点。二叉编码时边上蓝字是 0 / 1。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="resPanel">
+    <h2>结果：WPL 两种算法、编码、对比</h2>
+    <div class="res">
+      <div class="tw" id="resTable"></div>
+      <div class="sum" id="resSum"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>补几个虚结点（虚段）？</h2>
+    <div class="form" style="margin-top:0">
+      <label>叶子 / 初始归并段个数 n₀<input id="cN" type="number" min="1" max="100000" value="120" style="width:7em"></label>
+      <label>k 路（k 叉）<input id="cK" type="number" min="2" max="100" value="12" style="width:5em"></label>
+      <button class="btn" id="cGo" type="button">算</button>
+    </div>
+    <div class="note" id="cOut" style="min-height:2em"></div>
+    <div class="qbox">【2019 统考真题】设外存上有 120 个初始归并段，进行 12 路归并时，为实现最佳归并，需要补充的虚段个数是（ ）。A. 1　B. 2　C. 3　D. 4
+      <details style="margin-top:4px"><summary>看答案</summary><span class="ans">B。(120 − 1) % (12 − 1) = 119 % 11 = 9 ≠ 0，补 11 − 9 = 2 个。补完 n₀ = 122，(122 − 1) % 11 = 0，12 度结点 n₁₂ = 121 ÷ 11 = 11 个。</span></details></div>
+  </section>
+
+  <section class="panel">
+    <h2>例子从哪来、讲义要注意的地方</h2>
+    <p class="sub" id="srcnote"></p>
+    <ul class="sub" style="padding-left:1.2em;margin-top:8px;display:grid;gap:4px">
+      <li>讲义第五章 p91 最后一张图里，11 的两个孩子画成 A(6) 在左、B(5) 在右；按讲义自己 p90 的“小的放左边”应为 B(5) 左、A(6) 右。左右怎么摆不影响 WPL，但会改变编码，考试按题目约定来。</li>
+      <li>讲义第五章 p98 不补虚结点那棵树，根下画了一个空圆圈：那只是表示根缺一个孩子（最后一轮只合并了 6 和 15 两个），不是虚结点。真正补的虚结点要在第一轮就和最小的一起合并（p99），这样 WPL 从 42 降到 34。</li>
+      <li>讲义第五章 p96 第一步 D(1) 和 B(2)、E(2) 都能配，讲义取了 E。本页“同权值先取后出现的”能画出和讲义一样的树（A=0、C=10、B=110、D=1110、E=1111）；换成“先出现的”，树形和编码都变，WPL 还是 29。</li>
+    </ul>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const PRESETS=[
+ {g:'讲义（第五章 树(下)）',t:'p90 A7 B5 C2 D4',w:'A7 B5 C2 D4',k:2,mode:'code',tie:'late',dum:true,
+  q:'讲义第五章 p90：用权值 A=7、B=5、C=2、D=4 构造哈夫曼树（小的放左边，大的放右边）。p89 先对比过两棵树：四个叶子都在第 2 层的 WPL = 26，A 在第 1 层的那棵 WPL = 23。',
+  a:'C+D = 6，B+6 = 11，A+11 = 18。WPL = 6 + 11 + 18 = 35 = 7×1 + 5×2 + 2×3 + 4×3。编码 A=0、B=10、C=110、D=111。',
+  src:'罗素《第五章 树(下)》p89–90。'},
+ {g:'',t:'p91 注意算法步骤',w:'A6 B5 C3 D4',k:2,mode:'code',tie:'late',dum:true,
+  q:'讲义第五章 p91（“注意算法步骤！”）：用权值 A=6、B=5、C=3、D=4 构造哈夫曼树。第一步 C+D = 7 之后，第二步合并的是哪两个？',
+  a:'第二步合并 B(5) 和 A(6) 得 11，不是 7 和 5：刚合成的 7 要放回队列和 5、6 一起比，5 和 6 最小。最后 7+11 = 18，WPL = 7 + 11 + 18 = 36，四个叶子都在第 2 层。',
+  src:'罗素《第五章 树(下)》p91。讲义图里 11 的孩子画成 A 左 B 右，本页按“小的放左”画 B 左 A 右，见下面的说明。'},
+ {g:'',t:'p96 字符串 AAABBACCCDEEA',w:'A5 B2 C3 D1 E2',k:2,mode:'code',tie:'late',dum:true,
+  q:'【例题】一串字符串 S = "AAABBACCCDEEA"，要求对其进行编码，并且得到的编码长度最短。（讲义第五章 p95–97）',
+  a:'频次 A5 B2 C3 D1 E2。哈夫曼编码 A=0、C=10、B=110、D=1110、E=1111，WPL = 1×5 + 2×3 + 3×2 + 4×(1+2) = 29，即编码后共 29 位；5 个字符定长要 3 位，3 × 13 = 39 位。',
+  src:'罗素《第五章 树(下)》p95–97。“同权值先取后出现的”可以得到和讲义一样的树。'},
+ {g:'',t:'p98 k=3 不补虚结点',w:'A5 B2 C3 D1 E4 F6',k:3,mode:'code',tie:'early',dum:false,
+  q:'讲义第五章 p98：权值 A5 B2 C3 D1 E4 F6，直接每次取最小的 3 个构造三叉哈夫曼树（不补虚结点），WPL 是多少？',
+  a:'D+B+C = 6，E+A+F = 15，最后只剩 6 和 15 两个，根只有 2 个孩子。WPL = 6 + 15 + 21 = 42。这不是最优，见下一个例子。',
+  src:'罗素《第五章 树(下)》p98。勾上“补虚结点”就变成 p99。'},
+ {g:'',t:'p99 k=3 补一个虚结点',w:'A5 B2 C3 D1 E4 F6',k:3,mode:'code',tie:'late',dum:true,
+  q:'讲义第五章 p99–100：同样 6 个权值做三叉哈夫曼树，n₀ = 6，(6 − 1) % (3 − 1) = 1 ≠ 0，要补几个虚结点？补完后 WPL 是多少？',
+  a:'补 2 − 1 = 1 个权 0 的虚结点。0+D+B = 3，3+C+E = 10，A+F+10 = 21。WPL = 3 + 10 + 21 = 34 < 42。',
+  src:'罗素《第五章 树(下)》p99–100。'},
+ {g:'强化 PPT',t:'第二讲 a~h 报文编码',w:'a7 b19 c2 d6 e32 f3 g21 h10',k:2,mode:'code',tie:'late',dum:true,
+  q:'【例题】假设用于传送秘密的报文由 {a,b,c,d,e,f,g,h} 中的字母组成，已知每个字母在报文中的出现频次为 {7, 19, 2, 6, 32, 3, 21, 10}。（1）采用哈夫曼编码对其编码，写出哈夫曼树并写出编码结果，求出 WPL。（2）为该报文构造的加权平均长度是多少？',
+  a:'（1）a: 1010，b: 00，c: 10000，d: 1001，e: 11，f: 10001，g: 01，h: 1011；WPL = (2+3)×5 + (6+7+10)×4 + (19+21+32)×2 = 261。（2）加权平均长度 = 261 ÷ 100 = 2.61。',
+  src:'数据结构强化第二讲 PPT p64–65。'},
+ {g:'',t:'第四讲 8 段 4 路归并',w:'12 25 39 61 19 42 33 49',k:4,mode:'merge',tie:'late',dum:true,
+  q:'假如最终得到了 8 个初始归并段，其长度（记录数）依次为：12，25，39，61，19，42，33，49，为了使得归并过程中的 I/O 次数最少，采用最佳归并树的方法来决定归并顺序（4 路归并），请问最终需要多少次 I/O 操作来进行归并，画出最佳归并树。',
+  a:'(8 − 1 + x) % (4 − 1) == 0，补 x = 2 个虚段。0+0+12+19 = 31，25+31+33+39 = 128，42+49+61+128 = 280。WPL = (12+19)×3 + (25+33+39)×2 + (42+49+61)×1 = 439，I/O = 2 × 439 = 878 次。',
+  src:'数据结构强化第四讲 PPT p64–65（置换-选择排序那道题的第 2 问）。'},
+ {g:'讲义 / 教材（外部排序）',t:'第八章 9 段 3 路归并',w:'4 12 5 28 22 9 15 7 33',k:3,mode:'merge',tie:'late',dum:true,
+  q:'假设初始 9 个归并段，其长度为 4，12，5，28，22，9，15，7，33，现在做 3 路平衡归并。如何判断是否需要补充虚段？最佳归并树的 I/O 次数是多少？',
+  a:'(9 − 1) % (3 − 1) = 0，不用补。4+5+7 = 16，9+12+15 = 36，16+22+28 = 66，33+36+66 = 135。I/O = 2 × WPL = 2 × [(4+5+7)×3 + (22+28+9+12+15)×2 + 33×1] = 2 × 253 = 506。',
+  src:'罗素《第八章 排序》p173–179。'},
+ {g:'',t:'王道 8 段 3 路（补不补对比）',w:'9 12 18 3 17 2 6 24',k:3,mode:'merge',tie:'late',dum:true,
+  q:'王道《数据结构》8.7.5：8 个初始归并段长度 9，12，18，3，17，2，6，24，做 3 路归并。若不补虚段、最后一次降为 2 路归并，I/O 次数是多少？补虚段构造最佳归并树，I/O 次数是多少？',
+  a:'不补：2+3+6 = 11，9+11+12 = 32，17+18+24 = 59，最后 32+59 = 91，WPL = 193，I/O = 386。补 1 个虚段：0+2+3 = 5，5+6+9 = 20，12+17+18 = 47，20+24+47 = 91，WPL = 163，I/O = 326。',
+  src:'王道《数据结构》（2027）8.7.5 最佳归并树，图 8.20。取消勾选“补虚结点”就是 386 那种。'},
+ {g:'统考真题',t:'2018 选编码',w:'a6 b3 c8 d2 e10 f4',k:2,mode:'code',tie:'late',dum:true,
+  q:'【2018 统考真题】已知字符集 {a,b,c,d,e,f}，若各字符出现的次数分别为 6,3,8,2,10,4，则对应字符集中各字符的哈夫曼编码可能是（ ）。A. 00, 1011, 01, 1010, 11, 100　B. 00, 100, 110, 000, 0010, 01　C. 10, 1011, 11, 0011, 00, 010　D. 0011, 10, 11, 0010, 01, 000',
+  a:'A。码长应为 a2 b4 c2 d4 e2 f3（WPL = 80）。B、D 码长对不上（D 里 a 是 4 位、b 是 2 位，频次多的反而长）；C 码长对得上，但 10 是 1011 的前缀，不是前缀码。本页按小左大右构造出来恰好就是 A。',
+  src:'王道《数据结构》第 5 章 5.5 选择题 18（2018 统考）。'},
+ {g:'',t:'2021 最小 WPL',w:'10 12 16 21 30',k:2,mode:'code',tie:'late',dum:true,
+  q:'【2021 统考真题】若某二叉树有 5 个叶结点，其权值分别为 10, 12, 16, 21, 30，则其最小的带权路径长度（WPL）是（ ）。A. 89　B. 200　C. 208　D. 289',
+  a:'B。10+12 = 22，16+21 = 37，22+30 = 52，37+52 = 89；WPL = 22 + 37 + 52 + 89 = 200 = (10+12)×3 + (16+21+30)×2。选 A 是把根的权值当成了 WPL。',
+  src:'王道《数据结构》第 5 章 5.5 选择题 20（2021 统考）。'},
+ {g:'',t:'2023 加权平均长度',w:'3 4 5 6 8 10',k:2,mode:'code',tie:'late',dum:true,
+  q:'【2023 统考真题】在由 6 个字符组成的字符集 S 中，各字符出现的频次分别为 3, 4, 5, 6, 8, 10，为 S 构造的哈夫曼编码的加权平均长度为（ ）。A. 2.4　B. 2.5　C. 2.67　D. 2.75',
+  a:'B。WPL = 7 + 11 + 15 + 21 + 36 = 90，总频次 36，90 ÷ 36 = 2.5。（3,4,5,6 码长 3，8,10 码长 2。）',
+  src:'王道《数据结构》第 5 章 5.5 选择题 22（2023 统考）。'},
+ {g:'',t:'2025 码长 ≥ 3 的个数',w:'2 3 4 6 8 10 11',k:2,mode:'code',tie:'late',dum:true,
+  q:'【2025 统考真题】设字符集 S 中包含 7 个字符，各字符出现的频次分别为 2, 3, 4, 6, 8, 10, 11。现为 S 中的各字符构造哈夫曼编码，编码长度不小于 3 的字符数是（ ）。A. 2　B. 3　C. 4　D. 5',
+  a:'D。2+3 = 5，4+5 = 9，6+8 = 14，9+10 = 19，11+14 = 25，19+25 = 44。码长：2、3 是 4 位，4、6、8 是 3 位，10、11 是 2 位，不小于 3 的共 5 个。',
+  src:'王道《数据结构》第 5 章 5.5 选择题 23（2025 统考）。'}
+];
+let NODES=[],frames=[],pos=0,guessed=new Set(),CFG=null,FINAL=null;
+function parseW(txt){const toks=txt.trim().split(/[\s,，、;；]+/).filter(Boolean);if(toks.length<2)throw '至少要 2 个权值。';if(toks.length>26)throw '最多 26 个权值，不然树太宽看不清。';
+  const out=[];for(const t of toks){const m=t.match(/^([^\d:：=\s]*)[:：=]?(\d+)$/);if(!m)throw `看不懂“${t}”：写成 A5、A:5 或 5，权值要是正整数。`;const w=+m[2];if(w<=0)throw `权值要大于 0：${t}`;if(w>99999)throw `权值太大：${t}`;out.push({name:m[1],w})}
+  const named=out.filter(o=>o.name).length;if(named&&named<out.length)throw '要么都写名字，要么都不写。';
+  if(named&&new Set(out.map(o=>o.name)).size!==out.length)throw '名字重复了。';return out}
+function autoName(list,mode){if(list[0].name)return list;return list.map((o,i)=>({...o,name:mode==='merge'?`段${i+1}`:String.fromCharCode(97+i)}))}
+function mk(o){const n={id:NODES.length,seq:NODES.length,...o};NODES.push(n);return n}
+function cmpFn(tie){return (a,b)=>a.w-b.w||(tie==='late'?b.seq-a.seq:a.seq-b.seq)}
+function needDum(n,k){return k>2&&(n-1)%(k-1)?(k-1)-(n-1)%(k-1):0}
+function build(cfg){NODES=[];const leaves=cfg.items.map(o=>mk({w:o.w,name:o.name,leaf:true,kids:[]}));const k=cfg.k,cmp=cmpFn(cfg.tie),n=leaves.length;const F=[];
+  let forest=[...leaves].sort(cmp);const nd=needDum(n,k),add=cfg.dum?nd:0;
+  F.push({k:'start',forest:[...forest],txt:`${n} 个${cfg.mode==='merge'?'归并段':'叶子'}，权值 ${cfg.items.map(o=>`${o.name} ${o.w}`).join('、')}。先按权值从小到大排好放进候选队列。${k===2?'每轮取最小的两个合并。':`每轮取最小的 ${k} 个合并。`}`});
+  if(k>2){const r=(n-1)%(k-1);const dums=[];for(let i=0;i<add;i++)dums.push(mk({w:0,name:'虚',leaf:true,dum:true,kids:[]}));const before=[...forest];forest=[...forest,...dums].sort(cmp);
+    F.push({k:'dum',before,forest:[...forest],newIds:dums.map(d=>d.id),val:cfg.dum?nd:undefined,
+      txt:`判断虚结点：n₀ = ${n}，(n₀ − 1) % (k − 1) = ${n-1} % ${k-1} = ${r}${r?` ≠ 0，要补 ${k-1} − ${r} = <b>${nd}</b> 个权为 0 的虚结点`:'，正好整除，<b>不用补</b>'}。${r&&!cfg.dum?'这里故意<b>不补</b>，看最后一轮凑不满 k 个会怎样。':''}${add?`补完 ${n+add} 个，${k} 叉树正好每个分支结点都有 ${k} 个孩子。`:''}`})}
+  let run=0,round=0;
+  while(forest.length>1){round++;const take=forest.slice(0,Math.min(k,forest.length));const rest=forest.slice(take.length);const s=take.reduce((a,b)=>a+b.w,0);
+    const nn=mk({w:s,name:'',leaf:false,kids:take});run+=s;const before=[...forest];forest=[...rest,nn].sort(cmp);
+    const ties=before.filter(x=>!take.includes(x)&&x.w===take[take.length-1].w);
+    const partial=take.length<k;
+    F.push({k:'merge',round,take,before,forest:[...forest],node:nn,val:s,run,
+      txt:`第 ${round} 轮：队列 [${before.map(x=>x.w).join(', ')}] 里最小的 ${take.length} 个是 ${take.map(lab).join('、')}，合并成 <b>${s}</b>${k===2?`（${lab(take[0])} 放左，${lab(take[1])} 放右）`:''}。${partial?`<b>只剩 ${take.length} 个，凑不满 ${k} 个</b>，这一轮只能 ${take.length} 路。`:''}${ties.length?`（${ties.map(lab).join('、')} 和 ${lab(take[take.length-1])} 一样大，这里按“同权值先取${cfg.tie==='late'?'后出现的':'先出现的'}”取了 ${lab(take[take.length-1])}；换一个取，树形会变，WPL 不变。）`:''}WPL 累计 = 分支结点权值之和 = <b>${run}</b>。`})}
+  FINAL=analyze(forest[0],cfg);
+  F.push({k:'wpl',forest:[...forest],val:run,txt:`合并完了，WPL = 所有分支结点权值之和 = ${F.filter(f=>f.k==='merge').map(f=>f.val).join(' + ')} = <b>${run}</b>；用叶子算：${FINAL.leaves.filter(l=>!l.dum).map(l=>`${l.w}×${l.d}`).join(' + ')} = <b>${FINAL.wpl2}</b>，两种算法一样。`});
+  if(cfg.mode==='merge')F.push({k:'io',forest:[...forest],val:2*run,txt:`每个记录在每一趟归并里读一次、写一次，I/O 次数 = 2 × WPL = 2 × ${run} = <b>${2*run}</b>。`});
+  else F.push({k:'end',forest:[...forest],txt:endText(cfg)});
+  return F}
+function lab(x){return x.leaf?(x.dum?'虚 0':`${x.name}(${x.w})`):`新结点 ${x.w}`}
+function analyze(root,cfg){const leaves=[];const walk=(nd,d,code)=>{if(nd.leaf){leaves.push({...nd,d,code});return}nd.kids.forEach((c,i)=>walk(c,d+1,code+(cfg.k===2?String(i):String(i))))};walk(root,0,'');
+  const order=new Map(NODES.filter(n=>n.leaf&&!n.dum).map((n,i)=>[n.id,i]));leaves.sort((a,b)=>(a.dum?1e9:order.get(a.id))-(b.dum?1e9:order.get(b.id)));
+  const real=leaves.filter(l=>!l.dum);const tot=real.reduce((a,b)=>a+b.w,0);const wpl2=real.reduce((a,b)=>a+b.w*b.d,0);
+  const internal=NODES.filter(n=>!n.leaf).reduce((a,b)=>a+b.w,0);
+  const fixBits=Math.max(1,Math.ceil(Math.log2(real.length)));
+  let alt=null;if(cfg.k>2){const nd=needDum(real.length,cfg.k);if(nd){alt=altWPL(cfg.items.map(o=>o.w),cfg.k,!cfg.dum)}}
+  return {leaves,tot,wpl2,internal,fixBits,alt,root}}
+function altWPL(ws,k,dum){/* WPL of the other choice (with/without dummies), for comparison */let q=[...ws];if(dum){const nd=needDum(ws.length,k);for(let i=0;i<nd;i++)q.push(0)}let s=0;
+  while(q.length>1){q.sort((a,b)=>a-b);const t=q.splice(0,Math.min(k,q.length));const v=t.reduce((a,b)=>a+b,0);s+=v;q.push(v)}return s}
+function endText(cfg){const R=FINAL;if(cfg.k!==2)return `树建好了。k 叉树的编码要用 0～${cfg.k-1} 共 ${cfg.k} 个符号，考试一般只考二叉，这里只看 WPL = <b>${R.internal}</b>。`;
+  const avg=R.internal/R.tot;return `从根往下，左 0 右 1，读出每个字符的编码（下面的表）。带权平均码长 = WPL ÷ 总频次 = ${R.internal} ÷ ${R.tot} = <b>${fmtN(avg)}</b>；定长编码 ${R.leaves.length} 个字符要 ⌈log₂ ${R.leaves.length}⌉ = ${R.fixBits} 位，共 ${R.fixBits} × ${R.tot} = ${R.fixBits*R.tot} 位，哈夫曼只要 ${R.internal} 位。`}
+function fmtN(x){return Number.isInteger(x)?String(x):(Math.round(x*10000)/10000).toString()}
+/* ---------- drawing ---------- */
+function layout(roots){const P={};let slot=0;const SW=CFG.items.length+(needDum(CFG.items.length,CFG.k))>12?40:48,LH=CFG.k===2?62:76,top=26;let maxD=0;
+  const place=(nd,d)=>{maxD=Math.max(maxD,d);if(!nd.kids.length){P[nd.id]={x:24+slot*SW,y:top+d*LH};slot++;return}nd.kids.forEach(c=>place(c,d+1));const xs=nd.kids.map(c=>P[c.id].x);P[nd.id]={x:xs.reduce((u,v)=>u+v,0)/xs.length,y:top+d*LH}};
+  roots.forEach((r,i)=>{if(i)slot+=0.35;place(r,0)});return {P,W:Math.max(260,48+(slot-1)*SW),H:top+maxD*LH+60}}
+function drawTree(f,pend){const fin=f.k==='wpl'||f.k==='io'||f.k==='end';const showRes=f.k==='merge'&&!pend;
+  const roots=pend?(f.before||f.forest):f.forest;const {P,W,H}=layout(roots);const cur=new Set();
+  if(showRes){cur.add(f.node.id);f.take.forEach(t=>cur.add(t.id))}if(f.k==='dum'&&!pend)(f.newIds||[]).forEach(i=>cur.add(i));
+  const codes=fin&&CFG.k===2&&CFG.mode==='code';const bits=CFG.k===2&&CFG.mode==='code';
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" style="width:${W}px;max-width:none" role="img" aria-label="哈夫曼森林">`;
+  const edges=nd=>{nd.kids.forEach((c,i)=>{const a=P[nd.id],b=P[c.id];const cls=cur.has(nd.id)?' cur':fin?' fin':'';const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy);
+      s+=`<line class="e${cls}" x1="${a.x+dx/L*17}" y1="${a.y+dy/L*17}" x2="${b.x-dx/L*17}" y2="${b.y-dy/L*17}"/>`;
+      if(bits)s+=`<text class="bit" x="${(a.x+b.x)/2+(i?9:-9)}" y="${(a.y+b.y)/2-4}">${i}</text>`;edges(c)})};
+  const nodes=nd=>{nd.kids.forEach(nodes);const p=P[nd.id];let cls='nd'+(nd.leaf?' leaf':'')+(nd.dum?' dum':'');if(cur.has(nd.id))cls+=' cur';else if(fin&&!nd.dum)cls+=' fin';
+    s+=`<circle class="${cls}" cx="${p.x}" cy="${p.y}" r="17"/><text class="nw" x="${p.x}" y="${p.y}">${nd.w}</text>`;
+    if(nd.leaf){s+=`<text class="nn" x="${p.x}" y="${p.y+31}">${esc(nd.name)}</text>`;if(codes&&!nd.dum){const L=FINAL.leaves.find(l=>l.id===nd.id);s+=`<text class="nc" x="${p.x}" y="${p.y+46}">${L.code}</text>`}}};
+  roots.forEach(r=>{edges(r)});roots.forEach(r=>nodes(r));$('tree').innerHTML=s+'</svg>';
+  $('treeTitle').textContent=roots.length>1?`森林：${roots.length} 棵树`:'哈夫曼树'+(CFG.mode==='merge'?`（${CFG.k} 路最佳归并树）`:'')}
+function render(msg){const f=frames[pos],pend=pending();drawTree(f,pend);
+  const roots=pend?(f.before||f.forest):f.forest;const fin=f.k==='wpl'||f.k==='io'||f.k==='end';
+  const pick=new Set(f.k==='merge'&&!pend?f.take.map(t=>t.id):[]);
+  const shownQ=f.k==='merge'&&!pend?f.before:roots;
+  $('queue').innerHTML=shownQ.map(x=>`<span class="qc${pick.has(x.id)?' pick':''}${x.dum?' dum':''}${fin?' fin':''}">${x.w}<small>${x.leaf?esc(x.name):'新'}</small></span>`).join('')+(f.k==='merge'&&!pend?`<span class="qc new" title="新结点">→ ${f.node.w}<small>新结点</small></span>`:'');
+  const merges=frames.slice(1,pos+1).filter(x=>x.k==='merge').filter(x=>!(x===f&&pend));
+  $('wplbar').innerHTML=merges.length?`WPL 累计 = ${merges.map(x=>x.val).join(' + ')} = <b>${merges[merges.length-1].run}</b>`:'WPL 累计 = 0（还没合并）';
+  $('log').innerHTML=merges.length?`<table class="t"><tr><th>轮</th><th>取出</th><th>新结点</th><th>WPL 累计</th></tr>${merges.map(x=>`<tr class="${x===f?'cur':''}"><td>${x.round}</td><td>${x.take.map(t=>t.w).join(' + ')}</td><td>${x.val}</td><td>${x.run}</td></tr>`).join('')}</table>`:'';
+  $('note').innerHTML=msg||(pend?prompt(f):f.txt);
+  $('prog').textContent=`第 ${pos} / ${frames.length-1} 步`;$('prev').disabled=pos===0;$('next').disabled=pos===frames.length-1&&!pend;
+  $('gbox').classList.toggle('hidden',!pend);if(pend){$('gq').innerHTML=glabel(f);if(!msg)$('gin').value=''}
+  drawRes(pos===frames.length-1)}
+function pending(){const f=frames[pos];return $('guessMode').checked&&f&&f.val!==undefined&&!guessed.has(pos)}
+function glabel(f){return {dum:'补几个虚结点：',merge:'新结点权值 = ',wpl:'WPL = ',io:'I/O 次数 = '}[f.k]}
+function prompt(f){if(f.k==='dum')return `n₀ = ${CFG.items.length}，k = ${CFG.k}。先算 (n₀ − 1) % (k − 1)，要补几个权为 0 的虚结点？（不用补就填 0）`;
+  if(f.k==='merge')return `第 ${f.round} 轮：候选队列是 [${f.before.map(x=>x.w).join(', ')}]${f.round>1?'（含前面合成的新结点）':''}。该取哪 ${Math.min(CFG.k,f.before.length)} 个？合并出的新结点权值是多少？`;
+  if(f.k==='wpl')return '树建好了。WPL 是多少？（分支结点权值相加，或者叶子权 × 路径长相加）';
+  if(f.k==='io')return `WPL = ${f.val/2}。归并的 I/O 次数是多少？`;return f.txt}
+function hint(f,v){if(f.k==='dum'){const r=(CFG.items.length-1)%(CFG.k-1);if(v===r&&r)return `${r} 是余数，要补的是 (k − 1) − 余数 = ${CFG.k-1} − ${r}。`;return ''}
+  if(f.k==='merge'){const k=CFG.k,b=f.before;const newest=b.filter(x=>!x.leaf).sort((x,y)=>y.seq-x.seq)[0];
+    if(newest){const others=b.filter(x=>x!==newest).slice(0,k-1);if(others.length===k-1&&newest.w+others.reduce((a,c)=>a+c.w,0)===v&&!f.take.includes(newest))return `刚合成的 ${newest.w} 不一定马上用，要放回队列和其他根一起比大小（讲义 p91“注意算法步骤”）。`}
+    const real=b.filter(x=>!x.dum).slice(0,k);if(b.some(x=>x.dum)&&real.reduce((a,c)=>a+c.w,0)===v)return '虚结点 0 也在队列里，而且最小，第一轮就要取它。';
+    if(v===b.slice(0,k-1).reduce((a,c)=>a+c.w,0)&&k>2)return `${k} 叉一次要取 ${k} 个。`;
+    return '把队列里所有根（包括新结点）从小到大排，取最前面的 '+Math.min(k,b.length)+' 个相加。'}
+  if(f.k==='wpl'){const root=FINAL.root.w;if(v===root)return '这是根的权值（所有叶子权值之和），不是 WPL。WPL 要把每个分支结点都加上。';if(v===f.val-root)return '根也是分支结点，它的权值也要加进去。';return ''}
+  if(f.k==='io'){if(v===f.val/2)return '这是 WPL，只算了读。每个记录读一次、写一次，要 ×2。';return ''}return ''}
+function check(){const f=frames[pos];const v=$('gin').value.trim();if(v==='')return;const n=+v;const ok=n===f.val;guessed.add(pos);
+  render((ok?'<span class="ok">对了。</span> ':`<span class="bad">你填 ${esc(v)}，应为 ${f.val}。</span>${hint(f,n)} `)+f.txt)}
+function drawRes(done){const R=FINAL;if(!done){$('resTable').innerHTML='<p class="legend">合并完就显示：每个叶子的权值、路径长、乘积'+(CFG.k===2&&CFG.mode==='code'?'和编码':'')+'。</p>';$('resSum').innerHTML='';return}
+  const code=CFG.k===2&&CFG.mode==='code';
+  $('resTable').innerHTML=`<table class="t"><tr><th>${CFG.mode==='merge'?'段':'字符'}</th><th>权值</th><th>路径长</th><th>权 × 路径长</th>${code?'<th>编码</th>':''}</tr>${R.leaves.map(l=>`<tr><td>${l.dum?'虚':esc(l.name)}</td><td>${l.w}</td><td>${l.d}</td><td>${l.w*l.d}</td>${code?`<td class="l">${l.code}</td>`:''}</tr>`).join('')}<tr><th>合计</th><td>${R.tot}</td><td></td><td><b>${R.wpl2}</b></td>${code?'<td></td>':''}</tr></table>`;
+  const inner=NODES.filter(n=>!n.leaf).map(n=>n.w);
+  let h=`<div>WPL（叶子算）= Σ 权 × 路径长 = <span class="big">${R.wpl2}</span></div><div>WPL（分支结点算）= ${inner.join(' + ')} = <span class="big">${R.internal}</span></div>`;
+  if(code)h+=`<div>带权平均码长 = ${R.internal} ÷ ${R.tot} = <b>${fmtN(R.internal/R.tot)}</b> 位</div><div>定长编码：${R.leaves.length} 个字符 × ⌈log₂ ${R.leaves.length}⌉ = ${R.fixBits} 位，总长 ${R.fixBits} × ${R.tot} = <b>${R.fixBits*R.tot}</b>，哈夫曼 <b>${R.internal}</b>，省了 ${R.fixBits*R.tot-R.internal} 位。</div>`;
+  if(CFG.mode==='merge')h+=`<div>I/O 次数 = 2 × WPL = <b>${2*R.internal}</b></div>`;
+  if(R.alt!==null)h+=`<div>对比：${CFG.dum?'不补虚结点（最后一轮凑不满 k 个）':'补上虚结点'}时 WPL = ${R.alt}${CFG.mode==='merge'?`，I/O = ${2*R.alt}`:''}。${CFG.dum?'补了更小。':'补了反而更小，所以要补。'}</div>`;
+  h+=`<div class="legend">结点总数 ${NODES.length}（叶子 ${R.leaves.length}，分支结点 ${inner.length}）。同权值先取谁会让树形、编码不同，WPL 不变：换上面“同权值先取”试试。</div>`;
+  $('resSum').innerHTML=h}
+/* ---------- control ---------- */
+function load(cfg){CFG=cfg;try{frames=build(cfg)}catch(e){$('err').textContent=String(e);return}pos=0;guessed=new Set();render()}
+function readForm(){const items=autoName(parseW($('inW').value),$('inMode').value);return {items,k:+$('inK').value,mode:$('inMode').value,tie:$('inTie').value,dum:$('inDum').checked}}
+function apply(){try{const c=readForm();$('err').textContent='';load(c);return true}catch(e){$('err').textContent=String(e);return false}}
+function step(d){if(d>0&&pending()){$('gin').focus();return}pos=Math.max(0,Math.min(frames.length-1,pos+d));render();if(pending())$('gin').focus()}
+$('next').onclick=()=>step(1);$('prev').onclick=()=>step(-1);$('reset').onclick=()=>{pos=0;guessed=new Set();render()};
+$('all').onclick=()=>{frames.forEach((_,i)=>guessed.add(i));pos=frames.length-1;render()};
+$('gbtn').onclick=check;$('gin').onkeydown=e=>{if(e.key==='Enter')check()};$('guessMode').onchange=()=>render();
+$('go').onclick=()=>{if(apply()){unpress();$('question').innerHTML='自己输入的权值。';$('srcnote').textContent='自己输入的数据。'}};
+$('inW').onkeydown=e=>{if(e.key==='Enter')$('go').click()};
+['inK','inMode','inTie','inDum'].forEach(id=>$(id).onchange=()=>apply());
+$('count').onclick=()=>{const s=$('inS').value.replace(/\s+/g,'');if(!s){$('err').textContent='先输入一段字符串。';return}const m=new Map();for(const ch of s){if(/\d/.test(ch)){$('err').textContent='字符串里不要有数字（会和权值混）。';return}m.set(ch,(m.get(ch)||0)+1)}
+  if(m.size<2){$('err').textContent='至少要 2 种不同的字符。';return}if(m.size>26){$('err').textContent='不同字符最多 26 种。';return}
+  $('inW').value=[...m].map(([c,n])=>`${c}${n}`).join(' ');$('inK').value='2';$('inMode').value='code';$('go').click();$('question').innerHTML=`字符串 ${esc(s)}，共 ${s.length} 个字符，${m.size} 种。`};
+function unpress(){$('presets').querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed','false'))}
+function usePreset(i){const p=PRESETS[i];$('inW').value=p.w;$('inK').value=String(p.k);$('inMode').value=p.mode;$('inTie').value=p.tie;$('inDum').checked=p.dum;
+  $('presets').querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===i));
+  $('question').innerHTML=`${esc(p.q)}<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${esc(p.a)}</span></details>`;$('srcnote').textContent=p.src;apply()}
+$('presets').innerHTML=PRESETS.map((p,i)=>(p.g?`<span class="grp">${p.g}：</span>`:'')+`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p.t}</button>`).join('');
+$('presets').onclick=e=>{const b=e.target.closest('[data-p]');if(b)usePreset(+b.dataset.p)};
+function calc(){const n=Math.floor(+$('cN').value),k=Math.floor(+$('cK').value);if(!(n>=1&&n<=100000)||!(k>=2&&k<=100)){$('cOut').innerHTML='<span class="bad">n₀ 要在 1～100000，k 要在 2～100。</span>';return}
+  if(k===2){$('cOut').innerHTML='二叉（k = 2）时 k − 1 = 1，任何 n₀ 都整除，<b>不用补</b>。';return}
+  const r=(n-1)%(k-1),x=r?(k-1)-r:0;$('cOut').innerHTML=`(n₀ − 1) % (k − 1) = ${n-1} % ${k-1} = ${r}。${r?`不为 0，补 (k − 1) − ${r} = <b>${x}</b> 个。补完 n₀ = ${n+x}，(${n+x} − 1) % ${k-1} = 0。`:'<b>不用补</b>。'}度为 ${k} 的结点 n<sub>${k}</sub> = (${n+x} − 1) ÷ ${k-1} = ${(n+x-1)/(k-1)} 个，也就是归并 ${(n+x-1)/(k-1)} 次。`}
+$('cGo').onclick=calc;['cN','cK'].forEach(id=>$(id).onkeydown=e=>{if(e.key==='Enter')calc()});calc();
+usePreset(0);
+</script>
+</body>
+</html>
