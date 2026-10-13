@@ -113,6 +113,28 @@ h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
     <div class="guess"><span>先自己算 k：</span><input id="guessIn" type="text" inputmode="numeric" aria-label="你算的下标"><button class="btn" id="guessBtn" type="button">对答案</button><span id="guessRes"></span><label style="margin-left:auto;font-size:13px;color:var(--muted)"><input type="checkbox" id="hide" checked> 对答案前先遮住结果</label></div>
     <div id="result"></div>
   </section>
+  <section class="panel" id="formulas">
+    <h2>公式速查（矩阵下标从 1 开始，数组下标从 0 开始）</h2>
+    <p class="sub" style="margin-bottom:8px">每个公式都是“前面整行（列）的个数 + 本行（列）前面的个数”，推导写在右边。考场上忘了就按右边现推，比硬背稳。数组从 1 开始：整体 +1。矩阵从 0 开始：先把 i、j 各加 1 再代入。</p>
+    <div style="overflow-x:auto"><table class="tbl">
+      <tr><th>存法</th><th>适用</th><th>k =</th><th>怎么来的</th></tr>
+      <tr><td>下三角，行优先</td><td>i ≥ j</td><td><b>i(i−1)/2 + j − 1</b></td><td>前 i−1 行长 1, 2, …, i−1，共 i(i−1)/2；本行前面 j−1 个</td></tr>
+      <tr><td>下三角，列优先</td><td>i ≥ j</td><td><b>(j−1)(2n−j+2)/2 + i − j</b></td><td>前 j−1 列长 n, n−1, …, n−j+2，首项加末项乘项数除 2；本列从 a<sub>jj</sub> 往下，前面 i−j 个</td></tr>
+      <tr><td>上三角，行优先</td><td>i ≤ j</td><td><b>(i−1)(2n−i+2)/2 + j − i</b></td><td>前 i−1 行长 n, n−1, …, n−i+2；本行从 a<sub>ii</sub> 开始，前面 j−i 个</td></tr>
+      <tr><td>上三角，列优先</td><td>i ≤ j</td><td><b>j(j−1)/2 + i − 1</b></td><td>前 j−1 列长 1, 2, …, j−1；本列前面 i−1 个</td></tr>
+      <tr><td>对称矩阵</td><td>问到没存的那半</td><td colspan="2">先交换 i、j 再用上面对应那行。所以“下三角行优先”和“上三角列优先”是同一个式子换了 i、j（打卡表 1.1 的注）</td></tr>
+      <tr><td>三角矩阵的常数 c</td><td>另一半</td><td><b>n(n+1)/2</b></td><td>c 只存一份，放在 n(n+1)/2 个元素后面</td></tr>
+      <tr><td>不含对角线：下三角行优先</td><td>i > j</td><td><b>(i−1)(i−2)/2 + j − 1</b></td><td>前 i−1 行长 0, 1, …, i−2</td></tr>
+      <tr><td>不含对角线：上三角行优先</td><td>i < j</td><td><b>(i−1)(2n−i)/2 + j − i − 1</b></td><td>前 i−1 行长 n−1, …, n−i+1；本行从 a<sub>i,i+1</sub> 开始。2011-41 就是这种（那题矩阵从 0 开始）</td></tr>
+      <tr><td>不含对角线：下三角列优先</td><td>i > j</td><td><b>(j−1)(2n−j)/2 + i − j − 1</b></td><td>前 j−1 列长 n−1, …, n−j+1</td></tr>
+      <tr><td>不含对角线：上三角列优先</td><td>i < j</td><td><b>(j−1)(j−2)/2 + i − 1</b></td><td>前 j−1 列长 0, 1, …, j−2</td></tr>
+      <tr><td>三对角，行优先</td><td>|i − j| ≤ 1</td><td><b>2i + j − 3</b></td><td>第 1 行 2 个，第 2～i−1 行各 3 个，共 3i−4；本行从 a<sub>i,i−1</sub> 开始，前面 j−i+1 个</td></tr>
+      <tr><td>三对角，反过来由 k 求 i、j</td><td>k 从 0 开始</td><td><b>i = ⌊(k+1)/3⌋ + 1，j = k − 2i + 3</b></td><td>2016 年反着问也能做：k = 87 → i = 30，j = 30</td></tr>
+      <tr><td>二维数组，行优先</td><td>A[0..m−1][0..n−1]</td><td><b>LOC(a<sub>ij</sub>) = LOC(a<sub>00</sub>) + (i·n + j)·L</b></td><td>前 i 整行每行 n 个，本行前 j 个；L 是每个元素占的单元数</td></tr>
+      <tr><td>二维数组，列优先</td><td>同上</td><td><b>LOC(a<sub>00</sub>) + (j·m + i)·L</b></td><td>前 j 整列每列 m 个，本列前 i 个</td></tr>
+    </table></div>
+    <p class="legend" style="margin-top:6px">每个公式都已对 n = 2～11 的每一格逐个枚举核对过。上面“定位”结果里也会给出当前这种的公式和代入过程。</p>
+  </section>
   <section class="panel">
     <h2>真题清单</h2>
     <table class="tbl">
