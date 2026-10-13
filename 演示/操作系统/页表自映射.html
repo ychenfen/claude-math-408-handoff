@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>页表项的两个地址</title>
+<style>
+/* 2024-45: one picture of virtual space, the page table zoomed in, and physical memory; each step asks one sub-question and fills a two-column "查表用的地址 / 最终访问的地址" table. */
+/* Mode tabs, then the structure (hash slots, chains or a tree with failure nodes), then two tallies that fill in step by step. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6em}
+.form input.wide{width:min(26em,80vw)}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer}
+.form [hidden]{display:none}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.phase{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;margin-bottom:8px}
+.phase span{border:1px solid var(--line);border-radius:999px;padding:1px 10px;color:var(--muted)}
+.phase span.on{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.view{overflow-x:auto}
+.table{display:flex;gap:4px;padding:4px 0 26px}
+.slot{min-width:46px;text-align:center;border:1.5px solid var(--line);border-radius:5px;background:var(--bg);position:relative;font:16px/1.4 var(--mono);padding:6px 2px}
+.slot small{display:block;font-size:11px;color:var(--muted)}
+.cur{border-color:var(--q)!important;box-shadow:0 0 0 2px var(--q) inset}
+.cmp{border-color:var(--cmp)!important;background:color-mix(in srgb,var(--cmp) 24%,transparent)!important}
+.hit{border-color:var(--done)!important;background:color-mix(in srgb,var(--done) 26%,transparent)!important}
+.empty{border-color:var(--mv)!important;background:color-mix(in srgb,var(--mv) 18%,transparent)!important}
+.slot .n,.cn .n{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font:10px var(--mono);color:var(--q);font-weight:700;white-space:nowrap}
+.chains{display:grid;gap:6px;padding-bottom:6px}
+.crow{display:flex;align-items:center;gap:0;font:14px var(--mono)}
+.caddr{width:42px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--hl);padding:2px 0}
+.arrow{width:18px;text-align:center;color:var(--muted)}
+.cn{position:relative;min-width:40px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--bg);padding:2px 4px;margin-bottom:14px}
+.nul{color:var(--muted);padding:0 4px}
+svg text{font-family:var(--mono)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:8px}
+.note .ask{color:var(--q);font-weight:600}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.tallies{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.tw{overflow-x:auto}
+.tally{border-collapse:collapse;font:13px var(--mono)}
+.tally th,.tally td{border:1px solid var(--line);padding:2px 6px;text-align:center;white-space:nowrap}
+.tally th{color:var(--muted);font-weight:400;text-align:left}
+.tally td.new{background:color-mix(in srgb,var(--done) 22%,transparent);font-weight:700}
+.asl{margin-top:6px;font:14px var(--mono)}
+.asl b{color:var(--done)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.block{font-size:14px}
+.block table{border-collapse:collapse;font:13px var(--mono);margin:6px 0}
+.block td,.block th{border:1px solid var(--line);padding:2px 8px;text-align:center}
+
+.map svg{display:block;width:100%;height:auto}
+.res{border-collapse:collapse;font:13px var(--mono)}
+.res th,.res td{border:1px solid var(--line);padding:3px 8px;text-align:left;white-space:nowrap}
+.res th{color:var(--muted);font-weight:400}
+.res td.new{background:color-mix(in srgb,var(--done) 22%,transparent);font-weight:700}
+.res td.ans{font-weight:700}
+.bits{display:flex;gap:3px;margin:4px 0 8px}
+.fld{border:1.5px solid var(--line);border-radius:5px;padding:3px 6px;text-align:center;font-size:12px;line-height:1.4}
+.fld b{display:block;font:14px var(--mono);font-weight:700}
+.fld .v{display:block;font:11px var(--mono);color:var(--muted);word-break:break-all}
+.pg{background:color-mix(in srgb,var(--q) 18%,transparent);border-color:var(--q)}
+.of{background:color-mix(in srgb,var(--done) 20%,transparent);border-color:var(--done)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.col h3{font:14px var(--serif);font-weight:600;margin:0 0 6px}
+.col ul{margin:0;padding-left:1.2em;font:13px var(--mono);line-height:1.9}
+.col.look{border-left:3px solid var(--cmp);padding-left:10px}
+.col.final{border-left:3px solid var(--done);padding-left:10px}
+.warn{border-left:3px solid var(--mv);padding:8px 12px;background:color-mix(in srgb,var(--mv) 10%,transparent);font-size:14px}
+.form[hidden]{display:none}
+.form input[type=text]{width:9.5em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="地址转换.html">地址转换</a><a href="CPU调度.html">CPU 调度</a><a href="磁盘调度.html">磁盘调度</a></div>
+  <header>
+    <h1>页表项的两个地址（2024-45）</h1>
+    <p class="sub">2024-45 新在一点：页表本身也放在进程的虚拟地址空间里，所以<b>同一个页表项有两个地址</b>。操作系统改页表时用它的虚拟地址，MMU 查页表时用它的物理地址。页表所在的那一页，也要靠页表里的一项来映射，这一项就指向页表自己。题目和答案对照王道 2026 第 3.2 节综合题 21。</p>
+  </header>
+  <section class="panel"><h2>先分清三种地址</h2><ol class="rules">
+    <li><b>数据的物理地址</b> = 页框号拼上页内偏移，是最后真正要访问的地址。</li>
+    <li><b>页表项的地址</b> = 页表起始地址 + 页号 × 页表项大小。起始地址用虚拟的就得到虚拟地址，用物理的就得到物理地址；两者加的是同一个 页号 × 4。</li>
+    <li>页框号 = 物理地址去掉低位偏移（右移偏移位数），也就是物理地址的高位。</li>
+    <li>谁用哪个：缺页处理程序是操作系统的代码，分页开着时它也只能用虚拟地址去改页表项；MMU 用页表基址寄存器里的物理地址去查。（这条是本页的推理，和冲刺 PPT 2024 讲解的说法一致。）</li>
+  </ol></section>
+  <section class="panel">
+    <div class="form">
+      <label>地址位数<input id="w" type="number" min="8" max="32"></label>
+      <label>页大小（2 的几次方 B）<input id="p" type="number" min="4" max="30"></label>
+      <label>页表项大小（B）<input id="e" type="number" min="1"></label>
+      <label>页表起始虚拟地址<input id="pv" type="text"></label>
+      <label>页表起始物理地址<input id="pp" type="text"></label>
+      <label>访问的虚拟地址<input id="va" type="text"></label>
+      <label>处理后得到的物理地址<input id="pa" type="text"></label>
+      <label class="chk"><input id="guess" type="checkbox" checked> 先猜再看</label>
+      <button class="btn" id="go" type="button">按这组数据重新演示</button>
+    </div>
+    <div class="presets" id="presets"></div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="view map" id="view"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="2"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+
+    <p class="tip">“先猜再看”开着时，每一小问先停一步问你，自己算完再点下一步。键盘 ← → 单步，空格播放／暂停。</p>
+  </section>
+  <section class="panel two">
+    <div class="col look"><h3>查表用的地址（找页表项）</h3><ul id="look"><li>还没算</li></ul></div>
+    <div class="col final"><h3>最终访问的地址（找数据）</h3><ul id="final"><li>还没算</li></ul></div>
+  </section>
+  <section class="panel"><h2>答案汇总</h2><div class="tw" id="tally"></div></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let frames=[],at=0,timer=null;
+const SPD=[3500,2500,1800,1200,800,500,300];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].q)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;draw(f);
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+function wire(){
+  $('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+  $('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+  $('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+  document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+  showSpd()}
+
+const PRESETS=[
+ ['2024-45 原题',{w:32,p:22,e:4,pv:'B8C0 0000',pp:'6540 0000',va:'1234 5678',pa:'BAB4 5678'}],
+ ['换一组数（自拟，可当检验题）',{w:32,p:22,e:4,pv:'8040 0000',pp:'1240 0000',va:'0ABC DEF0',pa:'C0FC DEF0'}],
+ ['页 4KB、16 位地址（自拟）',{w:16,p:12,e:2,pv:'F000',pp:'3000',va:'5A3C',pa:'7A3C'}]];
+const H=(n,w)=>{const d=Math.ceil(w/4);let s=n.toString(16).toUpperCase().padStart(d,'0');if(d===8)s=s.slice(0,4)+' '+s.slice(4);return s+'H'};
+const h=(n)=>n.toString(16).toUpperCase()+'H';
+const ph=s=>{const t=s.replace(/\s|h$/gi,'');return /^[0-9a-f]+$/i.test(t)?parseInt(t,16):NaN};
+let cfg=null;
+function build(){const c={w:+$('w').value,p:+$('p').value,e:+$('e').value,pv:ph($('pv').value),pp:ph($('pp').value),va:ph($('va').value),pa:ph($('pa').value)};
+  if(!(c.w>=8&&c.w<=32&&c.p>=2&&c.p<c.w))return '地址位数、页大小不对。';const le=Math.log2(c.e);if(!Number.isInteger(le))return '页表项大小要是 2 的幂。';
+  const lim=2**c.w;for(const k of ['pv','pp','va','pa'])if(!(c[k]>=0&&c[k]<lim))return '四个地址都要是不超过地址位数的十六进制数。';
+  const P=2**c.p,nb=c.w-c.p;if(c.pv%P||c.pp%P)return '页表起始地址要按页对齐（低位偏移全 0）。';
+  const off=c.va%P,vpn=Math.floor(c.va/P);if(c.pa%P!==off)return `物理地址的低 ${c.p} 位要和虚拟地址的偏移一样（偏移照抄）。`;
+  const tblBytes=2**nb*c.e;
+  const R={vpn,off,idx:vpn*c.e,pteV:c.pv+vpn*c.e,pteP:c.pp+vpn*c.e,frame:Math.floor(c.pa/P),tpg:Math.floor(c.pv/P),tframe:Math.floor(c.pp/P)};
+  R.tIdx=R.tpg*c.e;R.tpteV=c.pv+R.tIdx;R.tpteP=c.pp+R.tIdx;R.multi=tblBytes>P;
+  if(R.multi)return `这组数一级页表要 ${tblBytes} B，超过一页（${P} B），不是 2024-45 的情形，换一组数。`;
+  cfg={c,R,P,nb};const F=[];const look=[],fin=[],tal=[];
+  const push=(note,o={})=>F.push(Object.assign({note,look:look.slice(),fin:fin.slice(),tal:tal.slice(),hl:[]},o));
+  const W=c.w;
+  push(`页大小 2^${c.p} B，偏移 ${c.p} 位，页号 ${nb} 位，一共 2^${nb} = ${2**nb} 页。一级页表 ${2**nb} 项 × ${c.e} B = ${tblBytes} B，${tblBytes===P?'正好一页':'不到一页'}。页表放在虚拟地址 ${H(c.pv,W)} 开始的这一页，装在物理地址 ${H(c.pp,W)} 开始的页框。`,{stage:0});
+  push(`<span class="ask">访问 ${H(c.va,W)}，页号和偏移各是多少？</span>`,{q:true,stage:0});
+  tal.push(['虚拟地址的页号',`${H(c.va,W)} &gt;&gt; ${c.p}`,h(vpn)]);
+  push(`高 ${nb} 位是页号 <b>${h(vpn)}</b>，低 ${c.p} 位是偏移 <b>${h(off)}</b>。缺页了，要给页 ${h(vpn)} 分配页框，并改它的页表项。`,{stage:1,split:true,hl:['data']});
+  push(`<span class="ask">页 ${h(vpn)} 的页表项在页表里离开头多少字节？</span>`,{q:true,stage:1,split:true});
+  push(`页号 × 页表项大小 = ${h(vpn)} × ${c.e} = <b>${h(R.idx)}</b>（也就是左移 ${le} 位）。这个偏移虚拟、物理两边都一样。`,{stage:2,split:true,hl:['pte']});
+  push(`<span class="ask">这个页表项的<b>虚拟地址</b>是多少？</span>`,{q:true,stage:2,split:true,hl:['pte']});
+  look.push(`页表项虚拟地址 ${H(R.pteV,W)}（OS 改页表用）`);tal.push(['页表项的虚拟地址',`${H(c.pv,W)} + ${h(R.idx)}`,H(R.pteV,W)]);
+  push(`页表起始虚拟地址 + ${h(R.idx)} = <b>${H(R.pteV,W)}</b>。缺页处理程序是操作系统的代码，它就用这个地址去写页表项。`,{stage:3,split:true,hl:['pte','vlink']});
+  push(`<span class="ask">这个页表项的<b>物理地址</b>是多少？</span>`,{q:true,stage:3,split:true,hl:['pte']});
+  look.push(`页表项物理地址 ${H(R.pteP,W)}（MMU 查页表用）`);tal.push(['页表项的物理地址',`${H(c.pp,W)} + ${h(R.idx)}`,H(R.pteP,W)]);
+  push(`页表起始物理地址 + ${h(R.idx)} = <b>${H(R.pteP,W)}</b>。MMU 从页表基址寄存器拿到的是物理地址，它用这个地址读页表项。`,{stage:4,split:true,hl:['pte','plink']});
+  push(`<span class="ask">页表项里的页框号改成多少？</span>`,{q:true,stage:4,split:true,hl:['pte']});
+  fin.push(`页框号 ${h(R.frame)}`);fin.push(`数据的物理地址 ${H(c.pa,W)} = ${h(R.frame)} 拼 ${h(off)}`);tal.push(['更新后的页框号',`${H(c.pa,W)} &gt;&gt; ${c.p}`,h(R.frame)]);
+  push(`题目给了处理后的物理地址 ${H(c.pa,W)}，去掉低 ${c.p} 位偏移，高 ${nb} 位就是页框号 <b>${h(R.frame)}</b>。页表项里填 ${h(R.frame)}，页 ${h(vpn)} 就映射到页框 ${h(R.frame)}。`,{stage:5,split:true,hl:['pte','data','frame']});
+  push(`<div class="warn">10-12 这里丢了分：${H(R.pteP,W)} 是<b>页表项</b>的物理地址，是查表时访问的；${H(c.pa,W)} 才是<b>数据</b>的物理地址。看下面两栏：左边的地址都是为了找页表项，右边才是最后访问的。</div>`,{stage:5,split:true,hl:['pte','data','frame']});
+  push(`<span class="ask">第 2 问：页表自己所在的那一页，页号是多少？</span>`,{q:true,stage:6});
+  tal.push(['页表所在页的页号',`${H(c.pv,W)} &gt;&gt; ${c.p}`,h(R.tpg)]);
+  push(`页表在虚拟地址 ${H(c.pv,W)}，右移 ${c.p} 位，页号 <b>${h(R.tpg)}</b>。页表也在虚拟地址空间里，所以它本身也占一页、也要一个页表项。`,{stage:6,hl:['tpage']});
+  push(`<span class="ask">页 ${h(R.tpg)} 的页表项的虚拟地址是多少？</span>`,{q:true,stage:6,hl:['tpage']});
+  look.push(`页 ${h(R.tpg)} 的页表项虚拟地址 ${H(R.tpteV,W)}`);tal.push(['该页的页表项虚拟地址',`${H(c.pv,W)} + ${h(R.tpg)} × ${c.e}`,H(R.tpteV,W)]);
+  push(`${H(c.pv,W)} + ${h(R.tpg)} × ${c.e} = ${H(c.pv,W)} + ${h(R.tIdx)} = <b>${H(R.tpteV,W)}</b>。算法和第 1 问一样，只是页号换成了 ${h(R.tpg)}。`,{stage:7,hl:['tpage','tpte']});
+  push(`<span class="ask">这一项里的页框号是多少？</span>`,{q:true,stage:7,hl:['tpage','tpte']});
+  tal.push(['该页表项中的页框号',`${H(c.pp,W)} &gt;&gt; ${c.p}`,h(R.tframe)]);
+  push(`页表这一页装在物理地址 ${H(c.pp,W)} 开始的页框里，页框号 = ${H(c.pp,W)} 右移 ${c.p} 位 = <b>${h(R.tframe)}</b>。看图上的回环：第 ${h(R.tpg)} 项指向的页框，正是装着页表自己的那个页框。`,{stage:8,hl:['tpage','tpte','self']});
+  push(`做完。规律：页表项地址 = 页表起始 + 页号 × ${c.e}，虚拟、物理两边各算一次；页框号 = 物理地址右移 ${c.p} 位。`,{stage:9,hl:['pte','data','frame','tpage','tpte','self'],split:true,done:true});
+  frames=F;at=0;return ''}
+
+function draw(f){const {c,R,P,nb}=cfg;const W=c.w;const on=k=>f.hl.includes(k);
+  const S=920,Hh=360;let s=`<svg viewBox="0 0 ${S} ${Hh}" role="img" aria-label="虚拟地址空间、页表和物理内存">`;
+  const col=(x,t)=>`<text x="${x}" y="18" font-size="13" fill="var(--muted)" font-family="var(--sans)">${t}</text>`;
+  s+=col(20,'虚拟地址空间（按页）')+col(330,'页表（放大，1 页）')+col(680,'物理内存（按页框）');
+  const N=2**nb;const yOf=(n,top=40,hh=290)=>top+n/N*hh;
+  // 虚拟空间
+  s+=`<rect x="20" y="40" width="180" height="290" fill="var(--bg)" stroke="var(--line)"/>`;
+  const vbox=(n,lab,key,color)=>{const y=yOf(n);const lit=on(key);return `<rect x="20" y="${y-9}" width="180" height="18" fill="${lit?color:'var(--paper)'}" fill-opacity="${lit?.28:1}" stroke="${lit?color:'var(--line)'}" stroke-width="${lit?2:1}"/><text x="28" y="${y+4}" font-size="12" fill="var(--ink)">页 ${h(n)} ${lab}</text>`};
+  s+=vbox(R.vpn,'数据','data','var(--q)');s+=vbox(R.tpg,'页表','tpage','var(--cmp)');
+  // 物理
+  s+=`<rect x="680" y="40" width="220" height="290" fill="var(--bg)" stroke="var(--line)"/>`;
+  const pbox=(n,lab,key,color,show)=>{const y=yOf(n);const lit=on(key);return `<rect x="680" y="${y-9}" width="220" height="18" fill="${lit?color:'var(--paper)'}" fill-opacity="${lit?.28:1}" stroke="${lit?color:'var(--line)'}" stroke-width="${lit?2:1}"/><text x="688" y="${y+4}" font-size="12" fill="var(--ink)">${show?`页框 ${h(n)} ${lab}`:'页框 ？'}</text>`};
+  const showF=f.stage>=5,showT=f.stage>=8;
+  s+=pbox(showF?R.frame:R.vpn,'数据','frame','var(--q)',showF);s+=pbox(R.tframe,'页表',f.stage>=8?'self':'tpage','var(--cmp)',true);
+  // 页表放大
+  const tx=330,tw=300,ty=40,th=290;s+=`<rect x="${tx}" y="${ty}" width="${tw}" height="${th}" fill="var(--paper)" stroke="var(--cmp)" stroke-width="1.5"/>`;
+  s+=`<text x="${tx+6}" y="${ty+16}" font-size="11" fill="var(--muted)">虚 ${H(c.pv,W)} ／ 物 ${H(c.pp,W)} 起</text>`;
+  const rows=[{i:0,lab:'第 0 项'},{i:R.vpn,lab:`第 ${h(R.vpn)} 项`,key:'pte',val:f.stage>=5?h(R.frame):'？（缺页）'},{i:R.tpg,lab:`第 ${h(R.tpg)} 项`,key:'tpte',val:f.stage>=8?h(R.tframe):'？'},{i:N-1,lab:`第 ${h(N-1)} 项`}].sort((a,b)=>a.i-b.i).filter((r,k,a)=>!k||r.i!==a[k-1].i);
+  rows.forEach(r=>{const y=yOf(r.i,ty+28,th-44);const lit=r.key&&on(r.key);const color=r.key==='tpte'?'var(--cmp)':'var(--q)';
+    s+=`<rect x="${tx+8}" y="${y-10}" width="${tw-16}" height="20" fill="${lit?color:'var(--bg)'}" fill-opacity="${lit?.25:1}" stroke="${lit?color:'var(--line)'}" stroke-width="${lit?2:1}"/>`;
+    s+=`<text x="${tx+14}" y="${y+4}" font-size="11" fill="var(--ink)">${r.lab}　+${h(r.i*c.e)}</text>`;
+    if(r.val)s+=`<text x="${tx+tw-14}" y="${y+4}" text-anchor="end" font-size="12" font-weight="700" fill="var(--ink)">页框 ${r.val}</text>`;
+    if(r.key==='pte'&&f.stage>=3)s+=`<text x="${tx+14}" y="${y+24}" font-size="10" fill="var(--muted)">${on('vlink')||f.stage>3?'虚 '+H(R.pteV,W):''}${f.stage>=4?'　物 '+H(R.pteP,W):''}</text>`;
+    if(r.key==='tpte'&&f.stage>=7)s+=`<text x="${tx+14}" y="${y+24}" font-size="10" fill="var(--muted)">虚 ${H(R.tpteV,W)}</text>`});
+  // 箭头：页 → 页表项 → 页框
+  const arr=(x1,y1,x2,y2,color,dash)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="2" ${dash?'stroke-dasharray="5 4"':''} marker-end="url(#ah)"/>`;
+  s+=`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker></defs>`;
+  if(f.stage>=2)s+=arr(200,yOf(R.vpn),tx+8,yOf(R.vpn,ty+28,th-44),'var(--q)',true);
+  if(f.stage>=5)s+=arr(tx+tw-8,yOf(R.vpn,ty+28,th-44),680,yOf(R.frame),'var(--q)');
+  if(f.stage>=6)s+=arr(200,yOf(R.tpg),tx+8,yOf(R.tpg,ty+28,th-44),'var(--cmp)',true);
+  if(f.stage>=8){s+=arr(tx+tw-8,yOf(R.tpg,ty+28,th-44),680,yOf(R.tframe),'var(--cmp)');
+    s+=`<path d="M 790 ${yOf(R.tframe)+10} C 790 352, 480 352, 480 ${ty+th}" fill="none" stroke="var(--cmp)" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#ah)"/><text x="560" y="350" font-size="11" fill="var(--cmp)">这个页框装的就是页表本身</text>`}
+  s+='</svg>';
+  if(f.split){const vs=(c.va).toString(2).padStart(W,'0');s=`<div class="bits"><div class="fld pg" style="flex:${nb} 1 0"><span>页号 ${nb} 位</span><b>${h(R.vpn)}</b><span class="v">${vs.slice(0,nb)}</span></div><div class="fld of" style="flex:${c.p} 1 0"><span>偏移 ${c.p} 位</span><b>${h(R.off)}</b><span class="v">${vs.slice(nb)}</span></div></div>`+s}
+  $('view').innerHTML=s;$('note').innerHTML=f.note;
+  $('look').innerHTML=f.look.length?f.look.map(x=>`<li>${x}</li>`).join(''):'<li>还没算</li>';
+  $('final').innerHTML=f.fin.length?f.fin.map(x=>`<li>${x}</li>`).join(''):'<li>还没算</li>';
+  $('tally').innerHTML=f.tal.length?`<table class="res"><tr><th>问</th><th>算式</th><th>答案</th></tr>${f.tal.map((r,i)=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="ans ${i===f.tal.length-1&&!frames[at].q?'new':''}">${r[2]}</td></tr>`).join('')}</table>`:'<p class="tip">答一问填一行。</p>'}
+function run(){stop();const e=build();$('err').textContent=e;if(!e)render()}
+function applyPreset(i){const v=PRESETS[i][1];for(const k in v)$(k).value=v[k];$('presets').querySelectorAll('[data-pi]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.pi===i));run()}
+$('presets').innerHTML='例子：'+PRESETS.map(([t],i)=>`<button type="button" class="chip" data-pi="${i}" aria-pressed="false">${t}</button>`).join('');
+$('presets').onclick=e=>{const b=e.target.closest('[data-pi]');if(b)applyPreset(+b.dataset.pi)};
+$('go').onclick=run;wire();applyPreset(0);
+</script>
+</body>
+</html>
