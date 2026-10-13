@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>关键路径</title>
+<style>
+/* AOE graph on top, the four tables (ve, vl, e, l) filled one cell per step below it, with an editable activity list. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:80ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.ctrl .muted{color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+#graph{overflow-x:auto}
+#graph svg{min-width:540px}
+svg{width:100%;height:auto;display:block}
+.g-edge{stroke:var(--muted);stroke-width:1.6;fill:none}
+.g-edge.crit{stroke:var(--mv);stroke-width:3}
+.g-edge.use{stroke:var(--q);stroke-width:3}
+.g-edge.win{stroke:var(--cmp);stroke-width:3.4}
+.g-lab{font:12px var(--mono);fill:var(--ink);paint-order:stroke;stroke:var(--paper);stroke-width:4px}
+.g-lab.crit{fill:var(--mv);font-weight:700}
+.g-node{fill:var(--paper);stroke:var(--green);stroke-width:2}
+.g-node.cur{fill:var(--hl);stroke:var(--cmp);stroke-width:3}
+.g-node.crit{stroke:var(--mv);stroke-width:3}
+.g-num{font:600 14px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.g-ve{font:11px var(--mono);fill:var(--q);text-anchor:middle}
+.g-vl{font:11px var(--mono);fill:var(--mv);text-anchor:middle}
+.tbls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:14px}
+@media (max-width:760px){.tbls{grid-template-columns:minmax(0,1fr)}}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;font:13px var(--mono);width:100%}
+table.t th,table.t td{border:1px solid var(--line);padding:3px 6px;text-align:center;min-width:2.2em}
+table.t th{color:var(--muted);font-weight:400;background:var(--bg)}
+table.t td.cur{background:color-mix(in srgb,var(--cmp) 30%,transparent);font-weight:700}
+table.t td.crit{color:var(--mv);font-weight:700}
+table.t td.q{color:var(--muted)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em}
+.note b{color:var(--done)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:6em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+textarea{width:100%;min-height:9em;font:13px/1.5 var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:6px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;font:13px var(--mono)}
+.acts label{display:flex;gap:4px;align-items:center;border:1px solid var(--line);border-radius:4px;padding:2px 6px;background:var(--bg)}
+.acts input{width:3.4em;font:13px var(--mono);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:3px;padding:1px 4px}
+.acts label.crit{border-color:var(--mv)}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.paths{font:14px var(--mono);margin-top:8px}
+.paths b{color:var(--mv)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="拓扑排序代码走读.html">拓扑排序代码走读</a></div>
+  <header>
+    <h1>关键路径：ve、vl、e、l 四张表</h1>
+    <p class="sub">AOE 网上一步填一格：先按拓扑序正推事件最早发生时间 ve，再按逆拓扑序倒推最迟发生时间 vl，最后算每个活动的 e、l 和时间余量。活动时长可以改，看关键路径怎么变。</p>
+  </header>
+  <section class="panel">
+    <h2>四句话</h2>
+    <ol class="rules">
+      <li><b>ve 正推取最大</b>：源点 ve = 0；ve(j) = max{ ve(i) + 活动 &lt;i,j&gt; 时长 }，所有进 j 的边都要算，取最大（要等最慢的那条做完）。</li>
+      <li><b>vl 倒推取最小</b>：汇点 vl = ve(汇点)；vl(i) = min{ vl(j) − 活动 &lt;i,j&gt; 时长 }，所有出 i 的边都要算，取最小。</li>
+      <li><b>活动看起点和终点</b>：活动 &lt;i,j&gt; 的 e = ve(i)（起点最早），l = vl(j) − 时长（终点最迟往回减）。</li>
+      <li><b>l − e = 0 的是关键活动</b>，关键活动连成的从源点到汇点的路径是关键路径，长度 = ve(汇点)。关键路径可能不止一条；只缩短一条上的活动，工期不一定变短。</li>
+    </ol>
+  </section>
+  <section class="panel">
+    <div class="chips" id="presets">例子：</div>
+    <div style="margin-top:10px" id="graph"></div>
+    <p class="legend">圆圈上方蓝字是 ve，下方红字是 vl（填到才显示）。<span style="color:var(--cmp)">橙色边</span>是这一步取到最大或最小的那条，<span style="color:var(--q)">蓝色边</span>是这一步参与比较的边，<span style="color:var(--mv)">红色粗边</span>是关键活动。</p>
+  </section>
+  <section class="panel">
+    <div class="ctrl">
+      <button class="btn" id="reset" type="button">从头</button>
+      <button class="btn" id="prev" type="button">上一步</button>
+      <button class="btn primary" id="next" type="button">下一步</button>
+      <button class="btn" id="all" type="button">全部填完</button>
+      <label class="muted"><input type="checkbox" id="guessMode" checked> 先猜再看（每格先自己填）</label>
+      <span class="muted" id="prog"></span>
+    </div>
+    <div class="guess hidden" id="gbox"><span id="gq"></span><input id="gin" type="text" inputmode="numeric" aria-label="你的答案"><button class="btn" id="gbtn" type="button">对答案</button><span id="gres"></span></div>
+    <div class="note" id="note" style="margin-top:10px"></div>
+    <div class="tbls" style="margin-top:12px">
+      <div class="tw" id="tv"></div>
+      <div class="tw" id="ta"></div>
+    </div>
+    <div class="paths" id="paths"></div>
+  </section>
+  <section class="panel">
+    <h2>改活动时长（改完从头再填）</h2>
+    <div class="acts" id="acts"></div>
+    <div class="chips" id="tweaks" style="margin-top:8px"></div>
+    <details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--muted)">输入自己的 AOE 网</summary>
+      <p class="legend">每行一个活动：<code>名字 起点 终点 时长</code>，例如 <code>a 1 2 3</code>。顶点用数字或字母都行，只能有一个源点和一个汇点。</p>
+      <textarea id="src"></textarea>
+      <div class="ctrl" style="margin-top:6px"><button class="btn primary" id="load" type="button">用这个网</button></div>
+    </details>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <h2>例子从哪来</h2>
+    <p class="sub" id="srcnote"></p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const PRESETS=[
+ {name:'讲义例题（两条关键路径）',src:'a 1 2 3\nb 3 2 4\nc 1 3 8\nd 2 4 7\ne 2 5 6\nf 3 5 10\ng 4 6 6\nh 5 6 9',
+  note:'罗素《第六章 图（下）》关键路径一节第 82–95 页的 AOE 网：6 个事件、8 个活动。拓扑序 1,3,2,4,5,6；ve = 0,12,8,19,18,27（按事件 1–6），vl = 0,12,8,21,18,27；关键路径 1→3→2→5→6 和 1→3→5→6，工期 27。讲义第 96–98 页的三道思考题在下面“改时长”里一键试。',
+  tweaks:[['只把 f 缩到 9',{f:9}],['e 缩到 5、f 缩到 9',{e:5,f:9}],['e 缩到 3、f 缩到 7',{e:3,f:7}]]},
+ {name:'强化第三讲（三条关键路径）',src:'a 1 2 3\nb 1 3 8\nc 2 4 9\nd 3 2 4\ne 2 5 6\nf 3 5 10\ng 4 6 6\nh 5 6 9',
+  note:'数据结构强化第三讲 PPT 第 28 页例题：问加快哪些活动能缩短工期，选项 A. c 和 e　B. d 和 c　C. f 和 d　D. f 和 h，答案 C。三条关键路径 1-3-5-6、1-3-2-5-6、1-3-2-4-6 都是 27，f 在第一条上，d 在后两条上，两个一起加快三条才都变短。页面上 2→4 的活动 c 被水印盖住，按三条关键路径都等于 27 反推为 9。',
+  tweaks:[['只加快 f（10→9）',{f:9}],['f 和 d 各减 1（选项 C）',{f:9,d:3}],['c 和 e 各减 1（选项 A）',{c:8,e:5}]]},
+ {name:'2011-41 应用题',src:'a 0 1 4\nb 0 2 6\nc 1 2 5\nd 2 3 4\ne 2 4 3\nf 3 5 3\ng 4 5 3',
+  note:'2011 年 408 第 41 题第 3 问：由上三角邻接矩阵还原出的有向带权图（顶点 0–5）求关键路径和长度。活动名 a–g 是这里为了标注加的，题目里没有。答案：关键路径 0→1→2→3→5，长度 16（王道《数据结构》第 6 章综合应用题 09 解答）。矩阵怎么还原见“矩阵压缩存储”页。',tweaks:[]}
+];
+let G=null,frames=[],pos=0,guessed=new Set(),pi=0;
+function parse(txt){const acts=[];const lines=txt.split('\n').map(s=>s.trim()).filter(Boolean);
+  for(const ln of lines){const p=ln.split(/[\s,，]+/);if(p.length!==4)throw `这一行要 4 项：${ln}`;const w=+p[3];if(!Number.isFinite(w)||w<0)throw `时长要是非负数：${ln}`;acts.push({n:p[0],u:p[1],v:p[2],w})}
+  if(!acts.length)throw '至少一个活动';if(new Set(acts.map(a=>a.n)).size!==acts.length)throw '活动名字重复了';
+  const vs=[];acts.forEach(a=>{[a.u,a.v].forEach(x=>{if(!vs.includes(x))vs.push(x)})});
+  vs.sort((a,b)=>{const na=+a,nb=+b;return Number.isFinite(na)&&Number.isFinite(nb)?na-nb:a<b?-1:a>b?1:0});
+  const indeg={},outd={};vs.forEach(v=>{indeg[v]=0;outd[v]=0});acts.forEach(a=>{indeg[a.v]++;outd[a.u]++});
+  const srcs=vs.filter(v=>!indeg[v]),sinks=vs.filter(v=>!outd[v]);if(srcs.length!==1||sinks.length!==1)throw `要正好一个源点和一个汇点，现在源点 ${srcs.join(',')||'无'}，汇点 ${sinks.join(',')||'无'}`;
+  /* topological order: queue, smallest first */
+  const d={...indeg},q=[srcs[0]],topo=[];while(q.length){q.sort((a,b)=>vs.indexOf(a)-vs.indexOf(b));const x=q.shift();topo.push(x);acts.filter(a=>a.u===x).forEach(a=>{if(--d[a.v]===0)q.push(a.v)})}
+  if(topo.length!==vs.length)throw '有环，不是 AOE 网';
+  return {acts,vs,topo,src:srcs[0],sink:sinks[0]}}
+function solve(g){const ve={},vl={};g.topo.forEach(v=>{const inn=g.acts.filter(a=>a.v===v);ve[v]=inn.length?Math.max(...inn.map(a=>ve[a.u]+a.w)):0});
+  [...g.topo].reverse().forEach(v=>{const out=g.acts.filter(a=>a.u===v);vl[v]=out.length?Math.min(...out.map(a=>vl[a.v]-a.w)):ve[v]});
+  const e={},l={};g.acts.forEach(a=>{e[a.n]=ve[a.u];l[a.n]=vl[a.v]-a.w});return {ve,vl,e,l}}
+function critPaths(g,S){const crit=g.acts.filter(a=>S.l[a.n]-S.e[a.n]===0);const out=[];const go=(v,p)=>{if(v===g.sink){out.push(p);return}crit.filter(a=>a.u===v).forEach(a=>go(a.v,[...p,a]))};go(g.src,[]);return out}
+function build(){const g=G,S=solve(g);const F=[];
+  F.push({k:'start',txt:`拓扑序：${g.topo.join(' → ')}。ve 按这个顺序正推，vl 按反过来的顺序倒推。`});
+  g.topo.forEach(v=>{const inn=g.acts.filter(a=>a.v===v);
+    if(!inn.length)F.push({k:'ve',v,val:0,use:[],win:[],txt:`源点 ${v}：ve(${v}) = <b>0</b>。`});
+    else{const c=inn.map(a=>({a,s:S.ve[a.u]+a.w}));const m=Math.max(...c.map(x=>x.s));
+      F.push({k:'ve',v,val:m,use:inn.map(a=>a.n),win:c.filter(x=>x.s===m).map(x=>x.a.n),txt:`ve(${v})：进 ${v} 的边有 ${inn.length} 条，${c.map(x=>`${x.a.n}: ve(${x.a.u}) + ${x.a.w} = ${S.ve[x.a.u]} + ${x.a.w} = ${x.s}`).join('；')}。${inn.length>1?'取最大':'只有一条'}，ve(${v}) = <b>${m}</b>。`})}});
+  [...g.topo].reverse().forEach(v=>{const out=g.acts.filter(a=>a.u===v);
+    if(!out.length)F.push({k:'vl',v,val:S.ve[v],use:[],win:[],txt:`汇点 ${v}：vl(${v}) = ve(${v}) = <b>${S.ve[v]}</b>，这就是工期。`});
+    else{const c=out.map(a=>({a,s:S.vl[a.v]-a.w}));const m=Math.min(...c.map(x=>x.s));
+      F.push({k:'vl',v,val:m,use:out.map(a=>a.n),win:c.filter(x=>x.s===m).map(x=>x.a.n),txt:`vl(${v})：出 ${v} 的边有 ${out.length} 条，${c.map(x=>`${x.a.n}: vl(${x.a.v}) − ${x.a.w} = ${S.vl[x.a.v]} − ${x.a.w} = ${x.s}`).join('；')}。${out.length>1?'取最小':'只有一条'}，vl(${v}) = <b>${m}</b>。`})}});
+  g.acts.forEach(a=>{F.push({k:'e',n:a.n,val:S.e[a.n],use:[a.n],win:[],txt:`活动 ${a.n} = &lt;${a.u}, ${a.v}&gt;：e(${a.n}) = ve(${a.u}) = <b>${S.e[a.n]}</b>（起点事件最早发生，活动就能最早开始）。`});
+    const sl=S.l[a.n]-S.e[a.n];F.push({k:'l',n:a.n,val:S.l[a.n],use:[a.n],win:[],txt:`l(${a.n}) = vl(${a.v}) − ${a.w} = ${S.vl[a.v]} − ${a.w} = <b>${S.l[a.n]}</b>；余量 l − e = ${S.l[a.n]} − ${S.e[a.n]} = ${sl}${sl===0?'，<b>关键活动</b>':''}。`})});
+  const P=critPaths(g,S);F.push({k:'end',txt:`余量为 0 的关键活动：${g.acts.filter(a=>S.l[a.n]===S.e[a.n]).map(a=>a.n).join('、')}。关键路径 ${P.length} 条，长度都是 ${S.ve[g.sink]}。${P.length>1?'有多条时，只缩短其中一条上的活动，工期不变；要缩短的活动得同时在所有关键路径上，或者每条上都缩。':''}`});
+  return {F,S,P}}
+let R=null;
+function load(txt,keepPos){try{G=parse(txt)}catch(e){$('err').textContent=e;return false}$('err').textContent='';R=build();frames=R.F;pos=keepPos?Math.min(pos,frames.length-1):0;guessed=new Set();drawActs();render();return true}
+function filled(){const s={ve:{},vl:{},e:{},l:{}};for(let i=1;i<=pos;i++){const f=frames[i];if(f.k==='ve'||f.k==='vl')s[f.k][f.v]=f.val;if(f.k==='e'||f.k==='l')s[f.k][f.n]=f.val}return s}
+function layout(){const g=G,lev={};g.topo.forEach(v=>{const inn=g.acts.filter(a=>a.v===v);lev[v]=inn.length?Math.max(...inn.map(a=>lev[a.u]+1)):0});
+  const cols={};g.topo.forEach(v=>{(cols[lev[v]]=cols[lev[v]]||[]).push(v)});const L=Math.max(...Object.values(lev));const W=Math.max(560,140*(L+1)),H=Math.max(...Object.values(cols).map(c=>c.length))*110+50;
+  const p={};Object.entries(cols).forEach(([l,c])=>c.forEach((v,i)=>{p[v]=[60+(W-120)*(L?+l/L:0.5),H/2+(i-(c.length-1)/2)*110]}));return {p,W,H}}
+function render(){const f=frames[pos],s=filled(),{p,W,H}=layout(),g=G,done=pos===frames.length-1;
+  const critSet=new Set(done?g.acts.filter(a=>R.S.l[a.n]===R.S.e[a.n]).map(a=>a.n):Object.keys(s.l).filter(n=>s.l[n]===s.e[n]));
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="AOE 网"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="context-stroke"/></marker></defs>`;
+  g.acts.forEach(a=>{const [x1,y1]=p[a.u],[x2,y2]=p[a.v];const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy)||1;const r=22;const sx=x1+dx/len*r,sy=y1+dy/len*r,ex=x2-dx/len*(r+3),ey=y2-dy/len*(r+3);
+    const same=g.acts.filter(b=>(b.u===a.v&&b.v===a.u)).length;const bend=same?18:0;const mx=(sx+ex)/2-dy/len*bend,my=(sy+ey)/2+dx/len*bend;
+    let cls='g-edge';if(f.win&&f.win.includes(a.n))cls+=' win';else if(f.use&&f.use.includes(a.n))cls+=' use';else if(critSet.has(a.n))cls+=' crit';
+    svg+=`<path class="${cls}" d="M${sx},${sy} Q${mx},${my} ${ex},${ey}" marker-end="url(#ah)"/>`;
+    const lx=(sx+2*mx+ex)/4-dy/len*10,ly=(sy+2*my+ey)/4+dx/len*10;svg+=`<text class="g-lab${critSet.has(a.n)?' crit':''}" x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central">${a.n}=${a.w}</text>`});
+  g.vs.forEach(v=>{const [x,y]=p[v];const cur=f.v===v;const crit=done&&R.S.ve[v]===R.S.vl[v];svg+=`<circle class="g-node${cur?' cur':''}${crit&&!cur?' crit':''}" cx="${x}" cy="${y}" r="20"/><text class="g-num" x="${x}" y="${y}">${v}</text>`;
+    if(s.ve[v]!==undefined)svg+=`<text class="g-ve" x="${x}" y="${y-27}">ve ${s.ve[v]}</text>`;if(s.vl[v]!==undefined)svg+=`<text class="g-vl" x="${x}" y="${y+36}">vl ${s.vl[v]}</text>`});
+  $('graph').innerHTML=svg+'</svg>';
+  const cell=(k,id,val)=>{const isCur=f.k===k&&(f.v===id||f.n===id);const v=val===undefined?'':val;return `<td class="${isCur?'cur':''}">${isCur&&pending()?'?':v}</td>`};
+  $('tv').innerHTML=`<table class="t"><tr><th>事件</th>${g.topo.map(v=>`<th>${v}</th>`).join('')}</tr><tr><th>ve</th>${g.topo.map(v=>cell('ve',v,s.ve[v])).join('')}</tr><tr><th>vl</th>${g.topo.map(v=>cell('vl',v,s.vl[v])).join('')}</tr></table><p class="legend">按拓扑序排列。</p>`;
+  $('ta').innerHTML=`<table class="t"><tr><th>活动</th>${g.acts.map(a=>`<th>${a.n}<br><small>${a.u}→${a.v}</small></th>`).join('')}</tr><tr><th>时长</th>${g.acts.map(a=>`<td class="q">${a.w}</td>`).join('')}</tr><tr><th>e</th>${g.acts.map(a=>cell('e',a.n,s.e[a.n])).join('')}</tr><tr><th>l</th>${g.acts.map(a=>cell('l',a.n,s.l[a.n])).join('')}</tr><tr><th>l−e</th>${g.acts.map(a=>{const ok=s.l[a.n]!==undefined&&!(f.k==='l'&&f.n===a.n&&pending());const d=ok?s.l[a.n]-s.e[a.n]:'';return `<td class="${ok&&d===0?'crit':''}">${d}</td>`}).join('')}</tr></table>`;
+  $('note').innerHTML=pending()?guessPrompt(f):f.txt;
+  $('paths').innerHTML=done?R.P.map(P=>`<div>关键路径：<b>${[G.src,...P.map(a=>a.v)].join(' → ')}</b>（${P.map(a=>a.n).join(' + ')} = ${P.reduce((s,a)=>s+a.w,0)}）</div>`).join(''):'';
+  $('prog').textContent=`第 ${pos} / ${frames.length-1} 步`;$('prev').disabled=pos===0;$('next').disabled=done&&!pending();
+  const pg=pending();$('gbox').classList.toggle('hidden',!pg);if(pg){$('gq').innerHTML=guessLabel(f);if(!$('gres').dataset.keep){$('gin').value='';$('gres').textContent=''}$('gres').dataset.keep=''}
+  document.querySelectorAll('#acts label').forEach(l=>l.classList.toggle('crit',done&&critSet.has(l.dataset.n)))}
+function pending(){const f=frames[pos];return $('guessMode').checked&&f&&f.val!==undefined&&!guessed.has(pos)}
+function guessLabel(f){return f.k==='ve'||f.k==='vl'?`${f.k}(${f.v}) = `:`${f.k}(${f.n}) = `}
+function guessPrompt(f){const g=G;if(f.k==='ve'){const inn=g.acts.filter(a=>a.v===f.v);return inn.length?`算 ve(${f.v})：进 ${f.v} 的边是 ${inn.map(a=>`${a.n}(${a.u}→${a.v}, ${a.w})`).join('、')}（蓝色）。每条 ve(起点) + 时长，取最大。`:`源点 ${f.v} 的 ve 是多少？`}
+  if(f.k==='vl'){const out=g.acts.filter(a=>a.u===f.v);return out.length?`算 vl(${f.v})：出 ${f.v} 的边是 ${out.map(a=>`${a.n}(${a.u}→${a.v}, ${a.w})`).join('、')}（蓝色）。每条 vl(终点) − 时长，取最小。`:`汇点 ${f.v} 的 vl 是多少？`}
+  const a=g.acts.find(x=>x.n===f.n);return f.k==='e'?`活动 ${a.n} = &lt;${a.u}, ${a.v}&gt; 的最早开始时间 e 是多少？看它的起点事件。`:`活动 ${a.n} = &lt;${a.u}, ${a.v}&gt;，时长 ${a.w}，最迟开始时间 l 是多少？看它的终点事件。`}
+function check(){const f=frames[pos];const v=$('gin').value.trim();if(v==='')return;const ok=+v===f.val;
+  let hint='';if(!ok){if(f.k==='ve'&&G.acts.filter(a=>a.v===f.v).some(a=>R.S.ve[a.u]+a.w===+v))hint='这是其中一条，但 ve 要取最大。';
+    else if(f.k==='vl'&&G.acts.filter(a=>a.u===f.v).some(a=>R.S.vl[a.v]-a.w===+v))hint='这是其中一条，但 vl 要取最小。';
+    else if(f.k==='l'){const a=G.acts.find(x=>x.n===f.n);if(+v===R.S.vl[a.v])hint='忘了减时长：l = vl(终点) − 时长。';else if(+v===R.S.vl[a.u])hint='l 不是 vl(起点)，是 vl(终点) − 时长。'}
+    else if(f.k==='e'){const a=G.acts.find(x=>x.n===f.n);if(+v===R.S.ve[a.v])hint='e 看起点事件的 ve，不是终点。'}}
+  guessed.add(pos);$('gres').dataset.keep='';render();$('note').innerHTML=(ok?'<span class="ok">对了。</span> ':`<span class="bad">你填 ${v}，应为 ${f.val}。</span>${hint} `)+f.txt}
+function step(d){if(d>0&&pending()){$('gin').focus();return}pos=Math.max(0,Math.min(frames.length-1,pos+d));render();if(pending())$('gin').focus()}
+$('next').onclick=()=>step(1);$('prev').onclick=()=>step(-1);$('reset').onclick=()=>{pos=0;guessed=new Set();render()};
+$('all').onclick=()=>{for(let i=0;i<frames.length;i++)guessed.add(i);pos=frames.length-1;render()};
+$('gbtn').onclick=check;$('gin').onkeydown=e=>{if(e.key==='Enter')check()};$('guessMode').onchange=render;
+function drawActs(){$('acts').innerHTML=G.acts.map(a=>`<label data-n="${a.n}">${a.n} ${a.u}→${a.v}<input type="number" min="0" value="${a.w}" data-n="${a.n}" aria-label="活动 ${a.n} 时长"></label>`).join('');
+  $('acts').querySelectorAll('input').forEach(inp=>inp.onchange=()=>{const w=+inp.value;if(!(w>=0))return;G.acts.find(a=>a.n===inp.dataset.n).w=w;setSrc();load($('src').value,false)})}
+function setSrc(){$('src').value=G.acts.map(a=>`${a.n} ${a.u} ${a.v} ${a.w}`).join('\n')}
+function usePreset(i){pi=i;const P=PRESETS[i];$('src').value=P.src;load(P.src,false);$('srcnote').textContent=P.note;
+  $('presets').querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===i));
+  $('tweaks').innerHTML=P.tweaks.length?'讲义的问题：'+P.tweaks.map(([t],k)=>`<button type="button" class="chip" data-t="${k}">${t}</button>`).join('')+'<button type="button" class="chip" data-t="-1">恢复原时长</button>':''}
+$('tweaks').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;const P=PRESETS[pi];const k=+b.dataset.t;load(P.src,false);
+  if(k>=0){Object.entries(P.tweaks[k][1]).forEach(([n,w])=>G.acts.find(a=>a.n===n).w=w);setSrc();load($('src').value,false);$('all').click()}
+  const old=solve(parse(P.src)).ve[G.sink];const now=R.S.ve[G.sink];if(k>=0)$('paths').insertAdjacentHTML('beforeend',`<div>原工期 ${old}，现在 <b>${now}</b>，${now<old?`缩短 ${old-now}`:'没变'}。</div>`)};
+$('load').onclick=()=>{if(load($('src').value,false)){$('presets').querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed','false'));$('tweaks').innerHTML='';$('srcnote').textContent='自己输入的网。'}};
+$('presets').insertAdjacentHTML('beforeend',PRESETS.map((p,i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p.name}</button>`).join(''));
+$('presets').onclick=e=>{const b=e.target.closest('[data-p]');if(b)usePreset(+b.dataset.p)};
+usePreset(0);
+</script>
+</body>
+</html>
