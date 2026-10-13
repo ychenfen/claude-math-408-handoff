@@ -830,6 +830,83 @@ P.csn={tpl:'结构体',name:'孩子兄弟 CSNode / CSTree',when:SWHEN,
   R.Q('C 右边连着 D。C 是叶子吗？',['是','不是'],0,'C 的 firstchild 是 NULL，没有孩子，就是叶子。右边连着兄弟不影响。');
   R.S('leaf','叶子就是 firstchild 为 NULL 的结点：E、F、C、G，一共 4 个。T11 的 CountLeafCS 就是数这个。',[tv({c:{E:'done',F:'done',C:'done',G:'done'}})])}};
 
+/* ---------- 第 4 章补充：树的另两种表示法、顺序二叉树（2022）、并查集 ---------- */
+const PTN=[['A',-1],['B',0],['C',0],['D',0],['E',1],['F',1],['G',3]];
+const ptTable=(o={})=>['html',`<div><h2>T.nodes[ ]（T.n = 7）</h2><table class="mtx"><tr><th>下标</th>${PTN.map((_,i)=>`<th>${i}</th>`).join('')}</tr><tr><th>data</th>${PTN.map((x,i)=>`<td class="${o.hl===i?'cmp':''}${(o.ok||[]).includes(i)?' mv':''}">${x[0]}</td>`).join('')}</tr><tr><th>parent</th>${PTN.map((x,i)=>`<td class="${o.hl===i?'cmp':''}${(o.ok||[]).includes(i)?' mv':''}">${x[1]}</td>`).join('')}</tr></table><div class="legend">原树：A 的孩子 B C D，B 的孩子 E F，D 的孩子 G。</div></div>`];
+P.pt={tpl:'结构体',name:'双亲表示法 PTree',when:SWHEN,
+ idea:['用一个数组存所有结点，每个结点只记“我的双亲在第几格”。','根没有双亲，parent 记 −1；森林就是有好几个 −1。','找双亲 O(1)；找孩子要把整个数组扫一遍。'],
+ why:{par:'根的 parent 为 −1。森林里每棵树的根都是 −1（打卡表 3.3.1 特别提醒应用题可能考森林的双亲表示）。',n:'n 记结点个数，扫数组时当上界。',scan:'找孩子只能扫一遍，这就是 T1 的单层循环。',if:'T 是变量用 .；nodes[i] 是结构体也用 .。'},
+ blanks:['ts','d','par','n1','ts2','nd','n','n2'],
+ code:[['#define MAX_TREE_SIZE 100','','def'],['typedef struct{','// 一个结点','ts'],['    char data;','','d'],['    int parent;','// 双亲的下标，根为 -1','par'],['} PTNode;','','n1'],['typedef struct{','// 整棵树','ts2'],['    PTNode nodes[MAX_TREE_SIZE];','','nd'],['    int n;','// 结点数','n'],['} PTree;','','n2'],['',''],['for (int i = 0; i < T.n; i++)','// 找下标 k 的孩子：扫整个数组','scan'],['    if (T.nodes[i].parent == k) printf("%c ", T.nodes[i].data);','','if']],
+ run(R){const a=[],b=[];
+  R.S('def','容量 100。',[H(box('MAX_TREE_SIZE',[['值','100']]))]);
+  R.S('ts','先定义“一个结点”。',[H(box('结点（还没起名）',a))]);
+  a.push(['char data','数据','new']);R.S('d','data。',[H(box('结点（还没起名）',a))]);a[0][2]='';
+  R.Q('A 是根，没有双亲。它的 parent 写几？',['0','-1','NULL'],1,'parent 是下标，0 是一个合法下标（就是 A 自己），所以用 −1 表示“没有”。');
+  a.push(['int parent','双亲下标','new']);R.S('par','parent：双亲在数组里的下标。这里是 int 下标，不是指针。',[H(box('结点（还没起名）',a))]);a[1][2]='';
+  R.S('n1','起名 PTNode。',[H(box('PTNode',a))]);
+  R.S('ts2','再定义“整棵树”。',[H(box('PTNode',a),box('树（还没起名）',b))]);
+  b.push(['PTNode nodes[100]','结点数组','new']);R.S('nd','nodes：所有结点放在一个数组里。',[H(box('PTNode',a),box('树（还没起名）',b))]);b[0][2]='';
+  b.push(['int n','结点数','new']);R.S('n','n：实际有几个结点。',[H(box('PTNode',a),box('树（还没起名）',b))]);b[1][2]='';
+  R.S('n2','起名 PTree。把例子的树存进去就是右边这张表。',[H(box('PTree',b)),ptTable()]);
+  R.Q('找 A（下标 0）的孩子，要看哪些格？',['只看 A 那一格','扫整个数组，找 parent == 0 的'],1,'结点里只记了双亲，没记孩子，所以要扫一遍。');
+  const ok=[];for(let i=0;i<7;i++){if(PTN[i][1]===0)ok.push(i);R.S(PTN[i][1]===0?'if':'scan',PTN[i][1]===0?`nodes[${i}].parent == 0：${PTN[i][0]} 是 A 的孩子。`:`nodes[${i}].parent = ${PTN[i][1]}，不是。`,[ptTable({hl:i,ok:ok.slice()})])}
+  R.S('scan','A 的孩子是 B C D。反过来找 E 的双亲只要看 nodes[4].parent = 1，一步就到 B。',[ptTable({ok})])}};
+P.ct={tpl:'结构体',name:'孩子表示法 CTNode',when:SWHEN,
+ idea:['每个结点后面挂一条链表，链上是它所有孩子的下标。','两层：孩子链结点 Child，树结点 CTNode；树就是 CTNode 数组。','它和图的邻接表长得一模一样（打卡表 3.3.3 也让把两者放一起记）。'],
+ why:{idx:'index 是孩子在数组里的下标，对应邻接表的 adjvex。',nx:'next 指同一个结点的下一个孩子，对应邻接表的 nextarc。',fc:'firstChild 对应邻接表的 firstarc。',arr:'一棵树 = 一个 CTNode 数组，对应 Graph 里的 adjlist。'},
+ blanks:['ts','idx','nx','n1','ts2','d','fc','n2','arr'],
+ code:[['typedef struct Child{','// 孩子链表的结点','ts'],['    int index;','// 孩子的下标','idx'],['    struct Child *next;','// 下一个孩子','nx'],['} Child;','','n1'],['typedef struct{','// 树的结点','ts2'],['    char data;','','d'],['    Child *firstChild;','// 第一个孩子','fc'],['} CTNode;','','n2'],['CTNode tree[MAX_TREE_SIZE];','// 一棵树 = 一个结点数组','arr'],['',''],['for (Child *p = tree[k].firstChild; p != NULL; p = p->next)','// 找 k 的孩子','walk'],['    printf("%c ", tree[p->index].data);','','pr']],
+ run(R){const a=[],b=[];const adj=[[1,2,3],[4,5],[],[6],[],[],[]];const AV=(cur,cv)=>['adj',{adj,cur,vis:[],curV:cv,title:'tree[ ]：0 A，1 B，2 C，3 D，4 E，5 F，6 G'}];
+  R.S('ts','第一层：孩子链表的结点。',[H(box('struct Child',a))]);
+  a.push(['int index','孩子下标','new']);R.S('idx','index：这个孩子在数组里的下标。',[H(box('struct Child',a))]);a[0][2]='';
+  a.push(['struct Child *next','→ 下一个孩子','new']);R.S('nx','next：同一个双亲的下一个孩子。',[H(box('struct Child',a))]);a[1][2]='';
+  R.S('n1','起名 Child。',[H(box('Child',a))]);
+  R.S('ts2','第二层：树的结点。',[H(box('Child',a),box('树结点（还没起名）',b))]);
+  b.push(['char data','数据','new']);R.S('d','data。',[H(box('Child',a),box('树结点（还没起名）',b))]);b[0][2]='';
+  b.push(['Child *firstChild','→ 第一个孩子','new']);R.S('fc','firstChild：孩子链表的头。',[H(box('Child',a),box('树结点（还没起名）',b))]);b[1][2]='';
+  R.S('n2','起名 CTNode。',[H(box('Child',a),box('CTNode',b))]);
+  R.Q('右边马上画出整棵树。它和哪个结构长得一样？',['邻接矩阵','邻接表','孩子兄弟链表'],1,'左边一列结点，每个后面挂一串孩子下标，和邻接表的“顶点 + 边表”完全同构。');
+  R.S('arr','树就是一个 CTNode 数组。画出来和邻接表一样：A 后面挂 1 2 3（B C D），B 后面挂 4 5（E F），D 后面挂 6（G）。',[AV(null)]);
+  for(let k=0;k<3;k++){R.S('walk',k?'p = p->next，下一个孩子。':'找 A（k = 0）的孩子：p = tree[0].firstChild。',[AV([0,k])]);R.S('pr',`输出 tree[p->index] = tree[${adj[0][k]}]，即 ${'ABCDEFG'[adj[0][k]]}。`,[AV([0,k])])}
+  R.S('walk','p = NULL，A 的孩子 B C D 输出完。这就是 T10 的循环。',[AV(null,0)])}};
+const SQ=[40,25,60,-1,30,-1,80,-1,-1,27];
+function sqTree(){const nodes={};SQ.forEach((v,i)=>{if(v!==-1)nodes['n'+i]={t:String(v),l:null,r:null}});Object.keys(nodes).forEach(k=>{const i=+k.slice(1),l=2*i+1,r=2*i+2;if(l<SQ.length&&SQ[l]!==-1)nodes[k].l='n'+l;if(r<SQ.length&&SQ[r]!==-1)nodes[k].r='n'+r});return nodes}
+P.sqbt={tpl:'结构体',name:'顺序存储二叉树 SqBiTree（2022）',when:SWHEN,
+ idea:['按完全二叉树的编号把结点放进数组，空位置存 −1。','根在下标 0 时：i 的左孩子 2i+1，右孩子 2i+2，双亲 (i−1)/2。','用之前先判 i 越没越界、是不是 −1。'],
+ why:{arr:'2022 真题就是这个结构体，空结点 −1，根在下标 0。打卡表用的是 bool isEmpty、根在下标 1，题目给哪种照哪种。',lr:'根在 0：2i+1、2i+2。根在 1：2i、2i+1。考前看清题目从几开始。',f:'根在 0：(i−1)/2。根在 1：i/2。',chk:'手册丢分点：先判 i >= ElemNum，再取 SqBiTNode[i]，顺序反了会越界。'},
+ blanks:['ts','arr','num','name','lr','f','chk'],
+ code:[['#define MAX_SIZE 100','','def'],['typedef struct{','','ts'],['    int SqBiTNode[MAX_SIZE];','// 结点值，空结点为 -1','arr'],['    int ElemNum;','// 占用的数组长度','num'],['} SqBiTree;','','name'],['',''],['int l = 2 * i + 1, r = 2 * i + 2;','// 根在下标 0','lr'],['int f = (i - 1) / 2;','// 双亲','f'],['if (i >= T.ElemNum || T.SqBiTNode[i] == -1) return;','// 先判越界，再判空','chk']],
+ run(R){const f=[];const A=(o={})=>['arr',{name:'T.SqBiTNode[ ]（ElemNum = 10）',vals:SQ,cls:o.c||{},ptrs:o.p||{}}];const TR=(c={})=>['tree',{nodes:sqTree(),root:'n0',cls:c,title:'对应的二叉树'}];
+  R.S('ts','开始定义。',[H(box('新类型',f))]);
+  f.push(['int SqBiTNode[100]','结点值，空为 -1','new']);R.S('arr','结点值数组。没有结点的位置存 −1。',[H(box('新类型',f))]);f[0][2]='';
+  f.push(['int ElemNum','占用长度','new']);R.S('num','ElemNum：数组用到第几格。',[H(box('新类型',f))]);f[1][2]='';
+  R.S('name','起名 SqBiTree。例子：40 25 60 −1 30 −1 80 −1 −1 27。',[H(box('SqBiTree',f)),A(),TR()]);
+  R.Q('i = 1（25）。它的左、右孩子在哪两格？',['2 和 3','3 和 4','2 和 4'],1,'根在 0：2×1+1 = 3，2×1+2 = 4。');
+  R.S('lr','i = 1：l = 3，r = 4。',[A({p:{i:1,l:3,r:4},c:{1:'cmp',3:'cmp',4:'cmp'}}),TR({n1:'cur'})]);
+  R.S('chk','看 l = 3：SqBiTNode[3] = −1，25 没有左孩子。',[A({p:{l:3},c:{3:'mv'}}),TR({n1:'cur'})]);
+  R.S('chk','看 r = 4：4 < 10 且不是 −1，右孩子是 30。',[A({p:{r:4},c:{4:'done'}}),TR({n1:'cur',n4:'done'})]);
+  R.Q('i = 9（27）的双亲在哪一格？',['4','5','3'],0,'(9−1)/2 = 4，就是 30。');
+  R.S('f','i = 9：f = (9−1)/2 = 4，27 的双亲是 30。',[A({p:{i:9,f:4},c:{9:'cmp',4:'done'}}),TR({n9:'cur',n4:'done'})]);
+  R.S('chk','i = 10（30 的右孩子 2×4+2）：10 >= ElemNum，直接返回，不会去读数组外的 SqBiTNode[10]。',[A({c:{4:'cmp'}}),TR({n4:'cur'})])}};
+P.uf={tpl:'结构体',name:'并查集（P2）',when:'手册把并查集列为 P2：看懂、默写一遍。判连通一律用 DFS，不用并查集。打卡表 3.5 讲了它的定义和 Union / Find。',
+ idea:['每个集合是一棵树，用双亲表示法存：S[i] 是 i 的双亲，根存负数。','Find(x)：沿着 S[x] 一直往上走，走到根。','Union：把一棵树的根挂到另一棵树的根下面。'],
+ why:{s:'和双亲表示法一样，只是只剩 parent 一个字段，所以一个 int 数组就够。',in2:'初始每个元素自己是一个集合，都是根，存 −1。',f2:'S[x] >= 0 说明 x 还有双亲，继续往上；根的 S 是负数。',u2:'传进来的必须是两个根；同一个根说明已经在一个集合里。',u3:'打卡表还给了两种优化（P2 了解）：小树并到大树（根存 −结点数），Find 时路径压缩。'},
+ blanks:['s','in2','f2','f3','u2','u3'],
+ code:[['#define SIZE 6','','def'],['int S[SIZE];','// S[i] = i 的双亲；根存 -1','s'],['void Initial(int S[]){','','in'],['    for (int i = 0; i < SIZE; i++) S[i] = -1;','// 每个元素自成一个集合','in2'],['}',''],['int Find(int S[], int x){','','f'],['    while (S[x] >= 0) x = S[x];','// 往上找到根','f2'],['    return x;','','f3'],['}',''],['void Union(int S[], int Root1, int Root2){','','u'],['    if (Root1 == Root2) return;','// 已经是同一个集合','u2'],['    S[Root2] = Root1;','// Root2 挂到 Root1 下面','u3'],['}',''],['// 用法：Union(S, Find(S, a), Find(S, b));','','use']],
+ run(R){const s=Array(6).fill('?');const sets=()=>{const g={};s.forEach((v,i)=>{if(v==='?')return;let r=i;while(s[r]>=0)r=s[r];(g[r]=g[r]||[]).push(i)});return Object.entries(g).map(([r,m])=>`{${m.join(' ')}}（根 ${r}）`).join('  ')||'—'};
+  const V=(o={})=>[['vars',Object.assign({'集合':sets()},o.v||{})],['arr',{name:'S[ ]',vals:s,cls:o.c||{},ptrs:o.p||{}}]];
+  R.S('s','一个 int 数组就是整个并查集。',V());
+  R.S('in','Initial：初始化。',V());for(let i=0;i<6;i++)s[i]=-1;R.S('in2','全部置 −1：6 个元素各自是一个集合。',V());
+  const find=(x0,label)=>{let x=x0;R.S('f',`${label}Find(S, ${x0})。`,V({p:{x}}));while(s[x]>=0){R.S('f2',`S[${x}] = ${s[x]} ≥ 0，往上走到 ${s[x]}。`,V({p:{x},c:{[x]:'cmp'}}));x=s[x]}R.S('f2',`S[${x}] = ${s[x]} < 0，${x} 是根。`,V({p:{x},c:{[x]:'done'}}));R.S('f3',`返回 ${x}。`,V({p:{x},c:{[x]:'done'}}));return x};
+  const uni=(a,b)=>{R.S('use',`合并 ${a} 和 ${b} 所在的集合：先各自 Find 到根。`,V());const r1=find(a,''),r2=find(b,'');R.S('u',`Union(S, ${r1}, ${r2})。`,V());
+   if(r1===r2){R.S('u2','两个根相同，已经在一个集合，返回。',V());return}R.S('u2',`${r1} ≠ ${r2}，要合并。`,V());s[r2]=r1;R.S('u3',`S[${r2}] = ${r1}：根 ${r2} 挂到 ${r1} 下面。`,V({c:{[r2]:'mv'}}))};
+  uni(1,2);uni(3,4);
+  R.Q('现在 S = −1 −1 1 −1 3 −1。合并 2 和 4 所在的集合，Find(2) 返回几？',['2','1','-1'],1,'S[2] = 1 ≥ 0 往上到 1；S[1] = −1，1 是根。');
+  uni(2,4);
+  R.Q('S[3] 已经改成 1。Find(4) 要往上走几步、返回几？',['走 1 步，返回 3','走 2 步，返回 1'],1,'4 → 3 → 1，S[1] < 0，根是 1。树越来越高 Find 就越慢，这就是“小树并大树”和“路径压缩”要解决的。');
+  find(4,'查 4 属于哪个集合：');R.S('use',`最后三个集合：${sets()}。`,V())}};
+
 const TPL=[['结构体','第 4 章'],['T1','多重循环'],['T2','辅助数组'],['T3','有序合并'],['T4','链表转数组'],['T5','二叉树递归'],['T6','邻接矩阵'],['T7','增删'],['T8','层序'],['T9','DFS 拓扑'],['T10','邻接表'],['T11','孩子兄弟'],['快排',''],['二分',''],['归并','']];
 
 /* ---------- player ---------- */
