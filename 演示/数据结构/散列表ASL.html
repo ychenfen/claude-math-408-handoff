@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>查找成功与失败</title>
+<style>
+/* Mode tabs, then the structure (hash slots, chains or a tree with failure nodes), then two tallies that fill in step by step. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6em}
+.form input.wide{width:min(26em,80vw)}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer}
+.form [hidden]{display:none}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.phase{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;margin-bottom:8px}
+.phase span{border:1px solid var(--line);border-radius:999px;padding:1px 10px;color:var(--muted)}
+.phase span.on{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.view{overflow-x:auto}
+.table{display:flex;gap:4px;padding:4px 0 26px}
+.slot{min-width:46px;text-align:center;border:1.5px solid var(--line);border-radius:5px;background:var(--bg);position:relative;font:16px/1.4 var(--mono);padding:6px 2px}
+.slot small{display:block;font-size:11px;color:var(--muted)}
+.cur{border-color:var(--q)!important;box-shadow:0 0 0 2px var(--q) inset}
+.cmp{border-color:var(--cmp)!important;background:color-mix(in srgb,var(--cmp) 24%,transparent)!important}
+.hit{border-color:var(--done)!important;background:color-mix(in srgb,var(--done) 26%,transparent)!important}
+.empty{border-color:var(--mv)!important;background:color-mix(in srgb,var(--mv) 18%,transparent)!important}
+.slot .n,.cn .n{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font:10px var(--mono);color:var(--q);font-weight:700;white-space:nowrap}
+.chains{display:grid;gap:6px;padding-bottom:6px}
+.crow{display:flex;align-items:center;gap:0;font:14px var(--mono)}
+.caddr{width:42px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--hl);padding:2px 0}
+.arrow{width:18px;text-align:center;color:var(--muted)}
+.cn{position:relative;min-width:40px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--bg);padding:2px 4px;margin-bottom:14px}
+.nul{color:var(--muted);padding:0 4px}
+svg text{font-family:var(--mono)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:8px}
+.note .ask{color:var(--q);font-weight:600}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.tallies{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.tw{overflow-x:auto}
+.tally{border-collapse:collapse;font:13px var(--mono)}
+.tally th,.tally td{border:1px solid var(--line);padding:2px 6px;text-align:center;white-space:nowrap}
+.tally th{color:var(--muted);font-weight:400;text-align:left}
+.tally td.new{background:color-mix(in srgb,var(--done) 22%,transparent);font-weight:700}
+.asl{margin-top:6px;font:14px var(--mono)}
+.asl b{color:var(--done)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.block{font-size:14px}
+.block table{border-collapse:collapse;font:13px var(--mono);margin:6px 0}
+.block td,.block th{border:1px solid var(--line);padding:2px 8px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="代码走读.html">代码骨架走读</a></div>
+  <header>
+    <h1>查找成功与查找失败</h1>
+    <p class="sub">五类要算 ASL 的查找逐步演示：先建表或建树，再一个个数查找成功比几次，最后一个个数查找失败比几次。例子取自 2010 年 408 第 41 题和《数据结构应用题打卡表》第 3.6、5.2、5.3 节。</p>
+  </header>
+  <div class="modes" id="modes" role="group" aria-label="查找方法"></div>
+  <section class="panel"><h2>这一类怎么数</h2><ol class="rules" id="rules"></ol></section>
+  <section class="panel">
+    <div class="form">
+      <label id="lkeys"><span id="keysLabel">关键字</span><input id="keys" class="wide" type="text"></label>
+      <label data-for="hash">a（H = (a × key) mod p）<input id="a" type="number" min="1"></label>
+      <label data-for="hash">p<input id="p" type="number" min="1"></label>
+      <label data-for="lin">表长 m<input id="m" type="number" min="1"></label>
+      <label class="chk" data-for="hash"><input id="emptyOne" type="checkbox"> <span id="emptyLabel"></span></label>
+      <label class="chk"><input id="guess" type="checkbox" checked> 先猜再看</label>
+      <button class="btn" id="go" type="button">按这组数据重新演示</button>
+    </div>
+    <div class="presets" id="presets"></div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="phase" id="phase"></div>
+    <div class="view" id="view" aria-live="off"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="2"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+    <p class="tip">“先猜再看”开着时，每数一个之前先停一步问你，自己数完再点下一步对答案。键盘 ← → 单步，空格播放／暂停。</p>
+  </section>
+  <section class="panel tallies">
+    <div><h2>查找成功</h2><div class="tw" id="succ"></div></div>
+    <div><h2>查找失败</h2><div class="tw" id="fail"></div></div>
+  </section>
+  <section class="panel block">
+    <h2>第六类：分块查找（只讲公式，不做动画）</h2>
+    <p>先查索引表，再在块内顺序查，两段的比较次数相加。打卡表 5.1 的例子：15 个元素分 4 块，块长 4、3、4、4，索引和块内都顺序查找：</p>
+    <table><tr><th>第几块</th><td>1</td><td>2</td><td>3</td><td>4</td></tr><tr><th>查索引比较</th><td>1</td><td>2</td><td>3</td><td>4</td></tr><tr><th>块内各元素</th><td>1 2 3 4</td><td>1 2 3</td><td>1 2 3 4</td><td>1 2 3 4</td></tr><tr><th>合计</th><td>2+3+4+5</td><td>3+4+5</td><td>4+5+6+7</td><td>5+6+7+8</td></tr></table>
+    <p>ASL成功 = 74 / 15 ≈ 4.93。查找失败的 ASL 一般不考（失败情况的概率说不清），只会问“查某一个不存在的关键字比较了几次”：先查索引确定在哪一块，再把那一块从头比到尾。均匀分块的公式：n 个元素分 b 块、每块 s 个，都顺序查找时 ASL = (b+1)/2 + (s+1)/2。</p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const frac=(s,n)=>{if(!n)return '—';const g=gcd(s,n);return (n/g===1?`${s/g}`:`${s/g}/${n/g}`)+(s%n?` ≈ ${(s/n).toFixed(2)}`:'')};
+const parseKeys=s=>s.split(/[\s,，、]+/).filter(Boolean).map(Number);
+
+const MODES={
+ lin:{name:'线性探测',phases:['① 建表','② 查找成功','③ 查找失败','④ 算 ASL'],
+  rules:['<b>成功</b>：每个关键字比较的次数 = 插入它时探测了几个位置。加起来 <b>÷ 关键字个数 n</b>。','<b>失败</b>：对散列函数能算出的每个地址（mod p 就是 0～p−1），从那里往后一个个比，<b>比到空位才确定失败，和空位那一次也算</b>（王道、408 答案都这样算）。加起来 <b>÷ p</b>，不是 ÷ 表长，也不是 ÷ n。','表长 = n ÷ 装填因子。表长可以比 p 大，后面那几格只会被探测用到，不会作为失败的起点。'],
+  keysLabel:'关键字（按插入顺序）',emptyLabel:'和空位比较算 1 次',
+  presets:[['2010 年 41 题',{keys:'7, 8, 30, 11, 18, 9, 14',a:3,p:7,m:10,e:true}],['打卡表 5.3.1（表长 16，mod 13）',{keys:'19, 14, 23, 1, 68, 20, 84, 27, 55, 11, 10, 79',a:1,p:13,m:16,e:true}]]},
+ chain:{name:'拉链法',phases:['① 建表','② 查找成功','③ 查找失败','④ 算 ASL'],
+  rules:['<b>成功</b>：关键字在链上排第几个，就比较几次。加起来 <b>÷ n</b>。','<b>失败</b>：对每个地址 0～p−1，把那条链上的结点全比一遍才确定失败，次数 = 链长。加起来 <b>÷ p</b>。','空链比较 0 次：打卡表和多数答案只数“和关键字的比较”，空指针不算。王道个别题把空指针算 1 次，题目没说时按不算、并在答案里写明。','新结点接在链尾（和打卡表一致）。表长等于 p。'],
+  keysLabel:'关键字（按插入顺序）',emptyLabel:'和空指针比较也算 1 次',
+  presets:[['打卡表 5.3.4（mod 13）',{keys:'19, 14, 23, 1, 68, 20, 84, 27, 55, 11, 10, 79',a:1,p:13,e:false}],['2010 年的数据改用拉链',{keys:'7, 8, 30, 11, 18, 9, 14',a:3,p:7,e:false}]]},
+ bin:{name:'折半查找',phases:['① 画判定树','② 查找成功','③ 查找失败','④ 算 ASL'],
+  rules:['先画判定树：mid = (low + high) / 2 向下取整，mid 当根，左半边、右半边各自递归。','<b>成功</b>：结点在第几层就比较几次。加起来 <b>÷ n</b>。','<b>失败</b>：补上 n + 1 个失败结点（方块）。落到某个失败结点，比较次数 = 它的双亲所在层数（失败结点自己不算）。加起来 <b>÷ (n + 1)</b>。'],
+  keysLabel:'有序表（从小到大）',
+  presets:[['11 个元素',{keys:'7, 10, 13, 16, 19, 29, 32, 33, 37, 41, 43'}],['10 个元素',{keys:'1, 2, 3, 4, 5, 6, 7, 8, 9, 10'}]]},
+ bst:{name:'二叉排序树',phases:['① 依次插入','② 查找成功','③ 查找失败','④ 算 ASL'],
+  rules:['按顺序插入：比根小往左、比根大往右，走到空位放下。','<b>成功</b>：结点在第几层就比较几次，÷ n。','<b>失败</b>：补 n + 1 个失败结点，次数 = 失败结点的双亲所在层数，÷ (n + 1)。和折半查找同一套数法。'],
+  keysLabel:'插入序列',
+  presets:[['打卡表 3.6.1',{keys:'50, 26, 10, 3, 5, 60, 90, 40, 55, 100, 59'}]]},
+ avl:{name:'平衡二叉树',phases:['① 依次插入并调整','② 查找成功','③ 查找失败','④ 算 ASL'],
+  rules:['插入方法同二叉排序树；插完从下往上找第一个失衡的结点，按 LL、RR、LR、RL 旋转。','数 ASL 和二叉排序树完全一样：成功 = 层数，÷ n；失败 = 失败结点双亲的层数，÷ (n + 1)。','同一个序列，平衡后树更矮，两个 ASL 都会变小。'],
+  keysLabel:'插入序列',
+  presets:[['打卡表 3.6.4（含 LL、LR、RR、RL）',{keys:'50, 26, 10, 3, 5, 60, 90, 40, 55, 100, 59'}]]}
+};
+let mode='lin',frames=[],at=0,timer=null,cfg=null;
+
+/* ---------- 散列 ---------- */
+function buildHash(F,push,c){const {keys,a,p,e}=c,lin=mode==='lin',m=lin?c.m:p,H=k=>(a*k)%p;
+  const T=Array(m).fill(null),L=Array.from({length:p},()=>[]),succ=[],fail=[];const probes={};
+  const P=(note,o={})=>push(note,Object.assign({view:lin?{kind:'slots',T:T.slice(),p}:{kind:'chains',L:L.map(x=>x.slice())},succ:succ.map(x=>x.slice()),fail:fail.map(x=>x.slice())},o));
+  if(lin){const al=keys.length/m;P(`有 ${keys.length} 个关键字，表长 m = ${m}${Math.abs(al-0.7)<1e-9?`（装填因子 0.7：${keys.length} ÷ 0.7 = ${m}）`:''}。H 只能算出 0～${p-1}。`,{phase:0})}
+  else P(`拉链法：表长就是 p = ${p}，每个地址挂一条链。`,{phase:0});
+  keys.forEach(k=>{const h=H(k);
+    if(lin){const path=[];P(`插入 ${k}：H(${k}) = (${a}×${k}) mod ${p} = ${a*k} mod ${p} = <b>${h}</b>。`,{phase:0,cls:{[h]:'cur'}});let i=h;
+      while(T[i]!==null){path.push(i);P(`${i} 号已经有 ${T[i]}，冲突，往后看 ${(i+1)%m} 号。`,{phase:0,cls:Object.assign(Object.fromEntries(path.map(x=>[x,'cmp'])),{[(i+1)%m]:'cur'})});i=(i+1)%m}
+      path.push(i);T[i]=k;probes[k]=path;P(`${i} 号是空的，${k} 放进 ${i} 号。一共看了 ${path.length} 个位置，以后查 ${k} 也比较 ${path.length} 次。`,{phase:0,cls:Object.assign(Object.fromEntries(path.map(x=>[x,'cmp'])),{[i]:'hit'}),nums:Object.fromEntries(path.map((x,t)=>[x,'第'+(t+1)+'次']))})}
+    else{L[h].push(k);P(`插入 ${k}：H(${k}) = ${a*k} mod ${p} = <b>${h}</b>，接到 ${h} 号链的${L[h].length>1?'尾巴上（这条链现在 '+L[h].length+' 个）':'第一个'}。`,{phase:0,ccls:{[h+':'+(L[h].length-1)]:'hit'}})}});
+  P('建好了。下面数查找成功。',{phase:1});
+  keys.forEach(k=>{const h=H(k);
+    P(`<span class="ask">先猜：</span>查 ${k}，H(${k}) = ${h}。要比较几次才找到？`,{phase:1,q:true,cls:lin?{[h]:'cur'}:{},ccls:lin?{}:{['a'+h]:'cur'}});
+    if(lin){const path=probes[k];succ.push([k,path.length]);P(`查 ${k}：${path.map((x,t)=>`和 ${x} 号的 ${T[x]} 比${t===path.length-1?'，相等':'，不等'}`).join('；')}。比较 <b>${path.length}</b> 次。`,{phase:1,cls:Object.assign(Object.fromEntries(path.map(x=>[x,'cmp'])),{[path[path.length-1]]:'hit'}),nums:Object.fromEntries(path.map((x,t)=>[x,'第'+(t+1)+'次'])),newS:succ.length-1})}
+    else{const pos=L[h].indexOf(k);succ.push([k,pos+1]);const cc={};const nn={};for(let t=0;t<=pos;t++){cc[h+':'+t]=t===pos?'hit':'cmp';nn[h+':'+t]='第'+(t+1)+'次'}
+      P(`查 ${k}：在 ${h} 号链上排第 ${pos+1} 个，${pos?`前面比过 ${L[h].slice(0,pos).join('、')}，`:''}比较 <b>${pos+1}</b> 次。`,{phase:1,ccls:cc,cnums:nn,newS:succ.length-1})}});
+  const sS=succ.reduce((s,x)=>s+x[1],0);
+  P(`查找成功加起来 ${sS}，÷ n = ${keys.length}：ASL成功 = <b>${frac(sS,keys.length)}</b>。下面数查找失败。`,{phase:1});
+  for(let h=0;h<p;h++){
+    P(`<span class="ask">先猜：</span>一个不在表里的关键字算出 H = ${h}。要比几次才确定失败？`,{phase:2,q:true,cls:lin?{[h]:'cur'}:{},ccls:lin?{}:{['a'+h]:'cur'}});
+    if(lin){const path=[];let i=h;while(T[i]!==null&&path.length<m){path.push(i);i=(i+1)%m}const full=path.length===m;const cnt=path.length+(full||!e?0:1);fail.push([h,cnt]);
+      const cls=Object.fromEntries(path.map(x=>[x,'cmp'])),nums=Object.fromEntries(path.map((x,t)=>[x,'第'+(t+1)+'次']));if(!full){cls[i]='empty';if(e)nums[i]='第'+(path.length+1)+'次'}
+      P(`H = ${h}：${path.length?`和 ${path.map(x=>`${x} 号（${T[x]}）`).join('、')} 比，都不等；`:''}${full?'整张表比完。':`${i} 号是空位，确定失败${e?'，和空位这一次也算':'，空位这次不算'}。`}一共 <b>${cnt}</b> 次。`,{phase:2,cls,nums,newF:fail.length-1})}
+    else{const len=L[h].length,cnt=len+(e?1:0);fail.push([h,cnt]);const cc={['a'+h]:'cmp'},nn={};L[h].forEach((_,t)=>{cc[h+':'+t]='cmp';nn[h+':'+t]='第'+(t+1)+'次'});if(e)cc['n'+h]='empty';
+      P(`H = ${h}：${len?`把链上 ${L[h].join('、')} 都比一遍，都不等`:'这条链是空的'}${e?'，再和空指针比 1 次':''}。一共 <b>${cnt}</b> 次。`,{phase:2,ccls:cc,cnums:nn,newF:fail.length-1})}}
+  const sF=fail.reduce((s,x)=>s+x[1],0);
+  P(`查找失败加起来 ${sF}，÷ p = ${p}${lin?`（不是表长 ${m}，也不是 n = ${keys.length}）`:''}：ASL失败 = <b>${frac(sF,p)}</b>。`,{phase:3});
+  P(`答案：ASL成功 = (${succ.map(x=>x[1]).join(' + ')}) / ${keys.length} = <b>${frac(sS,keys.length)}</b>；ASL失败 = (${fail.map(x=>x[1]).join(' + ')}) / ${p} = <b>${frac(sF,p)}</b>。`,{phase:3});
+  return {sHead:'关键字',fHead:'H(key)',sDen:keys.length,fDen:p,sLab:'n',fLab:'p'}}
+
+/* ---------- 树 ---------- */
+const cl=t=>t?{k:t.k,l:cl(t.l),r:cl(t.r)}:null;
+const ht=t=>t?t.h:0;const upd=t=>{t.h=Math.max(ht(t.l),ht(t.r))+1;return t};
+const rotR=y=>{const x=y.l;y.l=x.r;x.r=y;upd(y);return upd(x)};const rotL=x=>{const y=x.r;x.r=y.l;y.l=x;upd(x);return upd(y)};
+function avlIns(t,k,info){if(!t)return {k,l:null,r:null,h:1};if(k<t.k)t.l=avlIns(t.l,k,info);else t.r=avlIns(t.r,k,info);upd(t);const b=ht(t.l)-ht(t.r);
+  if(b>1){if(k<t.l.k){info.push(`LL（${t.k} 失衡，右旋）`);return rotR(t)}info.push(`LR（${t.k} 失衡，先左旋 ${t.l.k} 再右旋）`);t.l=rotL(t.l);return rotR(t)}
+  if(b<-1){if(k>t.r.k){info.push(`RR（${t.k} 失衡，左旋）`);return rotL(t)}info.push(`RL（${t.k} 失衡，先右旋 ${t.r.k} 再左旋）`);t.r=rotR(t.r);return rotL(t)}return t}
+function bstIns(t,k){if(!t)return {k,l:null,r:null};if(k<t.k)t.l=bstIns(t.l,k);else t.r=bstIns(t.r,k);return t}
+function pathTo(t,k){const p=[];while(t){p.push(t.k);if(k===t.k)break;t=k<t.k?t.l:t.r}return p}
+function levels(t){const out=[];(function go(n,d){if(!n)return;go(n.l,d+1);out.push([n.k,d]);go(n.r,d+1)})(t,1);return out}
+function externals(t){const out=[];(function go(n,d,lo,hi,par){if(!n){out.push({lo,hi,par,d:d-1});return}go(n.l,d+1,lo,n.k,n.k);go(n.r,d+1,n.k,hi,n.k)})(t,1,null,null,null);return out}
+const ivl=e=>`(${e.lo===null?'−∞':e.lo}, ${e.hi===null?'+∞':e.hi})`;
+function buildTree(F,push,c){const keys=c.keys,succ=[],fail=[];let T=null;
+  const P=(note,o={})=>push(note,Object.assign({view:{kind:'tree',T:cl(T),ext:!!o.ext},succ:succ.map(x=>x.slice()),fail:fail.map(x=>x.slice())},o));
+  if(mode==='bin'){const s=keys.slice();const sorted=s.every((x,i)=>!i||s[i-1]<x);if(!sorted)return '折半查找要求有序表从小到大、没有重复。';
+    P(`${s.length} 个元素，下标 0～${s.length-1}。mid = (low + high) / 2，向下取整。`,{phase:0});
+    const rec=(lo,hi)=>{if(lo>hi)return null;const mid=(lo+hi)>>1;return {k:s[mid],lo,hi,mid,l:null,r:null}};
+    const order=[];const build=(lo,hi,parentSet)=>{if(lo>hi)return null;const mid=(lo+hi)>>1;const n={k:s[mid],l:null,r:null};parentSet(n);order.push([lo,hi,mid]);P(`区间 [${lo}, ${hi}]：mid = (${lo}+${hi})/2 = ${mid}，A[${mid}] = ${s[mid]} 当这棵子树的根。`,{phase:0,tcls:{[s[mid]]:'hit'}});build(lo,mid-1,x=>n.l=x);build(mid+1,hi,x=>n.r=x);return n};
+    build(0,s.length-1,x=>T=x)}
+  else{if(new Set(keys).size!==keys.length)return '关键字有重复。';
+    keys.forEach(k=>{const path=T?pathTo(T,k).filter(x=>x!==k):[];if(mode==='bst'){T=bstIns(T,k);P(`插入 ${k}：${path.length?`沿 ${path.join(' → ')} 往下比，`:''}放在空位上。`,{phase:0,tcls:Object.assign(Object.fromEntries(path.map(x=>[x,'cmp'])),{[k]:'hit'})})}
+      else{const info=[];P(`插入 ${k}：${path.length?`沿 ${path.join(' → ')} 往下，`:''}先按二叉排序树放下。`,{phase:0,view:{kind:'tree',T:bstIns(cl(T),k),ext:false},tcls:Object.assign(Object.fromEntries(path.map(x=>[x,'cmp'])),{[k]:'hit'})});
+        T=avlIns(T,k,info);if(info.length)P(`插入 ${k} 后失衡：${info.join('；')}。调整后如上。`,{phase:0,tcls:{[k]:'hit'}})}})}
+  const lv=levels(T);P('树建好了。查找成功：结点在第几层，就比较几次（从根开始比）。',{phase:1});
+  const bylevel=lv.slice().sort((x,y)=>x[1]-y[1]);
+  bylevel.forEach(([k,d])=>{P(`<span class="ask">先猜：</span>查 ${k} 要比较几次？`,{phase:1,q:true,tcls:{[k]:'cur'}});const path=pathTo(T,k);succ.push([k,d]);
+    P(`查 ${k}：依次和 ${path.join('、')} 比，在第 ${d} 层找到，比较 <b>${d}</b> 次。`,{phase:1,tcls:Object.assign(Object.fromEntries(path.map(x=>[x,'cmp'])),{[k]:'hit'}),newS:succ.length-1})});
+  const sS=succ.reduce((s,x)=>s+x[1],0);
+  P(`成功加起来 ${sS}，÷ n = ${lv.length}：ASL成功 = <b>${frac(sS,lv.length)}</b>。下面补上 ${lv.length+1} 个失败结点（方块），数查找失败。`,{phase:1,ext:true});
+  const ex=externals(T);
+  ex.forEach((e,i)=>{P(`<span class="ask">先猜：</span>要找的值落在区间 ${ivl(e)}，比较几次后确定失败？`,{phase:2,q:true,ext:true,ecls:{[i]:'cur'}});fail.push([ivl(e),e.d]);
+    const path=pathTo(T,e.par);P(`区间 ${ivl(e)}：依次和 ${path.join('、')} 比，走到 ${e.par} 的${e.lo===e.par?'右':'左'}边是空的，确定失败。${e.par} 在第 ${e.d} 层，比较 <b>${e.d}</b> 次（方块自己不算）。`,{phase:2,ext:true,tcls:Object.fromEntries(path.map(x=>[x,'cmp'])),ecls:{[i]:'empty'},newF:fail.length-1})});
+  const sF=fail.reduce((s,x)=>s+x[1],0);
+  P(`失败加起来 ${sF}，÷ (n + 1) = ${ex.length}：ASL失败 = <b>${frac(sF,ex.length)}</b>。`,{phase:3,ext:true});
+  P(`答案：ASL成功 = <b>${frac(sS,lv.length)}</b>；ASL失败 = <b>${frac(sF,ex.length)}</b>。${mode==='bin'?'':'每层个数 × 层数相加更快：'+[...new Set(lv.map(x=>x[1]))].sort().map(d=>`${d}×${lv.filter(x=>x[1]===d).length}`).join(' + ')+' = '+sS+'。'}`,{phase:3,ext:true});
+  return {sHead:'关键字',fHead:'失败区间',sDen:lv.length,fDen:ex.length,sLab:'n',fLab:'n+1'}}
+
+/* ---------- 画 ---------- */
+function drawSlots(v,f){return `<div class="table">${v.T.map((x,i)=>`<div class="slot ${(f.cls||{})[i]||''}">${x===null?'&nbsp;':x}<small>${i}</small>${(f.nums||{})[i]?`<span class="n">${f.nums[i]}</span>`:''}</div>`).join('')}</div>`}
+function drawChains(v,f){const c=f.ccls||{},n=f.cnums||{};return `<div class="chains">${v.L.map((ch,h)=>`<div class="crow"><div class="caddr ${c['a'+h]||''}">${h}</div>${ch.map((k,t)=>`<span class="arrow">→</span><div class="cn ${c[h+':'+t]||''}">${k}${n[h+':'+t]?`<span class="n">${n[h+':'+t]}</span>`:''}</div>`).join('')}<span class="arrow">→</span><span class="nul ${c['n'+h]?'empty':''}">∧</span></div>`).join('')}</div>`}
+function drawTree(v,f){const T=v.T;if(!T)return '<p class="tip">（空树）</p>';const items=[];let x=0;
+  (function go(n,d,par,lo,hi){if(!n){if(v.ext)items.push({ext:true,x:x++,d,par,lo,hi});return}const me={k:n.k,d,par};go(n.l,d+1,me,lo,n.k);me.x=x++;items.push(me);go(n.r,d+1,me,n.k,hi)})(T,1,null,null,null);
+  const dx=v.ext?30:44,W=Math.max(300,x*dx+30),maxd=Math.max(...items.map(i=>i.d)),Hh=maxd*58+20;const X=i=>20+i.x*dx+dx/2-6,Y=i=>14+(i.d-1)*58+14;
+  let s=`<svg viewBox="0 0 ${W} ${Hh}" width="${W}" role="img" aria-label="查找树">`;const tc=f.tcls||{},ec=f.ecls||{};
+  items.forEach(i=>{if(i.par)s+=`<line x1="${X(i.par)}" y1="${Y(i.par)}" x2="${X(i)}" y2="${Y(i)}" stroke="var(--muted)" stroke-width="1.3" ${i.ext?'stroke-dasharray="3 3"':''}/>`});
+  let ei=0;items.forEach(i=>{if(i.ext){const c=ec[ei++];const col=c==='empty'?'var(--mv)':c==='cur'?'var(--q)':'var(--muted)';s+=`<rect x="${X(i)-8}" y="${Y(i)-8}" width="16" height="16" rx="2" fill="${c==='empty'?'color-mix(in srgb,var(--mv) 30%,transparent)':'var(--paper)'}" stroke="${col}" stroke-width="${c?2.5:1.2}"/>`;return}
+    const c=tc[i.k];const fill=c==='hit'?'var(--done)':c==='cmp'?'color-mix(in srgb,var(--cmp) 40%,var(--paper))':'var(--paper)';
+    s+=`<circle cx="${X(i)}" cy="${Y(i)}" r="15" fill="${fill}" stroke="${c==='cur'?'var(--q)':'var(--ink)'}" stroke-width="${c==='cur'?3:1.3}"/><text x="${X(i)}" y="${Y(i)+4.5}" text-anchor="middle" font-size="12" fill="${c==='hit'?'var(--paper)':'var(--ink)'}">${i.k}</text>`});
+  for(let d=1;d<=maxd;d++)s+=`<text x="4" y="${14+(d-1)*58+18}" font-size="10" fill="var(--muted)">${d}</text>`;
+  return s+'</svg>'+'<p class="tip">左边的数字是层数。'+(v.ext?'方块是失败结点，虚线连到它的双亲。':'')+'</p>'}
+function tallyHTML(rows,head,newIdx,den,lab){if(!rows.length)return '<p class="tip">还没开始数。</p>';const s=rows.reduce((t,x)=>t+x[1],0);
+  return `<table class="tally"><tr><th>${head}</th>${rows.map(x=>`<td>${esc(x[0])}</td>`).join('')}</tr><tr><th>比较次数</th>${rows.map((x,i)=>`<td class="${i===newIdx?'new':''}">${x[1]}</td>`).join('')}</tr></table><div class="asl">合计 ${s}，÷ ${den}（${lab}）= <b>${frac(s,den)}</b></div>`}
+function draw(){const f=frames[at];if(!f)return;const v=f.view;
+  $('view').innerHTML=v.kind==='slots'?drawSlots(v,f):v.kind==='chains'?drawChains(v,f):drawTree(v,f);
+  $('note').innerHTML=f.note;$('phase').innerHTML=MODES[mode].phases.map((t,i)=>`<span class="${i===f.phase?'on':''}">${t}</span>`).join('');
+  $('succ').innerHTML=tallyHTML(f.succ,cfg.meta.sHead,f.newS,cfg.meta.sDen,cfg.meta.sLab);$('fail').innerHTML=tallyHTML(f.fail,cfg.meta.fHead,f.newF,cfg.meta.fDen,cfg.meta.fLab);
+  $('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+
+/* ---------- 控制 ---------- */
+function build(){const keys=parseKeys($('keys').value);if(!keys.length||keys.some(k=>!Number.isInteger(k)||k<0))return '关键字要是非负整数。';if(keys.length>40)return '最多 40 个关键字。';
+  const c={keys,a:+$('a').value,p:+$('p').value,m:+$('m').value,e:$('emptyOne').checked};const F=[];const push=(note,o)=>F.push(Object.assign({note},o));
+  let meta;if(mode==='lin'||mode==='chain'){if(new Set(keys).size!==keys.length)return '关键字有重复。';if(!(c.a>=1&&c.p>=1))return 'a、p 要是正整数。';
+    if(mode==='lin'){if(!(c.m>=c.p))return '表长 m 不能小于 p。';if(keys.length>c.m)return '关键字比表长还多。'}meta=buildHash(F,push,c)}
+  else{meta=buildTree(F,push,c);if(typeof meta==='string')return meta}
+  c.meta=meta;cfg=c;frames=F;at=0;$('scrub').max=F.length-1;return ''}
+function run(){stop();const e=build();$('err').textContent=e;if(!e)draw()}
+function setMode(m,preset=0){mode=m;const M=MODES[m];
+  $('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
+  $('rules').innerHTML=M.rules.map(r=>`<li>${r}</li>`).join('');$('keysLabel').textContent=M.keysLabel;
+  document.querySelectorAll('[data-for]').forEach(el=>{const f=el.dataset.for;el.hidden=!(f==='hash'?(m==='lin'||m==='chain'):f===m)});
+  if(M.emptyLabel)$('emptyLabel').textContent=M.emptyLabel;
+  $('presets').innerHTML='例子：'+M.presets.map(([t],i)=>`<button type="button" class="chip" data-pi="${i}" aria-pressed="${i===preset}">${t}</button>`).join('');
+  applyPreset(preset);try{history.replaceState(null,'','#'+m)}catch{}}
+function applyPreset(i){const v=MODES[mode].presets[i][1];$('keys').value=v.keys;if(v.a)$('a').value=v.a;if(v.p)$('p').value=v.p;if(v.m)$('m').value=v.m;if('e' in v)$('emptyOne').checked=v.e;
+  $('presets').querySelectorAll('[data-pi]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.pi===i));run()}
+const SPD=[3500,2500,1800,1200,800,500,300];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].q)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());draw()}else{timer=null;draw()}}
+function play(){if(timer){stop();draw();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());draw()}
+$('modes').innerHTML=Object.entries(MODES).map(([k,v])=>`<button type="button" class="chip" data-m="${k}" aria-pressed="false">${v.name}</button>`).join('');
+$('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b)setMode(b.dataset.m)};
+$('presets').onclick=e=>{const b=e.target.closest('[data-pi]');if(b)applyPreset(+b.dataset.pi)};
+$('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);draw()};$('prev').onclick=()=>{stop();at=prevIdx(at);draw()};
+$('first').onclick=()=>{stop();at=0;draw()};$('scrub').oninput=e=>{stop();at=+e.target.value;draw()};
+$('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+$('go').onclick=run;$('emptyOne').onchange=run;
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+showSpd();setMode(MODES[location.hash.slice(1)]?location.hash.slice(1):'lin');
+</script>
+</body>
+</html>
