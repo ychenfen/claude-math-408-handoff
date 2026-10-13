@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>I/O 全链路</title>
+<style>
+/* Scenario tabs, then a layer stack (software above the line, hardware below) beside state cards (CPU, processes and queues, where the data is, saved context), a CPU/device timeline, the step note, and below: a comparison table, an interrupt-mask exercise and closed-book questions. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --hw:#8a6d3b;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:82ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:13px var(--sans);font-weight:600;margin:0 0 6px;color:var(--muted)}
+.modes{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.opts{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:8px}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.opts [hidden]{display:none}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.phase{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;margin-bottom:10px}
+.phase span{border:1px solid var(--line);border-radius:999px;padding:1px 10px;color:var(--muted)}
+.phase span.on{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.phase span.past{color:var(--ink)}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px}
+@media (max-width:820px){.stage{grid-template-columns:minmax(0,1fr)}}
+.layers{display:grid;gap:4px;align-content:start}
+.layer{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:8px;align-items:start;border:1.5px solid var(--line);border-radius:5px;padding:5px 8px;background:var(--bg);transition:border-color .2s,background .2s}
+.layer .nm{font-size:13px;font-weight:600}
+.layer .dt{font-size:12px;color:var(--muted);font-family:var(--mono);overflow-wrap:anywhere}
+.layer.hwl .nm{color:var(--hw)}
+.layer.on{border-color:var(--q);background:color-mix(in srgb,var(--q) 14%,var(--paper));box-shadow:0 0 0 1px var(--q) inset}
+.layer.on .dt{color:var(--ink)}
+.layer.was{border-style:dashed}
+.sep{font-size:11px;color:var(--hw);display:flex;align-items:center;gap:8px;margin:4px 0}
+.sep::before,.sep::after{content:"";flex:1;border-top:1px dashed var(--hw)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px;align-content:start}
+.card{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg);min-width:0}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;font-size:13px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-family:var(--mono);overflow-wrap:anywhere}
+.tag{display:inline-block;border-radius:4px;padding:0 6px;font:12px/1.6 var(--mono);border:1px solid var(--line);background:var(--paper)}
+.tag.u{border-color:var(--done);color:var(--done)}
+.tag.k{border-color:var(--mv);color:var(--mv)}
+.tag.off{background:color-mix(in srgb,var(--mv) 18%,transparent)}
+.st{display:inline-block;border-radius:4px;padding:0 6px;font:12px/1.6 var(--sans);font-weight:600}
+.st.运行{background:color-mix(in srgb,var(--done) 28%,transparent)}
+.st.就绪{background:color-mix(in srgb,var(--cmp) 30%,transparent)}
+.st.阻塞{background:color-mix(in srgb,var(--mv) 28%,transparent)}
+.q{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:12px;margin:3px 0}
+.q .ql{color:var(--muted);min-width:6.5em}
+.pcb{border:1.5px solid var(--ink);border-radius:3px;padding:0 5px;font:12px var(--mono);background:var(--paper)}
+.pcb.new{border-color:var(--cmp);background:color-mix(in srgb,var(--cmp) 25%,transparent)}
+.nil{color:var(--muted);font:12px var(--mono)}
+.chg{background:color-mix(in srgb,var(--cmp) 28%,transparent);border-radius:3px;outline:1px solid var(--cmp)}
+.stack{display:grid;gap:3px;font:12px var(--mono)}
+.stack div{border:1px solid var(--line);border-radius:3px;padding:1px 6px;background:var(--paper)}
+.tl{margin-top:12px;overflow-x:auto}
+.tl table{border-collapse:separate;border-spacing:2px;font-size:11px}
+.tl th{color:var(--muted);font-weight:400;text-align:right;padding-right:6px;white-space:nowrap}
+.tl td{min-width:22px;height:20px;border-radius:3px;text-align:center;cursor:pointer;color:var(--bg);font:10px var(--mono)}
+.tl td.fut{opacity:.22}
+.tl td.cur{outline:2px solid var(--ink);outline-offset:1px}
+.c-P1u{background:var(--done)} .c-P1k{background:var(--mv)} .c-P2u{background:var(--q)} .c-INT{background:var(--hw)} .c-dev{background:var(--cmp)} .c-none{background:transparent;cursor:default}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:4.6em;margin-top:10px}
+.note .ask{color:var(--q);font-weight:600}
+.note .ref{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.note .warn{color:var(--mv)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.tw{overflow-x:auto}
+.res{border-collapse:collapse;font-size:13px}
+.res th,.res td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+.res th{color:var(--muted);font-weight:400;white-space:nowrap}
+.res thead th{color:var(--ink);font-weight:600;background:var(--hl)}
+.res td b{color:var(--mv)}
+.res td.curcol{background:color-mix(in srgb,var(--q) 10%,transparent)}
+.mask{display:grid;gap:10px}
+.mask .form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.mask label{display:grid;gap:2px;color:var(--muted)}
+.mask input[type=text]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:13em}
+.mtab{border-collapse:collapse;font:14px var(--mono)}
+.mtab th,.mtab td{border:1px solid var(--line);padding:0;text-align:center;width:42px;height:32px}
+.mtab th{color:var(--muted);font-weight:400}
+.mtab td button{width:100%;height:100%;border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.mtab td.ok{background:color-mix(in srgb,var(--done) 22%,transparent)}
+.mtab td.bad{background:color-mix(in srgb,var(--mv) 26%,transparent)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+details{border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg);margin-top:6px}
+details summary{cursor:pointer;font-size:14px}
+details summary b{color:var(--q);font-weight:600}
+details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.qs{display:grid;gap:2px}
+.src{font-size:13px;margin:0;padding-left:1.3em}
+.src li{margin:2px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="地址转换.html">地址转换</a><a href="CPU调度.html">CPU 调度</a><a href="开机到用户进程.html">开机到用户进程</a><a href="文件打开与读取.html">文件打开与读取</a></div>
+  <header>
+    <h1>I/O 全链路：系统调用、中断、阻塞唤醒串起来</h1>
+    <p class="sub">把第 1 章（中断、系统调用）、第 2 章（进程状态、调度）、第 3 章（缺页）、第 4 章（打开文件表、磁盘缓存）、第 5 章（驱动、中断方式、DMA）拆开学的东西，放进同一次读操作里看。左边是这一步在哪一层执行，右边是 CPU、进程队列和数据此刻在哪。三条链路用的是强化 PPT 的例子，页码见每一步下方。</p>
+  </header>
+  <div class="modes" id="modes" role="group" aria-label="场景"></div>
+  <section class="panel"><h2>这条链路的主干</h2><ol class="rules" id="rules"></ol>
+    <div class="opts"><label id="dirtyWrap" hidden><input id="dirty" type="checkbox"> 被换出的页 q 修改过（要先写回）</label><label><input id="guess" type="checkbox" checked> 先猜再看</label></div>
+  </section>
+  <section class="panel">
+    <div class="phase" id="phase"></div>
+    <div class="stage">
+      <div><h3>这一步在哪一层</h3><div class="layers" id="layers"></div></div>
+      <div class="cards" id="cards"></div>
+    </div>
+    <div class="tl" id="tl"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="1"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+    <p class="tip">“先猜再看”开着时，关键步骤先停一步问你。键盘 ← → 单步，空格播放／暂停。时间线上的格子可以点，直接跳到那一步。</p>
+  </section>
+  <section class="panel"><h2>三条链路对比</h2><div class="tw" id="cmp"></div>
+    <p class="tip">高亮的一列是当前场景。第 ③ 列强化3 p107–111 还讨论了另一种做法：页先 DMA 进内核的页面缓冲，再交给用户页框。</p></section>
+  <section class="panel mask"><h2>练一下：中断屏蔽字（强化1 p82、p117）</h2>
+    <p class="tip" style="margin:0">场景 ① 的题设：可屏蔽中断 I1～I4，<b>响应</b>优先级 I1&gt;I2&gt;I3&gt;I4，<b>处理</b>优先级 I2&gt;I3&gt;I1&gt;I4，I4 是键盘中断。点格子在 0／1 之间切换，填好后核对。第 i 行是“正在处理 Ii 时”的屏蔽字，第 j 列为 1 表示屏蔽 Ij。</p>
+    <div class="form"><label>响应优先级<input id="mResp" type="text" value="I1>I2>I3>I4"></label><label>处理优先级<input id="mProc" type="text" value="I2>I3>I1>I4"></label>
+      <button class="btn" id="mNew" type="button">按这组优先级重填</button><button class="btn primary" id="mCheck" type="button">核对</button><button class="btn" id="mShow" type="button">看答案</button></div>
+    <div class="err" id="mErr" role="alert"></div>
+    <div class="tw" id="mTab"></div>
+    <div id="mExp" class="tip"></div>
+  </section>
+  <section class="panel"><h2>闭卷自测</h2><p class="tip" style="margin:0 0 4px">题目出自强化 PPT（页码在题后）。参考要点是本页整理的，PPT 只给了题目或部分答案的，已注明。</p><div class="qs" id="qs"></div></section>
+  <section class="panel"><h2>来源</h2><ol class="src" id="src"></ol>
+    <p class="tip">寄存器传参（R0–R3）、INT 0x80、系统调用表、read_keyboard 这些名字是强化1 的教学模型；一章 p86–88 用的是 AX 放调用类型、BX/CX… 放参数。考试只需要知道：参数在用户态准备好（寄存器或内存），陷入后由内核按系统调用号分派。</p></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let frames=[],at=0,timer=null,scen='kbd';
+const SPD=[4500,3200,2400,1700,1200,800,500];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].ask)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].ask)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;draw(f);
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].ask?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+function wire(){
+  $('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+  $('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+  $('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+  document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)||(e.target.tagName==='BUTTON'&&e.key===' ')||e.target.tagName==='SUMMARY')return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+  showSpd()}
+
+/* 场景：layers 层次；init 初始状态；steps 每步只写变化。
+   状态字段：mode 用户态/内核态，intr 开/关，run 正在 CPU 上的进程，ctx 正在执行的代码，P1/P2 进程状态，
+   ready 就绪队列，blk 阻塞队列，data 数据位置，regs 寄存器，stack 保存的现场，cpu 时间线类别，dev 设备是否在工作 */
+const PH=['用户态准备','陷入内核','内核处理','阻塞与调度','设备工作','中断与唤醒','返回用户态'];
+const SC={
+kbd:{name:'① scanf 读键盘（中断方式）',
+ rules:['P1 调 scanf → 库函数在<b>用户态</b>准备参数 → 执行陷入指令进内核。','内核查系统调用表到 sys_read → 驱动发现键盘没数据 → P1 <b>自阻塞</b>，调度 P2。','按键 → 键盘<b>外部中断</b>（借 P2 的上下文处理）→ 驱动把数据读进<b>内核缓冲区</b> → 唤醒 P1 进就绪队列。','P1 被调度后在内核里继续：缓冲区 → 变量 a，系统调用返回用户态。'],
+ blkName:'键盘阻塞队列',
+ layers:[['user','用户程序 P1'],['lib','C 库函数'],['sys','系统调用处理程序'],['sched','进程控制与调度'],['isr','中断处理程序'],['drv','键盘驱动程序'],['|','硬件'],['hw','CPU（中断隐指令）'],['dev','键盘与键盘控制器']],
+ dataKeys:[['dr','键盘数据寄存器'],['sr','键盘状态寄存器'],['kb','内核缓冲区'],['a','P1 的变量 a']],
+ init:{mode:'用户态',intr:'开',run:'P1',ctx:'main：scanf("%d",&a)',P1:'运行',P2:'就绪',ready:['P2'],blk:[],data:{dr:'空',sr:'0（未就绪）',kb:'空',a:'未赋值'},regs:{R0:'—',R1:'—',R2:'—',R3:'—'},stack:[],pc:'scanf 调用处'},
+ steps:[
+ {ph:0,L:'user',d:'scanf("%d",&a)',cpu:'P1u',note:'P1 在用户态执行到 scanf("%d",&a)。scanf 是 C 库函数，它自己读不了键盘，读设备要请内核来做。',ref:'强化1 p82–84'},
+ {ph:0,L:'lib',d:'scanf → 封装成 sys_read',cpu:'P1u',s:{ctx:'库函数：准备系统调用参数',regs:{R0:'SYS_READ',R1:'&a',R2:'读取长度',R3:'键盘'}},
+  ask:'库函数把“读哪个设备、读到哪、读多长、哪种调用”放进寄存器。传送变量 a 的地址这一步，发生在用户态还是内核态？',
+  note:'仍是<b>用户态</b>。库函数把调用号和参数放进寄存器：R0 = SYS_READ，R1 = a 的地址，R2 = 读取长度，R3 = 键盘。陷入之后内核再从这些寄存器里取。',ref:'强化1 p85、p120 Ⅰ；一章 p86–88（同一件事用 AX/BX/CX 表示）'},
+ {ph:1,L:'lib',d:'执行 INT 0x80',cpu:'P1u',s:{pc:'INT 0x80'},
+  ask:'接下来执行陷入指令 INT 0x80。这触发的是中断还是异常？这条指令是特权指令吗？',
+  note:'是<b>内中断（陷入／自陷、访管）</b>，由正在执行的指令主动引起，不是外设来的。陷入指令本身<b>不是特权指令</b>，用户态就能执行；执行它就是为了进内核。',ref:'强化1 p86、p120 Ⅱ；一章 p80–82'},
+ {ph:1,L:'hw',d:'切内核态 · 关中断 · 保存断点 · 查向量表',cpu:'P1k',s:{mode:'内核态',intr:'关',ctx:'（硬件动作，不是程序）',pc:'中断向量表[0x80] 的服务地址',stack:['P1 断点：INT 的下一条指令','P1 的 PSW']},
+  ask:'CPU 响应这次陷入。切换特权级、关中断、保存断点、跳到服务程序，是硬件做的还是操作系统程序做的？',
+  note:'全是<b>硬件</b>，统称中断隐指令：① 用户态 → 内核态；② 关中断；③ 保存断点（PC）和 PSW；④ 按中断号 0x80 查中断向量表，把服务程序入口送进 PC。保存在内核栈里，断点是 INT 的<b>下一条</b>指令，返回后不再执行 INT。',ref:'强化1 p87–89；一章 p56、p58–59'},
+ {ph:2,L:'sys',d:'保存现场 → 开中断',cpu:'P1k',s:{ctx:'系统调用服务程序（预处理）',intr:'开',stack:['P1 断点：INT 的下一条指令','P1 的 PSW','P1 的通用寄存器（R0…）']},
+  note:'进入服务程序后由<b>软件</b>保存现场（通用寄存器等）到内核栈，保存完再开中断，这样处理系统调用期间更紧急的中断仍能进来。关中断的那一小段只为了让“保存”不被打断。',ref:'强化1 p90–91；一章 p57'},
+ {ph:2,L:'sys',d:'查系统调用表：R0 = SYS_READ → sys_read',cpu:'P1k',s:{ctx:'系统调用处理程序：分派'},
+  ask:'所有系统调用都从 0x80 号进来。内核怎么知道这次要的是 sys_read？靠硬件还是软件？',
+  note:'靠<b>软件</b>：系统调用处理程序读 R0 里的调用号，查系统调用表，跳到 sys_read。硬件只负责“0x80 号陷入 → 跳到这段处理程序”。',ref:'强化1 p92、p120 Ⅲ Ⅳ；一章 p67–72'},
+ {ph:2,L:'drv',d:'read_keyboard(addr) · 查状态寄存器',cpu:'P1k',s:{ctx:'sys_read → 键盘驱动接口'},
+  note:'sys_read 从寄存器取参数：R3 说读键盘，R1 是 a 的地址，R2 是长度，然后调用键盘驱动的接口。驱动查键盘<b>状态寄存器：0</b>，还没有人按键，数据没准备好。',ref:'强化1 p93–95'},
+ {ph:3,L:'sched',d:'阻塞原语：P1 → 键盘阻塞队列',cpu:'P1k',s:{ctx:'阻塞原语（P1 自己调用）',P1:'阻塞',blk:['P1'],stack:['P1 断点：INT 的下一条指令','P1 的 PSW','P1 的通用寄存器（R0…）','P1 在 sys_read 里的阻塞点 → 存进 PCB1']},
+  ask:'数据没来，P1 现在是什么状态？它在哪个队列？是谁让它变成这样的？',
+  note:'P1 <b>运行 → 阻塞</b>。是 P1 在内核态<b>自己</b>调用阻塞原语（自阻塞）：改 PCB1 的状态、把上下文存进 PCB、把 PCB1 挂到键盘设备的阻塞队列。',ref:'强化1 p95–97；二上 p83'},
+ {ph:3,L:'sched',d:'从就绪队列选 P2 · 进程切换',cpu:'P2u',s:{mode:'用户态',run:'P2',ctx:'P2 的用户程序',P2:'运行',ready:[],pc:'P2 的断点'},
+  note:'CPU 不能空等，调度程序从就绪队列选出 P2，做进程切换（恢复 P2 的上下文、切换地址空间），P2 回到用户态继续跑。现在<b>CPU 在跑 P2，P1 在键盘阻塞队列里</b>。',ref:'强化1 p98；二上 p55–59'},
+ {ph:4,L:'dev',d:'按键“5” → 数据寄存器 · 状态置 1 · 发中断 I4',cpu:'P2u',dev:1,s:{data:{dr:'5',sr:'1（就绪）'}},
+  ask:'有人按下了 5。计算机靠什么知道键盘有了输入？',
+  note:'键盘控制器把字符放进<b>数据寄存器</b>，<b>状态寄存器</b>置位，然后向 CPU 发出<b>外部中断</b>请求 I4。系统是靠这个中断知道有输入的，不是一直去查。',ref:'强化1 p99–102、p119 Ⅰ'},
+ {ph:5,L:'hw',d:'指令结束时查到 I4 · 中断隐指令',cpu:'INT',s:{mode:'内核态',intr:'关',ctx:'（硬件动作）',pc:'中断向量表[键盘] 的服务地址',stack:['P2 断点、PSW（在 P2 的内核栈）']},
+  note:'CPU 在 P2 的某条指令<b>执行完</b>后检查到中断请求，I4 没被屏蔽就响应：同样是中断隐指令，切内核态、关中断、保存 <b>P2</b> 的断点，跳到键盘中断服务程序。这里<b>没有进程切换</b>，中断处理借用的是当前进程 P2 的上下文。',ref:'强化1 p87、p103；一章 p56；外中断与内中断：强化1 p121（2009.22）'},
+ {ph:5,L:'isr',d:'保存现场 · 设屏蔽字 · 开中断',cpu:'INT',s:{intr:'开',ctx:'键盘中断服务程序',stack:['P2 断点、PSW（在 P2 的内核栈）','P2 的通用寄存器','键盘中断的屏蔽字']},
+  ask:'数据寄存器里有 5 了。中断处理程序应该把它直接写进 P1 的变量 a 吗？',
+  note:'<b>不能直接写</b>。此刻的地址空间是 P2 的，P1 的 a 不在当前页表里，要写进 P1 的用户空间就得先切到 P1。所以先放进<b>内核缓冲区</b>（内核空间所有进程共享），等 P1 自己回来拿。',ref:'强化1 p103–106'},
+ {ph:5,L:'drv',d:'查状态 = 1 → I/O 指令读数据寄存器 → 写内核缓冲区',cpu:'INT',s:{ctx:'中断服务程序调用键盘驱动',data:{dr:'空',sr:'0',kb:'5'}},
+  ask:'把数据从数据寄存器取出来，是由哪个程序控制的？它在中断处理的哪个阶段被调用？',
+  note:'由<b>设备驱动程序</b>控制：查状态寄存器为 1，用 I/O 指令把数据寄存器读进通用寄存器，再用写内存指令放进内核缓冲区。它是在“执行中断服务程序”这一阶段被中断处理程序调用的。（独立编址用 in/out 这类专门指令按端口号访问；统一编址就用普通的 load/store。）',ref:'强化1 p107–111、p119 Ⅲ'},
+ {ph:5,L:'isr',d:'唤醒原语：PCB1 → 就绪队列',cpu:'INT',s:{P1:'就绪',blk:[],ready:['P1'],ctx:'唤醒原语（中断处理程序调用）'},
+  note:'中断处理程序调用唤醒原语：从键盘阻塞队列取出 PCB1，状态改为<b>就绪</b>，插进就绪队列。唤醒<b>不等于</b>马上运行。',ref:'强化1 p113；二上 p84'},
+ {ph:5,L:'hw',d:'关中断 · 恢复 P2 现场和断点 · 开中断 · 中断返回',cpu:'P2u',s:{mode:'用户态',ctx:'P2 的用户程序',stack:[],pc:'P2 被打断处'},
+  note:'中断返回，P2 从被打断的那条指令之后接着跑。<span class="warn">PPT p113 画的是唤醒后直接“调度、进程切换、P1 运行”；实际看调度策略：抢占式且 P1 优先级更高时，返回前就可能切到 P1。本页按 P2 先跑到时间片用完来演示，结论一样。</span>',ref:'强化1 p113、p116；一章 p57、p61；二中 p125–131（何时置 NEED_RESCHED，PPT 模型）'},
+ {ph:3,L:'sched',d:'P2 时间片用完 → 选中 P1 · 进程切换',cpu:'P1k',s:{mode:'内核态',run:'P1',P1:'运行',P2:'就绪',ready:['P2'],ctx:'P1 在 sys_read 的阻塞点之后继续',pc:'sys_read 阻塞点之后'},
+  note:'调度程序选中 P1，<b>就绪 → 运行</b>。注意 P1 是从当初阻塞的地方接着执行，那里在<b>内核态</b>（sys_read 里面），不是直接回到用户程序。',ref:'强化1 p113、p118'},
+ {ph:6,L:'sys',d:'内核缓冲区 → &a（R1 给的地址）',cpu:'P1k',s:{data:{kb:'空',a:'5'},ctx:'sys_read：拷贝到用户空间'},
+  ask:'现在为什么能把数据写进 a 了？',
+  note:'因为当前进程已经是 P1，用的是 P1 的页表，R1 里那个 a 的地址有效了。sys_read 把内核缓冲区的数据拷到 a。',ref:'强化1 p114–115'},
+ {ph:6,L:'hw',d:'关中断 · 恢复现场和断点 · 开中断 · 中断返回',cpu:'P1u',s:{mode:'用户态',stack:[],ctx:'scanf 返回',pc:'INT 的下一条指令'},
+  note:'系统调用返回：关中断，从内核栈恢复 P1 的现场和断点，开中断，执行中断返回指令回到<b>用户态</b>，从 INT 的下一条接着执行。',ref:'强化1 p116'},
+ {ph:6,L:'user',d:'scanf 返回，a = 5',cpu:'P1u',s:{ctx:'main：scanf 之后的语句'},fin:1,
+  note:'P1 在用户态继续，a = 5。整条链上 P1 的状态：<b>运行 →（请求键盘 I/O）阻塞 →（键盘中断唤醒）就绪 →（被调度）运行</b>。',ref:'强化1 p118'}
+ ]},
+file:{name:'② read 读文件（DMA，缓存未命中）',
+ rules:['read(fd, buffer, 128) 和场景 ① 一样陷入内核，到 sys_read。','文件系统：fd → 打开文件表（权限、文件指针 51548）→ 逻辑块号 50、块内偏移 348 → 查<b>内核的磁盘块缓存</b>，没有。','驱动设置 DMA 读<b>整块</b>进缓存，P1 自阻塞；DMA 传送时 CPU 在跑 P2，<b>一整块传完才中断一次</b>。','DMA 中断唤醒 P1 → P1 从缓存拷 128B 到 buffer，文件指针 +128，返回。'],
+ blkName:'磁盘阻塞队列',
+ layers:[['user','用户程序 P1'],['sys','系统调用处理程序'],['fs','文件系统'],['sched','进程控制与调度'],['isr','DMA 中断服务程序'],['drv','磁盘驱动程序'],['|','硬件'],['hw','CPU（中断隐指令）'],['dma','DMA 控制器'],['dev','磁盘控制器与磁盘']],
+ dataKeys:[['fp','文件指针'],['blk','磁盘上 list.db 的块 50'],['dbuf','DMA 缓冲'],['cache','内核磁盘块缓存'],['ubuf','P1 的 buffer']],
+ init:{mode:'用户态',intr:'开',run:'P1',ctx:'read(fd, buffer, 128)',P1:'运行',P2:'就绪',ready:['P2'],blk:[],data:{fp:'51548（lseek 设的）',blk:'1KB 数据',dbuf:'空',cache:'没有块 50',ubuf:'空'},regs:{fd:'—',buf:'—',len:'—'},stack:[],pc:'read 调用处'},
+ steps:[
+ {ph:0,L:'user',d:'lseek(fd,51548) 之后 read(fd,buffer,128)',cpu:'P1u',
+  note:'P1 已经 open 了 root/dir1/dir4/list.db（inode 97），lseek 把文件指针设到 51548，现在 read(fd, buffer, 128)：参数 1 是文件描述符，参数 3 是读取长度。',ref:'强化4 p24–27'},
+ {ph:1,L:'sys',d:'传参 → 陷入 → 中断隐指令 → 保存现场 → 查表到 sys_read',cpu:'P1k',s:{mode:'内核态',regs:{fd:'fd',buf:'buffer 地址',len:'128'},ctx:'sys_read',stack:['P1 断点：陷入指令的下一条','P1 的 PSW 和通用寄存器'],pc:'sys_read'},
+  note:'这一段和场景 ① 的第 2–6 步完全一样：用户态把 fd、buffer 地址、128 放进寄存器，执行陷入指令，硬件切内核态、保存断点，软件保存现场、查系统调用表进 sys_read。',ref:'强化1 p85–92'},
+ {ph:2,L:'fs',d:'fd → 用户级打开文件表项 → 系统级打开文件表项',cpu:'P1k',s:{ctx:'文件系统：查打开文件表'},
+  ask:'read 拿到 fd 之后，第一件要检查的是什么？',
+  note:'用 fd 找到 P1 的用户级打开文件表（文件描述符表）里那一项：里面有<b>文件指针 51548</b>和指向系统级打开文件表的索引；系统级那一项指向内存里的 inode 97。先检查这一项的<b>权限</b>是否允许“读”，不允许就直接返回错误。',ref:'强化4 p28–32；四章 p58、p62、p67'},
+ {ph:2,L:'fs',d:'⌊51548 / 1024⌋ = 50，51548 mod 1024 = 348',cpu:'P1k',s:{ctx:'文件系统：逻辑地址 → 块号'},
+  ask:'磁盘块 1KB。文件指针 51548 处的数据在文件的第几块？块内偏移多少？',
+  note:'51548 ÷ 1024 = 50 余 348：在<b>逻辑块 50</b>，块内偏移 <b>348</b>，要读的 128B 是 348～475，没有跨块。（文件 102656B，一共 ⌈102656/1024⌉ = 101 块，块号 0～100。）',ref:'强化4 p29–36'},
+ {ph:2,L:'fs',d:'inode 物理地址字段 → 物理块号 · 查磁盘块缓存：未命中',cpu:'P1k',s:{ctx:'文件系统：找物理块、查缓存'},
+  ask:'磁盘块缓存在用户空间还是内核空间？除了块里的数据，缓存块还要记什么？',
+  note:'按 inode 97 的物理地址字段把逻辑块 50 换成物理块号（怎么换取决于分配方式，见“文件打开与读取”页）。磁盘块缓存在<b>内核空间</b>，所有进程共用；每个缓存块要记它对应的<b>物理块号</b>（实际还有逻辑设备号），才知道是不是想要的块。这次没找到。',ref:'强化4 p46、p71–74'},
+ {ph:2,L:'drv',d:'初始化 DMA：方向 · 磁盘地址 · 内存地址 · 长度 → 启动',cpu:'P1k',s:{ctx:'磁盘驱动程序：设置 DMA'},
+  ask:'驱动让 DMA 传多少：用户要的 128B，还是整块？',
+  note:'传<b>整块</b> 1KB，目的地是内核缓存块。驱动给 DMA 控制器写四样东西：传输方向（磁盘 → 内存）、磁盘地址、内存地址（缓存块首地址）、传输长度，再发启动命令。用户只要 128B，但磁盘按块读，块只进内核缓存，之后由 OS 挑出那 128B。',ref:'强化3 p99–100；五章 p53–54；强化4 p75–76'},
+ {ph:3,L:'sched',d:'P1 自阻塞 → 磁盘阻塞队列 · 调度 P2',cpu:'P2u',dev:1,s:{P1:'阻塞',blk:['P1'],run:'P2',P2:'运行',ready:[],mode:'用户态',ctx:'P2 的用户程序',pc:'P2 的断点'},
+  ask:'P1 是什么时候阻塞的？',
+  note:'启动 DMA 之后，P1 立刻<b>自阻塞</b>进磁盘阻塞队列，调度程序切到 P2。从这里开始 CPU 跑 P2，磁盘和 DMA 并行工作。',ref:'强化3 p105；强化4 p77；强化1 p127'},
+ {ph:4,L:'dma',d:'磁盘控制器 → DMA 缓冲 → 内存，逐字传送',cpu:'P2u',dev:1,s:{data:{dbuf:'字 1、字 2…',cache:'块 50（传输中）'}},
+  note:'DMA 控制器控制总线，把数据从磁盘控制器的缓冲一个字一个字送进内存，<b>不经过 CPU</b>，CPU 照常执行 P2（只在 DMA 占用总线时让出几个周期）。',ref:'强化3 p101–104；五章 p55'},
+ {ph:5,L:'hw',d:'整块传完 → DMA 发中断 · 中断隐指令',cpu:'INT',dev:0,s:{mode:'内核态',intr:'关',data:{dbuf:'空',cache:'块 50（完整 1KB）'},ctx:'（硬件动作）',stack:['P2 断点、PSW（在 P2 的内核栈）']},
+  note:'一整块传完，DMA 控制器才向 CPU 发<b>一次</b>中断（中断方式是每个字或字符一次）。CPU 在 P2 的指令结束时响应：切内核态、关中断、保存 P2 断点，跳到 DMA 中断服务程序。',ref:'强化3 p105；五章 p59'},
+ {ph:5,L:'isr',d:'唤醒 P1：磁盘阻塞队列 → 就绪队列',cpu:'INT',s:{intr:'开',P1:'就绪',blk:[],ready:['P1'],ctx:'DMA 中断服务程序'},
+  ask:'P1 被唤醒的时候，数据已经在磁盘缓存里了吗？',
+  note:'<b>已经在了</b>。DMA 方式是传输完成后才中断，所以唤醒 P1 时数据已在内存（内核缓存块）里，不需要再搬。',ref:'强化1 p127；强化4 p77；强化3 p105'},
+ {ph:3,L:'sched',d:'中断返回 P2 · 之后调度选中 P1',cpu:'P1k',s:{run:'P1',P1:'运行',P2:'就绪',ready:['P2'],ctx:'P1 在 sys_read 阻塞点之后继续',stack:['P1 断点：陷入指令的下一条','P1 的 PSW 和通用寄存器'],pc:'sys_read 阻塞点之后'},
+  note:'中断返回后 P2 继续；之后某次调度选中 P1（何时选中看调度策略），P1 在内核态从阻塞点接着执行 sys_read。',ref:'强化3 p105'},
+ {ph:6,L:'sys',d:'缓存块[348…475] → buffer',cpu:'P1k',s:{data:{ubuf:'128B（块 50 的 348～475 字节）'},ctx:'sys_read：拷贝到用户空间'},
+  ask:'P1 会拿到完整的块 50 吗？若缓存块首地址是 a，拷贝的源地址范围是多少？',
+  note:'<b>不会</b>，只拿到要的 128B。源地址 a+348 起，到 a+476 之前（PPT 写作 a+348～a+476），拷进 P1 的 buffer。',ref:'强化4 p35–37、p75–76'},
+ {ph:6,L:'fs',d:'文件指针 51548 + 128 = 51676',cpu:'P1k',s:{data:{fp:'51676'},ctx:'文件系统：更新文件指针'},
+  ask:'读完以后，fd 那一项的文件指针是多少？',
+  note:'51548 + 128 = <b>51676</b>，下一次 read 从这里开始。<span class="warn">PPT p38–39 写的是 51586，是把 51548 抄成了 51458 的笔误（51458 + 128 = 51586）；按 51548 算应为 51676。</span>',ref:'强化4 p37–39（本页已核算）'},
+ {ph:6,L:'user',d:'系统调用返回 read_len = 128',cpu:'P1u',s:{mode:'用户态',stack:[],ctx:'read 返回 128',pc:'陷入指令的下一条'},fin:1,
+  note:'恢复现场、中断返回，P1 回到用户态，read 返回读到的字节数 128。和场景 ① 比：数据从设备到内存是 <b>DMA</b> 搬的、整块只中断一次；但“缓冲区在内核 → 唤醒后再拷给用户”这条主线一样。',ref:'强化1 p116；强化4 p27'}
+ ]},
+fault:{name:'③ 缺页（DMA 换入）',
+ rules:['P1 执行一条访存指令 → MMU 查 TLB、页表，页 p 的<b>存在位 = 0</b> → 缺页<b>异常</b>（内中断，故障）。','缺页处理：找空闲页框；没有就置换出页 q（q 改过要先写回）。','驱动设置 DMA 把 p 从外存读进页框 f，P1 自阻塞；DMA 完成中断唤醒 P1。','P1 被调度后改页表（存在位 1），异常返回<b>重新执行那条访存指令</b>。'],
+ blkName:'磁盘阻塞队列',
+ layers:[['user','用户程序 P1'],['pf','缺页异常处理程序'],['sched','进程控制与调度'],['isr','DMA 中断服务程序'],['drv','磁盘驱动程序'],['|','硬件'],['mmu','MMU（TLB、页表）'],['hw','CPU（中断隐指令）'],['dma','DMA 控制器'],['dev','磁盘（交换区／文件区）']],
+ dataKeys:[['pte','页 p 的页表项'],['tlb','TLB 中页 p'],['frame','页框 f'],['qpte','页 q 的页表项'],['disk','外存中的页 p']],
+ init:{mode:'用户态',intr:'开',run:'P1',ctx:'load R, [页 p 内某地址]',P1:'运行',P2:'就绪',ready:['P2'],blk:[],data:{pte:'存在位 0',tlb:'无',frame:'装着页 q',qpte:'存在位 1，页框 f',disk:'有页 p'},regs:{},stack:[],pc:'访存指令'},
+ steps:[
+ {ph:0,L:'user',d:'执行访存指令，逻辑地址在页 p',cpu:'P1u',note:'P1 在用户态执行一条访存指令，逻辑地址落在页 p 上。',ref:'强化3 p91'},
+ {ph:1,L:'mmu',d:'查 TLB：未命中 → 查页表：存在位 0',cpu:'P1u',s:{ctx:'（MMU 硬件地址转换）'},
+  ask:'MMU 发现页 p 的存在位是 0。如果是越界或权限不够，会是缺页吗？',
+  note:'硬件 MMU 先查 TLB，没有；再查页表，页 p 在地址空间内、权限检查也通过，但<b>存在位 = 0</b>，这才是缺页。越界、越权是另一类异常（越界或越权中断），不会去调页。',ref:'强化3 p91、p34–35；三章 p116–117'},
+ {ph:1,L:'hw',d:'缺页异常 · 中断隐指令 · 断点 = 这条访存指令',cpu:'P1k',s:{mode:'内核态',intr:'关',ctx:'（硬件动作）',stack:['P1 断点：引起缺页的这条访存指令','P1 的 PSW'],pc:'缺页异常处理程序入口'},
+  ask:'这次保存的断点是哪条指令？和系统调用的断点有什么不同？',
+  note:'缺页是<b>故障</b>类内中断，发生在指令<b>执行过程中</b>，指令没完成。断点保存的是<b>这条访存指令本身</b>，处理完要重新执行它；系统调用的断点是陷入指令的<b>下一条</b>。',ref:'三章 p117–118；强化3 p105（再次执行缺页指令）'},
+ {ph:2,L:'pf',d:'保存现场 · 开中断 · 找空闲页框：没有 → 置换选中 q',cpu:'P1k',s:{intr:'开',ctx:'缺页异常处理程序',stack:['P1 断点：引起缺页的这条访存指令','P1 的 PSW','P1 的通用寄存器']},
+  note:'缺页处理程序保存现场后先找空闲页框；没有，就按页面置换算法选一个页（这里是页框 f 里的页 q）换出。置换算法怎么选，见地址转换页。',ref:'强化3 p92；三章 p119'},
+ {ph:2,L:'pf',if:'dirty',d:'q 修改过 → 先写回外存（又一次磁盘 I/O）',cpu:'P1k',s:{data:{qpte:'存在位 0'}},
+  ask:'页 q 被修改过，能直接覆盖页框 f 吗？',
+  note:'<b>不能</b>。q 改过，外存里的副本已过时，要先把 q 写回外存（又是一次“设置 DMA → 阻塞 → 完成中断 → 唤醒”，过程和下面的读入一样，这里合成一步），再把 q 的页表项存在位置 0、作废 TLB 里 q 的项。',ref:'强化3 p92–94'},
+ {ph:2,L:'pf',if:'!dirty',d:'q 没改过 → 直接放弃页框 f',cpu:'P1k',s:{data:{qpte:'存在位 0'}},
+  ask:'页 q 没被修改过，换出前要写回吗？',
+  note:'<b>不用</b>写回，外存里有一样的副本，直接把 q 的页表项存在位置 0（并作废 TLB 里 q 的项），页框 f 就能用了。勾上方“被换出的页 q 修改过”看另一条分支。',ref:'强化3 p92'},
+ {ph:2,L:'drv',d:'初始化 DMA：外存中 p 的位置 → 页框 f，一页',cpu:'P1k',s:{ctx:'缺页处理调用磁盘驱动：设置 DMA'},
+  note:'缺页处理程序调用磁盘驱动：DMA 传输方向 磁盘 → 内存，磁盘地址 = 页 p 在交换区或文件区的位置，内存地址 = 页框 f，长度 = 一页，然后启动。',ref:'强化3 p95–100'},
+ {ph:3,L:'sched',d:'P1 自阻塞 → 磁盘阻塞队列 · 调度 P2',cpu:'P2u',dev:1,s:{P1:'阻塞',blk:['P1'],run:'P2',P2:'运行',ready:[],mode:'用户态',ctx:'P2 的用户程序',pc:'P2 的断点'},
+  note:'和读文件一样：启动 DMA 后 P1 自阻塞，调度 P2。磁盘 I/O 要几毫秒，CPU 不能等。',ref:'强化3 p105'},
+ {ph:4,L:'dma',d:'页 p → 页框 f，CPU 在跑 P2',cpu:'P2u',dev:1,s:{data:{frame:'正在写入页 p'}},
+  note:'DMA 把页 p 一字一字搬进页框 f，不经过 CPU。',ref:'强化3 p95–96、p101–104'},
+ {ph:5,L:'hw',d:'传完 → DMA 中断 · 中断隐指令（P2 上下文）',cpu:'INT',s:{mode:'内核态',intr:'关',data:{frame:'页 p'},ctx:'（硬件动作）',stack:['P2 断点、PSW（在 P2 的内核栈）']},
+  note:'整页传完，DMA 控制器发中断；CPU 在 P2 的指令结束时响应。',ref:'强化3 p105'},
+ {ph:5,L:'isr',d:'唤醒 P1 → 就绪队列',cpu:'INT',s:{intr:'开',P1:'就绪',blk:[],ready:['P1'],ctx:'DMA 中断服务程序'},
+  note:'DMA 中断服务程序唤醒 P1：磁盘阻塞队列 → 就绪队列。',ref:'强化3 p105'},
+ {ph:3,L:'sched',d:'中断返回 P2 · 之后调度选中 P1',cpu:'P1k',s:{run:'P1',P1:'运行',P2:'就绪',ready:['P2'],ctx:'P1 在缺页处理的阻塞点之后继续',stack:['P1 断点：引起缺页的这条访存指令','P1 的 PSW','P1 的通用寄存器'],pc:'缺页处理阻塞点之后'},
+  note:'P1 被调度，在内核态回到缺页处理程序里接着做。',ref:'强化3 p105'},
+ {ph:6,L:'pf',d:'页 p 的页表项：页框号 f，存在位 1',cpu:'P1k',s:{data:{pte:'存在位 1，页框 f',disk:'有页 p（副本）'},ctx:'缺页处理：改页表'},
+  note:'把页 p 的页表项改成指向页框 f、存在位置 1。（强化3 p105 的流程图把页表处理画在发起 I/O 之前、其它处理在唤醒之后；“置存在位 1”要等页真正进来以后。）',ref:'强化3 p92、p105'},
+ {ph:6,L:'hw',d:'恢复现场 · 异常返回 → 回到那条访存指令',cpu:'P1u',s:{mode:'用户态',stack:[],ctx:'重新执行访存指令',pc:'引起缺页的那条访存指令'},
+  note:'异常返回，PC 回到<b>引起缺页的那条指令</b>，重新执行。',ref:'强化3 p105；三章 p118'},
+ {ph:6,L:'mmu',d:'再查：TLB 未命中 → 页表命中 → 写 TLB → 访存',cpu:'P1u',s:{data:{tlb:'页 p → 页框 f'},ctx:'访存成功，继续下一条'},fin:1,
+  note:'这次页表命中，硬件把这一项写进 TLB，拼出物理地址访存成功，P1 继续执行。和前两个场景比：触发的是<b>故障</b>，返回后<b>重做本条</b>；数据由 DMA 直接进页框，不需要再拷给用户。',ref:'强化3 p91；地址转换页“缺页换页”'}
+ ]}
+};
+const LANE={P1u:'P1 用户态',P1k:'P1 内核态',P2u:'P2 用户态',INT:'中断处理（借 P2 上下文）'};
+
+function build(){const S=SC[scen];const dirty=$('dirty').checked;
+  const steps=S.steps.filter(st=>!st.if||(st.if==='dirty'?dirty:!dirty));
+  let st=JSON.parse(JSON.stringify(S.init));st.ch=[];const F=[];const was=new Set();
+  F.push({st:{...st,ch:[]},L:null,was:[],note:'初始状态：P1 在 CPU 上运行，P2 在就绪队列里。按“下一步”开始。',ref:'',si:-1});
+  steps.forEach((s,i)=>{const prev=JSON.parse(JSON.stringify(st));
+    if(s.ask)F.push({st:{...prev,ch:[]},L:s.L,was:[...was],ask:1,note:`<span class="ask">${s.ask}</span>`,ref:'先想一下，再按“下一步”看答案。',si:i,d:s.d,cpu:s.cpu,dev:s.dev,ph:s.ph});
+    const ch=[];const o=s.s||{};
+    for(const k in o){if(k==='data'||k==='regs'){for(const j in o[k]){if(st[k][j]!==o[k][j])ch.push(k+'.'+j);st[k][j]=o[k][j]}}else{if(JSON.stringify(st[k])!==JSON.stringify(o[k]))ch.push(k);st[k]=o[k]}}
+    was.add(s.L);
+    F.push({st:{...JSON.parse(JSON.stringify(st)),ch},L:s.L,was:[...was],note:s.note,ref:s.ref,si:i,d:s.d,cpu:s.cpu,dev:s.dev,ph:s.ph,fin:s.fin,det:{...(F.length?F[F.length-1].det:{}),[s.L]:s.d}})});
+  /* 让每一帧带上各层最近一次的说明 */
+  let det={};F.forEach(f=>{if(!f.ask&&f.L)det={...det,[f.L]:f.d};f.det={...det};if(f.ask&&f.L)f.det[f.L]='？'});
+  frames=F;at=0;window._steps=steps}
+
+const C=(k,ch)=>ch.includes(k)?'chg':'';
+function pcbs(a,newer){return a.length?a.map(p=>`<span class="pcb ${newer?'new':''}">PCB${p.slice(1)}</span>`).join(''):'<span class="nil">空</span>'}
+function draw(f){const S=SC[scen];const st=f.st,ch=st.ch;
+  $('phase').innerHTML=PH.map((p,i)=>`<span class="${f.ph===i?'on':''}">${p}</span>`).join('');
+  $('layers').innerHTML=S.layers.map(([k,n])=>k==='|'?`<div class="sep">${n}</div>`:
+    `<div class="layer ${['hw','dev','dma','mmu'].includes(k)?'hwl':''} ${f.L===k?'on':(f.was.includes(k)?'was':'')}"><span class="nm">${n}</span><span class="dt">${f.det[k]||'—'}</span></div>`).join('');
+  const regs=Object.keys(st.regs).length?`<div class="card"><h3>寄存器（系统调用参数）</h3><dl class="kv">${Object.entries(st.regs).map(([k,v])=>`<dt>${k}</dt><dd class="${C('regs.'+k,ch)}">${v}</dd>`).join('')}</dl></div>`:'';
+  $('cards').innerHTML=`
+   <div class="card"><h3>CPU</h3><dl class="kv">
+     <dt>模式</dt><dd><span class="tag ${st.mode==='用户态'?'u':'k'} ${C('mode',ch)}">${st.mode}</span></dd>
+     <dt>中断</dt><dd><span class="tag ${st.intr==='关'?'off':''} ${C('intr',ch)}">${st.intr==='关'?'关中断':'开中断'}</span></dd>
+     <dt>当前进程</dt><dd class="${C('run',ch)}">${st.run}</dd>
+     <dt>在执行</dt><dd class="${C('ctx',ch)}">${st.ctx}</dd>
+     <dt>PC</dt><dd class="${C('pc',ch)}">${st.pc}</dd></dl></div>
+   <div class="card"><h3>进程与队列</h3>
+     <div class="q"><span class="ql">P1</span><span class="st ${st.P1} ${C('P1',ch)}">${st.P1}</span><span class="ql" style="min-width:auto;margin-left:10px">P2</span><span class="st ${st.P2} ${C('P2',ch)}">${st.P2}</span></div>
+     <div class="q"><span class="ql">运行</span><span class="pcb">PCB${st.run.slice(1)}</span></div>
+     <div class="q"><span class="ql">就绪队列</span>${pcbs(st.ready,ch.includes('ready'))}</div>
+     <div class="q"><span class="ql">${S.blkName}</span>${pcbs(st.blk,ch.includes('blk'))}</div></div>
+   <div class="card"><h3>数据在哪</h3><dl class="kv">${S.dataKeys.map(([k,n])=>`<dt>${n}</dt><dd class="${C('data.'+k,ch)}">${st.data[k]}</dd>`).join('')}</dl></div>
+   ${regs}
+   <div class="card"><h3>保存的断点和现场（内核栈／PCB）</h3><div class="stack ${C('stack',ch)}">${st.stack.length?st.stack.map(x=>`<div>${x}</div>`).join(''):'<span class="nil">无</span>'}</div></div>`;
+  const steps=window._steps;const cur=f.si;
+  const cell=(i,s,row)=>{const cls=row==='cpu'?'c-'+s.cpu:(s.dev?'c-dev':'c-none');const fut=i>cur||(i===cur&&f.ask);
+    return `<td class="${cls} ${fut?'fut':''} ${i===cur?'cur':''}" data-si="${i}" title="${i+1}. ${s.d.replace(/"/g,'')}">${row==='cpu'?i+1:''}</td>`};
+  $('tl').innerHTML=`<table><tr><th>CPU 在跑</th>${steps.map((s,i)=>cell(i,s,'cpu')).join('')}</tr><tr><th>设备在工作</th>${steps.map((s,i)=>cell(i,s,'dev')).join('')}</tr></table>
+    <div class="legend">${Object.entries(LANE).map(([k,v])=>`<span><i class="c-${k}"></i>${v}</span>`).join('')}<span><i class="c-dev"></i>${scen==='kbd'?'键盘有输入':'DMA／磁盘传送'}</span></div>`;
+  $('note').innerHTML=f.note+(f.ref?`<span class="ref">${f.ref.startsWith('先想')?f.ref:'出处：'+f.ref}</span>`:'');
+  $('cmp').querySelectorAll('td').forEach(td=>td.classList.toggle('curcol',+td.dataset.c===['kbd','file','fault'].indexOf(scen)))}
+
+$('tl').onclick=e=>{const td=e.target.closest('[data-si]');if(!td)return;stop();const si=+td.dataset.si;at=frames.findIndex(f=>f.si===si&&!f.ask);render()};
+
+const CMP=[['触发方式','陷入指令（自愿的内中断）','陷入指令（自愿的内中断）','缺页<b>故障</b>（指令执行中，内中断）'],
+ ['断点／返回到','陷入指令的下一条','陷入指令的下一条','引起缺页的那条指令，<b>重新执行</b>'],
+ ['I/O 控制方式','中断驱动：每个字符中断一次','DMA：整块传完中断一次','DMA：整页传完中断一次'],
+ ['发起 I/O 的','sys_read 调键盘驱动','文件系统查缓存未命中 → 磁盘驱动设置 DMA','缺页处理程序 → 磁盘驱动设置 DMA'],
+ ['P1 何时阻塞','驱动发现没有输入','启动 DMA 之后','启动 DMA 之后（q 改过则写回时也要等）'],
+ ['谁唤醒 P1','键盘中断处理程序','DMA 中断服务程序','DMA 中断服务程序'],
+ ['数据路径','数据寄存器 →（CPU）→ 内核缓冲区 →（CPU 拷贝）→ a','磁盘 →（DMA）→ 内核磁盘块缓存 →（CPU 拷贝 128B）→ buffer','外存 →（DMA）→ 页框 f，不再拷贝'],
+ ['唤醒后还要做','拷到 a，系统调用返回','拷 128B，文件指针 +128，返回','改页表（存在位 1），异常返回重做指令'],
+ ['P1 状态','运行 → 阻塞 → 就绪 → 运行','同左','同左']];
+$('cmp').innerHTML=`<table class="res"><thead><tr><th></th><th>① scanf 读键盘</th><th>② read 读文件</th><th>③ 缺页</th></tr></thead>${CMP.map(r=>`<tr><th>${r[0]}</th>${r.slice(1).map((c,i)=>`<td data-c="${i}">${c}</td>`).join('')}</tr>`).join('')}</table>`;
+
+/* 中断屏蔽字练习 */
+let M=null,mUser=null;
+function parseOrd(s){const a=s.split(/[>＞\s,，]+/).map(x=>x.trim().toUpperCase()).filter(Boolean);return a}
+function mBuild(){$('mErr').textContent='';$('mExp').innerHTML='';const r=parseOrd($('mResp').value),p=parseOrd($('mProc').value);
+  if(r.length<2||r.length>6){$('mErr').textContent='写 2～6 个中断，用 > 隔开。';return}
+  if(new Set(p).size!==p.length||new Set(r).size!==r.length||p.length!==r.length||p.some(x=>!r.includes(x))){$('mErr').textContent='两个顺序里的中断要相同、不重复。';return}
+  const names=r.slice().sort((a,b)=>a.localeCompare(b,'zh',{numeric:true}));const rank=x=>p.indexOf(x);
+  M={names,ans:names.map(i=>names.map(j=>rank(j)>=rank(i)?1:0)),p};mUser=names.map(()=>names.map(()=>0));mDraw()}
+function mDraw(mark){const {names}=M;$('mTab').innerHTML=`<table class="mtab"><tr><th>处理中＼屏蔽</th>${names.map(n=>`<th>${n}</th>`).join('')}</tr>${names.map((n,i)=>`<tr><th>${n}</th>${names.map((m,j)=>`<td class="${mark?(mUser[i][j]===M.ans[i][j]?'ok':'bad'):''}"><button type="button" data-i="${i}" data-j="${j}" aria-label="${n} 行 ${m} 列">${mUser[i][j]}</button></td>`).join('')}</tr>`).join('')}</table>`}
+$('mTab').onclick=e=>{const b=e.target.closest('button');if(!b||!M)return;const i=+b.dataset.i,j=+b.dataset.j;mUser[i][j]^=1;mDraw()};
+$('mNew').onclick=mBuild;
+$('mCheck').onclick=()=>{if(!M)return;mDraw(true);const bad=M.ans.flat().filter((v,k)=>v!==mUser.flat()[k]).length;
+  $('mExp').innerHTML=bad?`还有 <b>${bad}</b> 格不对（红色）。提示：只看<b>处理</b>优先级，自己也要屏蔽自己。`:'全对。'+mWhy()};
+$('mShow').onclick=()=>{if(!M)return;mUser=M.ans.map(r=>r.slice());mDraw(true);$('mExp').innerHTML=mWhy()};
+function mWhy(){const {p}=M;return ` 规则：处理 Ii 时，处理优先级<b>不高于</b> Ii 的中断都屏蔽（填 1，含 Ii 自己），比它高的放行（填 0）。处理顺序是 ${p.join(' &gt; ')}，所以 ${p[0]} 那一行全是 1，${p[p.length-1]} 那一行只有自己是 1。<b>响应</b>优先级只在几个中断同时请求、CPU 还没开中断嵌套时决定先响应谁，不进屏蔽字表。`}
+
+/* 闭卷自测 */
+const QS=[
+ ['P1 执行 scanf() 前后，P1 的状态怎样变化？每次变化由什么引起？（强化1 p118）','运行 → 阻塞：请求键盘 I/O 而数据未到，P1 自己调用阻塞原语。阻塞 → 就绪：键盘中断处理程序调用唤醒原语。就绪 → 运行：被调度程序选中（PPT 给出了这条链）。'],
+ ['计算机系统通过什么方式得知键盘产生了输入？（强化1 p119 Ⅰ）','键盘控制器发出的外部中断（I/O 中断）。'],
+ ['键盘输入后若无其它中断，计算机会经过哪几个处理阶段？硬件完成了哪些功能？（强化1 p119 Ⅱ Ⅳ）','中断响应（硬件：中断隐指令——关中断、保存断点和 PSW、找到服务程序入口）→ 中断处理（软件：保存现场和屏蔽字、开中断、执行服务程序即调用驱动取数据并唤醒 P1、关中断、恢复现场和屏蔽字、开中断）→ 中断返回。另外键盘控制器把数据放进数据寄存器、置状态位、发中断，也是硬件做的。（阶段划分按一章 p56–57 整理）'],
+ ['响应键盘中断 I4 之后，外设又产生了 I1，CPU 一定立刻响应 I1 吗？（强化1 p119 Ⅴ）','不一定。I4 的屏蔽字是 0001，不屏蔽 I1，所以处理 I4 期间开中断后可以嵌套响应 I1；但在中断隐指令和保存现场的关中断阶段、或某条指令还没执行完时，要等开中断且指令结束后才响应。（本页整理）'],
+ ['用户程序触发的是中断还是异常？怎么触发的？系统怎么跳转到处理系统调用的程序入口？（强化1 p120 Ⅱ Ⅳ）','异常（内中断中的陷入）。执行陷入指令（PPT 的模型是 INT 0x80）主动触发；硬件按中断号查中断向量表，把对应服务地址送入 PC，进入系统调用处理程序，再由软件按调用号查系统调用表跳到 sys_read。'],
+ ['简述此例中系统调用执行过程是怎样与键盘外设中断联动的。（强化1 p120 Ⅴ）','sys_read 调驱动发现无数据 → P1 自阻塞挂在键盘阻塞队列；按键产生外部中断，中断处理程序调用驱动把数据读进内核缓冲区，并唤醒 P1；P1 被调度后在 sys_read 里从内核缓冲区取数据写入 a，然后系统调用返回。两者靠“键盘阻塞队列 + 内核缓冲区”衔接。（本页整理）'],
+ ['read 读文件时，磁盘缓存在用户空间还是内核空间？进程会拿到完整的块 50 吗？（强化4 p71–76）','内核空间，因为所有进程共用（PPT 原答案）。不会，块只读进内核缓存，再由 OS 把用户请求的那部分拷到用户 buffer（PPT 原答案）。'],
+ ['若磁盘传送采用 DMA，读文件的进程何时阻塞？被唤醒时数据是否已在磁盘缓存中？（强化4 p77）','驱动启动 DMA 之后立即自阻塞；唤醒时数据已在内存中，因为 DMA 是整块传完才发中断（依据强化1 p127、强化3 p105）。'],
+ ['缺页异常和系统调用的陷入，返回时 PC 指向哪里？为什么不同？','缺页返回到引起缺页的那条指令，重新执行，因为它在执行过程中被打断、没完成（故障）。陷入返回到陷入指令的下一条，因为陷入指令已经执行完（陷阱）。（三章 p117–118，本页整理）'],
+ ['（迁移）把场景 ① 的键盘换成中断方式的打印机输出 3 个字符：进程在何时阻塞？会产生几次中断？数据先放在哪？','系统调用把要打印的数据先拷进内核缓冲区，驱动送出第 1 个字符后进程阻塞（或在缓冲区满时阻塞）；打印机每打完一个字符发一次中断，中断处理程序送下一个字符，共 3 次中断，最后一次唤醒进程。（本页整理，输出设备流程见强化3 p117–118、五章 p68–69）']];
+$('qs').innerHTML=QS.map(([q,a],i)=>`<details><summary><b>${i+1}.</b> ${q}</summary><div class="ans">${a}</div></details>`).join('');
+const SRC=['强化1（绪论与进程基础）场景 3：p82–120（scanf 全过程与问题），p121–127（真题解析）','强化3（内存管理）：p90–111（缺页中断、页面交换、DMA、阻塞唤醒时机、页缓冲），p116–122（不同设备的访问流程）','强化4（文件系统）：p24–39（read 与文件指针），p46（物理地址字段），p71–77（文件缓存）','一章（综述）：p44–48（内核空间、内核栈），p51–64（中断），p65–92（系统调用）','二上：p55–59（进程切换），p83–84（阻塞、唤醒原语）；二中：p125–131（抢占实现，PPT 模型）','三章：p115–119（请求分页与缺页处理）；五章：p16（键盘中断流程），p49–59（I/O 控制方式与 DMA），p65–74（I/O 请求处理过程）'];
+$('src').innerHTML=SRC.map(s=>`<li>${s}</li>`).join('');
+
+function setScen(k){scen=k;$('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===k));
+  $('rules').innerHTML=SC[k].rules.map(r=>`<li>${r}</li>`).join('');$('dirtyWrap').hidden=k!=='fault';
+  try{history.replaceState(null,'','#'+k)}catch{}stop();build();render()}
+$('modes').innerHTML=Object.entries(SC).map(([k,v])=>`<button type="button" class="chip" data-m="${k}" aria-pressed="false">${v.name}</button>`).join('');
+$('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b)setScen(b.dataset.m)};
+$('dirty').onchange=()=>{stop();build();render()};
+wire();mBuild();const h=location.hash.slice(1);setScen(SC[h]?h:'kbd');
+</script>
+</body>
+</html>

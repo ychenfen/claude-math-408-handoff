@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>文件打开与读取</title>
+<style>
+/* Part 1: open/lseek/read/close stepper — directory tree, the disk side (inode table and the directory block just read), the memory side (in-memory inode, system-wide and per-process open-file tables), an I/O counter and the note. Part 2: block-allocation calculator — four methods side by side, the access chain drawn for the chosen one, and index-block counting. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --hw:#8a6d3b;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:82ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:17px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:13px var(--sans);font-weight:600;margin:0 0 6px;color:var(--muted)}
+.code{font:13px/1.6 var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:6px 10px;margin:0;white-space:pre-wrap}
+.code .cur{background:color-mix(in srgb,var(--q) 22%,transparent);outline:1px solid var(--q);border-radius:2px}
+.grid3{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1fr) minmax(0,1.3fr);gap:12px;margin-top:10px}
+@media (max-width:900px){.grid3{grid-template-columns:minmax(0,1fr)}}
+.box{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg);min-width:0}
+.tree svg{display:block;width:100%;height:auto}
+svg text{font-family:var(--sans)}
+.itab{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0 8px}
+.itab span{font:12px var(--mono);border:1px solid var(--line);border-radius:3px;padding:0 6px;background:var(--paper)}
+.itab span.on{border-color:var(--cmp);background:color-mix(in srgb,var(--cmp) 28%,transparent);font-weight:700}
+.dblk{border:1.5px solid var(--line);border-radius:4px;background:var(--paper);padding:4px 8px;font:13px var(--mono)}
+.dblk .t{font:12px var(--sans);color:var(--muted)}
+.dblk .hit{color:var(--mv);font-weight:700}
+.dblk.on{border-color:var(--q)}
+.tbl{border-collapse:collapse;font:12px var(--mono);width:100%;margin:2px 0 8px}
+.tbl th,.tbl td{border:1px solid var(--line);padding:2px 5px;text-align:center}
+.tbl th{color:var(--muted);font-weight:400;font-family:var(--sans)}
+.tbl tr.new td{background:color-mix(in srgb,var(--cmp) 26%,transparent)}
+.tbl tr.gone td{text-decoration:line-through;color:var(--muted)}
+.tbl td.chg{background:color-mix(in srgb,var(--cmp) 34%,transparent);font-weight:700}
+.nil{color:var(--muted);font:12px var(--mono)}
+.io{font:13px var(--mono);margin-top:4px}
+.io b{color:var(--mv);font-size:15px}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:4.6em;margin-top:10px}
+.note .ask{color:var(--q);font-weight:600}
+.note .ref{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.note .warn{color:var(--mv)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:8px}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input,.form select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6.5em}
+.form select{font-family:var(--sans);width:auto}
+.modes{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 6px}
+.res{border-collapse:collapse;font-size:13px}
+.res th,.res td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+.res th{color:var(--muted);font-weight:400;white-space:nowrap}
+.res thead th{color:var(--ink);font-weight:600;background:var(--hl)}
+.res td.n{font:15px var(--mono);font-weight:700;text-align:center;color:var(--mv)}
+.res tr.cur td{background:color-mix(in srgb,var(--q) 12%,transparent)}
+.tw{overflow-x:auto}
+.chain svg{display:block;width:100%;height:auto;min-width:560px}
+.chain{overflow-x:auto;margin-top:8px}
+.calc p{margin:4px 0;font:14px var(--mono)}
+.calc b{color:var(--done)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+details{border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg);margin-top:6px}
+details summary{cursor:pointer;font-size:14px}
+details summary b{color:var(--q);font-weight:600}
+details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.src{font-size:13px;margin:0;padding-left:1.3em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="IO全链路.html">I/O 全链路</a><a href="开机到用户进程.html">开机到用户进程</a><a href="磁盘调度.html">磁盘调度</a></div>
+  <header>
+    <h1>文件打开与读取</h1>
+    <p class="sub">强化4 场景一用同一个文件 root/dir1/dir4/list.db 把第 4 章串了一遍：open 怎样逐级检索目录、建两级打开文件表；lseek、read 怎样用文件指针算块号；close 怎样减访问计数；再换四种分配方式，看读或改同一块各要几次磁盘 I/O。读盘之后数据怎么经 DMA 进内核缓存，见 <a href="IO全链路.html#file">I/O 全链路 ②</a>。</p>
+  </header>
+
+  <section class="panel">
+    <h2>一、open → lseek → read → close</h2>
+    <pre class="code" id="code"></pre>
+    <div class="opts"><label><input id="rootRes" type="checkbox"> 根目录 inode 常驻内存（很多题这样假设）</label><label><input id="guess" type="checkbox" checked> 先猜再看</label></div>
+    <div class="grid3">
+      <div class="box tree"><h3>目录树（一个磁盘块放两个目录项）</h3><div id="tree"></div></div>
+      <div class="box"><h3>磁盘</h3><div class="tip" style="margin:0">磁盘 inode 表</div><div class="itab" id="itab"></div><div class="tip" style="margin:0 0 3px">刚读进来的目录块</div><div id="dblk"></div><div class="io" id="io"></div></div>
+      <div class="box"><h3>内存（内核空间）</h3><div id="mem"></div></div>
+    </div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="1"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+    <p class="tip">键盘 ← → 单步，空格播放／暂停。“磁盘 I/O”按 PPT 的画法计：每读一个 inode、每读一个目录块各算一次。</p>
+  </section>
+
+  <section class="panel calc">
+    <h2>二、四种分配方式：读／改第 k 块要几次磁盘 I/O</h2>
+    <p class="tip" style="margin:0 0 6px">默认是强化4 p46–70 的设定：list.db 共 101 块（0～100），看第 50 块；混合索引有 10 个直接、1 个一级、1 个二级索引，地址项 4B，块 1KB。文件已经 open，inode（文件元数据）在内存里。</p>
+    <div class="form">
+      <label>文件块数 N<input id="N" type="number" min="1" value="101"></label>
+      <label>目标块号 k<input id="K" type="number" min="0" value="50"></label>
+      <label>操作<select id="op"><option value="r">读这一块</option><option value="w">修改这一块（读入、改、写回）</option></select></label>
+      <label>块大小 B<input id="B" type="number" min="16" value="1024"></label>
+      <label>地址项 B<input id="A" type="number" min="1" value="4"></label>
+      <label>直接索引个数<input id="D" type="number" min="0" value="10"></label>
+      <label>最高几级间接<select id="L"><option value="2" selected>一级 + 二级</option><option value="3">一级 + 二级 + 三级</option><option value="1">只有一级</option></select></label>
+    </div>
+    <div class="opts"><label><input id="fatMem" type="checkbox" checked> FAT 已读入内存</label></div>
+    <div class="err" id="aErr" role="alert"></div>
+    <div class="modes" id="am" role="group" aria-label="分配方式"></div>
+    <div class="chain" id="chain"></div>
+    <div id="aWhy"></div>
+    <div class="tw"><table class="res" id="aTab"></table></div>
+    <div id="idx"></div>
+  </section>
+
+  <section class="panel"><h2>闭卷自测</h2><p class="tip" style="margin:0 0 4px">题目出自强化4（页码在题后），PPT 给了答案的标“PPT 原答案”，其余是本页整理的。</p><div id="qs"></div></section>
+  <section class="panel"><h2>来源</h2><ol class="src" id="src"></ol></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let frames=[],at=0,timer=null;
+const SPD=[4500,3200,2400,1700,1200,800,500];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].ask)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].ask)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;draw(f);
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].ask?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+$('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+$('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+$('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','SUMMARY'].includes(e.target.tagName)||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+
+const CODE=['P:  fd  = open("root/dir1/dir4/list.db", "RW");','P2: fd2 = open("root/dir1/dir4/list.db", "R");','P:  lseek(fd, 51548, ...);','P:  read(fd, buffer, 128);','P2: read(fd2, buf2, 128);','P:  close(fd);','P2: close(fd2);'];
+/* 目录树节点：[名字, x, y, 父, 是否目录] */
+const TN={root:['root',150,22,null,1],dir1:['dir1',60,80,'root',1],a1:['a.txt',120,80,'root',0],dir2:['dir2',185,80,'root',1],dir3:['dir3',250,80,'root',1],
+ a2:['a.txt',22,138,'dir1',0],b2:['b.txt',75,138,'dir1',0],dir4:['dir4',130,138,'dir1',1],e:['e.doc',185,138,'dir2',0],d:['d.jpg',250,138,'dir3',0],c:['c.av',105,196,'dir4',0],list:['list.db',165,196,'dir4',0]};
+const INOS=[0,26,96,97,256,388,1268,1386];
+/* 状态：path 已确认的节点，ino 高亮的磁盘 inode，blk 当前目录块，mem 内存 inode，sys 系统打开文件表，up/up2 用户表，io 计数 */
+function S0(){return {line:0,path:[],ino:null,blk:null,mem:[],sys:[],up:[],up2:[],io:{i:0,d:0},ch:[]}}
+function steps(rootRes){const L=[];
+ const add=(o)=>L.push(o);
+ add({line:0,note:'P 执行 open("root/dir1/dir4/list.db", "RW")。open 的第一步是<b>按路径逐级检索目录</b>，最终拿到 list.db 的 inode；第二步在两级打开文件表里建表项。',ref:'强化4 p7、p18'});
+ if(rootRes)add({line:0,path:['root'],memAdd:'inode 0',note:'根目录的 inode 0 常驻内存，不用读盘。勾掉上面的选项可看 PPT 的画法（先从磁盘 inode 表把 inode 0 读进来）。',ref:'强化4 p8（PPT 画了读入）'});
+ else add({line:0,path:['root'],ino:0,memAdd:'inode 0',io:'i',note:'从<b>磁盘 inode 表</b>把根目录的 inode 0 装入内存（1 次磁盘 I/O）。',ref:'强化4 p8'});
+ add({line:0,path:['root'],blk:['root','文件块 0',[['dir1',26],['a.txt',388]],'dir1'],io:'d',ask:'inode 0 的物理地址字段说 root 占文件块 0、1。要找 dir1，两块都得读吗？',
+  note:'按 inode 0 的物理地址字段找到 root 的文件块，读入<b>文件块 0</b>：目录项是（文件名，inode 编号）的二元组，这一块里就有 <b>("dir1", 26)</b>，找到了，<b>文件块 1 不用读</b>。',ref:'强化4 p9–10'});
+ add({line:0,path:['root','dir1'],ino:26,memAdd:'inode 26',io:'i',note:'按编号 26 把 dir1 的 inode 读进内存。',ref:'强化4 p11'});
+ add({line:0,path:['root','dir1'],blk:['dir1','文件块 0',[['a.txt',96],['b.txt',256]],null],io:'d',note:'读 dir1 的文件块 0：只有 a.txt 和 b.txt，<b>没有 dir4</b>，继续读下一块。',ref:'强化4 p12–13'});
+ add({line:0,path:['root','dir1'],blk:['dir1','文件块 1',[['dir4',1386]],'dir4'],io:'d',note:'读 dir1 的文件块 1：找到 <b>("dir4", 1386)</b>。',ref:'强化4 p14'});
+ add({line:0,path:['root','dir1','dir4'],ino:1386,memAdd:'inode 1386',io:'i',note:'把 dir4 的 inode 1386 读进内存。dir4 只占一个文件块。',ref:'强化4 p15–16'});
+ add({line:0,path:['root','dir1','dir4'],blk:['dir4','文件块 0',[['c.av',1268],['list.db',97]],'list'],io:'d',note:'读 dir4 的文件块 0：找到 <b>("list.db", 97)</b>。',ref:'强化4 p17'});
+ add({line:0,path:['root','dir1','dir4','list'],ino:97,memAdd:'inode 97',io:'i',ask:'从 root 走到 list.db，一共读了几次磁盘？',
+  note:`把 list.db 的 <b>inode 97</b> 装入内存，<b>open 的第一步（目录检索）完成</b>。共读 inode ${rootRes?3:4} 次、目录块 4 次，合计 <b>${rootRes?7:8} 次</b>磁盘 I/O。路径每多一级，就多一个 inode 加若干目录块。`,ref:'强化4 p18'});
+ add({line:0,sysAdd:{ino:97,cnt:1},note:'在<b>系统级打开文件表</b>里插入新表项：inode 号 97、<b>访问计数 1</b>、缓存地址、其它信息，并指向内存里的 inode 97。整个系统只有这一张表。',ref:'强化4 p19；四章 p62'});
+ add({line:0,upAdd:['up',{fp:0,perm:'读写'}],note:'在<b>进程 P 的用户级打开文件表</b>（文件描述符表）里建新表项：系统表索引（指向上一步那项）、<b>文件指针 0</b>、权限等。每个进程一张。',ref:'强化4 p20；四章 p58、p67'});
+ add({line:0,ret:'fd',note:'把这个新表项在用户级打开文件表里的<b>下标作为 open() 的返回值</b>，就是 fd。以后 read、write、close 都只用 fd，不再查目录。',ref:'强化4 p21'});
+ add({line:1,sysCnt:2,upAdd:['up2',{fp:0,perm:'只读'}],ask:'P2 也打开同一个文件。系统级打开文件表会多一项吗？P2 拿到什么？',
+  note:'P2 同样检索路径（这些 inode 已在内存，可以不再读盘）。发现 inode 97 在系统级打开文件表里<b>已有表项</b>，不新建，只把<b>访问计数加 1 → 2</b>；P2 自己的用户级打开文件表里建一项，指向同一个系统表项，文件指针 0，权限“只读”，返回 fd2。',ref:'强化4 p22–23'});
+ add({line:2,upSet:['up',{fp:51548}],ask:'P 执行 lseek(fd, 51548)。P2 的文件指针会变吗？',
+  note:'lseek 只改 <b>P 那一项的文件指针 → 51548</b>，不读磁盘。P2 的指针还是 0：文件指针在各自的用户级表项里，所以两个进程读同一个文件互不影响。',ref:'强化4 p25、p28；四章 p67'});
+ add({line:3,ask:'read(fd, buffer, 128)：先检查什么？要读的数据在第几块、块内偏移多少？',
+  note:'先检查 fd 那一项的<b>权限</b>是否允许读（PPT 的另一种写法里 P 以 "W" 只写打开，那样 read 就会失败）。然后 51548 ÷ 1024 = <b>50</b> 余 <b>348</b>：逻辑块 50、偏移 348。用 inode 97 的物理地址字段把块 50 换成物理块号（见下面第二部分），读进内核缓存，再拷 128B 给 buffer。',ref:'强化4 p29–36'});
+ add({line:3,upSet:['up',{fp:51676}],note:'读完，P 的文件指针 = 51548 + 128 = <b>51676</b>。<span class="warn">PPT p38–39 写的是 51586，是把 51548 抄成 51458 的笔误。</span>',ref:'强化4 p37–39（本页已核算）'});
+ add({line:4,upSet:['up2',{fp:128}],note:'P2 用 fd2 从它自己的指针 0 开始读，读的是块 0 的前 128B，读完 P2 的指针 = 128。（PPT p40 只画了两个进程各读各的，这一步的数是本页按同样规则推的。）',ref:'强化4 p40'});
+ add({line:5,upDel:'up',sysCnt:1,ask:'P close(fd)。系统级表项和内存 inode 97 会被删掉吗？',
+  note:'删除 P 用户级打开文件表里的那一项，系统级表项的<b>访问计数减 1 → 1</b>。还有 P2 在用，所以系统级表项和内存 inode 都<b>保留</b>。',ref:'强化4 p41–42'});
+ add({line:6,upDel:'up2',sysCnt:0,note:'P2 close(fd2)：删除 P2 的表项，访问计数减到 <b>0</b>。',ref:'强化4 p43–44'});
+ add({line:6,sysDel:1,memDel:'inode 97',fin:1,note:'计数为 0，删除系统级表项，内存 inode 97 也可以释放（改过就先写回磁盘）。注意 close 不删除文件本身，删除文件要 delete，而且 delete 只是把 inode 的<b>链接计数</b>减 1，为 0 才真正回收。',ref:'强化4 p45、p111–113'});
+ return L}
+function build(){const L=steps($('rootRes').checked);let st=S0();const F=[];
+  F.push({st:JSON.parse(JSON.stringify(st)),note:'按“下一步”开始。左边是目录树，中间是磁盘上被读到的东西，右边是内核里的表。',ref:''});
+  for(const s of L){const pre=JSON.parse(JSON.stringify(st));pre.ch=[];pre.line=s.line;
+    if(s.ask)F.push({st:pre,ask:1,note:`<span class="ask">${s.ask}</span>`,ref:'先想一下，再按“下一步”看答案。'});
+    st.ch=[];st.line=s.line;st.ino=s.ino??null;st.blk=s.blk||null;if(s.path)st.path=s.path;
+    if(s.io){st.io[s.io]++;st.ch.push('io')}
+    if(s.memAdd){st.mem.push(s.memAdd);st.ch.push('mem:'+s.memAdd)}
+    if(s.memDel){st.mem=st.mem.filter(x=>x!==s.memDel)}
+    if(s.sysAdd){st.sys=[{...s.sysAdd,gone:0}];st.ch.push('sysnew')}
+    if(s.sysCnt!=null){st.sys[0].cnt=s.sysCnt;st.ch.push('cnt')}
+    if(s.sysDel){st.sys[0].gone=1}
+    if(s.upAdd){st[s.upAdd[0]]=[{...s.upAdd[1],gone:0}];st.ch.push(s.upAdd[0]+'new')}
+    if(s.upSet){Object.assign(st[s.upSet[0]][0],s.upSet[1]);st.ch.push(s.upSet[0]+'fp')}
+    if(s.upDel){st[s.upDel][0].gone=1}
+    if(s.ret)st.ch.push('ret');
+    F.push({st:JSON.parse(JSON.stringify(st)),note:s.note,ref:s.ref,fin:s.fin})}
+  frames=F;at=0}
+function draw(f){const st=f.st;
+  $('code').innerHTML=CODE.map((c,i)=>i===st.line&&at>0?`<span class="cur">${c}</span>`:c).join('\n');
+  let s=`<svg viewBox="0 0 280 216" role="img" aria-label="目录树">`;
+  for(const [k,[n,x,y,p]] of Object.entries(TN))if(p){const P=TN[p];const on=st.path.includes(k)&&st.path.includes(p);s+=`<line x1="${P[1]}" y1="${P[2]+9}" x2="${x}" y2="${y-9}" stroke="${on?'var(--mv)':'var(--line)'}" stroke-width="${on?2.5:1.2}"/>`}
+  for(const [k,[n,x,y,p,dir]] of Object.entries(TN)){const on=st.path.includes(k);const fill=on?'var(--mv)':(dir?'var(--muted)':'var(--cmp)');
+    s+=dir?`<rect x="${x-24}" y="${y-10}" width="48" height="20" rx="3" fill="${fill}"/>`:`<ellipse cx="${x}" cy="${y}" rx="25" ry="11" fill="${fill}"/>`;
+    s+=`<text x="${x}" y="${y+4}" text-anchor="middle" font-size="11" fill="#fff">${n}</text>`}
+  $('tree').innerHTML=s+'</svg><p class="tip">方框是目录，椭圆是普通文件。红色是已经检索到的路径。</p>';
+  $('itab').innerHTML=INOS.map(n=>`<span class="${st.ino===n?'on':''}">${n}</span>`).join('');
+  $('dblk').innerHTML=st.blk?`<div class="dblk on"><span class="t">${st.blk[0]} 的${st.blk[1]}</span><br>${st.blk[2].map(([n,i])=>`<span class="${(st.blk[3]&&TN[st.blk[3]]&&TN[st.blk[3]][0]===n)?'hit':''}">("${n}", ${i})</span>`).join('<br>')}</div>`:'<span class="nil">这一步没有读目录块</span>';
+  $('io').innerHTML=`P 的 open 读盘：inode <b>${st.io.i}</b> 次 + 目录块 <b>${st.io.d}</b> 次 = <b>${st.io.i+st.io.d}</b>`;
+  const tr=(o,cls,cells)=>`<tr class="${o.gone?'gone':cls}">${cells}</tr>`;
+  const ch=st.ch;
+  const up=(arr,key,who,fdn)=>arr.length?`<table class="tbl"><tr><th>${fdn}</th><th>系统表索引</th><th>文件指针</th><th>权限</th></tr>${tr(arr[0],ch.includes(key+'new')?'new':'',`<td class="${ch.includes('ret')&&key==='up'?'chg':''}">${fdn}</td><td>→ inode 97 那项</td><td class="${ch.includes(key+'fp')?'chg':''}">${arr[0].fp}</td><td>${arr[0].perm}</td>`)}</table>`:'<span class="nil">（还没有表项）</span>';
+  $('mem').innerHTML=`<div class="tip" style="margin:0">内存里的 inode</div><div class="itab">${st.mem.length?st.mem.map(m=>`<span class="${ch.includes('mem:'+m)?'on':''}">${m}</span>`).join(''):'<span class="nil">无</span>'}</div>
+   <div class="tip" style="margin:0">系统级打开文件表（全系统一张）</div>${st.sys.length?`<table class="tbl"><tr><th>inode 号</th><th>访问计数</th><th>缓存地址</th><th>其它</th></tr>${tr(st.sys[0],ch.includes('sysnew')?'new':'',`<td>97</td><td class="${ch.includes('cnt')?'chg':''}">${st.sys[0].cnt}</td><td>…</td><td>…</td>`)}</table>`:'<span class="nil">（还没有表项）</span>'}
+   <div class="tip" style="margin:0">P 的用户级打开文件表</div>${up(st.up,'up','P','fd')}
+   <div class="tip" style="margin:0">P2 的用户级打开文件表</div>${up(st.up2,'up2','P2','fd2')}`;
+  $('note').innerHTML=f.note+(f.ref?`<span class="ref">${f.ref.startsWith('先想')?f.ref:'出处：'+f.ref}</span>`:'')}
+$('rootRes').onchange=()=>{stop();build();render()};
+showSpd();build();render();
+
+/* 第二部分：分配方式计算 */
+const AM={cont:'连续分配',link:'链接分配（隐式）',fat:'FAT（显式链接）',idx:'混合索引'};let am='idx';
+$('am').innerHTML=Object.entries(AM).map(([k,v])=>`<button type="button" class="chip" data-a="${k}" aria-pressed="${k===am}">${v}</button>`).join('');
+$('am').onclick=e=>{const b=e.target.closest('[data-a]');if(!b)return;am=b.dataset.a;$('am').querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x.dataset.a===am));calc()};
+function idxPath(k,D,P,Lv){if(k<D)return {lvl:0,reads:0};let r=k-D;for(let l=1;l<=Lv;l++){const cap=P**l;if(r<cap)return {lvl:l,reads:l};r-=cap}return null}
+function idxBlocks(N,D,P,Lv){let n=Math.max(0,N-D),cnt=0;const det=[];for(let l=1;l<=Lv&&n>0;l++){const cap=P**l;const use=Math.min(n,cap);let c=0,u=use;for(let d=l;d>=1;d--){u=Math.ceil(u/P);c+=u}det.push(`${l} 级间接管 ${use} 块，用索引块 ${c} 个`);cnt+=c;n-=use}return {cnt,det,left:n}}
+function calc(){const v=k=>+$(k).value;const N=v('N'),k=v('K'),B=v('B'),A=v('A'),D=v('D'),Lv=+$('L').value,w=$('op').value==='w',fm=$('fatMem').checked;$('aErr').textContent='';
+  if([N,B,A].some(x=>!(x>0))||!(k>=0)||!(D>=0)||[N,k,B,A,D].some(x=>!Number.isInteger(x))){$('aErr').textContent='都填正整数（k、直接索引个数可以是 0）。';return}
+  if(k>=N){$('aErr').textContent=`文件只有 ${N} 块，块号是 0～${N-1}。`;return}
+  const P=Math.floor(B/A);const ip=idxPath(k,D,P,Lv);const wb=w?1:0;
+  const R={cont:{n:1+wb,why:`起始块号 + ${k} 直接算出物理块号，读 1 次${w?'，改完写回 1 次':''}。`},
+   link:{n:k+1+wb,why:`只能从第 0 块顺着指针走：读块 0～${k-1} 拿指针（${k} 次），再读块 ${k}（1 次）${w?'，写回 1 次':''}。`},
+   fat:{n:(fm?0:1)+1+wb,why:`${fm?'FAT 在内存里，顺着 FAT 找到块 '+k+' 的物理地址不用读盘':'FAT 不在内存，先读 FAT（按 1 次算，FAT 很大时要更多次）'}，读数据块 1 次${w?'，写回 1 次':''}。`},
+   idx:ip?{n:ip.reads+1+wb,why:ip.lvl===0?`k = ${k} < ${D}，在直接索引里，inode 已在内存，直接读数据块 1 次${w?'，写回 1 次':''}。`:`k = ${k}：直接索引管 0～${D-1}${ip.lvl>=1?`，一级管 ${D}～${D+P-1}`:''}${ip.lvl>=2?`，二级管 ${D+P}～${D+P+P*P-1}`:''}${ip.lvl>=3?'，三级管再往后的':''}，落在 <b>${ip.lvl} 级间接</b>：读 ${ip.lvl} 个索引块 + 1 个数据块${w?' + 写回 1 次':''}。（每个索引块放 ${B} ÷ ${A} = ${P} 个地址）`}:{n:null,why:`块号 ${k} 超出这个 inode 能管的最大块数。`}};
+  $('aTab').innerHTML=`<thead><tr><th>方式</th><th>物理地址字段存什么</th><th>${w?'修改':'读'}第 ${k} 块</th><th>怎么数</th></tr></thead>`+
+   [['cont','起始块号、文件块数'],['link','起始块地址、结束块地址（每块末尾存下一块地址）'],['fat','开始块地址（下一块地址集中放在 FAT 里）'],['idx',`${D} 个直接地址 + ${['','一级','一级、二级','一级、二级、三级'][Lv]}间接索引地址`]].map(([m,f])=>`<tr class="${m===am?'cur':''}"><td>${AM[m]}</td><td>${f}</td><td class="n">${R[m].n??'—'}</td><td>${R[m].why}</td></tr>`).join('');
+  $('aWhy').innerHTML='';
+  /* 访问链示意 */
+  const W=900,H=96;let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="访问链"><defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--q)"/></marker></defs>`;
+  const box=(x,l,c,sub,io)=>`<rect x="${x}" y="22" width="92" height="40" rx="4" fill="${c}"/><text x="${x+46}" y="40" text-anchor="middle" font-size="12" fill="#fff">${l}</text><text x="${x+46}" y="55" text-anchor="middle" font-size="10" fill="#fff">${sub}</text>${io?`<text x="${x+46}" y="80" text-anchor="middle" font-size="11" fill="var(--mv)" font-weight="700">读盘</text>`:`<text x="${x+46}" y="80" text-anchor="middle" font-size="11" fill="var(--muted)">内存</text>`}`;
+  const arr=(x)=>`<line x1="${x}" y1="42" x2="${x+26}" y2="42" stroke="var(--q)" stroke-width="2" marker-end="url(#m)"/>`;
+  let nodes=[];
+  if(am==='cont')nodes=[['inode',' 起始块号','var(--muted)',0],[`块 ${k}`,'起始 + '+k,'var(--done)',1]];
+  if(am==='link')nodes=k<=5?[['inode','起始块地址','var(--muted)',0],...Array.from({length:k},(_,i)=>[`块 ${i}`,'取下一块指针','var(--cmp)',1]),[`块 ${k}`,'目标','var(--done)',1]]:[['inode','起始块地址','var(--muted)',0],['块 0','取指针','var(--cmp)',1],['块 1','取指针','var(--cmp)',1],[`块 2～${k-2}`,'逐块取指针','var(--cmp)',1],[`块 ${k-1}`,'取指针','var(--cmp)',1],[`块 ${k}`,'目标','var(--done)',1]];
+  if(am==='fat')nodes=[['inode','开始块地址','var(--muted)',0],['FAT',`顺链查 ${k} 次`,fm?'var(--muted)':'var(--cmp)',fm?0:1],[`块 ${k}`,'目标','var(--done)',1]];
+  if(am==='idx'&&ip){nodes=[['inode',ip.lvl?`${ip.lvl} 级间接地址项`:`直接地址项 ${k}`,'var(--muted)',0]];for(let l=1;l<=ip.lvl;l++)nodes.push([`索引块（第 ${l} 层）`,'取下一层地址','var(--cmp)',1]);nodes.push([`块 ${k}`,'目标','var(--done)',1])}
+  nodes.forEach((n,i)=>{const x=10+i*122;s+=box(x,n[0],n[2],n[1],n[3]);if(i<nodes.length-1)s+=arr(x+94)});
+  if(w)s+=`<text x="${10+nodes.length*122}" y="46" font-size="12" fill="var(--mv)" font-weight="700">+ 写回 1 次</text>`;
+  $('chain').innerHTML=s+'</svg>';
+  const ib=idxBlocks(N,D,P,Lv);
+  $('idx').innerHTML=`<h3 style="margin-top:12px">混合索引：这个文件一共用几个索引块（强化4 p67–70）</h3><p>${N} 块：直接索引管 ${Math.min(N,D)} 块；${ib.det.join('；')||'不需要间接索引'}。共 <b>${ib.cnt}</b> 个索引块、${N} 个数据块${ib.left>0?`；<span style="color:var(--mv)">还有 ${ib.left} 块超出能管的范围</span>`:''}。</p>
+   <p class="tip">PPT：101 块 → 1 个索引块（p68）；528 块 → 一级 1 个 + 二级 1 个 + 二级下面的 2 个 = 4 个（p70）。把 N 改成 528 试试。inode 里的地址项本身不算索引块。</p>`}
+['N','K','op','B','A','D','L','fatMem'].forEach(k=>$(k).oninput=calc);calc();
+
+const QS=[
+ ['连续分配方式下，读取文件块 50 要几次磁盘 I/O？修改它呢？（强化4 p49–52）','PPT 原答案：读 1 次，直接读入（起始块号 + 50）号物理块；修改 2 次，一次读入内存修改，一次写回。'],
+ ['链式（隐式链接）分配下，读取文件块 50 要几次 I/O？修改呢？（p55–58）','PPT 原答案：读 51 次（读块 0～49 的指针找到块 50，再读块 50）；修改 52 次（50 次找到、1 次读入、1 次写回）。'],
+ ['FAT 方式下修改文件块 50 要几次 I/O？为什么比隐式链接少？（p60–61）','PPT 原答案：2 次。找到块 50 只查内存里的 FAT，不需要磁盘 I/O；下一块地址集中在 FAT 里，不分散在各数据块末尾。'],
+ ['混合索引（10 直接、1 一级、1 二级，地址项 4B，块 1KB）：一级、二级索引各管多少块？块 50 由谁管、读要几次 I/O？（p62–66）','PPT 原答案：一个索引块 1KB ÷ 4B = 256 项，一级管 256 块，二级管 256² 块；块 50 由一级索引管，读要 2 次（索引块 1 次 + 数据块 1 次，inode 已在内存）。'],
+ ['该文件（101 块）共占用几个数据块和索引块？若文件共 528 块呢？（p67–70）','PPT 原答案：101 个数据块、1 个索引块；528 块时用一级的 1 个、二级的 1 个和它下面的前 2 个，共 4 个索引块。'],
+ ['进程 P 和 P2 先后打开同一文件，系统级和用户级打开文件表各有几项？P 关闭后会怎样？（p22、p41–45）','系统级 1 项（访问计数 2），P、P2 的用户级各 1 项。P 关闭：删 P 的表项，计数减为 1，系统表项和内存 inode 保留；P2 再关闭，计数为 0，才删系统表项、释放内存 inode。（依据 PPT 动画整理）'],
+ ['（迁移）根目录 inode 常驻内存，每个目录都只占 1 块，打开 /a/b/c/d.txt 至少要读几次磁盘？','路径上 a、b、c 三个目录和 d.txt 共 4 个 inode 要读，根、a、b、c 四个目录各读 1 个目录块：4 + 4 = 8 次。（本页整理，前提是没有其它缓存）'],
+ ['（迁移）同一设定下，把文件块 50 改成文件块 300，混合索引读它要几次 I/O？','300 − 10 = 290 > 256，越过一级（管 10～265），落在二级：读二级的两层索引块 2 次 + 数据块 1 次 = 3 次。可以在上面的计算器里把 k 改成 300、N 改成 301 验证。'],
+ ['（真题型，强化4 p134–140）连续分配的文件占 200 块，要在第 30 块前插入一块新记录，文件前面有空闲块。最少要几次读、几次写？换成链式分配呢？','连续：把第 1～29 块各前移一块（读 29 次、写 29 次），再写入新记录 1 次，共读 29、写 30（PPT 原答案）。链式（PPT 原答案）：为找到第 29 块读前 28 块，第 29 块读一次、改指针后写一次，再写新的第 30 块，共 31 次。']];
+$('qs').innerHTML=QS.map(([q,a])=>`<details><summary><b>问</b> ${q}</summary><div class="ans">${a}</div></details>`).join('');
+$('src').innerHTML=['强化4 场景一：p7–23（open 与两级打开文件表），p24–40（lseek、read、文件指针），p41–45（close），p46–70（四种分配方式与 I/O 次数），p111–113（删除与链接计数），p134–140（真题 4 插入记录）','四章 p21–36（目录与目录检索），p49–67（inode、用户级与系统级打开文件表、文件读写指针），p95–113（分配方式）'].map(x=>`<li>${x}</li>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>开机到用户进程</title>
+<style>
+/* Stage pills, then an SVG with a memory bar on top, a PC marker and a disk bar below (load arrows between them), a detail card for the current step, the step note and controls; below that a superblock calculator and closed-book questions. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --hw:#8a6d3b;
+  --s1:#6f93c9; --s2:#e08a3c; --s3:#e7c14a; --s4:#7fae5a; --s5:#9a8fc4; --s6:#9aa0a6;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c;
+  --s1:#4f6f9f; --s2:#b3692c; --s3:#a88a2c; --s4:#5b8540; --s5:#6f6699; --s6:#666c71; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c;
+  --s1:#4f6f9f; --s2:#b3692c; --s3:#a88a2c; --s4:#5b8540; --s5:#6f6699; --s6:#666c71; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:82ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:13px var(--sans);font-weight:600;margin:0 0 6px;color:var(--muted)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.flow button{font:inherit;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:999px;padding:3px 12px;cursor:pointer}
+.flow button.on{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.flow button.past{color:var(--ink);border-color:var(--accent)}
+.flow .ar{color:var(--muted)}
+.stage{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}}
+.view{overflow-x:auto}
+.view svg{display:block;width:100%;height:auto;min-width:620px}
+svg text{font-family:var(--sans)}
+.card{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg);min-width:0;font-size:13px}
+.card table{border-collapse:collapse;font:12px var(--mono);margin:4px 0;width:100%}
+.card th,.card td{border:1px solid var(--line);padding:2px 6px;text-align:center}
+.card th{color:var(--muted);font-weight:400}
+.card td.h{background:color-mix(in srgb,var(--cmp) 26%,transparent);font-weight:700}
+.card ul{margin:4px 0;padding-left:1.2em}
+.card code,.mono{font-family:var(--mono);font-size:12px}
+.chk{color:var(--done);font-weight:700}
+.todo{color:var(--muted)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:4.6em;margin-top:10px}
+.note .ask{color:var(--q);font-weight:600}
+.note .ref{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.note .warn{color:var(--mv)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.opts{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6.5em}
+.sbbar svg{display:block;width:100%;height:auto;margin-top:8px}
+.calc p{margin:4px 0;font:14px var(--mono)}
+.calc b{color:var(--done)}
+.calc .bad{color:var(--mv)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+details{border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg);margin-top:6px}
+details summary{cursor:pointer;font-size:14px}
+details summary b{color:var(--q);font-weight:600}
+details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.src{font-size:13px;margin:0;padding-left:1.3em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="IO全链路.html">I/O 全链路</a><a href="文件打开与读取.html">文件打开与读取</a><a href="地址转换.html">地址转换</a></div>
+  <header>
+    <h1>从空白磁盘到第一个用户进程</h1>
+    <p class="sub">强化1 场景 1 的主线：磁盘格式化与安装 → 开机 → 引导 → 操作系统初始化 → 创建用户进程并执行。上面一条是内存，下面一条是磁盘，蓝色圆点是 PC（CPU 正在执行谁），橙色箭头是“把谁从磁盘载入内存”。画法照 PPT 的动画，页码在每一步下方。</p>
+  </header>
+  <section class="panel"><div class="flow" id="flow"></div>
+    <div class="opts" style="margin-top:8px"><label><input id="guess" type="checkbox" checked> 先猜再看</label></div></section>
+  <section class="panel">
+    <div class="stage"><div class="view" id="view"></div><div class="card" id="card"></div></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="1"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+    <p class="tip">上方阶段可以点，直接跳到那一段。键盘 ← → 单步，空格播放／暂停。</p>
+  </section>
+  <section class="panel calc"><h2>超级块计算器（强化4 p78–88）</h2>
+    <p class="tip" style="margin:0 0 6px">逻辑格式化写进超级块的字段。默认是 PPT 的数据：磁盘块 1KB，inode 4B（PPT 设定的值，真实系统的 inode 大得多），inode 表从块 3 开始共 15 块，位图从块 18 开始共 12 块，数据区从块 30 开始。可以改数再算。</p>
+    <div class="form">
+      <label>块大小 B<input id="bs" type="number" min="1" value="1024"></label>
+      <label>inode 大小 B<input id="isz" type="number" min="1" value="4"></label>
+      <label>inode 表开始块<input id="is" type="number" min="0" value="3"></label>
+      <label>inode 表块数<input id="ic" type="number" min="1" value="15"></label>
+      <label>位图开始块<input id="bm" type="number" min="0" value="18"></label>
+      <label>位图块数<input id="bc" type="number" min="1" value="12"></label>
+      <label>数据区开始块<input id="ds" type="number" min="0" value="30"></label>
+      <label>查 inode 号<input id="ino" type="number" min="0" value="326"></label>
+    </div>
+    <div class="err" id="sbErr" role="alert"></div>
+    <div class="sbbar" id="sbBar"></div>
+    <div id="sbOut"></div>
+  </section>
+  <section class="panel"><h2>闭卷自测</h2><p class="tip" style="margin:0 0 4px">题目是强化1 p9、p18、p30、p43–48 的原题（编号沿用 PPT）。PPT 只在 p46–47 画了答案，其余参考要点是本页整理的，已注明依据。</p><div id="qs"></div></section>
+  <section class="panel"><h2>来源</h2><ol class="src" id="src"></ol>
+    <p class="tip">idle_proc、plic、pagetable 这些名字是 PPT 的教学模型（类似 ucore／RISC-V 的实现），不当作 408 的通用结论；408 只要求知道初始化做了哪几类事。“BIOS 保存在内存 ROM 区域”是 PPT 的说法，意思是它在主存地址空间里的只读存储器中，断电不丢。</p></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let frames=[],at=0,timer=null;
+const SPD=[4500,3200,2400,1700,1200,800,500];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].ask)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].ask)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;draw(f);
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].ask?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+$('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+$('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+$('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','SUMMARY'].includes(e.target.tagName)||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+
+/* 磁盘段：[标签, 宽度, 颜色变量]；内存段：[标签, x, 宽度, 颜色变量] */
+const DSEG={blank:['空白盘片：还没有磁道和扇区',860,'--s6'],mbr:['MBR',54,'--s3'],p1:['分区 1',466,'--s4'],p2:['分区 2',200,'--s4'],p3:['分区 3',140,'--s1'],
+ pbr:['PBR',40,'--s3'],sb:['超级块',52,'--s2'],ino:['inode 区',90,'--s6'],bmp:['位图',62,'--s5'],data:['数据区',222,'--s2'],root:['根目录',72,'--s2'],osimg:['os.img',150,'--s1']};
+const MSEG={bios:['BIOS（ROM）',730,110,'--s2'],mbr:['MBR',20,70,'--s3'],pbr:['PBR',100,70,'--s3'],os:['操作系统内核',180,250,'--s1'],
+ f20:['页框20',470,48,'--s4'],f21:['页框21',522,48,'--s4'],f76:['页框76',574,48,'--s4'],f88:['页框88',626,48,'--s4'],f89:['页框89',678,48,'--s4']};
+const D0=['blank'],DS='sectors',DP=['mbr','p1','p2','p3'],DL=['mbr','pbr','sb','ino','bmp','data','p2','p3'],DI=['mbr','pbr','sb','ino','bmp','root','osimg','p2','p3'];
+const ST=[['disk','磁盘格式化与安装'],['boot','开机与引导'],['init','操作系统初始化'],['proc','创建用户进程并执行']];
+const PTAB=(hl,sys)=>`<h3>MBR 里的磁盘分区表（强化1 p14）</h3><table><tr><th>分区</th><th>是否系统分区</th><th>其它信息</th></tr>${[1,2,3].map(i=>`<tr><td class="${hl===i?'h':''}">${i}</td><td class="${hl===i?'h':''}">${sys&&i===1?'是':(sys===2&&i===3?'是':(sys?'否':'—'))}</td><td>…</td></tr>`).join('')}</table>`;
+const IVT=hl=>`<h3>中断向量表（强化1 p21）</h3><table><tr><th>中断号</th><th>服务地址</th><th>其它信息</th></tr>${['79H','80H','81H','82H','83H'].map(n=>`<tr><td class="${hl&&n==='80H'?'h':''}">${n}</td><td class="${hl&&n==='80H'?'h':''}">${n==='80H'?'系统调用服务例程':'服务地址'}</td><td>…</td></tr>`).join('')}</table><p class="tip">PPT 示意图里 80H 指向系统调用服务例程；其它号是示意。</p>`;
+const INIT=(n)=>`<h3>初始化清单（强化1 p20）</h3><ul>${['中断和异常初始化','内存管理初始化','进程管理初始化','文件系统初始化','I/O 管理初始化'].map((x,i)=>`<li class="${i<n?'chk':'todo'}">${i<n?'✓ ':'○ '}${x}</li>`).join('')}</ul>`;
+const PT=`<h3>PCB1 的页表（强化1 p40）</h3><table><tr><th>页面</th><th>物理页框号</th><th>存在位</th></tr>${[[0,21],[1,76],[2,20],[3,88],[4,89]].map(([p,f])=>`<tr><td>${p}</td><td>${f}</td><td>1</td></tr>`).join('')}</table><p class="tip">PCB 里的 PTR 指向页表所在的物理地址；进程切换时把它装进页表基址寄存器。</p>`;
+const LAYOUT=`<h3>进程虚拟地址空间（强化1 p41）</h3><table><tr><th>区</th><th>放什么</th><th>何时有</th></tr><tr><td>代码段</td><td>指令、只读常量</td><td>可执行文件里就有</td></tr><tr><td>数据段</td><td>已初始化的全局变量</td><td>可执行文件里就有</td></tr><tr><td>bss 段</td><td>未初始化的全局变量</td><td>文件里只记大小</td></tr><tr><td>堆</td><td>malloc 动态分配</td><td>加载后运行时</td></tr><tr><td>栈</td><td>局部变量、调用帧</td><td>加载后运行时</td></tr></table>`;
+const CODE=`<pre class="mono" style="margin:4px 0;white-space:pre-wrap">int a,b=0,c;
+int main(){
+  int *A=(int*)malloc(100*sizeof(int));
+  scanf("%d",&a);
+  return 0;
+}</pre><p class="tip">强化1 p41、p43 的示例程序</p>`;
+const STEPS=[
+ {g:'disk',disk:D0,mem:[],note:'一块刚出厂前的空白磁盘。从这里一直走到用户程序跑起来，PPT 按时间顺序分成四段。',ref:'强化1 p2–3',card:`<h3>整条主线（强化1 p2）</h3><p>磁盘格式化和操作系统安装 → 开机 → 操作系统引导 → 操作系统启动成功 → 操作系统初始化 → OS 初始化完成、用户介入 → 创建用户进程并执行</p>`},
+ {g:'disk',disk:DS,mem:[],hl:[],ask:'把空白盘片划出盘面、磁道，再把磁道分成扇区，这一步叫什么？通常由谁来做？',
+  note:'<b>物理格式化（低级格式化）</b>：划分盘面、磁道、扇区，每个扇区再分成标识部分 ID、间隔区 GAP、数据区 DATA。通常磁盘<b>出厂前</b>由生产厂商做好，用户不用做。',ref:'强化1 p4；四章 p167、p170',card:`<h3>扇区的三部分</h3><table><tr><th>ID</th><th>GAP</th><th>DATA</th></tr><tr><td>标识</td><td>间隔</td><td>数据</td></tr></table><p class="tip">磁头组、柱面、磁道、扇区的几何关系见磁盘调度页。</p>`},
+ {g:'disk',disk:DP,mem:[],hl:['mbr'],ask:'把一块物理盘分成 C 盘、D 盘这样几个独立的逻辑盘，这一步叫什么？分区信息记在哪？',
+  note:'<b>磁盘分区</b>：把整个物理空间划成几个独立的逻辑单元。分区过程中在磁盘最开头产生 <b>MBR</b>（主引导记录），里面建一张<b>磁盘分区表</b>，记录各分区的信息。',ref:'强化1 p5、p14；四章 p171',card:PTAB(0,0)},
+ {g:'disk',disk:DL,mem:[],hl:['pbr','sb','ino','bmp','data'],ask:'分区 1 还不能存文件。要在分区里写入引导块、超级块、inode 区、位图、建根目录，这一步叫什么？',
+  note:'<b>逻辑格式化（高级格式化）</b>：对象是一个分区，按某种文件系统的格式写入 <b>PBR</b>（分区引导记录）和文件系统信息（超级块、inode 区或 FAT 区、空闲空间位图等），并<b>创建根目录</b>。不同文件系统的逻辑格式化不一样，所以也叫“文件系统安装”。',ref:'强化1 p6–7；四章 p130–132、p172–174',card:`<h3>分区内的布局（四章 p172）</h3><table><tr><th>引导块</th><th>超级块</th><th>inode 区</th><th>空闲空间位图</th><th>数据区</th></tr><tr><td>PBR</td><td>各区位置、大小</td><td>文件元数据</td><td>哪些块空闲</td><td>目录和文件</td></tr></table><p class="tip">超级块各字段怎么算，见下方超级块计算器。</p>`},
+ {g:'disk',disk:DI,mem:[],hl:['osimg','mbr'],
+  note:'<b>安装操作系统</b>：把 os.img 写进分区 1 的数据区；在 MBR 的分区表里把分区 1 标成<b>系统分区（启动分区）</b>；PBR 改成能找到并载入这个 OS 的引导程序。',ref:'强化1 p8、p14',card:PTAB(1,1)},
+ {g:'boot',disk:DI,mem:['bios'],pc:'bios',load:['mbr','mbr'],memLater:['mbr'],ask:'开机后 PC 首先指向哪里？为什么那段程序断电后还在？',
+  note:'开机后 PC 指向 <b>BIOS</b> 的入口。BIOS 是保存在主存 <b>ROM</b> 区域里的固定程序，断电不丢。CPU 执行 BIOS：开机自检、初始化一些简单的中断，然后把物理磁盘的<b>第一个扇区 MBR</b> 载入内存，最后把 CPU 控制权交给 MBR。',ref:'强化1 p11–12；一章 p110–112',card:`<h3>谁在执行</h3><p>“BIOS 加载 MBR”说的其实是 <b>CPU 在执行 BIOS 的指令</b>把 MBR 读进内存，强化1 p48 的问题 11 就问这件事。</p>`},
+ {g:'boot',disk:DI,mem:['bios','mbr'],pc:'mbr',load:['pbr','pbr'],ask:'MBR 怎么知道该载入哪个分区的 PBR？',
+  note:'PC 跳到 MBR。MBR 里有<b>磁盘分区表</b>，按表找到<b>系统分区</b>（分区 1），把该分区的 <b>PBR</b> 载入内存并把控制权交给 PBR。',ref:'强化1 p13–15；一章 p113–115',card:PTAB(1,1)},
+ {g:'boot',disk:DI,mem:['bios','mbr','pbr'],pc:'pbr',load:['osimg','os'],
+  note:'PC 跳到 PBR。PBR 是这个分区的引导程序，认识本分区的文件系统，能找到 os.img，把操作系统程序载入内存，再把 CPU 控制权交给操作系统。',ref:'强化1 p16–17；一章 p116–117',card:`<h3>三级接力（强化1 p10）</h3><ol><li>执行 BIOS，加载 MBR</li><li>执行 MBR，加载 PBR</li><li>执行 PBR，加载操作系统</li></ol>`},
+ {g:'init',disk:DI,mem:['bios','os'],pc:'os',
+  note:'PC 指向操作系统，<b>操作系统启动成功</b>，开始初始化。各子模块（内存、进程、文件、I/O、中断）都要先把自己的全局变量、数据结构准备好，进程和线程才能正常运行。（MBR、PBR 用完后那块内存可以被覆盖，图里去掉了。）',ref:'强化1 p17、p19–20',card:INIT(0)},
+ {g:'init',disk:DI,mem:['bios','os'],pc:'os',hl:['os'],ask:'用户程序执行 INT 0x80 时，CPU 凭什么能跳到系统调用服务例程？这张表是什么时候填的？',
+  note:'<b>中断和异常初始化</b>：OS 里有大量服务例程，已被载入内存的不同位置，要<b>填写中断向量表</b>（例如 80H → 系统调用服务例程），中断来了硬件才能按中断号找到入口。同时<b>初始化时钟</b>，设好时钟中断的间隔，分时和时间片都靠它。',ref:'强化1 p21–22；一章 p63–64（软件负责填向量表、写服务程序）',card:IVT(1)+INIT(1)},
+ {g:'init',disk:DI,mem:['bios','os'],pc:'os',hl:['os'],
+  note:'<b>内存管理初始化</b>：准备内存分配机制（内存池），按探测到的内存情况配置分配器；建立<b>内核地址空间的页表</b>，地址映射开启后内核程序才能正常访问。',ref:'强化1 p23–24',card:INIT(2)},
+ {g:'init',disk:DI,mem:['bios','os'],pc:'os',hl:['os'],
+  note:'<b>进程管理初始化</b>：创建 idle 进程（没有就绪进程时运行的闲逛进程）和其它初始用户进程（如图形界面进程）；<b>初始化调度器</b>，为就绪队列等数据结构分配空间、设置全局变量。',ref:'强化1 p25–26；二中 p116–117（闲逛进程）',card:INIT(3)},
+ {g:'init',disk:DI,mem:['bios','os'],pc:'os',hl:['os','sb'],load:['sb','os'],ask:'根目录、超级块这些磁盘上的信息，是 OS 初始化时写到磁盘上的吗？',
+  note:'<b>不是</b>。它们是<b>逻辑格式化</b>时写好的。<b>文件系统初始化</b>只是把启动分区里的文件系统当作根文件系统，把它运行需要的信息（超级块等）<b>读进内存</b>，并做虚拟文件系统 VFS 的初始化，如创建 VFS 的根节点。',ref:'强化1 p27–28',card:INIT(4)},
+ {g:'init',disk:DI,mem:['bios','os'],pc:'os',hl:['os'],
+  note:'<b>I/O 管理初始化</b>：使能设备中断（PPT 用 RISC-V 的中断控制器 plic 举例）、设置中断屏蔽字和优先级、探测各个 I/O 设备。到这里初始化完成，用户可以介入了。',ref:'强化1 p29',card:INIT(5)},
+ {g:'proc',disk:DI,mem:['bios','os'],pc:'os',
+  note:'<b>用户程序的形成</b>（在这之前、在别处完成）：main.c、1.c、2.c、3.c 各自预处理和编译成 .s，汇编成 .o，再<b>链接</b>成一个可执行文件 myproject.out，存在磁盘的文件区里。',ref:'强化1 p32–34；一章 p32–34',card:`<h3>四步</h3><p class="mono">.c →(预处理、编译)→ .s →(汇编)→ .o →(链接)→ myproject.out</p>${CODE}`},
+ {g:'proc',disk:DI,mem:['bios','os'],pc:'os',hl:['os'],ask:'用户双击 myproject.out，创建进程的第一步是什么？失败会怎样？',
+  note:'父进程（终端、图形界面）请求创建进程。第一步<b>申请 pid 和空白 PCB</b>：系统同时存在的进程数有限，申请不到就创建失败；成功后新 PCB 出现在 PCB 队列里，进程进入<b>创建态</b>。',ref:'强化1 p35–37；二上 p37、p77',card:`<h3>创建原语四步（强化1 p36）</h3><ol><li><b>申请 pid 和空白 PCB</b></li><li>申请进程所需其它资源</li><li>初始化 PCB</li><li>PCB 加入就绪队列</li></ol>`},
+ {g:'proc',disk:DI,mem:['bios','os','f20','f21','f76','f88','f89'],pc:'os',hl:['f20','f21','f76','f88','f89'],load:['data','f21'],
+  note:'<b>申请其它资源并初始化 PCB</b>：以内存为例，要拿到初始运行所需的内存才能满足执行条件，拿不到就一直停在创建态。这里给页面 0～4 分了页框 21、76、20、88、89，建好页表，PCB 里的 PTR 指向页表的物理地址。',ref:'强化1 p38–40',card:PT},
+ {g:'proc',disk:DI,mem:['bios','os','f20','f21','f76','f88','f89'],pc:'os',ask:'变量 a、b、c、A、A[10] 分别在进程地址空间的哪个区？',
+  note:'a、c 是<b>未初始化的全局变量 → bss 段</b>；b = 0 按“已初始化全局变量”算<b>数据段</b>（gcc 实际会把初始化为 0 的全局变量也放进 .bss，考题按初始化与否分）；A 是 main 的局部变量 → <b>栈</b>；A[10] 在 malloc 出来的空间里 → <b>堆</b>。',ref:'强化1 p41、p43–44（问题 9 Ⅰ）',card:LAYOUT+CODE},
+ {g:'proc',disk:DI,mem:['bios','os','f20','f21','f76','f88','f89'],pc:'f21',hl:['f21'],ask:'新进程第一次被调度时，CPU 从哪里开始执行？程序执行完怎样正常退出？',
+  note:'PCB 加入就绪队列，被调度后<b>装入处理机</b>。编译时把 main 的入口写成 entry point 放进 PCB，第一次运行时把它当作“用户程序断点”来恢复，于是从 main 开始执行；编译时还在结束处自动加入 <b>exit()</b> 系统调用，用来终止进程。图里 PC 指向页面 0 所在的页框 21。',ref:'强化1 p42、p46–47',card:`<h3>PCB 里的入口（强化1 p46–47）</h3><table><tr><th>PCB 字段</th><th>值</th></tr><tr><td>main entry point</td><td>第一次运行时当作断点恢复</td></tr><tr><td>PTR</td><td>页表物理地址</td></tr><tr><td>状态</td><td>就绪 → 运行</td></tr></table><p class="tip">接下来 scanf 怎么读键盘，见 <a href="IO全链路.html#kbd">I/O 全链路</a>。</p>`}
+];
+function build(){const F=[];STEPS.forEach((s,i)=>{if(s.ask)F.push({...s,si:i,q:s.ask,ask:1});F.push({...s,si:i,ask:0})});frames=F;at=0}
+function segs(keys,y,H,hl,isDisk){let s='';if(keys==='sectors'){for(let i=0;i<20;i++)s+=`<rect x="${20+i*43}" y="${y}" width="41" height="${H}" fill="var(--s6)" rx="2"/><text x="${20+i*43+20.5}" y="${y+H/2+4}" text-anchor="middle" font-size="10" fill="#fff">扇区</text>`;return s}
+  let x=20;for(const k of keys){const [l,w,c]=DSEG[k];const on=hl&&hl.includes(k);
+    s+=`<rect x="${x}" y="${y}" width="${w-2}" height="${H}" fill="var(${c})" rx="3" ${on?'stroke="var(--ink)" stroke-width="2.5"':''}/><text x="${x+(w-2)/2}" y="${y+H/2+4}" text-anchor="middle" font-size="${w<60?11:12}" fill="#fff" font-weight="${on?700:400}">${l}</text>`;DSEG[k].x=x;x+=w}return s}
+function draw(f){const W=880,H=262,my=40,dy=210,bh=34;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="内存与磁盘">`;
+  s+=`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--cmp)"/></marker><marker id="ap" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--q)"/></marker></defs>`;
+  s+=`<text x="20" y="${my-8}" font-size="13" fill="var(--muted)">内存</text><rect x="20" y="${my}" width="840" height="${bh}" fill="color-mix(in srgb,var(--s4) 35%,transparent)" rx="3"/>`;
+  s+=`<text x="20" y="${dy-8}" font-size="13" fill="var(--muted)">磁盘</text>`;
+  s+=segs(f.disk,dy,bh,f.hl,true);
+  if(Array.isArray(f.disk)&&f.disk.includes('p1')===false&&f.disk.includes('pbr')){const x0=DSEG.pbr.x,x1=DSEG.p2.x-2;s+=`<path d="M${x0} ${dy+bh+6} V${dy+bh+12} H${x1} V${dy+bh+6}" fill="none" stroke="var(--muted)"/><text x="${(x0+x1)/2}" y="${dy+bh+26}" text-anchor="middle" font-size="12" fill="var(--muted)">分区 1${f.disk.includes('osimg')?'（系统分区）':''}</text>`}
+  const memShown=f.mem.slice();
+  for(const k of memShown){const [l,x,w,c]=MSEG[k];const on=(f.hl||[]).includes(k)||f.pc===k;
+    s+=`<rect x="${x}" y="${my}" width="${w}" height="${bh}" fill="var(${c})" rx="3" ${on?'stroke="var(--ink)" stroke-width="2.5"':''}/><text x="${x+w/2}" y="${my+bh/2+4}" text-anchor="middle" font-size="${w<60?10:12}" fill="#fff">${l}</text>`}
+  const PG={f20:2,f21:0,f76:1,f88:3,f89:4};for(const k of memShown)if(PG[k]!=null){const m=MSEG[k];s+=`<text x="${m[1]+m[2]/2}" y="${my+bh+13}" text-anchor="middle" font-size="10" fill="var(--muted)">页面${PG[k]}</text>`}
+  if(f.load&&!f.ask){const [dk,mk]=f.load;const d=DSEG[dk],m=MSEG[mk];if(d&&m&&d.x!=null){const x1=d.x+(d[1]-2)/2,x2=m[1]+m[2]/2;
+    s+=`<line x1="${x1}" y1="${dy-4}" x2="${x2}" y2="${my+bh+20}" stroke="var(--cmp)" stroke-width="2.5" marker-end="url(#ah)"/><text x="${(x1+x2)/2+8}" y="${(dy+my+bh)/2+8}" font-size="12" fill="var(--cmp)" font-weight="700">载入</text>`;
+    if(!memShown.includes(mk))s+=`<rect x="${m[1]}" y="${my}" width="${m[2]}" height="${bh}" fill="var(${m[3]})" opacity=".55" rx="3" stroke="var(--cmp)" stroke-dasharray="4 3" stroke-width="2"/><text x="${m[1]+m[2]/2}" y="${my+bh/2+4}" text-anchor="middle" font-size="12" fill="#fff">${m[0]}</text>`}}
+  if(f.pc){const m=MSEG[f.pc];const px=m[1]+m[2]/2;s+=`<circle cx="${px}" cy="150" r="17" fill="var(--q)"/><text x="${px}" y="155" text-anchor="middle" font-size="13" fill="#fff" font-weight="700">PC</text><line x1="${px}" y1="132" x2="${px}" y2="${my+bh+4}" stroke="var(--q)" stroke-width="2" marker-end="url(#ap)"/>`}
+  else s+=`<text x="440" y="150" text-anchor="middle" font-size="13" fill="var(--muted)">${f.g==='disk'?'还没开机，CPU 不参与（格式化、安装在另一台机器或安装程序里做）':''}</text>`;
+  $('view').innerHTML=s+'</svg>';
+  $('card').innerHTML=f.card||'';
+  const gi=ST.findIndex(x=>x[0]===f.g);
+  $('flow').innerHTML=ST.map(([k,n],i)=>`${i?'<span class="ar">→</span>':''}<button type="button" data-g="${k}" class="${i===gi?'on':(i<gi?'past':'')}">${n}</button>`).join('');
+  $('note').innerHTML=f.ask?`<span class="ask">${f.q}</span><span class="ref">先想一下，再按“下一步”看答案。</span>`:f.note+`<span class="ref">出处：${f.ref}</span>`}
+$('flow').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;stop();at=frames.findIndex(f=>f.g===b.dataset.g);render()};
+showSpd();build();render();
+
+/* 超级块计算器 */
+function sb(){const v=k=>+$(k).value;const bs=v('bs'),isz=v('isz'),is=v('is'),ic=v('ic'),bm=v('bm'),bc=v('bc'),ds=v('ds'),ino=v('ino');$('sbErr').textContent='';
+  if([bs,isz,ic,bc].some(x=>!(x>0))||[is,bm,ds,ino].some(x=>!(x>=0))||[bs,isz,is,ic,bm,bc,ds,ino].some(x=>!Number.isInteger(x))){$('sbErr').textContent='都要填非负整数，块大小、inode 大小、块数要大于 0。';return}
+  const per=Math.floor(bs/isz),maxF=per*ic,maxD=8*bs*bc;const warn=[];if(is+ic!==bm)warn.push(`inode 表结束于块 ${is+ic-1}，位图却从 ${bm} 开始`);if(bm+bc!==ds)warn.push(`位图结束于块 ${bm+bc-1}，数据区却从 ${ds} 开始`);
+  const ok=ino<maxF;const blk=is+Math.floor(ino/per),off=ino%per;
+  const parts=[['块 0～'+(is-1),is,'--s6','（PPT 未细分：引导块、超级块等）'],['inode 表',ic,'--s3',''],['位图',bc,'--s5',''],['数据区…',Math.max(8,Math.round((ic+bc)*0.9)),'--s2','']];
+  const tot=parts.reduce((a,p)=>a+p[1],0);let x=10,s=`<svg viewBox="0 0 880 96" role="img" aria-label="分区块布局">`;
+  parts.forEach(([l,n,c],i)=>{const w=Math.max(40,n/tot*860);const st=i===0?0:i===1?is:i===2?bm:ds;s+=`<rect x="${x}" y="20" width="${w-2}" height="34" fill="var(${c})" rx="3"/><text x="${x+(w-2)/2}" y="42" text-anchor="middle" font-size="12" fill="#fff">${l}</text><text x="${x}" y="14" font-size="11" fill="var(--muted)">${st}</text>`;
+    if(i===1&&ok){const bx=x+(blk-is+0.5)/ic*(w-2);s+=`<line x1="${bx}" y1="58" x2="${bx}" y2="70" stroke="var(--mv)" stroke-width="2"/><text x="${Math.min(Math.max(bx,60),820)}" y="86" text-anchor="middle" font-size="12" fill="var(--mv)" font-weight="700">inode ${ino} 在块 ${blk}</text>`}x+=w});
+  $('sbBar').innerHTML=s+'</svg>';
+  $('sbOut').innerHTML=`<p>每块放 inode：${bs} ÷ ${isz} = <b>${per}</b> 个</p>
+   <p>最多文件数（一个文件一个 inode）：${per} × ${ic} = <b>${maxF}</b></p>
+   <p>数据区最多块数（位图每一位管一块）：8 × ${bs} × ${bc} = <b>${maxD}</b></p>
+   <p>inode ${ino}：${ok?`${ino} ÷ ${per} = ${Math.floor(ino/per)} 余 ${off} → 在块 ${is} + ${Math.floor(ino/per)} = <b>${blk}</b>，是这一块里的第 <b>${off}</b> 号（从 0 数）`:`<span class="bad">超出 inode 总数 ${maxF}</span>`}</p>
+   ${warn.length?`<p class="bad">注意：${warn.join('；')}，各区不连续。</p>`:''}
+   <p class="tip">PPT 答案：3840 个文件（p85）、98304 块（p86）、inode 326 在 3 + 1 = 4 号块的第 70 号（p88）。超级块何时写入：逻辑格式化时（p80）。校验区的作用：区分文件系统类型、检测文件系统合法性（p81）。“数据区最多”是不考虑磁盘容量、只看位图能管多少块。</p>`}
+['bs','isz','is','ic','bm','bc','ds','ino'].forEach(k=>$(k).oninput=sb);sb();
+
+const QS=[
+ ['1) 物理磁盘的存储区域被划分为盘面、磁道、扇区是哪个过程实现的？该过程的提供者是谁？（强化1 p9）','物理格式化（低级格式化），通常由磁盘生产厂商完成，用户不用做（依据四章 p170）。'],
+ ['2) 将物理磁盘空间划分为不同的逻辑磁盘的步骤是？（p9）','磁盘分区；分区信息记在 MBR 的磁盘分区表里（强化1 p5、p14）。'],
+ ['3) 根据文件系统为各个逻辑磁盘装入文件系统相关信息的过程称为？（p9）','逻辑格式化（高级格式化），也称文件系统安装（四章 p173–174）。'],
+ ['4) 为何可以根据操作系统类型加载对应的逻辑磁盘分区？（p18）','MBR 的分区表记录了每个分区的信息，包括是否为系统分区；安装 OS 时把它所在的分区标为系统分区，并在该分区写入能载入这个 OS 的 PBR。MBR 查表找到系统分区、载入其 PBR，PBR 再载入 OS。（本页整理，依据强化1 p13–17）'],
+ ['5) BIOS 被存放在内存还是外存？存储介质是 ROM 还是 RAM？为什么？（p18）','按 PPT 的说法放在内存的 ROM 区域（主存地址空间里的只读存储器）。必须是非易失的 ROM：开机时 RAM 里什么都没有，CPU 一上电就要有可执行的程序。（本页整理，依据强化1 p11）'],
+ ['6) 用户用命令行方式运行程序，命令解释程序起什么作用？它运行在用户态还是内核态？（p30）','它读取并解析用户输入的命令，再通过系统调用请内核完成（如创建进程、执行程序）。命令解释程序是用户态程序，真正的工作在系统调用进入内核后完成。（本页整理，依据一章 p77–78）'],
+ ['7) 用户点开图形文件本质上与文件系统发生了交互，访问了目录系统中的某个文件。目录系统中的根目录是何时被写入磁盘的？（p30）','逻辑格式化时（创建根目录，强化1 p6–7、p28）。OS 初始化只是把根文件系统的信息读进内存。'],
+ ['8) 用户双击鼠标后，操作系统利用什么机制进行反馈？建立鼠标操作与系统反馈联系的步骤发生在哪个过程中？（p30）','中断机制：鼠标操作产生外部中断，CPU 按中断号查中断向量表进入中断处理程序，再调用驱动，最终交给对应进程处理。联系是在 OS 初始化阶段建立的：中断和异常初始化填好中断向量表，I/O 管理初始化使能设备中断、设置屏蔽字。（本页整理，依据强化1 p21、p29）'],
+ ['9 Ⅰ) 程序加载到内存时分为代码段、数据段、bss 段、堆栈区，哪些区域在加载前就逻辑上存在，哪些加载后才分配？变量 a、b、c、A、A[10] 分别位于哪个区域？（p43–44，程序见上方第 17 步）','代码段、数据段（以及 bss 的大小信息）在可执行文件里就有；堆和栈是加载后、运行时才分配的。a、c → bss；b=0 → 数据段（按“已初始化”分；gcc 实际放 .bss）；A → 栈；A[10] → 堆。（本页整理，依据强化1 p41）'],
+ ['9 Ⅱ Ⅲ) 静态链接下，程序的虚拟地址空间何时形成？静态重定位和动态重定位下，数据的物理地址分别在什么时候形成？（p44–45）','静态链接：链接时形成完整的逻辑（虚拟）地址空间。静态重定位：装入内存时一次性把逻辑地址改成物理地址；动态重定位：程序执行、真正访存时由硬件（重定位寄存器或 MMU）转换。（本页整理，依据三章 p20）'],
+ ['9 Ⅳ) 编译该程序时，如何保证程序从 main 函数处开始执行？如何保证执行完后正常退出？（p45–47）','PPT 答案：main 的入口作为 entry point 记入 PCB，第一次运行时当作用户程序断点恢复；编译时在结束处自动加入 exit() 系统调用，用于终止该任务。'],
+ ['10) 在现代操作系统中，程序的执行与进程有什么关系？（p48）','程序是磁盘上静态的指令和数据；程序要执行，必须由 OS 为它创建进程（PCB + 资源）。进程是程序的一次执行过程，一个程序可以同时对应多个进程。（本页整理，依据一章 p5–8）'],
+ ['11) 有时说“BIOS 程序加载了 MBR”，有时说“CPU 加载了 MBR”，两种说法什么关系？还能举出类似的例子吗？（p48）','是一回事：程序本身不会动，是 CPU 在执行 BIOS 的指令完成加载。类似的说法还有“中断处理程序唤醒了进程”“调度程序选中了进程”，实际都是 CPU 在执行那段内核程序。（本页整理）'],
+ ['（迁移）把超级块改成：块 2KB、inode 128B，inode 表从块 4 开始共 64 块，位图 2 块。最多能有多少个文件？数据区最多管多少块？inode 1000 在哪一块？','每块 2048 ÷ 128 = 16 个 inode；最多 16 × 64 = 1024 个文件；位图 8 × 2048 × 2 = 32768 块；1000 ÷ 16 = 62 余 8 → 块 4 + 62 = 66 的第 8 号。可以在上面的计算器里验证。']];
+$('qs').innerHTML=QS.map(([q,a])=>`<details><summary><b>问</b> ${q}</summary><div class="ans">${a}</div></details>`).join('');
+$('src').innerHTML=['强化1 场景 1：p2–8（格式化与安装），p10–17（引导），p19–29（初始化），p31–48（创建用户进程与问题）','强化4 p78–88（文件系统布局与超级块计算，逐页看过图）','一章 p32–36（程序的形成与装载），p110–117（引导，和强化1 同一套动画）','四章 p130–132（外存布局），p167–174（物理格式化、分区、逻辑格式化）','二上 p37、p77（进程创建）；二中 p116–117（闲逛进程）；三章 p20（重定位时机）'].map(x=>`<li>${x}</li>`).join('');
+</script>
+</body>
+</html>
