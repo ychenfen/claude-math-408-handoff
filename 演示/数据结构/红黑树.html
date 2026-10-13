@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>红黑树</title>
+<style>
+/* Red-black tree on the left, the equivalent order-4 B-tree on the right, both redrawn from the same snapshot every step. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --nr:#d0473b; --nb:#262626; --nbs:#262626; --nil:#8a8f86;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --nr:#d0473b; --nb:#050605; --nbs:#9aa294; --nil:#5d655a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --nr:#d0473b; --nb:#050605; --nbs:#9aa294; --nil:#5d655a; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:86ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.ctrl .muted{color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em;white-space:pre-line}
+.q{font-size:14px;padding:8px 12px;border:1px dashed var(--line);border-radius:5px;margin-top:10px}
+.q .ans{color:var(--done);font-weight:600}
+details summary{cursor:pointer;color:var(--muted);font-size:13px}
+.views{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:12px;margin-top:12px}
+@media (max-width:860px){.views{grid-template-columns:minmax(0,1fr)}}
+.view{border:1px solid var(--line);border-radius:5px;padding:8px;min-width:0;background:var(--bg)}
+.view h3{font:13px var(--sans);font-weight:600;margin:0 0 4px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sv{overflow-x:auto}
+svg{width:100%;height:auto;display:block}
+.edge{stroke:var(--muted);stroke-width:1.6}
+.edge.bad{stroke:var(--mv);stroke-width:3.4;stroke-dasharray:6 4}
+.edge.nil{stroke:var(--line)}
+.nR{fill:var(--nr)}.nB{fill:var(--nb);stroke:var(--nbs);stroke-width:1.2}
+.nk{font:600 13px var(--mono);fill:#fff;text-anchor:middle;dominant-baseline:central}
+.nilbox{fill:var(--nil)}
+.niltx{font:8px var(--mono);fill:#fff;text-anchor:middle;dominant-baseline:central}
+.ring{fill:none;stroke-width:3.4}
+.ring.cur{stroke:var(--cmp)}.ring.done{stroke:var(--done)}
+.ring.dbl{stroke:var(--q);stroke-width:2.4}
+.dbltx{font:600 11px var(--sans);fill:var(--q);text-anchor:middle}
+.bbox{fill:var(--paper);stroke:var(--q);stroke-width:1.4}
+.bbox.over{stroke:var(--mv);stroke-width:2.6}
+.bbox.empty{stroke:var(--mv);stroke-width:2;stroke-dasharray:5 3}
+.blink{stroke:var(--q);stroke-width:1.2}
+.btag{font:600 11px var(--sans);fill:var(--mv);text-anchor:middle}
+.mask{font:14px var(--sans);fill:var(--muted);text-anchor:middle}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em}
+.note b{color:var(--done)}
+.note .bt{display:block;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);font-size:14px}
+.note .bt::before{content:"B 树视角　";color:var(--q);font-weight:600}
+.tag{display:inline-block;font:600 13px var(--mono);border-radius:4px;padding:1px 8px;background:var(--q);color:var(--paper);margin-right:6px}
+.tag.ok{background:var(--done)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:6em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+.props{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:6px 14px;font-size:14px;margin:0;padding:0;list-style:none}
+.props li{display:flex;gap:6px;align-items:baseline}
+.props .st{font:700 13px var(--mono);flex:none;width:1.3em}
+.props .y{color:var(--done)}.props .n{color:var(--mv)}
+.stats{font:13px var(--mono);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 16px}
+.stats b{color:var(--q)}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;font-size:13px;width:100%}
+table.t th,table.t td{border:1px solid var(--line);padding:3px 6px;text-align:left;vertical-align:top}
+table.t th{color:var(--muted);font-weight:400;background:var(--bg);white-space:nowrap}
+table.t tr.cur td{background:color-mix(in srgb,var(--cmp) 26%,transparent)}
+table.t td.c{font:600 13px var(--mono);white-space:nowrap}
+.form{display:grid;gap:6px;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:4px 6px;width:100%}
+.legend{font-size:12px;color:var(--muted);margin:6px 0 0}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:760px){.two{grid-template-columns:minmax(0,1fr)}}
+.quiz{display:grid;gap:8px;font-size:14px}
+.quiz .item{border:1px dashed var(--line);border-radius:5px;padding:6px 10px}
+.hidden{display:none}
+code{font:13px var(--mono);background:var(--bg);padding:0 3px;border-radius:3px;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>红黑树 ⇄ 4 阶 B 树</h1>
+    <p class="sub">按罗素讲义《第九节 红黑树》（78 页）的做法：黑结点和它的红孩子并成一个 B 树结点，左边红黑树、右边对应的 4 阶 B 树每一步同步重画。插入按 RR-1、RR-2，删除按 BB-1 到 BB-4 分类，每步写清楚是哪种情况、B 树上是上溢、下溢、借还是合并。例题用讲义 p7–10、p12–18、p32–35、p49、p69–77 的原图数据。王道未收录红黑树统考真题，这里配王道 7.3.4 的习题和 Relax1000 的题。</p>
+  </header>
+  <section class="panel">
+    <h2>五句话</h2>
+    <ol class="rules">
+      <li><b>红黑树 = 4 阶 B 树</b>：一个黑结点带上它的红孩子，就是一个 B 树结点（1～3 个关键字，有且只有一个黑的，红的不相邻）。红黑树的<b>黑高</b>等于 B 树的<b>高度</b>。</li>
+      <li><b>新结点一律染红</b>；父亲黑就直接插。父亲红（双红）看<b>叔叔</b>：叔叔黑是 <b>RR-1</b>，3-4 重构（旋转 1～2 次，中间的染黑两边染红），修一次就结束；叔叔红是 <b>RR-2</b>，只染色（父、叔染黑，爷爷染红），等于 B 树<b>上溢分裂</b>，爷爷往上走，可能一直传到根。</li>
+      <li><b>删除先变成删叶子或单分支</b>（有两个孩子就用中序后继顶替）。删红结点直接删；删黑结点但有红孩子，孩子顶上来染黑；删黑叶子就留下一个<b>双黑</b>，等于 B 树<b>下溢</b>。</li>
+      <li>双黑看<b>兄弟</b>：兄弟红是 <b>BB-4</b>（旋转换色，转成 BB-1 或 BB-2）；兄弟黑且有红孩子是 <b>BB-1</b>（兄弟够借，3-4 重构，改动的关键字继承原来的颜色）；兄弟和侄子都黑时，父亲红是 <b>BB-2</b>（父亲下来合并，结束），父亲黑是 <b>BB-3</b>（合并后父结点也空了，下溢往上传）。</li>
+      <li>讲义 p68 原话：“<b>真正做题时，不需要考虑分类，除 BB-1-rr，直接转 B 树来做即可</b>。”只有 RR-2 和 BB-3 会往上传，其余修一次就完；插入最多旋转 2 次，删除最多 3 次。</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <div class="chips" id="presets">例题：</div>
+    <div class="q" id="question"></div>
+    <div class="ctrl" style="margin-top:10px">
+      <button class="btn" id="reset" type="button">从头</button>
+      <button class="btn" id="prev" type="button">上一步</button>
+      <button class="btn primary" id="next" type="button">下一步</button>
+      <button class="btn" id="all" type="button">跑到底</button>
+      <label class="muted"><input type="checkbox" id="guessMode" checked> 先猜再看</label>
+      <label class="muted"><input type="checkbox" id="showNil"> 画出 NIL 叶结点</label>
+      <span class="muted" id="prog"></span>
+    </div>
+    <div class="guess hidden" id="gbox"><span id="gq"></span><span id="gopts" class="chips"></span><input id="gin" type="text" inputmode="numeric" aria-label="你的答案"><button class="btn" id="gbtn" type="button">对答案</button></div>
+    <div class="note" id="note" style="margin-top:10px"></div>
+    <div class="views">
+      <div class="view"><h3>红黑树 <span id="rbinfo"></span></h3><div class="sv" id="rbv"></div></div>
+      <div class="view"><h3>对应的 4 阶 B 树 <span id="binfo"></span></h3><div class="sv" id="bv"></div></div>
+    </div>
+    <p class="legend"><span style="color:var(--cmp)">橙圈</span>是这一步涉及的结点，<span style="color:var(--done)">绿圈</span>是做完的，<span style="color:var(--mv)">红虚线边</span>是双红，<span style="color:var(--q)">蓝色双圈</span>是双黑。B 树里红框写“上溢”的结点有 4 个关键字，红虚线空框是下溢的结点。</p>
+  </section>
+
+  <section class="panel">
+    <h2>红黑性质（随当前这一步实时检查）</h2>
+    <ul class="props" id="props"></ul>
+    <div class="stats" id="stats"></div>
+    <details style="margin-top:8px"><summary>常考结论</summary>
+      <ul class="rules" style="margin-top:6px">
+        <li>从根到叶结点的<b>最长路径不大于最短路径的 2 倍</b>（最短全黑，最长红黑相间）。</li>
+        <li>n 个内部结点的红黑树，高度 <b>log₂(n+1) ≤ h ≤ 2log₂(n+1)</b>（讲义 p11：B 树高 ≤ log₂(n+1)，红结点不连续，红黑树高 ≤ 2 倍 B 树高）。</li>
+        <li>黑高为 bh 的红黑树，内部结点<b>最少 2<sup>bh</sup> − 1</b>（全黑满二叉树），<b>最多 2<sup>2bh</sup> − 1</b>（红黑相间的满二叉树）（王道 7.3.3）。</li>
+        <li>黑高的数法：从结点出发（不含自身）到叶结点路径上的黑结点数，NIL 叶结点算进去（王道）。讲义 p5 的说法是“除去外部结点”数黑结点，对黑结点数出来一样；根的黑高 = 外部结点的黑深度 = B 树高度。</li>
+        <li>插入最多旋转 2 次（RR-1），删除最多旋转 3 次（BB-4 一次 + BB-1 两次）；一旦旋转，修正随即结束。</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="panel">
+    <h2>修正情况总表（讲义 p31、p68，当前情况高亮）</h2>
+    <div class="tw"><table class="t" id="cases">
+      <tr><th>情况</th><th>什么时候</th><th>旋转</th><th>染色</th><th>修一次后</th><th>B 树上发生了什么</th></tr>
+      <tr data-c="RR-1"><td class="c">RR-1</td><td>双红，叔叔黑（NIL 也算黑）</td><td>1～2</td><td>2</td><td>立即完成</td><td>结点 3 个关键字没溢出，只是黑的不在中间：3-4 重构，中间的当黑</td></tr>
+      <tr data-c="RR-2"><td class="c">RR-2</td><td>双红，叔叔红</td><td>0</td><td>3</td><td>上溢向上传播</td><td>结点 4 个关键字上溢，爷爷升到父结点（染红），父、叔各成一个结点</td></tr>
+      <tr data-c="BB-1"><td class="c">BB-1</td><td>双黑，兄弟黑，兄弟有红孩子</td><td>1～2</td><td>3</td><td>立即完成</td><td>下溢，兄弟够借：兄弟的关键字上去，父关键字下来，改动的继承原颜色</td></tr>
+      <tr data-c="BB-2"><td class="c">BB-2</td><td>双黑，兄弟和侄子都黑，父亲红</td><td>0</td><td>2</td><td>立即完成</td><td>下溢，兄弟不够借：父关键字下来和兄弟合并，父结点还有黑关键字，不再下溢</td></tr>
+      <tr data-c="BB-3"><td class="c">BB-3</td><td>双黑，兄弟、侄子、父亲全黑</td><td>0</td><td>1</td><td>需要进一步调整</td><td>下溢，兄弟不够借：合并后父结点空了，下溢向上传，到根就让树矮一层</td></tr>
+      <tr data-c="BB-4"><td class="c">BB-4</td><td>双黑，兄弟红</td><td>1</td><td>2</td><td>转化为 BB-1 或 BB-2</td><td>兄弟和父亲本来在同一个 B 树结点里，旋转换色只是换个表示，B 树不变</td></tr>
+    </table></div>
+    <p class="legend">讲义 p31 的表 RR-1 写“染色 2”、RR-2 写“染色 3”，p68 的表 BB-1 写“染色 3”；这里照抄。BB-1-rr（兄弟两个孩子都红）讲义 p47–48 规定选外侧侄子做 LL 或 RR 型单旋。</p>
+  </section>
+
+  <section class="panel">
+    <h2>输入自己的树和操作</h2>
+    <div class="form">
+      <label>初始红黑树（可空，空就是从空树开始）<input id="inTree" type="text" spellcheck="false" autocomplete="off" placeholder="例：36B(20B(1R,25R),99R(51B(40R,),111B))"></label>
+      <label>操作（数字是插入，前面加 - 或“删”是删除，空格或逗号隔开）<input id="inOps" type="text" spellcheck="false" autocomplete="off" placeholder="例：1 2 3 4 5 6 7 8 9 10 -4"></label>
+      <div class="ctrl"><button class="btn primary" id="load" type="button">运行</button><button class="btn" id="seq" type="button">从空树插入 1～10</button></div>
+    </div>
+    <p class="legend">树的写法：<code>关键字+颜色(左子树,右子树)</code>，颜色 R 红、B 黑，没有孩子就空着，例如 <code>50B(40B,100B(60R,))</code>。关键字用 0～9999 的整数，最多 40 个结点。输入的树会先检查是不是合法的红黑树。</p>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+
+  <div class="two">
+    <section class="panel">
+      <h2>选择题速查（都不用画树）</h2>
+      <div class="quiz" id="quiz"></div>
+    </section>
+    <section class="panel">
+      <h2>例题出处和讲义勘误</h2>
+      <div class="sub" id="srcnote" style="font-size:13px"></div>
+      <ul class="rules" style="margin-top:8px;font-size:13px">
+        <li>讲义 p7–8 的 B 树图把 111 写成了 “11”，应为 111（红黑树图里是 0111）。</li>
+        <li>讲义 p49 标题写“删除20”，图里没有 20，按删前删后的图应为<b>删除 200</b>。</li>
+        <li>删有两个孩子的结点，讲义没写用前驱还是后继，这里按王道 7.3.3 用<b>中序后继</b>（右子树最左）。讲义的删除例题删的都是叶子，不受影响。</li>
+        <li>页面算法按 CLRS 标准写法实现，例题最终树和每步的情况名已用独立 Python 程序重算核对。</li>
+      </ul>
+    </section>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+/* ======================= presets ======================= */
+const PRESETS=[
+ {n:'p7 等价转换',init:'36B(20B(1R,25R),99R(51B(40R,),111B))',ops:'',conv:true,
+  q:'【讲义 p3、p7–8】如何将一棵合法的红黑树等价转换为一棵 4 阶 B 树？树：根 36 黑；36 的左孩子 20 黑、右孩子 99 红；20 的孩子 1、25 都红；99 的孩子 51、111 都黑；51 的左孩子 40 红。',
+  a:'B 树根 [36 99]，下面三个结点 [1 20 25]、[40 51]、[111]，共 4 个结点（= 黑结点数）。红黑树黑高 2，B 树高也是 2（讲义 p8 推论）。讲义 p7–8 的 B 树把 111 写成了 11，应为 111。',src:'讲义 p3–8 的同一棵树（取自 USFCA 可视化工具）。'},
+ {n:'p9 例题',init:'44B(22B(11R,33R),77B(55R,88R))',ops:'',conv:true,
+  q:'【例题】将下面的红黑树转化为等价的4阶B树（讲义 p9）。树：根 44 黑；左 22 黑（孩子 11、33 红），右 77 黑（孩子 55、88 红）。',
+  a:'[44] 下面挂 [11 22 33] 和 [55 77 88]，共 3 个 B 树结点，树高 2。',src:'讲义 p9。'},
+ {n:'p10 例题',init:'52B(50B,60R(55B,66B(62R,68R)))',ops:'',conv:true,
+  q:'【例题】将下面的红黑树转化为等价的4阶B树（讲义 p10）。树：根 52 黑；左 50 黑，右 60 红；60 的孩子 55 黑、66 黑；66 的孩子 62、68 红。',
+  a:'根 [52 60]，下面 [50]、[55]、[62 66 68]，共 4 个 B 树结点。',src:'讲义 p10。'},
+ {n:'p12–18 插 30、33',init:'35B(,39R)',ops:'30 33',
+  q:'【讲义 p12–18】树只有 35（黑）和它的右孩子 39（红）。依次插入 30、33。',
+  a:'插 30：父 35 黑，直接插入。插 33：父 30 红、叔 39 红 → RR-2：30、39 染黑，35 染红；35 是根，强制染黑。最终 35 黑；30 黑（右孩子 33 红）、39 黑。B 树 [30 33 35 39] 上溢，35 上去当根：[35] 下面 [30 33]、[39]。',src:'讲义 p12–18，讲“为什么选 35 上去（拓扑变化最小）”。'},
+ {n:'p32–35 删 60',init:'35B(10B(5R,15R),50R(44B(,46R),60B))',ops:'-60',
+  q:'【例题】删除该红黑树中的元素60（讲义 p32–35）。树：根 35 黑；左 10 黑（孩子 5、15 红），右 50 红；50 的孩子 44 黑（右孩子 46 红）、60 黑。',
+  a:'60 是黑叶子，删后双黑（B 树结点 [60] 空了，下溢）。兄弟 44 黑、有红孩子 46 → BB-1。46 在内侧，旋转两次：先对 44 左旋，再对 50 右旋；46 继承 50 的红色，44、50 黑。最终 35 黑；10 黑（5、15 红）、46 红（44、50 黑）。B 树 [35 46] 下面 [5 10 15]、[44]、[50]：兄弟够借，46 上去，50 下来。',src:'讲义 p32–35。'},
+ {n:'p49 删 200（BB-1-rr）',init:'100B(50B(40R,60R),200B)',ops:'-200',
+  q:'【讲义 p49】删除 200（讲义写“删除20”，树里没有 20，按图应为 200）。树：根 100 黑；左 50 黑（孩子 40、60 都红），右 200 黑。',
+  a:'200 黑叶子，删后双黑；兄弟 50 黑，两个孩子都红 → BB-1-rr，选外侧 40（LL 型）只右旋一次：50 继承 100 的黑色，100、40 黑，60 红挂到 100 的左边。最终 50 黑；40 黑、100 黑（左孩子 60 红）。讲义：“当有两种选择时，3-4 重构选择拓扑结构变化小的。”',src:'讲义 p47–49（BB-1-rr 特殊情况）。'},
+ {n:'p69–73 插 30',init:'11B(8R(2B(1R,7R),10B),25B(20R,27R))',ops:'30',
+  q:'【例题】向该红黑树中插入30（讲义 p69–73）。树：根 11 黑；左 8 红，右 25 黑；8 的孩子 2 黑（孩子 1、7 红）、10 黑；25 的孩子 20、27 红。',
+  a:'30 挂在 27 右边；父 27 红、叔 20 红 → RR-2：20、27 染黑，25 染红；25 的父亲 11 黑，结束。最终 11 黑；8 红、25 红；2 黑（1、7 红）、10 黑、20 黑、27 黑（右孩子 30 红）。B 树 [20 25 27 30] 上溢，25 上升到根 [8 11 25]。',src:'讲义 p69–73。'},
+ {n:'p74 删 60',init:'50B(40B,100B(60R,))',ops:'-60',
+  q:'【例题】删除该红黑树的60（讲义 p74）。树：根 50 黑；左 40 黑，右 100 黑；100 的左孩子 60 红。',
+  a:'60 是红叶子，直接删除。最终 50、40、100 都黑。B 树 [60 100] 删掉 60 还剩 [100]，不下溢。',src:'讲义 p74。'},
+ {n:'p75–77 删 100',init:'50B(40B,100B)',ops:'-100',
+  q:'【例题】删除该红黑树的100（讲义 p75–77，树是 p74 删完 60 的结果：50、40、100 全黑）。',
+  a:'100 黑叶子，删后双黑；兄弟 40 黑、没有红孩子，父 50 黑 → BB-3：40 染红，双黑上移到 50，50 是根，结束。最终 50 黑、左孩子 40 红，黑高减 1。B 树：[100] 下溢，兄弟 [40] 不够借，40 和 50 合并成新根 [40 50]，树矮一层。',src:'讲义 p75–77。'},
+ {n:'从空树插 1～10',init:'',ops:'1 2 3 4 5 6 7 8 9 10',
+  q:'从空树依次插入 1, 2, 3, …, 10，每一步是什么情况？最后哪些结点是红的？',
+  a:'情况依次：1 当根染黑；2 父黑直接插；3 RR-1（RR 型）；4 RR-2，传到根染黑；5 RR-1；6 RR-2；7 RR-1；8 先 RR-2，爷爷 6 变红后和父亲 4 又成双红，再做一次 RR-1；9 RR-1；10 连续两次 RR-2 传到根，根染黑。最终 4 黑；2 黑（1、3 黑）、6 黑；6 的孩子 5 黑、8 红；8 的孩子 7、9 黑，9 的右孩子 10 红。红结点只有 8、10，黑高 3。B 树 [4] 下面 [2]、[6 8]，再下面 [1] [3] [5] [7] [9 10]。',src:'不是讲义例题，是按讲义“插入”规则跑的序列，方便看 RR-2 一层层往上传。'},
+ {n:'王道 第 20 题',init:'',ops:'1 2 3 4 5 6 7',
+  q:'【王道 7.3.4 第 20 题】将关键字 1,2,3,4,5,6,7 依次插入初始为空的红黑树 T，则 T 中红结点的个数是（ ）。A. 1　B. 2　C. 3　D. 4',
+  a:'C。最终 2 黑；1 黑、4 红；4 的孩子 3、6 黑；6 的孩子 5、7 红。红结点 4、5、7 共 3 个。',src:'王道《数据结构》7.3.4 本节试题精选第 20 题（不是统考真题）。'},
+ {n:'王道 第 21 题',init:'',ops:'5 4 3 2 1',
+  q:'【王道 7.3.4 第 21 题】将关键字 5,4,3,2,1 依次插入初始为空的红黑树 T，则 T 的最终形态是（ ）。（四个选项是树图，这里不重画，王道答案是 D）',
+  a:'D 那棵：4 黑；2 黑（孩子 1、3 都红）、5 黑。过程：3 触发 RR-1（LL），2 触发 RR-2 到根，1 触发 RR-1（LL）。',src:'王道 7.3.4 第 21 题，Relax1000 第 7 章 Q34 同题。'},
+ {n:'Relax Q33',init:'',ops:'41 38 31 12 19 8',
+  q:'【Relax1000 第 7 章 Q33】将关键字 41，38，31，12，19，8 依次插入空的红黑树后，下列对结果的树说法错误的是（ ）。A．有 2 个红色结点，4 个黑色结点　B．12 和 41 的黑高都为 0　C．8 是 12 的孩子　D．树中存在相邻的黑色内部结点',
+  a:'B。最终 38 黑；19 红、41 黑；19 的孩子 12 黑（左孩子 8 红）、31 黑。黑高不含自身、要算 NIL 叶结点，12 和 41 的黑高都是 1，B 错。A 对（红 19、8）；C 对；D 对（38 和 41 都黑且相邻）。',src:'Relax1000 数据结构第 7 章 Q33（答案 B）。'},
+ {n:'补充：BB-4→BB-2',init:'20B(10B,40R(30B,50B))',ops:'-10',
+  q:'（补充例子，讲义 BB-4 只有字母图）删除 10。树：根 20 黑；左 10 黑，右 40 红；40 的孩子 30、50 黑。',
+  a:'10 黑叶子删后双黑。兄弟 40 红 → BB-4：对 20 左旋，40 染黑、20 染红；新兄弟 30 黑、没有红孩子、父 20 红 → BB-2：30 染红、20 染黑，结束。最终 40 黑；20 黑（右孩子 30 红）、50 黑。',src:'自编补充，演示讲义 p64–67 的 BB-4 转 BB-2。'},
+ {n:'补充：BB-3 往上传',init:'',ops:'1 2 3 4 5 6 7 8 9 10 -1',
+  q:'（补充例子）从空树插入 1～10 之后，再删除 1。',
+  a:'1 黑叶子删后双黑；兄弟 3 黑无红孩子、父 2 黑 → BB-3：3 染红，双黑上移到 2。2 的兄弟 6 黑、外侧侄子 8 红 → BB-1，对 4 左旋一次：6 继承 4 的黑色，4、8 染黑。最终 6 黑；4 黑（2 黑带右红孩子 3、5 黑）、8 黑（7 黑、9 黑带右红孩子 10）。',src:'自编补充，演示 BB-3 下溢向上传，再在上一层被 BB-1 借到。'}
+];
+const QUIZ=[
+ {q:'【讲义 p6 例题】下列关于红黑树说法错误的是（ ）。A. 红黑树可以全是黑色结点　B. 红黑树的外部结点是黑色结点　C. 红黑树中黑结点的孩子一定是红色结点　D. 红黑树中根结点的黑高度和外部结点的黑深度相等',a:'C。黑结点的孩子可红可黑，只有红结点的孩子必须黑。'},
+ {q:'【王道 7.3.4 第 16 题】下列关于红黑树和 AVL 树的说法中，不正确的是（ ）。I. 一棵含有 n 个结点的红黑树的高度至多为 2log₂(n+1)　II. 若一个结点是红色的，则它的父结点和孩子结点都是黑色的　III. 红黑树的查询效率一般要优于含有相同结点数的 AVL 树　IV. 若 AVL 树的某结点的左右孩子的平衡因子都是零，则该结点的平衡因子也是零　A. I、III　B. III　C. II、IV　D. III、IV',a:'D。III 反了，AVL 更平衡，查找一般更快；IV 左右孩子平衡因子为 0 不代表左右子树一样高。'},
+ {q:'【王道 7.3.4 第 17 题】下列关于红黑树和 AVL 树的描述中，不正确的是（ ）。A. 两者都属于自平衡的二叉树　B. 两者查找、插入、删除的时间复杂度都相同　C. 红黑树插入和删除过程至多有 2 次旋转操作　D. 红黑树的任意一个结点的左右子树高度（含叶结点）之比不超过 2',a:'C。插入至多 2 次，删除可能 3 次（BB-4 旋转一次后再 BB-1 旋转两次）。'},
+ {q:'【王道 7.3.4 第 18 题】下列关于红黑树的说法中，正确的是（ ）。A. 红黑树的红结点的数目最多和黑结点的数目相同（不考虑虚构结点）　B. 若红黑树的所有结点都是黑色的，则它一定是一棵满二叉树　C. 红黑树的任何一个分支结点都有两个非空孩子结点　D. 红黑树的子树也一定是红黑树',a:'B。A：根黑带两个红孩子，红是黑的 2 倍；C：黑结点可以一个 NIL 一个红孩子；D：根是红的子树不是红黑树。'},
+ {q:'【Relax1000 第 7 章 Q29】下列关于红黑树的说法正确的是（ ）。I. 红黑树的某棵子树（如果有的话），也一定是红黑树　II. 如果根结点黑高为 h，则内部结点数（含关键字的结点）最多有 2²ʰ − 1 个　III. 红结点数量不会超过内部结点数量的一半　IV. 任何一个结点的左右子树高度之差不超过 2 倍　V. 红黑树和平衡二叉树的查找、插入、删除操作，最坏时间复杂度数量级相同　A. II、III、IV、V　B. I、IV、V　C. II、IV、V　D. III、IV、V',a:'C。I 错：红根子树不合法；III 错：根黑两个孩子红，红占 2/3。'}
+];
+/* ======================= tree engine (CLRS) ======================= */
+let UID=0;
+const mk=(k,c)=>({id:++UID,k,c,l:null,r:null,p:null});
+const col=n=>n?n.c:'B';
+function rotL(T,x){const y=x.r;x.r=y.l;if(y.l)y.l.p=x;y.p=x.p;if(!x.p)T.root=y;else if(x===x.p.l)x.p.l=y;else x.p.r=y;y.l=x;x.p=y}
+function rotR(T,x){const y=x.l;x.l=y.r;if(y.r)y.r.p=x;y.p=x.p;if(!x.p)T.root=y;else if(x===x.p.r)x.p.r=y;else x.p.l=y;y.r=x;x.p=y}
+function find(T,k){let x=T.root;while(x&&x.k!==k)x=k<x.k?x.l:x.r;return x}
+const snap=n=>n?{id:n.id,k:n.k,c:n.c,l:snap(n.l),r:snap(n.r)}:null;
+function parseTree(txt){const s=txt.replace(/\s+/g,'');const T={root:null};if(!s)return T;let i=0;
+  const node=par=>{if(i>=s.length||s[i]===','||s[i]===')')return null;const m=/^(\d{1,4})([RBrb红黑])/.exec(s.slice(i));if(!m)throw `第 ${i+1} 个字符附近看不懂：“${s.slice(i,i+8)}”。每个结点写成 数字+R/B，例如 36B。`;
+    i+=m[0].length;const x=mk(+m[1],/[Rr红]/.test(m[2])?'R':'B');x.p=par;
+    if(s[i]==='('){i++;x.l=node(x);if(s[i]!==',')throw `结点 ${x.k} 的括号里要有逗号分开左右子树（第 ${i+1} 个字符）。`;i++;x.r=node(x);if(s[i]!==')')throw `结点 ${x.k} 的括号没有闭合（第 ${i+1} 个字符）。`;i++}
+    return x};
+  T.root=node(null);if(i!==s.length)throw `第 ${i+1} 个字符后面多出了内容：“${s.slice(i,i+8)}”。`;
+  const keys=[];let cnt=0;const walk=(x,lo,hi)=>{if(!x)return;cnt++;if(lo!==null&&x.k<=lo||hi!==null&&x.k>=hi)throw `不是二叉排序树：${x.k} 的位置不对（应在 ${lo??'−∞'} 和 ${hi??'+∞'} 之间）。`;walk(x.l,lo,x.k);walk(x.r,x.k,hi)};walk(T.root,null,null);
+  if(cnt>40)throw '结点太多，最多 40 个。';
+  const v=violations(snap(T.root),null);if(v.length)throw '这棵树不是合法的红黑树：\n'+v.join('\n');return T}
+function parseOps(txt,lim=60){const ops=[];const toks=txt.replace(/[，、;；]/g,' ').split(/[\s,]+/).filter(Boolean);
+  for(let t of toks){let d=false;if(/^(删|-|−|d)/i.test(t)){d=true;t=t.replace(/^(删除?|-|−|d)/i,'')}else t=t.replace(/^(插入?|\+|i)/i,'');
+    if(!/^\d{1,4}$/.test(t))throw `“${t}”不是 0～9999 的整数。`;ops.push({d,k:+t})}
+  if(ops.length>lim)throw `操作太多，最多 ${lim} 个。`;return ops}
+/* B-tree grouping of a snapshot: a group starts at the root or at a black node; red nodes join the group above. */
+function groups(S,dbl,showNil){if(!S)return null;
+  const g=head=>{const keys=[],kids=[];
+    const visit=y=>{side(y,'l');keys.push(y);side(y,'r')};
+    const side=(y,s)=>{const ch=y[s];
+      if(!ch){if(dbl&&dbl.pid===y.id&&dbl.side===s)kids.push({empty:true,keys:[],kids:[]});else if(showNil)kids.push({nil:true,keys:[],kids:[]});return}
+      if(ch.c==='R')visit(ch);else kids.push(g(ch))};
+    visit(head);const grp={keys,kids};return dbl&&dbl.id===head.id?{empty:true,keys:[],kids:[grp]}:grp};
+  return g(S)}
+function bstr(G){if(!G)return '∅';if(G.nil)return '';return '['+G.keys.map(n=>n.k).join(' ')+']'+(G.kids.filter(k=>!k.nil).length?'{'+G.kids.filter(k=>!k.nil).map(bstr).join(' ')+'}':'')}
+function gtxt(n){/* B-node text of a live node */let h=n;while(h.p&&h.c==='R')h=h.p;const ks=[];const c=y=>{if(!y)return;if(y!==h&&y.c==='B')return;c(y.l);ks.push(y.k);c(y.r)};c(h);return '['+ks.join(' ')+']'}
+function dumpT(n){if(!n)return '';if(!n.l&&!n.r)return `${n.k}${n.c}`;return `${n.k}${n.c}(${dumpT(n.l)},${dumpT(n.r)})`}
+/* property check on a snapshot (dbl = double-black marker, counted as an extra black) */
+function violations(S,dbl){const v=[];if(!S)return v;if(S.c!=='B')v.push(`根 ${S.k} 是红色（性质：根必须黑）。`);
+  const w=(x,isD)=>{if(!x)return 1+(isD?1:0);if(x.c==='R'){[x.l,x.r].forEach(c=>{if(c&&c.c==='R')v.push(`${x.k} 和孩子 ${c.k} 都是红色（双红）。`)})}
+    const a=w(x.l,dbl&&dbl.pid===x.id&&dbl.side==='l'),b=w(x.r,dbl&&dbl.pid===x.id&&dbl.side==='r');if(a!==b)v.push(`结点 ${x.k} 左右两边黑结点数不同（${a-1} 和 ${b-1}）。`);
+    return Math.max(a,b)+(x.c==='B'?1:0)+(dbl&&dbl.id===x.id?1:0)};w(S,false);return v}
+/* ======================= frame recorder ======================= */
+function run(initTxt,ops){UID=0;const T=parseTree(initTxt);const F=[],log=[];let opi=-1;
+  const push=(o)=>{F.push(Object.assign({t:snap(T.root),cur:[],done:[],dbl:null,bad:null,opi},o))};
+  const ids=a=>a.filter(Boolean).map(n=>n.id);
+  push({tag:'初始',txt:T.root?`初始红黑树，${ops.length?`接下来依次做：${ops.map(o=>(o.d?'删 ':'插 ')+o.k).join('，')}。`:'没有要做的操作，先看它和右边 B 树怎么对应。'}`:'空树。',b:T.root?`每个黑结点和它的红孩子并成一个 B 树结点，红黑树的黑高 = B 树的高度。`:'空 B 树。'});
+  ops.forEach((o,oi)=>{opi=oi;const L=[];if(o.d)del(o.k,L);else ins(o.k,L);log.push(L)});
+  return {F,log,T};
+  function ins(k,L){if(find(T,k))throw `${k} 已经在树里了，不能重复插入。`;
+    const path=[];let y=null,x=T.root;while(x){path.push(x);y=x;x=k<x.k?x.l:x.r}
+    const z=mk(k,'R');z.p=y;if(!y)T.root=z;else if(k<y.k)y.l=z;else y.r=z;
+    if(!y){L.push('root');push({tag:'插入',cur:[z.id],txt:`插入 ${k}：空树，${k} 当根，先按规矩染红。`,b:`新建一个结点 [${k}]。`})}
+    else{push({tag:'插入',cur:ids([...path,z]),txt:`插入 ${k}：从根比较 ${path.map(n=>n.k).join(' → ')}，落在 ${y.k} 的${y.l===z?'左':'右'}边的 NIL 上，新结点<b>染红</b>（染红不改变任何路径的黑结点数）。`,b:`${k} 放进终端结点，现在是 ${gtxt(z)}。`})}
+    if(y&&y.c==='B'){L.push('parent-black');push({tag:'父黑',cur:ids([y,z]),txt:`父结点 ${y.k} 是黑色，没有双红，<b>直接插入</b>，结束（讲义 p20）。`,b:`结点 ${gtxt(z)} 有 ${gtxt(z).split(' ').length} 个关键字，不超过 3，不溢出。`})}
+    let zz=z;
+    while(zz.p&&zz.p.c==='R'){const p=zz.p,g=p.p,left=p===g.l,u=left?g.r:g.l,uk=u?u.k:'NIL',uRed=col(u)==='R';
+      const inner=left?zz===p.r:zz===p.l,type=left?(inner?'LR':'LL'):(inner?'RL':'RR');
+      push({tag:'双红',cur:ids([zz,p,g,u]),bad:[p.id,zz.id],
+        txt:`${zz.k} 和父结点 ${p.k} 都是红色（双红）。爷爷 ${g.k}，叔叔是 ${uk}，${uRed?'<b>红色</b>':'<b>黑色</b>'+(u?'':'（NIL 算黑）')}，所以是 <b>${uRed?'RR-2':'RR-1'}</b>。`,
+        b:`这时 B 树结点是 ${gtxt(zz)}，${uRed?'4 个关键字，超过 3 个，<b>上溢</b>。':'3 个关键字没溢出，只是黑的不在中间（红红黑的排法不合法）。'}`,
+        ask:{type:'choice',q:`双红：${zz.k} 和父结点 ${p.k} 都红。爷爷 ${g.k}，叔叔（爷爷的另一个孩子）是 ${uk}。该用哪种修正？`,opts:['RR-1（叔叔黑：3-4 重构）','RR-2（叔叔红：只染色、上溢）'],ans:uRed?1:0,
+          hint:uRed?'叔叔是红色。RR-1 是叔叔黑（NIL 也算黑）。':'叔叔是黑色（NIL 也算黑），叔叔红才是 RR-2。'}});
+      if(uRed){L.push('RR-2');p.c='B';u.c='B';g.c='R';
+        const up=g.p;push({tag:'RR-2',cur:ids([p,u,g]),bad:up&&up.c==='R'?[up.id,g.id]:null,txt:`<span class="tag">RR-2</span>父 ${p.k}、叔 ${u.k} 染黑，爷爷 ${g.k} 染红（不旋转，3 次染色）。${!up?`${g.k} 是根，下一步强制染黑。`:up.c==='R'?`${g.k} 的父亲 ${up.k} 也是红色，双红<b>传到上一层</b>，下一步接着判断叔叔。`:`${g.k} 的父亲 ${up.k} 是黑色，修好了。`}`,
+          b:`上溢分裂：中间偏右的 ${g.k} 升到父结点${up?`（现在是 ${gtxt(g)}）`:'（它是根，B 树长出新根）'}，左右分成 ${gtxt(p)} 和 ${gtxt(u)}。${up&&up.c==='R'?'升上去的 '+g.k+' 在上层结点里又和红关键字相邻，上层要接着处理（4 个关键字就再上溢，3 个关键字就重构）。':''}`});zz=g}
+      else{L.push('RR-1('+type+')');
+        if(inner){left?rotL(T,p):rotR(T,p);push({tag:'RR-1',cur:ids([zz,p]),bad:[zz.id,p.id],txt:`<span class="tag">RR-1</span>${type} 型：${zz.k} 在内侧，先对父 ${p.k} ${left?'左':'右'}旋，变成 ${left?'LL':'RR'} 型（${zz.k} 上来，${p.k} 下去）。`,b:`B 树结点还是 ${gtxt(zz)}，只是红黑树里换了个摆法。`});zz=p}
+        const pp=zz.p;pp.c='B';g.c='R';left?rotR(T,g):rotL(T,g);
+        push({tag:'RR-1',cur:ids([pp,zz,g]),done:[],txt:`<span class="tag">RR-1</span>对爷爷 ${g.k} ${left?'右':'左'}旋，中间的 ${pp.k} 染黑，两边的 ${Math.min(zz.k,g.k)}、${Math.max(zz.k,g.k)} 染红。这就是 3-4 重构，${inner?'一共旋转 2 次':'旋转 1 次'}，<b>修一次就结束</b>。`,b:`结点 ${gtxt(pp)} 关键字个数不变，只是中间的 ${pp.k} 当黑色，两边当红色（讲义 p25“颜色互换”）。`})}}
+    if(T.root.c==='R'){L.push('root-black');T.root.c='B';push({tag:'根染黑',cur:[T.root.id],txt:`根 ${T.root.k} 是红色，强制染黑。${T.root!==z?'整棵树黑高 +1。':''}`,b:T.root!==z?`上溢传到了根，根分裂，B 树长高一层，新根 ${gtxt(T.root)}。`:`B 树只有一个结点 [${k}]。`})}
+    push({tag:'完成',done:[z.id],txt:`插入 ${k} 完成，红黑性质全部满足。`,b:`B 树现在：${bstr(groups(snap(T.root)))}。`})}
+  function del(k,L){const z=find(T,k);if(!z)throw `${k} 不在树里，没法删。`;
+    const path=[];let x=T.root;while(x!==z){path.push(x);x=k<x.k?x.l:x.r}path.push(z);
+    push({tag:'删除',cur:ids(path),txt:`删除 ${k}：从根比较 ${path.map(n=>n.k).join(' → ')}，找到 ${k}，它是${z.c==='R'?'红':'黑'}色，${z.l&&z.r?'有两个孩子':z.l||z.r?'只有一个孩子':'没有孩子（两边都是 NIL）'}。`,b:`${k} 在 B 树结点 ${gtxt(z)} 里。`});
+    let y=z;
+    if(z.l&&z.r){L.push('successor');let s=z.r;while(s.l)s=s.l;
+      push({tag:'找后继',cur:ids([z,s]),txt:`${k} 有两个孩子，不能直接删。找中序后继：右子树最左的 ${s.k}。把 ${s.k} 搬到 ${k} 的位置（颜色用 ${k} 原来的），改成删除 ${s.k} 原来那个结点，它最多只有一个右孩子。`,b:`和 B 树删非终端结点一样：用后继 ${s.k} 顶替 ${k}，转成在终端结点 ${gtxt(s)} 里删 ${s.k}。`});
+      z.k=s.k;y=s;push({tag:'找后继',cur:ids([z,s]),txt:`${s.k} 已经顶到上面（还是原来 ${k} 的颜色），下面要删的是 ${s.k} 原来的结点（橙圈里下面那个）。`,b:`顶替完，问题变成删终端结点里的 ${s.k}。`})}
+    const ch=y.l||y.r,yp=y.p,side=yp?(y===yp.l?'l':'r'):null;
+    const kind=y.c==='R'?0:col(ch)==='R'?1:2;
+    push({tag:'删哪种',cur:ids([y,ch]),txt:`要真正摘掉的是 ${y.k}（${y.c==='R'?'红':'黑'}色，${ch?`孩子 ${ch.k} ${ch.c==='R'?'红':'黑'}色`:'没有孩子'}），属于讲义 p37 的“${['1. 删除结点为红色结点','2.1 删除结点的孩子结点为红色','2.2 删除结点的孩子结点都为黑色'][kind]}”。`,b:`${y.k} 所在的 B 树结点是 ${gtxt(y)}。`,
+      ask:{type:'choice',q:`要真正摘掉的是 ${y.k}（${y.c==='R'?'红':'黑'}色，${ch?`有一个孩子 ${ch.k}，${ch.c==='R'?'红':'黑'}色`:'没有孩子'}）。删它属于哪种？`,opts:['删红结点：直接删','删黑结点、有红孩子：孩子顶上来染黑','删黑结点、没有孩子：出现双黑，要修正'],ans:kind,
+        hint:['红结点删了不影响黑高，直接删。','黑结点有红孩子，红孩子顶上来染黑就补回了那一重黑。','黑结点没有孩子，删掉后这条路少一个黑，NIL 变成双黑。'][kind]}});
+    if(ch)ch.p=yp;if(!yp)T.root=ch;else yp[side]=ch;
+    if(kind===0){L.push('del-red');push({tag:'直接删',cur:ids([yp]),txt:`${y.k} 是红色，<b>直接删</b>，用 NIL 代替，黑高不变，结束。`,b:`${y.k} 是结点里的红关键字，删掉后结点还剩 ${yp?gtxt(yp):'[]'}，不下溢。`})}
+    else if(kind===1){L.push('del-black-redchild');ch.c='B';push({tag:'孩子染黑',cur:ids([ch]),txt:`${y.k} 是黑色，红孩子 ${ch.k} 顶上来<b>继承黑色</b>，黑高补回来了，结束（讲义 p40）。`,b:`结点里删掉 ${y.k}，剩下 ${gtxt(ch)}，${ch.k} 当这个结点的黑关键字，不下溢。`})}
+    else{L.push('del-black-leaf');
+      if(!yp){push({tag:'删空',txt:`${y.k} 是唯一的结点，删完树空了。`,b:`B 树也空了。`})}
+      else{let xx=null,xp=yp,xl=side==='l';
+        push({tag:'双黑',cur:ids([yp]),dbl:{pid:yp.id,side},txt:`${y.k} 是黑叶子，删掉后经过这里的路径少了一个黑结点。把顶替它的 NIL 看成<b>双黑</b>（多背一重黑），接下来要把这一重黑消掉。`,b:`${y.k} 所在的 B 树结点只有它一个关键字，删完<b>空了，下溢</b>（右边的红虚线空框）。`});
+        fix(xx,xp,xl,L)}}
+    push({tag:'完成',done:[],txt:`删除 ${k} 完成，红黑性质全部满足。`,b:`B 树现在：${bstr(groups(snap(T.root)))}。`})}
+  function fix(x,p,left,L){const dm=()=>x?{id:x.id}:{pid:p.id,side:left?'l':'r'};
+    while(x!==T.root&&col(x)==='B'){p=x?x.p:p;if(x)left=x===p.l;let w=left?p.r:p.l;
+      const outer=()=>left?w.r:w.l,inner=()=>left?w.l:w.r;
+      const xs=x?`双黑结点 ${x.k}`:'双黑 NIL';
+      const kind=col(w)==='R'?3:(col(w.l)==='B'&&col(w.r)==='B')?(p.c==='R'?1:2):0;
+      const nep=[w.l,w.r].map(n=>n?`${n.k}${n.c==='R'?'红':'黑'}`:'NIL').join('、');
+      push({tag:'看兄弟',cur:ids([p,w,w.l,w.r]),dbl:dm(),
+        txt:`${xs}，父亲 ${p.k}（${p.c==='R'?'红':'黑'}），兄弟 ${w.k}（${w.c==='R'?'红':'黑'}），侄子：${nep}。所以是 <b>${['BB-1','BB-2','BB-3','BB-4'][kind]}</b>。`,
+        b:['兄弟结点 '+gtxt(w)+' 有 2 个以上关键字，<b>够借</b>。','兄弟结点 '+gtxt(w)+' 只有 1 个关键字，<b>不够借</b>，要合并；父关键字 '+p.k+' 是红的。','兄弟结点 '+gtxt(w)+' 只有 1 个关键字，<b>不够借</b>，要合并；父关键字 '+p.k+' 独占一个结点。',`兄弟 ${w.k} 是红的，说明它和父亲 ${p.k} 在同一个 B 树结点 ${gtxt(p)} 里，空结点真正的兄弟还在下面一层。`][kind],
+        ask:{type:'choice',q:`${xs}。父亲 ${p.k}（${p.c==='R'?'红':'黑'}），兄弟 ${w.k}（${w.c==='R'?'红':'黑'}），兄弟的孩子：${nep}。是哪种双黑修正？`,opts:['BB-1','BB-2','BB-3','BB-4'],ans:kind,
+          hint:['兄弟黑，兄弟有红孩子 → BB-1（兄弟够借）。','兄弟和侄子都黑，父亲红 → BB-2。','兄弟、侄子、父亲全黑 → BB-3。','先看兄弟：兄弟是红色 → BB-4。'][kind]}});
+      if(kind===3){L.push('BB-4');w.c='B';p.c='R';left?rotL(T,p):rotR(T,p);const nw=left?p.r:p.l;
+        push({tag:'BB-4',cur:ids([w,p,nw]),dbl:dm(),txt:`<span class="tag">BB-4</span>对父亲 ${p.k} ${left?'左':'右'}单旋，${w.k} 染黑、${p.k} 染红。现在双黑的新兄弟是 ${nw.k}（黑），父亲 ${p.k} 是红的，下一步只会是 BB-1 或 BB-2（讲义 p67）。`,b:`B 树没变，${gtxt(p)} 这个结点只是换成 ${w.k} 当黑关键字。`});continue}
+      if(kind===1){L.push('BB-2');w.c='R';p.c='B';
+        push({tag:'BB-2',cur:ids([w,p]),dbl:null,txt:`<span class="tag">BB-2</span>兄弟 ${w.k} 染红，父亲 ${p.k} 染黑（相当于 P 和 D 换了颜色），双黑消掉，结束。`,b:`兄弟不够借：父关键字 ${p.k} 下来和兄弟合并成 ${gtxt(p)}；${p.k} 原来是红关键字，上面的结点还有黑关键字，不会再下溢。`});x=T.root;break}
+      if(kind===2){L.push('BB-3');w.c='R';x=p;
+        push({tag:'BB-3',cur:ids([w,p]),dbl:p===T.root?null:{id:p.id},txt:`<span class="tag">BB-3</span>兄弟 ${w.k} 染红（只染这一次，不旋转），双黑上移到父亲 ${p.k}。${p===T.root?`${p.k} 是根，双黑到根直接去掉，整棵树<b>黑高 −1</b>，结束。`:`${p.k} 是黑的，要接着修。`}`,b:`兄弟不够借：父关键字 ${p.k} 下来和兄弟合并成 ${gtxt(p)}。${p===T.root?'父结点是根，空了就去掉，B 树<b>矮一层</b>。':'父结点因此也空了，<b>下溢向上传</b>。'}`});
+        if(p===T.root)L.push('reach-root');continue}
+      /* BB-1 */
+      const oR=col(outer())==='R',iR=col(inner())==='R';
+      if(oR){L.push(iR?'BB-1-rr':'BB-1(1)')}
+      else{L.push('BB-1(2)');const n=inner();n.c='B';w.c='R';left?rotR(T,w):rotL(T,w);
+        push({tag:'BB-1',cur:ids([n,w]),dbl:dm(),txt:`<span class="tag">BB-1</span>红侄子 ${n.k} 在内侧，先对兄弟 ${w.k} ${left?'右':'左'}旋，让 ${n.k} 上来当兄弟（${left?'RL':'LR'} 型的第一次旋转）。`,b:`还是同一个兄弟结点 ${gtxt(n)}，换个摆法。`});w=n}
+      const o=outer(),old=p.c;w.c=p.c;p.c='B';o.c='B';left?rotL(T,p):rotR(T,p);
+      push({tag:'BB-1',cur:ids([w,p,o]),dbl:null,txt:`<span class="tag">BB-1${iR&&oR?'-rr':''}</span>${iR&&oR?'两个侄子都是红的，讲义 p48 说选外侧的，做 LL/RR 型单旋。':''}对父亲 ${p.k} ${left?'左':'右'}旋：${w.k} 上来<b>继承 ${p.k} 原来的${old==='R'?'红':'黑'}色</b>，${p.k} 和 ${o.k} 染黑。3-4 重构，双黑消掉，结束。`,b:`兄弟够借：${w.k} 上到父结点，父关键字 ${p.k} 下到空结点${iR&&oR?'（讲义：两个侄子都红时按 3-4 重构做，不按 B 树借法硬套）':''}；改动的关键字继承原来的颜色。`});x=T.root;break}
+    if(x)x.c='B';if(T.root)T.root.c='B'}
+}
+/* ======================= drawing ======================= */
+const NS='http://www.w3.org/2000/svg';
+function drawRB(f,showNil){const S=f.t;if(!S)return {svg:'<p class="legend" style="margin:8px">空树</p>',info:''};
+  const pos={},items=[];let xi=0,maxD=0;const gapN=40,gapL=24,LH=60;
+  const walk=(n,d,par,side)=>{if(!n){const dblHere=f.dbl&&par&&f.dbl.pid===par.id&&f.dbl.side===side;if(showNil||dblHere){const w=dblHere?34:gapL;items.push({nil:true,par,dblHere,x:xi+w/2,d});xi+=w;maxD=Math.max(maxD,d)}return}
+    walk(n.l,d+1,n,'l');pos[n.id]={x:xi+gapN/2,d,n};items.push({n,x:xi+gapN/2,d});xi+=gapN;maxD=Math.max(maxD,d);walk(n.r,d+1,n,'r')};
+  walk(S,0,null,null);const W=Math.max(xi+20,200),H=maxD*LH+(f.dbl?62:48);const X=x=>x+10,Y=d=>26+d*LH;
+  let e='',nd='';const cur=new Set(f.cur),done=new Set(f.done);
+  items.forEach(it=>{const par=it.nil?it.par:null;if(it.nil){if(par){const pp=pos[par.id];e+=`<line class="edge nil" x1="${X(pp.x)}" y1="${Y(pp.d)}" x2="${X(it.x)}" y2="${Y(it.d)}"/>`}
+      nd+=`<rect class="nilbox" x="${X(it.x)-9}" y="${Y(it.d)-8}" width="18" height="16" rx="3"/><text class="niltx" x="${X(it.x)}" y="${Y(it.d)}">NIL</text>`;
+      if(it.dblHere)nd+=`<rect class="ring dbl" x="${X(it.x)-13}" y="${Y(it.d)-12}" width="26" height="24" rx="5"/><rect class="ring dbl" x="${X(it.x)-16}" y="${Y(it.d)-15}" width="32" height="30" rx="6"/><text class="dbltx" x="${X(it.x)}" y="${Y(it.d)+28}">双黑</text>`;return}
+    const n=it.n;[n.l,n.r].forEach(c=>{if(c){const q=pos[c.id];const bad=f.bad&&f.bad.includes(n.id)&&f.bad.includes(c.id);e+=`<line class="edge${bad?' bad':''}" x1="${X(it.x)}" y1="${Y(it.d)}" x2="${X(q.x)}" y2="${Y(q.d)}"/>`}});
+    const cx=X(it.x),cy=Y(it.d);nd+=`<circle class="n${n.c}" cx="${cx}" cy="${cy}" r="16"/><text class="nk" x="${cx}" y="${cy}">${n.k}</text>`;
+    if(cur.has(n.id))nd+=`<circle class="ring cur" cx="${cx}" cy="${cy}" r="20.5"/>`;else if(done.has(n.id))nd+=`<circle class="ring done" cx="${cx}" cy="${cy}" r="20.5"/>`;
+    if(f.dbl&&f.dbl.id===n.id)nd+=`<circle class="ring dbl" cx="${cx}" cy="${cy}" r="24"/><circle class="ring dbl" cx="${cx}" cy="${cy}" r="27.5"/><text class="dbltx" x="${cx+34}" y="${cy-14}">双黑</text>`});
+  const svg=`<svg viewBox="0 0 ${W+20} ${H}" style="min-width:${Math.min(W+20,Math.max(330,(W+20)*.8))}px;max-width:${Math.round((W+20)*1.25)}px;margin:0 auto" role="img" aria-label="红黑树">${e}${nd}</svg>`;
+  return {svg,W}}
+function drawB(f,showNil){const G=groups(f.t,f.dbl,showNil);if(!G)return '<p class="legend" style="margin:8px">空树</p>';
+  const KW=28,BH=32,LH=74,GAP=12;
+  const bw=g=>g.nil?16:g.empty?36:g.keys.length*KW+10;
+  const meas=g=>{g.kids.forEach(meas);const kw=g.kids.reduce((s,c)=>s+c.w,0)+GAP*Math.max(0,g.kids.length-1);g.w=Math.max(bw(g),kw)};meas(G);
+  let maxD=0;const place=(g,x0,d)=>{g.d=d;maxD=Math.max(maxD,d);let x=x0+(g.w-(g.kids.reduce((s,c)=>s+c.w,0)+GAP*Math.max(0,g.kids.length-1)))/2;g.kids.forEach(c=>{place(c,x,d+1);x+=c.w+GAP});
+    g.cx=g.kids.length&&!g.nil?(g.kids[0].cx+g.kids[g.kids.length-1].cx)/2:x0+g.w/2};place(G,0,0);
+  const W=G.w+20,H=(maxD+1)*LH+20;const Y=d=>14+d*LH;let e='',nd='';const cur=new Set(f.cur),done=new Set(f.done);
+  const draw=g=>{const w=bw(g),x=10+g.cx-w/2,y=Y(g.d);
+    g.kids.forEach(c=>{const cw=bw(c);e+=`<line class="blink" x1="${10+g.cx}" y1="${y+BH}" x2="${10+c.cx}" y2="${Y(c.d)+(c.nil?2:0)}"/>`;draw(c)});
+    if(g.nil){nd+=`<ellipse class="nilbox" cx="${10+g.cx}" cy="${y+8}" rx="8" ry="6"/>`;return}
+    nd+=`<rect class="bbox${g.empty?' empty':g.keys.length>3?' over':''}" x="${x}" y="${y}" width="${w}" height="${BH}" rx="4"/>`;
+    if(g.empty)nd+=`<text class="btag" x="${x+w/2}" y="${y+BH/2+4}">空</text>`;
+    if(g.keys.length>3)nd+=`<text class="btag" x="${x+w/2}" y="${y-4}">上溢</text>`;
+    g.keys.forEach((n,i)=>{const cx=x+5+KW/2+i*KW,cy=y+BH/2;nd+=`<circle class="n${n.c}" cx="${cx}" cy="${cy}" r="12"/><text class="nk" style="font-size:${n.k>99?10:12}px" x="${cx}" y="${cy}">${n.k}</text>`;
+      if(cur.has(n.id))nd+=`<circle class="ring cur" cx="${cx}" cy="${cy}" r="14.5" style="stroke-width:2.6"/>`;else if(done.has(n.id))nd+=`<circle class="ring done" cx="${cx}" cy="${cy}" r="14.5" style="stroke-width:2.6"/>`})};
+  draw(G);return `<svg viewBox="0 0 ${W} ${H}" style="min-width:${Math.min(W,Math.max(300,W*.8))}px;max-width:${Math.round(W*1.25)}px;margin:0 auto" role="img" aria-label="4 阶 B 树">${e}${nd}</svg>`}
+function stats(S){if(!S)return {n:0,h:0,bh:0,minP:0,maxP:0};let n=0,minP=1e9,maxP=0;const w=(x,d)=>{if(!x){minP=Math.min(minP,d);maxP=Math.max(maxP,d);return}n++;w(x.l,d+1);w(x.r,d+1)};w(S,0);
+  let bh=0,x=S.l;while(true){if(!x){bh++;break}if(x.c==='B')bh++;x=x.l}return {n,h:maxP,bh,minP,maxP}}
+/* ======================= stepper ======================= */
+let R=null,frames=[],pos=0,answered=new Map(),curPreset=-1;
+const pending=()=>{const f=frames[pos];return $('guessMode').checked&&f&&f.ask&&!answered.has(pos)};
+function render(){const f=frames[pos];if(!f)return;const nil=$('showNil').checked;const pend=pending();
+  const rb=drawRB(f,nil);$('rbv').innerHTML=rb.svg;
+  const st=stats(f.t);$('rbinfo').textContent=f.t?`n = ${st.n}，高 ${st.h}`:'';
+  if(f.mask&&pend)$('bv').innerHTML=`<svg viewBox="0 0 300 80"><text class="mask" x="150" y="44">先在纸上画出 B 树，答完再看</text></svg>`;else $('bv').innerHTML=drawB(f,nil);
+  const G=groups(f.t,f.dbl,false);let bn=0,bd=0;const cnt=(g,d)=>{if(!g)return;bn++;bd=Math.max(bd,d+1);g.kids.forEach(c=>cnt(c,d+1))};cnt(G,0);$('binfo').textContent=f.t&&!(f.mask&&pend)?`${bn} 个结点，高 ${bd}`:'';
+  const a=answered.get(pos);let msg='';
+  if(pend)msg=f.ask.q;
+  else{msg=(a?(a.ok?'<span class="ok">对了。</span> ':`<span class="bad">你${f.ask.type==='num'?'填':'选'}的是 ${a.v}，不对。</span>${f.ask.hint} `):'')+f.txt+(f.b?`<span class="bt">${f.b}</span>`:'')}
+  $('note').innerHTML=msg;
+  const tg=String(f.tag).replace(/-rr$/,'');document.querySelectorAll('#cases tr[data-c]').forEach(tr=>tr.classList.toggle('cur',tg===tr.dataset.c||(f.ask&&!pend&&['RR-1','RR-2','BB-1','BB-2','BB-3','BB-4'][caseIdx(f)]===tr.dataset.c)));
+  props(f);
+  $('prog').textContent=`第 ${pos} / ${frames.length-1} 步${f.opi>=0&&R.ops.length?` · 操作 ${f.opi+1}/${R.ops.length}：${R.ops[f.opi].d?'删':'插'} ${R.ops[f.opi].k}`:''}`;
+  $('prev').disabled=pos===0;$('next').disabled=pos===frames.length-1&&!pend;
+  $('gbox').classList.toggle('hidden',!pend);
+  if(pend){const A=f.ask;$('gq').textContent=A.type==='num'?A.l:'选一个：';$('gopts').innerHTML=A.type==='choice'?A.opts.map((o,i)=>`<button type="button" class="chip" data-o="${i}">${o}</button>`).join(''):'';
+    $('gin').classList.toggle('hidden',A.type!=='num');$('gbtn').classList.toggle('hidden',A.type!=='num');$('gin').value=''}}
+function caseIdx(f){if(!f.ask||f.ask.opts===undefined)return -1;if(f.ask.opts.length===2)return f.ask.ans;if(f.ask.opts.length===4)return 2+f.ask.ans;return -1}
+function props(f){const S=f.t,v=violations(S,null);const has=re=>v.filter(s=>re.test(s));
+  const rootBad=has(/^根/),rr=has(/双红/),bh=has(/黑结点数不同/);
+  const li=(ok,txt,why)=>`<li><span class="st ${ok?'y':'n'}">${ok?'✓':'✗'}</span><span>${txt}${ok?'':`<br><small class="bad">${why}</small>`}</span></li>`;
+  $('props').innerHTML=li(!rootBad.length,'根结点是黑色',rootBad.join(' '))+li(true,'叶结点（NIL）都是黑色','')+li(!rr.length,'红结点的孩子必须黑（不能连续两个红）',rr.join(' '))+li(!bh.length,'任一结点到各叶结点路径上黑结点数相同',bh.slice(0,2).join(' ')+(f.dbl?' 双黑那条路少一个黑，把双黑多背的一重算上就平了。':''));
+  const st=stats(S);if(!S){$('stats').innerHTML='空树';return}
+  const lg=Math.log2(st.n+1);
+  $('stats').innerHTML=`<span>内部结点 n = <b>${st.n}</b></span><span>树高 h = <b>${st.h}</b>（不算 NIL）</span><span>黑高 bh = <b>${st.bh}</b>${v.length?'（左路数的）':''}</span><span>最短 / 最长根到叶路径 = <b>${st.minP}</b> / <b>${st.maxP}</b>${st.maxP<=2*st.minP?' ≤ 2 倍 ✓':' ✗'}</span><span>2log₂(n+1) = <b>${(2*lg).toFixed(2)}</b>，h ${st.h<=2*lg+1e-9?'≤':'>'} 它</span><span>2<sup>bh</sup> − 1 = <b>${2**st.bh-1}</b> ≤ n ${2**st.bh-1<=st.n?'✓':'✗'}</span>`}
+function choose(i){const f=frames[pos];const ok=i===f.ask.ans;answered.set(pos,{ok,v:f.ask.opts?f.ask.opts[i]:i});render()}
+function checkNum(){const f=frames[pos];const v=$('gin').value.trim();if(!/^\d+$/.test(v))return;answered.set(pos,{ok:+v===f.ask.ans,v});render()}
+function step(d){if(d>0&&pending()){if(frames[pos].ask.type==='num')$('gin').focus();return}pos=Math.max(0,Math.min(frames.length-1,pos+d));render()}
+$('next').onclick=()=>step(1);$('prev').onclick=()=>step(-1);$('reset').onclick=()=>{pos=0;answered=new Map();render()};
+$('all').onclick=()=>{frames.forEach((f,i)=>{if(f.ask&&!answered.has(i))answered.set(i,null)});pos=frames.length-1;render()};
+$('gopts').onclick=e=>{const b=e.target.closest('[data-o]');if(b)choose(+b.dataset.o)};
+$('gbtn').onclick=checkNum;$('gin').onkeydown=e=>{if(e.key==='Enter')checkNum()};
+$('guessMode').onchange=render;$('showNil').onchange=render;
+function load(init,opsTxt,conv){let r;try{const ops=parseOps(opsTxt);r=run(init,ops);r.ops=ops}catch(e){$('err').textContent=String(e);return false}
+  $('err').textContent='';R=r;frames=r.F;
+  if(conv){const S=frames[0].t;let nb=0;const w=x=>{if(!x)return;if(x.c==='B')nb++;w(x.l);w(x.r)};w(S);
+    frames[0].mask=true;frames[0].ask={type:'num',l:'B 树结点个数 = ',q:'这棵红黑树转成 4 阶 B 树，一共有几个 B 树结点？先在纸上画出来再填。',ans:nb,hint:`每个黑结点带着它的红孩子组成一个 B 树结点，所以 B 树结点数 = 黑结点数 = ${nb}。`};
+    frames[0].txt=`共 ${nb} 个黑结点，就是 ${nb} 个 B 树结点：${bstr(groups(S))}。`;frames[0].b='红黑树黑高 = B 树高度；B 树每个结点里有且只有一个黑关键字，红的不相邻。'}
+  pos=0;answered=new Map();render();return true}
+function usePreset(i){curPreset=i;const P=PRESETS[i];$('inTree').value=P.init;$('inOps').value=P.ops.split(/\s+/).filter(Boolean).join(' ');
+  $('question').innerHTML=`${P.q}<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${P.a}</span></details>`;
+  $('srcnote').textContent='当前例题：'+P.src;
+  document.querySelectorAll('#presets [data-p]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===i));load(P.init,P.ops,P.conv)}
+$('presets').insertAdjacentHTML('beforeend',PRESETS.map((p,i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p.n}</button>`).join(''));
+$('presets').onclick=e=>{const b=e.target.closest('[data-p]');if(b)usePreset(+b.dataset.p)};
+$('load').onclick=()=>{if(load($('inTree').value,$('inOps').value,false)){document.querySelectorAll('#presets [data-p]').forEach(b=>b.setAttribute('aria-pressed','false'));$('question').textContent='自己输入的树和操作。';$('srcnote').textContent='当前：自己输入的数据。'}};
+$('seq').onclick=()=>{$('inTree').value='';$('inOps').value='1 2 3 4 5 6 7 8 9 10';$('load').click()};
+$('quiz').innerHTML=QUIZ.map(q=>`<div class="item">${q.q}<details style="margin-top:4px"><summary>看答案</summary><span class="ok">${q.a}</span></details></div>`).join('');
+/* hook for the offline check against the Python reference */
+window.__rb={run(init,ops){const r=run(init,parseOps(ops,1e4));return {final:dumpT(r.T.root),logs:r.log,btree:bstr(groups(snap(r.T.root))),frames:r.F.length,
+  frameViol:r.F.map(f=>({tag:f.tag,v:violations(f.t,f.dbl).length,vs:violations(f.t,f.dbl),dbl:!!f.dbl}))}},presets:PRESETS};
+usePreset(0);
+</script>
+</body>
+</html>
