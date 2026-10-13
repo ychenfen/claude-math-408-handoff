@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>地址转换演示台</title>
+<style>
+/* Two modes: split a logical address across multi-level page tables, and walk one memory access through TLB, page table, page fault and the final access with a running time sum. */
+/* Mode tabs, then the structure (hash slots, chains or a tree with failure nodes), then two tallies that fill in step by step. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6em}
+.form input.wide{width:min(26em,80vw)}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer}
+.form [hidden]{display:none}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.phase{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;margin-bottom:8px}
+.phase span{border:1px solid var(--line);border-radius:999px;padding:1px 10px;color:var(--muted)}
+.phase span.on{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.view{overflow-x:auto}
+.table{display:flex;gap:4px;padding:4px 0 26px}
+.slot{min-width:46px;text-align:center;border:1.5px solid var(--line);border-radius:5px;background:var(--bg);position:relative;font:16px/1.4 var(--mono);padding:6px 2px}
+.slot small{display:block;font-size:11px;color:var(--muted)}
+.cur{border-color:var(--q)!important;box-shadow:0 0 0 2px var(--q) inset}
+.cmp{border-color:var(--cmp)!important;background:color-mix(in srgb,var(--cmp) 24%,transparent)!important}
+.hit{border-color:var(--done)!important;background:color-mix(in srgb,var(--done) 26%,transparent)!important}
+.empty{border-color:var(--mv)!important;background:color-mix(in srgb,var(--mv) 18%,transparent)!important}
+.slot .n,.cn .n{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font:10px var(--mono);color:var(--q);font-weight:700;white-space:nowrap}
+.chains{display:grid;gap:6px;padding-bottom:6px}
+.crow{display:flex;align-items:center;gap:0;font:14px var(--mono)}
+.caddr{width:42px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--hl);padding:2px 0}
+.arrow{width:18px;text-align:center;color:var(--muted)}
+.cn{position:relative;min-width:40px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--bg);padding:2px 4px;margin-bottom:14px}
+.nul{color:var(--muted);padding:0 4px}
+svg text{font-family:var(--mono)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:8px}
+.note .ask{color:var(--q);font-weight:600}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.tallies{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.tw{overflow-x:auto}
+.tally{border-collapse:collapse;font:13px var(--mono)}
+.tally th,.tally td{border:1px solid var(--line);padding:2px 6px;text-align:center;white-space:nowrap}
+.tally th{color:var(--muted);font-weight:400;text-align:left}
+.tally td.new{background:color-mix(in srgb,var(--done) 22%,transparent);font-weight:700}
+.asl{margin-top:6px;font:14px var(--mono)}
+.asl b{color:var(--done)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.block{font-size:14px}
+.block table{border-collapse:collapse;font:13px var(--mono);margin:6px 0}
+.block td,.block th{border:1px solid var(--line);padding:2px 8px;text-align:center}
+
+.bits{display:flex;gap:3px;margin:6px 0 4px;min-width:0}
+.fld{border:1.5px solid var(--line);border-radius:5px;padding:4px 4px;text-align:center;min-width:52px;font-size:12px;line-height:1.35;overflow:hidden}
+.fld b{display:block;font:15px var(--mono);font-weight:700}
+.fld .v{display:block;font:12px var(--mono);color:var(--muted);word-break:break-all}
+.f0{background:color-mix(in srgb,var(--q) 18%,transparent);border-color:var(--q)}
+.f1{background:color-mix(in srgb,var(--cmp) 20%,transparent);border-color:var(--cmp)}
+.f2{background:color-mix(in srgb,var(--mv) 16%,transparent);border-color:var(--mv)}
+.f3{background:color-mix(in srgb,var(--accent) 22%,transparent);border-color:var(--accent)}
+.fo{background:color-mix(in srgb,var(--done) 20%,transparent);border-color:var(--done)}
+.unk{border-style:dashed;color:var(--muted)}
+.lv{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;margin-top:10px}
+.lv .box{border:1.5px solid var(--line);border-radius:5px;padding:3px 8px;background:var(--bg);font:13px var(--mono)}
+.lv .arrow{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:14px}
+.tbl{border-collapse:collapse;font:13px var(--mono)}
+.tbl th,.tbl td{border:1px solid var(--line);padding:2px 8px;text-align:center;white-space:nowrap}
+.tbl th{color:var(--muted);font-weight:400}
+.tbl tr.on td{background:color-mix(in srgb,var(--q) 20%,transparent);font-weight:700}
+.tbl tr.bad td{background:color-mix(in srgb,var(--mv) 16%,transparent)}
+.tbl tr.vic td{text-decoration:line-through;color:var(--mv)}
+.tbl tr.new td{background:color-mix(in srgb,var(--done) 22%,transparent);font-weight:700}
+.sum{font:14px var(--mono);margin-top:8px;line-height:1.9}
+.sum b{color:var(--done)}
+.sum .term{display:inline-block;border:1px solid var(--line);border-radius:4px;padding:0 6px;margin:0 2px;background:var(--bg)}
+.sum .term.new{border-color:var(--cmp);background:color-mix(in srgb,var(--cmp) 22%,transparent)}
+.flow{display:flex;flex-wrap:wrap;gap:4px;font-size:12px;margin-bottom:8px}
+.flow span{border:1px solid var(--line);border-radius:999px;padding:1px 9px;color:var(--muted)}
+.flow span.on{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.flow span.done{color:var(--ink);border-color:var(--done)}
+.flow span.skip{text-decoration:line-through;opacity:.55}
+.form[hidden]{display:none}
+h3{font:14px var(--serif);font-weight:600;margin:4px 0 6px}
+select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="CPU调度.html">CPU 调度</a><a href="磁盘调度.html">磁盘调度</a></div>
+  <header>
+    <h1>地址转换演示台</h1>
+    <p class="sub">两件事分开练：先把逻辑地址按页表级数切成几段，再让一次访存从查 TLB 走到真正取数据，每一步的时间都加进算式。对应你错过的 2010-29（页目录几项）、2009-46（漏了最后那次访存）和 2010-46（FIFO 换哪页、物理地址怎么拼）。</p>
+  </header>
+  <div class="modes" id="modes" role="group" aria-label="演示内容"></div>
+  <section class="panel"><h2>这一类怎么做</h2><ol class="rules" id="rules"></ol></section>
+  <section class="panel">
+    <div class="form" id="formSplit">
+      <label>页大小（2 的几次方 B）<input id="sp" type="number" min="1" max="30"></label>
+      <label>页表项大小（B）<input id="se" type="number" min="1"></label>
+      <label>逻辑空间（2 的几次方页）<input id="sv" type="number" min="1" max="60"></label>
+      <label>要拆的逻辑地址（十六进制，可空）<input id="sa" type="text"></label>
+    </div>
+    <div class="form" id="formAcc">
+      <label>页大小（2 的几次方 B）<input id="ap" type="number" min="1" max="30"></label>
+      <label>页表（页号:页框H，- 表示不在内存，@ 后是装入时刻）<input id="apt" class="wide" type="text"></label>
+      <label>依次访问的逻辑地址（十六进制）<input id="aad" class="wide" type="text"></label>
+      <label>驻留集大小<input id="ar" type="number" min="1"></label>
+      <label>置换算法<select id="alg"><option value="LRU">LRU</option><option value="FIFO">FIFO</option><option value="CLOCK">CLOCK</option></select></label>
+      <label data-for="clock">CLOCK 指针起点页框（十六进制）<input id="aclk" type="text"></label>
+      <label>空闲页框（驻留集未满时用，可空）<input id="afree" type="text"></label>
+      <label>访存 ns<input id="tm" type="number" min="0"></label>
+      <label>查 TLB ns<input id="tt" type="number" min="0"></label>
+      <label>缺页处理 ns<input id="tf" type="number" min="0" style="width:9em"></label>
+      <label class="chk"><input id="tlbOn" type="checkbox"> 有 TLB（初始为空）</label>
+      <label class="chk"><input id="restart" type="checkbox"> 缺页处理后重新执行指令</label>
+    </div>
+    <div class="form" style="margin-top:8px">
+      <label class="chk"><input id="guess" type="checkbox" checked> 先猜再看</label>
+      <button class="btn" id="go" type="button">按这组数据重新演示</button>
+    </div>
+    <div class="presets" id="presets"></div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="flow" id="flow"></div>
+    <div class="view" id="view"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="2"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+
+    <p class="tip">“先猜再看”开着时，关键一步之前先停下来问你，自己算完再点下一步对答案。键盘 ← → 单步，空格播放／暂停。</p>
+  </section>
+  <section class="panel" id="tallyBox"><h2 id="tallyTitle">结果</h2><div class="tw" id="tally"></div></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let frames=[],at=0,timer=null;
+const SPD=[3500,2500,1800,1200,800,500,300];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].q)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;draw(f);
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+function wire(){
+  $('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+  $('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+  $('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+  document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+  showSpd()}
+
+const hex=(n,w=1)=>n.toString(16).toUpperCase().padStart(w,'0')+'H';
+const bin=(n,w)=>w<=0?'':n.toString(2).padStart(w,'0');
+const pow2=b=>2**b;
+const big=n=>n>=1e6&&Math.log10(n)%1===0?`10^${Math.log10(n)}`:String(n);
+const cls=['f0','f1','f2','f3'];
+
+const MODES={
+ split:{name:'多级页表怎么切地址',flow:['① 偏移几位','② 一页装几项','③ 一级一级往上数','④ 画出地址格式'],
+  rules:['页内偏移位数 = log₂(页大小)。','<b>一张页表必须正好装进一页</b>：一页能放 页大小 ÷ 页表项大小 = 2^k 项，所以每一级索引都是 k 位。','从最底层往上数：总页数 ÷ 2^k = 需要几张页表 = 上一级要几项。上一级的项数 ≤ 2^k 就装得进一页，停；装不下再加一级。','顶层项数 = 2^(剩下的位数)，这就是“页目录至少几项”。常见错误：用 页数 ÷ 页大小 去算，漏了“÷ 页表项大小”这一步。'],
+  presets:[['2010-29（王道 3.1 习题 63）',{p:10,e:2,v:16,a:'1F5A6'}],['同题改成 2^20 页（要三级）',{p:10,e:2,v:20,a:''}],['页 4KB、项 8B、2^36 页（四级）',{p:12,e:8,v:36,a:''}]]},
+ acc:{name:'一次访存的完整流程',flow:['拆地址','查 TLB','查页表','缺页处理','拼物理地址','访存'],
+  rules:['先拆：页号 = 地址 ÷ 页大小（高位），页内偏移 = 低位，<b>偏移原样照抄</b>到物理地址。','TLB 命中：只花查 TLB 的时间。未命中：再访存一次查页表。页表项无效：缺页中断，选一页换出，调入后<b>重新执行这条指令</b>（2009-46 的设定：处理过程中已更新页表和 TLB，所以重新执行时 TLB 命中）。','<b>最后一定还有一次访存</b>，这才是真正取数据。2009-46 三问都漏了这 100ns。','物理地址 = 页框号拼上页内偏移，不是相加、也不是页表项地址。'],
+  presets:[['2009-46（LRU，驻留集 2）',{p:12,pt:'0:101H, 1:-, 2:254H',ad:'2362, 1565, 25A5',r:2,alg:'LRU',clk:'',free:'',tm:100,tt:10,tf:100000000,tlb:true,rs:true}],
+           ['2010-46 FIFO（只看换哪页、物理地址）',{p:10,pt:'0:7@130, 1:4@230, 2:2@200, 3:9@160, 5:-',ad:'17CA',r:4,alg:'FIFO',clk:'',free:'',tm:100,tt:10,tf:100000000,tlb:false,rs:true}],
+           ['2010-46 CLOCK（从 2 号页框扫）',{p:10,pt:'0:7@130, 1:4@230, 2:2@200, 3:9@160, 5:-',ad:'17CA',r:4,alg:'CLOCK',clk:'2',free:'',tm:100,tt:10,tf:100000000,tlb:false,rs:true}],
+           ['2009-46 去掉 TLB',{p:12,pt:'0:101H, 1:-, 2:254H',ad:'2362, 1565, 25A5',r:2,alg:'LRU',clk:'',free:'',tm:100,tt:10,tf:100000000,tlb:false,rs:true}]]}
+};
+let mode='split',cfg=null;
+
+/* ---------- 多级页表切地址 ---------- */
+function buildSplit(c){const F=[];const {p,e,v}=c;const le=Math.log2(e);
+  if(!Number.isInteger(le))return '页表项大小要是 2 的幂。';if(le>p)return '页表项比一页还大。';if(p+v>64)return '地址太长了（超过 64 位）。';
+  const k=p-le;const fields=[];let known=false;
+  const push=(note,o={})=>F.push(Object.assign({note,fields:fields.slice(),known,p,k,v,addr:null},o));
+  push(`逻辑地址空间 2^${v} 页，每页 2^${p} B，逻辑地址一共 ${v}+${p} = ${v+p} 位。先定最低的偏移，再一级一级往上切。`,{flow:0});
+  push(`<span class="ask">页大小 2^${p} B，页内偏移要几位？</span>`,{flow:0,q:true});
+  known=true;push(`偏移 <b>${p} 位</b>：页内每个字节都要能编号，2^${p} 个字节就要 ${p} 位。`,{flow:0});
+  push(`<span class="ask">一页能放几个页表项？表内索引要几位？</span>`,{flow:1,q:true});
+  push(`2^${p} B ÷ ${e} B = 2^${p}÷2^${le} = <b>2^${k} = ${pow2(k)} 项</b>。一张页表正好一页，所以一张页表管 2^${k} 页，每一级索引都是 <b>${k} 位</b>。`,{flow:1,showK:true});
+  const one=v+le-p;
+  push(`对比：如果只用一级页表，要 2^${v} 项 × ${e} B = 2^${v+le} B，${one>0?`要占 2^${one} 个<b>连续</b>页框，这就是要分级的原因。`:'一页就装得下，一级就够。'}`,{flow:2,showK:true});
+  let left=v,lvl=0;
+  while(left>k){lvl++;const tables=left-k;
+    push(`<span class="ask">从下往上第 ${lvl} 级：要管 2^${left} ${lvl===1?'页':'项'}，每张表装 2^${k} 项，需要几张表？</span>`,{flow:2,showK:true,q:true});
+    fields.unshift(k);left-=k;
+    push(`2^${left+k} ÷ 2^${k} = <b>2^${tables} 张</b>第 ${lvl} 级页表。每张都要在上一级占一项，所以上一级要 <b>2^${tables} = ${pow2(tables)} 项</b>。这一级索引 ${k} 位。`,{flow:2,showK:true,left});
+    push(left<=k?`上一级只要 2^${left} 项 ≤ 2^${k}，<b>一页装得下</b>，它就是顶层，不用再加级。`:`上一级要 2^${left} 项 &gt; 2^${k}，一页装不下，还要再往上加一级。`,{flow:2,showK:true,left})}
+  fields.unshift(left);
+  const L=fields.length;
+  push(`共 <b>${L} 级</b>页表。顶层（${L===2?'页目录':'最高一级'}）有 <b>2^${left} = ${pow2(left)} 项</b>${L===2?'，也就是“页目录至少几项”的答案':''}。逻辑地址格式见上面的色块，从高到低：${fields.map((b,i)=>`${names(L)[i]} ${b} 位`).join('、')}、偏移 ${p} 位。`,{flow:3,showK:true,done:true});
+  if(c.a!==''){const A=parseInt(c.a,16);if(!(A>=0)||!/^[0-9a-f]+$/i.test(c.a))return '要拆的地址要是十六进制。';if(A>=2**(v+p))return `地址 ${c.a}H 超出了 ${v+p} 位。`;
+    push(`<span class="ask">把 ${c.a.toUpperCase()}H 按这个格式切开，各段是多少？</span>`,{flow:3,showK:true,done:true,q:true});
+    push(`写成 ${v+p} 位二进制，从低位往高位切：${p} 位偏移，再每 ${k} 位一段。各段的值写在色块下面。`,{flow:3,showK:true,done:true,addr:A})}
+  return {F,meta:{fields,L}}}
+function names(L){if(L===1)return['页号'];if(L===2)return['页目录号','页号'];return Array.from({length:L},(_,i)=>`第${i+1}级`)}
+function drawSplit(f){const L=f.fields.length;const nm=f.done?names(L):f.fields.map(()=> '索引');
+  let addrBits=f.addr!=null?bin(f.addr,f.v+f.p):null;
+  const box=(name,bits,c,val)=>`<div class="fld ${c}" style="flex:${Math.max(bits,3)} 1 0"><span>${name}</span><b>${bits===null?'?':bits+' 位'}</b>${val!=null?`<span class="v">${val}</span>`:''}</div>`;
+  let pos=0;const vals=[];if(addrBits){f.fields.forEach(b=>{vals.push(addrBits.slice(pos,pos+b));pos+=b})}
+  const rest=f.v-f.fields.reduce((s,b)=>s+b,0);
+  let h='<div class="bits">';
+  if(rest>0)h+=box(f.fields.length?'还没切':'页号部分',null,'unk',`共 ${rest} 位`);
+  f.fields.forEach((b,i)=>{h+=box(nm[i],b,cls[i%4],vals.length?`${vals[i]}<br>= ${parseInt(vals[i],2)}`:null)});
+  h+=box('页内偏移',f.known?f.p:null,f.known?'fo':'unk',addrBits?`${addrBits.slice(f.v)}<br>= ${hex(parseInt(addrBits.slice(f.v),2))}`:null)+'</div>';
+  h+=`<p class="tip">逻辑地址共 ${f.v+f.p} 位，色块宽度按位数画。</p>`;
+  if(f.showK){h+=`<div class="lv">${f.done?f.fields.map((b,i)=>`<span class="box ${cls[i%4]}">${names(L)[i]}：${i===0?'1 张':`2^${f.fields.slice(0,i).reduce((s,x)=>s+x,0)} 张`} × ${i===0?`2^${b}`:`2^${f.k}`} 项</span>`).join('<span class="arrow">→</span>')+'<span class="arrow">→</span><span class="box fo">页框 + 偏移</span>':`<span class="box">一张页表 = 一页 = 2^${f.k} 项</span>`}</div>`}
+  return h}
+
+/* ---------- 一次访存 ---------- */
+function parsePT(s){const pt=new Map();for(const part of s.split(/[,，;；]+/).map(x=>x.trim()).filter(Boolean)){
+    const m=part.match(/^([0-9]+)\s*[:：]\s*(-|[0-9a-f]+)\s*h?\s*(?:@\s*(\d+))?$/i);if(!m)return `看不懂“${part}”，格式是 页号:页框H 或 页号:-，可加 @装入时刻。`;
+    const pg=+m[1];pt.set(pg,m[2]==='-'?{frame:null,valid:false}:{frame:parseInt(m[2],16),valid:true,load:m[3]!=null?+m[3]:null})}return pt}
+function buildAcc(c){const F=[];const P=c.p,mask=pow2(P)-1;
+  const pt=parsePT(c.pt);if(typeof pt==='string')return pt;
+  const addrs=c.ad.split(/[\s,，、]+/).filter(Boolean);if(!addrs.length)return '至少给一个地址。';if(addrs.length>12)return '最多 12 个地址。';
+  for(const a of addrs)if(!/^[0-9a-f]+h?$/i.test(a))return `地址 ${a} 不是十六进制。`;
+  const free=c.free.split(/[\s,，、]+/).filter(Boolean).map(x=>parseInt(x,16));
+  let clock=0;const res=[...pt.entries()].filter(([,x])=>x.valid);
+  if(res.length>c.r)return `页表里已有 ${res.length} 页在内存，比驻留集 ${c.r} 还多。`;
+  res.sort((a,b)=>(a[1].load??0)-(b[1].load??0)).forEach(([,x],i)=>{x.order=x.load??i;x.last=x.load??i;x.use=1;x.lastLabel=x.load!=null?`时刻 ${x.load}`:`开始前第 ${i+1} 个`});
+  clock=Math.max(0,...res.map(([,x])=>x.last))+1;
+  let ptr=c.clk?parseInt(c.clk,16):null;
+  const tlb=[];const tally=[];
+  const W=Math.max(...addrs.map(a=>a.replace(/h/i,'').length));
+  const snap=()=>({pt:[...pt.entries()].sort((a,b)=>a[0]-b[0]).map(([g,x])=>({g,...x})),tlb:tlb.map(x=>({...x})),tally:tally.map(x=>({...x,terms:x.terms.slice()}))});
+  const push=(note,o={})=>F.push(Object.assign({note},snap(),o));
+  push(`共 ${addrs.length} 次访问。页大小 2^${P} B，所以低 ${P} 位是偏移、其余是页号。${c.tlb?'TLB 初始为空。':'没有 TLB，每次都查内存中的页表。'}置换用 ${c.alg}，驻留集 ${c.r} 页。`,{flow:-1});
+  addrs.forEach((s,i)=>{const A=parseInt(s.replace(/h/i,''),16);const pg=Math.floor(A/pow2(P)),off=A&mask;
+    const row={addr:s.replace(/h/i,'').toUpperCase(),terms:[],phys:null,note:''};tally.push(row);const cur={i,pg,off,A,P};
+    const add=(t,lab)=>{row.terms.push({t,lab})};
+    const st=(note,flow,o={})=>push(note,Object.assign({flow,cur:Object.assign({},cur),newTerm:false},o));
+    st(`<span class="ask">第 ${i+1} 次访问 ${row.addr}H：页号和页内偏移各是多少？</span>`,0,{q:true});
+    cur.split=true;st(`${row.addr}H = ${bin(A,Math.max(P+1,Math.ceil(Math.log2(A+1))))}。低 ${P} 位是偏移 <b>${hex(off)}</b>，往上是页号 <b>${pg}</b>（= ${row.addr}H ÷ 2^${P}）。`,0);
+    const fl={tlb:c.tlb};let hit=false;
+    if(c.tlb){st(`<span class="ask">查 TLB（+${c.tt}ns）。页 ${pg} 在 TLB 里吗？</span>`,1,{q:true,fl});
+      hit=tlb.some(x=>x.g===pg);add(c.tt,'查TLB');
+      st(hit?`TLB <b>命中</b>，直接得到页框号，不用查页表。`:`TLB <b>未命中</b>，要去内存里查页表。`,1,{newTerm:true,hlTlb:pg,fl})}
+    let e=pt.get(pg);
+    if(!hit){fl.pt=true;st(`<span class="ask">访存查页表（+${c.tm}ns）。页 ${pg} 的页表项有效吗？</span>`,2,{q:true,fl});
+      add(c.tm,'查页表');const valid=e&&e.valid;
+      st(valid?`页表项有效，页 ${pg} 在页框 ${hex(e.frame)}。${c.tlb?'顺手把这一项填进 TLB。':''}`:`页表项无效（存在位 0），<b>缺页</b>。`,2,{newTerm:true,hlPt:pg,fl});
+      if(valid&&c.tlb)tlb.push({g:pg,frame:e.frame});
+      if(!valid){fl.fault=true;if(!e){e={frame:null,valid:false};pt.set(pg,e)}
+        const resident=[...pt.entries()].filter(([,x])=>x.valid);let frame,victim=null,why='';
+        if(resident.length<c.r){if(!free.length)return `第 ${i+1} 次访问缺页时驻留集没满，但没给空闲页框。`;frame=free.shift();why=`驻留集只用了 ${resident.length} 页，还没满，直接把页 ${pg} 调入空闲页框 ${hex(frame)}，不用换出。`}
+        else{let order;
+          if(c.alg==='LRU'){resident.sort((a,b)=>a[1].last-b[1].last);victim=resident[0];why=`LRU 看<b>最近一次使用</b>的先后：${resident.map(([g,x])=>`页 ${g}（${x.lastLabel}）`).join('、')}，页 ${victim[0]} 最久没用，换出它。`}
+          else if(c.alg==='FIFO'){resident.sort((a,b)=>a[1].order-b[1].order);victim=resident[0];why=`FIFO 只看<b>装入时刻</b>：${resident.map(([g,x])=>`页 ${g}@${x.order}`).join('、')}，页 ${victim[0]} 最早装入，换出它（不管它最近用没用过）。`}
+          else{resident.sort((a,b)=>a[1].frame-b[1].frame);let idx=ptr==null?0:resident.findIndex(([,x])=>x.frame===ptr);if(idx<0)return `CLOCK 指针起点页框 ${hex(ptr)} 不在内存里。`;const steps=[];
+            for(let n=0;n<3*resident.length;n++){const [g,x]=resident[idx];if(x.use){steps.push(`页框 ${hex(x.frame)}（页 ${g}）访问位 1→0`);x.use=0;idx=(idx+1)%resident.length}else{victim=resident[idx];steps.push(`页框 ${hex(x.frame)}（页 ${g}）访问位 0，换出`);break}}
+            ptr=resident[(idx+1)%resident.length][1].frame;why=`CLOCK 环按页框号排，从指针处扫：${steps.join('；')}。`}
+          frame=victim[1].frame}
+        st(`<span class="ask">缺页中断（+${c.tf}ns）。${resident.length<c.r?'驻留集没满，页 '+pg+' 放到哪？':'驻留集满了，'+c.alg+' 换出哪一页？'}</span>`,3,{q:true,fl});
+        add(c.tf,'缺页');
+        if(victim){victim[1].valid=false;const vg=victim[0];const ti=tlb.findIndex(x=>x.g===vg);if(ti>=0)tlb.splice(ti,1)}
+        e.valid=true;e.frame=frame;e.order=clock;e.last=clock;e.use=1;e.lastLabel=null;if(c.tlb)tlb.push({g:pg,frame});
+        st(`${why} 页 ${pg} 调入页框 <b>${hex(frame)}</b>，页表${c.tlb?'和 TLB ':''}都已更新。`,3,{newTerm:true,victim:victim?victim[0]:null,newPg:pg,fl});
+        if(c.rs){if(c.tlb){add(c.tt,'重查TLB');st(`重新执行这条指令：再查一次 TLB（+${c.tt}ns），这次<b>命中</b>。`,1,{newTerm:true,hlTlb:pg,fl})}
+          else{add(c.tm,'重查页表');st(`重新执行这条指令：再查一次页表（+${c.tm}ns），这次有效。`,2,{newTerm:true,hlPt:pg,fl})}}}}
+    e.last=clock;e.use=1;e.lastLabel=`第 ${i+1} 次访问`;clock++;
+    const phys=e.frame*pow2(P)+off;
+    st(`<span class="ask">物理地址是多少？</span>`,4,{q:true,fl});
+    row.phys=phys;cur.phys=phys;cur.frame=e.frame;
+    st(`页框号 ${hex(e.frame)} 拼上偏移 ${hex(off)}：${hex(e.frame)} × 2^${P} + ${hex(off)} = <b>${hex(phys)}</b>。偏移照抄，没有加别的。`,4,{fl});
+    add(c.tm,'访存');row.done=true;
+    st(`用物理地址 ${hex(phys)} <b>访存取数据</b>（+${c.tm}ns）。这一步最容易漏。第 ${i+1} 次访问合计 <b>${row.terms.reduce((s,x)=>s+x.t,0)} ns</b>。`,5,{newTerm:true,fl})});
+  push(`全部做完。对照下面的表：每一行的算式都以一次“访存”结尾。`,{flow:-1});
+  return {F,meta:{}}}
+function drawAcc(f){const M=MODES.acc;const fl=f.fl||{};
+  $('flow').innerHTML=M.flow.map((t,i)=>{let c='';if(i===f.flow)c='on';else if((i===1&&!cfg.tlb))c='skip';return `<span class="${c}">${t}</span>`}).join('');
+  let h='<div class="grid2">';
+  const cu=f.cur;
+  if(cu){h+=`<div><h3>当前地址</h3><div class="bits">`+(cu.split?`<div class="fld f0" style="flex:2 1 0"><span>页号</span><b>${cu.pg}</b></div><div class="fld fo" style="flex:${Math.max(2,cu.P/3)} 1 0"><span>偏移 ${cu.P} 位</span><b>${hex(cu.off)}</b></div>`:`<div class="fld unk" style="flex:1 1 0"><span>逻辑地址</span><b>${hex(cu.A)}</b></div>`)+`</div>`;
+    if(cu.phys!=null)h+=`<div class="bits"><div class="fld f2" style="flex:2 1 0"><span>页框号</span><b>${hex(cu.frame)}</b></div><div class="fld fo" style="flex:${Math.max(2,cu.P/3)} 1 0"><span>偏移（照抄）</span><b>${hex(cu.off)}</b></div></div><p class="tip">物理地址 = <b>${hex(cu.phys)}</b></p>`;
+    h+='</div>'}
+  h+=`<div><h3>页表（在内存里）</h3><table class="tbl"><tr><th>页号</th><th>页框</th><th>存在位</th>${cfg.alg==='FIFO'?'<th>装入</th>':cfg.alg==='CLOCK'?'<th>访问位</th>':'<th>最近使用</th>'}</tr>${f.pt.map(x=>`<tr class="${x.g===f.hlPt?(x.valid?'on':'bad'):''} ${x.g===f.victim?'vic':''} ${x.g===f.newPg?'new':''}"><td>${x.g}</td><td>${x.frame==null?'—':hex(x.frame)}</td><td>${x.valid?1:0}</td><td>${!x.valid?'—':cfg.alg==='FIFO'?x.order:cfg.alg==='CLOCK'?x.use:(x.lastLabel||x.last)}</td></tr>`).join('')}</table></div>`;
+  if(cfg.tlb)h+=`<div><h3>TLB</h3>${f.tlb.length?`<table class="tbl"><tr><th>页号</th><th>页框</th></tr>${f.tlb.map(x=>`<tr class="${x.g===f.hlTlb?'on':''}"><td>${x.g}</td><td>${hex(x.frame)}</td></tr>`).join('')}</table>`:'<p class="tip">空</p>'}</div>`;
+  h+='</div>';
+  if(cu){const row=f.tally[cu.i];h+=`<div class="sum">第 ${cu.i+1} 次：${row.terms.length?row.terms.map((x,j)=>`<span class="term ${f.newTerm&&j===row.terms.length-1?'new':''}">${big(x.t)} <small>${x.lab}</small></span>`).join(' + '):'（还没开始计时）'}${row.done?` = <b>${row.terms.reduce((s,x)=>s+x.t,0)} ns</b>`:''}</div>`}
+  return h}
+function tallyAcc(f){if(!f.tally.length)return '<p class="tip">还没开始。</p>';
+  return `<table class="tbl"><tr><th>地址</th><th>时间算式</th><th>合计</th><th>物理地址</th></tr>${f.tally.map(r=>`<tr><td>${r.addr}H</td><td style="text-align:left">${r.terms.map(x=>big(x.t)).join(' + ')||'—'}</td><td>${r.done?r.terms.reduce((s,x)=>s+x.t,0)+' ns':'…'}</td><td>${r.phys!=null?hex(r.phys):'…'}</td></tr>`).join('')}</table>`}
+
+/* ---------- 控制 ---------- */
+function draw(f){if(mode==='split'){$('flow').innerHTML=MODES.split.flow.map((t,i)=>`<span class="${i===f.flow?'on':i<f.flow?'done':''}">${t}</span>`).join('');$('view').innerHTML=drawSplit(f);
+    $('tally').innerHTML=f.done?`<table class="tbl"><tr><th>级</th>${f.fields.map((_,i)=>`<th>${names(f.fields.length)[i]}</th>`).join('')}<th>偏移</th></tr><tr><th>位数</th>${f.fields.map(b=>`<td>${b}</td>`).join('')}<td>${f.p}</td></tr><tr><th>这一级每张表几项</th>${f.fields.map(b=>`<td>2^${b} = ${pow2(b)}</td>`).join('')}<td>—</td></tr></table>`:'<p class="tip">切完才显示。</p>'}
+  else{$('view').innerHTML=drawAcc(f);$('tally').innerHTML=tallyAcc(f)}
+  $('note').innerHTML=f.note}
+function build(){let r;
+  if(mode==='split'){const c={p:+$('sp').value,e:+$('se').value,v:+$('sv').value,a:$('sa').value.trim().replace(/h$/i,'')};
+    if(!(c.p>=1&&c.e>=1&&c.v>=1))return '三个数都要填正整数。';cfg=c;r=buildSplit(c)}
+  else{const c={p:+$('ap').value,pt:$('apt').value,ad:$('aad').value,r:+$('ar').value,alg:$('alg').value,clk:$('aclk').value.trim().replace(/h$/i,''),free:$('afree').value,tm:+$('tm').value,tt:+$('tt').value,tf:+$('tf').value,tlb:$('tlbOn').checked,rs:$('restart').checked};
+    if(!(c.p>=1&&c.r>=1))return '页大小和驻留集要是正整数。';cfg=c;r=buildAcc(c)}
+  if(typeof r==='string')return r;frames=r.F;at=0;return ''}
+function run(){stop();const e=build();$('err').textContent=e;if(!e)render()}
+function setMode(m,preset=0){mode=m;const M=MODES[m];
+  $('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
+  $('rules').innerHTML=M.rules.map(r=>`<li>${r}</li>`).join('');
+  $('formSplit').hidden=m!=='split';$('formAcc').hidden=m!=='acc';$('tallyTitle').textContent=m==='split'?'地址格式':'每次访问的时间和物理地址';
+  $('presets').innerHTML='例子：'+M.presets.map(([t],i)=>`<button type="button" class="chip" data-pi="${i}" aria-pressed="${i===preset}">${t}</button>`).join('');
+  applyPreset(preset);try{history.replaceState(null,'','#'+m)}catch{}}
+function clockVis(){document.querySelector('[data-for="clock"]').hidden=$('alg').value!=='CLOCK'}
+function applyPreset(i){const v=MODES[mode].presets[i][1];
+  if(mode==='split'){$('sp').value=v.p;$('se').value=v.e;$('sv').value=v.v;$('sa').value=v.a}
+  else{$('ap').value=v.p;$('apt').value=v.pt;$('aad').value=v.ad;$('ar').value=v.r;$('alg').value=v.alg;$('aclk').value=v.clk;$('afree').value=v.free;$('tm').value=v.tm;$('tt').value=v.tt;$('tf').value=v.tf;$('tlbOn').checked=v.tlb;$('restart').checked=v.rs;clockVis()}
+  $('presets').querySelectorAll('[data-pi]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.pi===i));run()}
+$('modes').innerHTML=Object.entries(MODES).map(([k,v])=>`<button type="button" class="chip" data-m="${k}" aria-pressed="false">${v.name}</button>`).join('');
+$('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b)setMode(b.dataset.m)};
+$('presets').onclick=e=>{const b=e.target.closest('[data-pi]');if(b)applyPreset(+b.dataset.pi)};
+$('go').onclick=run;$('alg').onchange=clockVis;
+wire();setMode(MODES[location.hash.slice(1)]?location.hash.slice(1):'split');
+</script>
+</body>
+</html>

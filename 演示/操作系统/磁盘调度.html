@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>磁盘调度轨迹</title>
+<style>
+/* Algorithm tabs, request input, then the head's path drawn top to bottom over a track axis, a running distance sum, and an access-time panel. */
+/* Mode tabs, then the structure (hash slots, chains or a tree with failure nodes), then two tallies that fill in step by step. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6em}
+.form input.wide{width:min(26em,80vw)}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer}
+.form [hidden]{display:none}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.phase{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;margin-bottom:8px}
+.phase span{border:1px solid var(--line);border-radius:999px;padding:1px 10px;color:var(--muted)}
+.phase span.on{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.view{overflow-x:auto}
+.table{display:flex;gap:4px;padding:4px 0 26px}
+.slot{min-width:46px;text-align:center;border:1.5px solid var(--line);border-radius:5px;background:var(--bg);position:relative;font:16px/1.4 var(--mono);padding:6px 2px}
+.slot small{display:block;font-size:11px;color:var(--muted)}
+.cur{border-color:var(--q)!important;box-shadow:0 0 0 2px var(--q) inset}
+.cmp{border-color:var(--cmp)!important;background:color-mix(in srgb,var(--cmp) 24%,transparent)!important}
+.hit{border-color:var(--done)!important;background:color-mix(in srgb,var(--done) 26%,transparent)!important}
+.empty{border-color:var(--mv)!important;background:color-mix(in srgb,var(--mv) 18%,transparent)!important}
+.slot .n,.cn .n{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font:10px var(--mono);color:var(--q);font-weight:700;white-space:nowrap}
+.chains{display:grid;gap:6px;padding-bottom:6px}
+.crow{display:flex;align-items:center;gap:0;font:14px var(--mono)}
+.caddr{width:42px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--hl);padding:2px 0}
+.arrow{width:18px;text-align:center;color:var(--muted)}
+.cn{position:relative;min-width:40px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--bg);padding:2px 4px;margin-bottom:14px}
+.nul{color:var(--muted);padding:0 4px}
+svg text{font-family:var(--mono)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:8px}
+.note .ask{color:var(--q);font-weight:600}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.tallies{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.tw{overflow-x:auto}
+.tally{border-collapse:collapse;font:13px var(--mono)}
+.tally th,.tally td{border:1px solid var(--line);padding:2px 6px;text-align:center;white-space:nowrap}
+.tally th{color:var(--muted);font-weight:400;text-align:left}
+.tally td.new{background:color-mix(in srgb,var(--done) 22%,transparent);font-weight:700}
+.asl{margin-top:6px;font:14px var(--mono)}
+.asl b{color:var(--done)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.block{font-size:14px}
+.block table{border-collapse:collapse;font:13px var(--mono);margin:6px 0}
+.block td,.block th{border:1px solid var(--line);padding:2px 8px;text-align:center}
+
+select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.form[hidden],.form [hidden]{display:none}
+.track svg{display:block;width:100%;height:auto}
+.res{border-collapse:collapse;font:13px var(--mono)}
+.res th,.res td{border:1px solid var(--line);padding:2px 8px;text-align:center;white-space:nowrap}
+.res th{color:var(--muted);font-weight:400}
+.res tr.cur td{background:color-mix(in srgb,var(--q) 16%,transparent);font-weight:700}
+.sum{font:14px var(--mono);line-height:1.9;margin-top:6px;word-break:break-all}
+.sum b{color:var(--done)}
+.sum .term{display:inline-block;border:1px solid var(--line);border-radius:4px;padding:0 5px;background:var(--bg)}
+.sum .term.j{border-style:dashed;color:var(--muted)}
+.sum .term.new{border-color:var(--cmp);background:color-mix(in srgb,var(--cmp) 22%,transparent)}
+.time p{margin:4px 0;font:14px var(--mono)}
+.time b{color:var(--done)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="地址转换.html">地址转换</a><a href="CPU调度.html">CPU 调度</a></div>
+  <header>
+    <h1>磁盘调度轨迹</h1>
+    <p class="sub">磁头每走一站先问你下一站是哪，再把这一段距离加进算式。CSCAN 的回跳算不算、要不要走到端点，可以勾选切换，看总距离怎么变。对应 2024-32（CSCAN 回扫那段算不算）和 2010-45（访问时间漏了旋转延迟）。</p>
+  </header>
+  <div class="modes" id="modes" role="group" aria-label="调度算法"></div>
+  <section class="panel"><h2>这个算法怎么走</h2><ol class="rules" id="rules"></ol></section>
+  <section class="panel">
+    <div class="form">
+      <label>磁道范围 最小<input id="lo" type="number" min="0"></label>
+      <label>最大<input id="hi" type="number" min="1"></label>
+      <label>磁头在<input id="head" type="number" min="0"></label>
+      <label>当前方向<select id="dir"><option value="1">磁道号增大</option><option value="-1">磁道号减小</option></select></label>
+      <label>请求（按到达顺序）<input id="req" class="wide" type="text"></label>
+      <label class="chk" data-for="c"><input id="jumpCount" type="checkbox" checked> 回跳的距离计入</label>
+      <label class="chk"><input id="guess" type="checkbox" checked> 先猜再看</label>
+      <button class="btn" id="go" type="button">按这组数据重新演示</button>
+    </div>
+    <div class="presets" id="presets"></div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="view track" id="view"></div>
+    <div class="sum" id="sum"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="2"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+
+    <p class="tip">“先猜再看”开着时，每走一站之前先停一步问你。键盘 ← → 单步，空格播放／暂停。</p>
+  </section>
+  <section class="panel tallies">
+    <div><h2>同一组请求，各算法对比</h2><div class="tw" id="cmp"></div></div>
+    <div class="time"><h2>换算成访问时间</h2>
+      <div class="form">
+        <label>每跨一道 ms<input id="perT" type="number" min="0" step="any"></label>
+        <label>转速 r/min<input id="rpm" type="number" min="1"></label>
+        <label>每道扇区数<input id="sec" type="number" min="1"></label>
+        <label>每次读几个扇区<input id="nsec" type="number" min="1"></label>
+      </div>
+      <div id="time"></div>
+    </div>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let frames=[],at=0,timer=null;
+const SPD=[3500,2500,1800,1200,800,500,300];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].q)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;draw(f);
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+function wire(){
+  $('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+  $('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+  $('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+  document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+  showSpd()}
+
+const MODES={
+ FCFS:{name:'FCFS',rules:['按请求到达的顺序一个个走，不管远近。','公平，但磁头来回乱跑，距离通常最长。']},
+ SSTF:{name:'SSTF 最短寻道',rules:['每次去<b>离当前磁头最近</b>的请求。','距离相同时，本页按当前移动方向继续（题目有规定就照题目）。','可能饥饿：远处的请求一直被近处新来的请求插队。']},
+ SCAN:{name:'SCAN 电梯',rules:['沿当前方向把请求一个个服务完，<b>一直走到磁道端点</b>，再掉头服务另一边。','另一边已经没有请求时就不用再走到端点，停在最后一个请求。','掉头那段是真走过去的，距离一定要算。']},
+ LOOK:{name:'LOOK',rules:['和 SCAN 一样来回扫，但<b>只走到这个方向最远的请求</b>就掉头，不去端点。','很多真题、教材把它也叫 SCAN，看题目描述“是否移到端点”。']},
+ CSCAN:{name:'C-SCAN 循环扫描',rules:['只在一个方向上服务：沿当前方向走到<b>端点</b>，立刻回到<b>另一端的端点</b>，再沿原方向继续服务。','回跳那段算不算：2024-32 按真题答案<b>算</b>（200→0 走 200，回到 399 走 399，再到 300、210 走 189，共 788）；题目写“返回不计”才不算。用上面的勾选切换。']},
+ CLOOK:{name:'C-LOOK',rules:['只在一个方向上服务：走到这个方向<b>最远的请求</b>，直接跳到另一侧<b>最远的请求</b>，再沿原方向继续。','10-10 批改记录里 2010-45 的 CSCAN 就是这么算的：100→120→30→50→90，共 20+90+20+40 = 170，回跳算了。','同样看题目说法决定回跳计不计。']}
+};
+const PRESETS=[
+ ['2010-45（按 10-10 批改记录）',{lo:0,hi:199,head:100,dir:1,req:'50, 90, 30, 120',jc:true,alg:'CLOOK',perT:1,rpm:6000,sec:100,nsec:1,note:'题目没给磁道范围，这里设 0～199；记录按 100→120→30→50→90 = 170 计，相当于 C-LOOK 且回跳计入。时间：170ms 寻道 + 4 × 5ms 旋转 + 4 × 0.1ms 传输 = 190.4ms。'}],
+ ['教材常用例子（磁头 100）',{lo:0,hi:199,head:100,dir:1,req:'55, 58, 39, 18, 90, 160, 150, 38, 184',jc:true,alg:'SSTF',perT:1,rpm:6000,sec:100,nsec:1}],
+ ['方向向小、带两端请求',{lo:0,hi:199,head:53,dir:-1,req:'98, 183, 37, 122, 14, 124, 65, 67',jc:true,alg:'SCAN',perT:1,rpm:6000,sec:100,nsec:1}]];
+let mode='CSCAN',cfg=null;
+
+/* 返回路线：[{to, kind:'serve'|'end'|'jump'}] */
+function route(alg,c){const {lo,hi,head,dir}=c;let rq=c.req.slice();const path=[];let pos=head,d=dir;
+  const serve=x=>{path.push({to:x,kind:'serve'});pos=x;rq.splice(rq.indexOf(x),1)};
+  if(alg==='FCFS'){c.req.forEach(x=>{path.push({to:x,kind:'serve'});pos=x});return path}
+  if(alg==='SSTF'){while(rq.length){let best=null;for(const x of rq){const dx=Math.abs(x-pos);if(best==null||dx<Math.abs(best-pos)||(dx===Math.abs(best-pos)&&Math.sign(x-pos)===d))best=x}
+      if(best!==pos)d=Math.sign(best-pos)||d;serve(best)}return path}
+  const side=s=>rq.filter(x=>s>0?x>=pos:x<=pos).sort((a,b)=>s>0?a-b:b-a);
+  if(alg==='SCAN'||alg==='LOOK'){for(const x of side(d))serve(x);if(rq.length){if(alg==='SCAN'){const e=d>0?hi:lo;if(pos!==e){path.push({to:e,kind:'end'});pos=e}}d=-d;for(const x of side(d))serve(x)}return path}
+  for(const x of side(d))serve(x);
+  if(rq.length){if(alg==='CSCAN'){const e=d>0?hi:lo,o=d>0?lo:hi;if(pos!==e)path.push({to:e,kind:'end'});path.push({to:o,kind:'jump'});pos=o}
+    else{const o=d>0?Math.min(...rq):Math.max(...rq);path.push({to:o,kind:'jump',serveToo:true});pos=o;rq.splice(rq.indexOf(o),1)}
+    for(const x of side(d))serve(x)}
+  return path}
+function total(path,c){let p=c.head,s=0;for(const m of path){const dx=Math.abs(m.to-p);if(!(m.kind==='jump'&&!c.jc))s+=dx;p=m.to}return s}
+
+function build(){const c={lo:+$('lo').value,hi:+$('hi').value,head:+$('head').value,dir:+$('dir').value,req:$('req').value.split(/[\s,，、]+/).filter(Boolean).map(Number),jc:$('jumpCount').checked};
+  if(!(c.hi>c.lo))return '最大磁道要比最小的大。';if(!(c.head>=c.lo&&c.head<=c.hi))return '磁头不在磁道范围里。';
+  if(!c.req.length)return '至少一个请求。';if(c.req.length>20)return '最多 20 个请求。';if(c.req.some(x=>!Number.isInteger(x)||x<c.lo||x>c.hi))return '请求要是范围内的整数。';
+  if(new Set(c.req).size!==c.req.length)return '请求有重复，去掉再试。';
+  const path=route(mode,c);cfg={c,path,cmp:Object.keys(MODES).map(k=>({k,s:total(route(k,c),c)}))};
+  const F=[];const terms=[];let p=c.head;const served=[];
+  const push=(note,o={})=>F.push(Object.assign({note,n:0,terms:terms.map(x=>({...x})),served:served.slice(),newT:false},o));
+  const pre=PRESETS.find(x=>x[1].req===$('req').value&&x[1].head===c.head);
+  push(`磁头在 ${c.head}，正向磁道号${c.dir>0?'增大':'减小'}的方向移动。请求：${c.req.join('、')}。${pre&&pre[1].note&&mode===pre[1].alg?pre[1].note:''}`);
+  path.forEach((m,i)=>{const dx=Math.abs(m.to-p);const counted=!(m.kind==='jump'&&!c.jc);
+    push(`<span class="ask">磁头在 ${p}。下一站去哪？</span>`,{q:true,n:i});
+    terms.push({v:dx,j:m.kind==='jump',c:counted,lab:`${p}→${m.to}`});if(m.kind==='serve'||m.serveToo)served.push(m.to);
+    const why=m.kind==='end'?`这个方向的请求服务完了，${mode==='SCAN'?'SCAN 要走到端点':'C-SCAN 要走到端点'} ${m.to} 才${mode==='SCAN'?'掉头':'回跳'}。`
+      :m.kind==='jump'?`回跳到 ${m.to}${m.serveToo?'（另一侧最远的请求，顺便服务它）':'（另一端端点）'}，这段 ${dx} ${counted?'<b>计入</b>':'<b>不计</b>'}。`
+      :mode==='FCFS'?`按到达顺序，下一个是 ${m.to}。`:mode==='SSTF'?`剩下的请求里 ${m.to} 离 ${p} 最近（${dx}）。`:`沿当前方向，下一个请求是 ${m.to}。`;
+    push(`${p} → ${m.to}，移动 ${dx}。${why}`,{n:i+1,newT:true});p=m.to});
+  const s=terms.reduce((a,x)=>a+(x.c?x.v:0),0);
+  push(`走完。总移动距离 <b>${s}</b>，平均每个请求 ${(s/c.req.length).toFixed(2)}。下面可以对比其他算法，或者换算成时间。`,{n:path.length,fin:true});
+  frames=F;at=0;timeCalc();return ''}
+
+function draw(f){const {c,path}=cfg;const W=900,L=20,R=20,rowH=Math.max(18,Math.min(34,300/(path.length+1))),top=44,H=top+(path.length+1)*rowH+16;
+  const X=t=>L+(t-c.lo)/(c.hi-c.lo)*(W-L-R);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="磁头移动轨迹">`;
+  s+=`<line x1="${X(c.lo)}" x2="${X(c.hi)}" y1="26" y2="26" stroke="var(--muted)"/>`;
+  [c.lo,c.hi].forEach(t=>{s+=`<text x="${X(t)}" y="14" text-anchor="${t===c.lo?'start':'end'}" font-size="12" fill="var(--muted)">${t}</text>`});
+  c.req.forEach(t=>{const sv=f.served.includes(t);s+=`<line x1="${X(t)}" x2="${X(t)}" y1="20" y2="32" stroke="${sv?'var(--done)':'var(--cmp)'}" stroke-width="2"/><line x1="${X(t)}" x2="${X(t)}" y1="34" y2="${H-10}" stroke="var(--line)" stroke-dasharray="2 4"/>`});
+  const lab=[...new Set([c.head,...c.req])].sort((a,b)=>a-b);let lastX=-99,alt=0;lab.forEach(t=>{alt=X(t)-lastX<26?1-alt:0;lastX=X(t);s+=`<text x="${X(t)}" y="${alt?44:14}" text-anchor="middle" font-size="11" fill="${t===c.head?'var(--q)':'var(--ink)'}" font-weight="${t===c.head?700:400}">${t}</text>`});
+  let p=c.head,y=top+rowH*0.5;s+=`<circle cx="${X(p)}" cy="${y}" r="5" fill="var(--q)"/>`;
+  path.slice(0,f.n).forEach((m,i)=>{const y2=top+(i+1.5)*rowH;const last=i===f.n-1;
+    s+=`<line x1="${X(p)}" y1="${y}" x2="${X(m.to)}" y2="${y2}" stroke="${m.kind==='jump'?'var(--muted)':'var(--q)'}" stroke-width="${last?3:2}" ${m.kind==='jump'?'stroke-dasharray="6 5"':''}/>`;
+    s+=m.kind==='serve'||m.serveToo?`<circle cx="${X(m.to)}" cy="${y2}" r="${last?6:4.5}" fill="var(--done)"/>`:`<rect x="${X(m.to)-4}" y="${y2-4}" width="8" height="8" fill="var(--muted)"/>`;
+    s+=`<text x="${X(m.to)+(X(m.to)>W-60?-8:8)}" y="${y2+4}" text-anchor="${X(m.to)>W-60?'end':'start'}" font-size="11" fill="var(--ink)">${m.to}</text>`;p=m.to;y=y2});
+  $('view').innerHTML=s+'</svg><p class="tip">横轴是磁道号，从上往下是时间。绿点是服务了一个请求，灰方块是走到端点，虚线是回跳。橙色刻度是还没服务的请求。</p>';
+  const t=f.terms;const sum=t.reduce((a,x)=>a+(x.c?x.v:0),0);
+  $('sum').innerHTML=t.length?`距离：${t.map((x,i)=>`<span class="term ${x.j?'j':''} ${f.newT&&i===t.length-1?'new':''}" title="${x.lab}">${x.c?x.v:`<s>${x.v}</s>`}</span>`).join(' + ')} = <b>${sum}</b>`:'距离：还没开始走。';
+  $('note').innerHTML=f.note;
+  $('cmp').innerHTML=`<table class="res"><tr><th>算法</th><th>总移动距离</th></tr>${cfg.cmp.map(r=>`<tr class="${r.k===mode?'cur':''}"><td>${MODES[r.k].name}</td><td>${f.fin||r.k!==mode?r.s:'？'}</td></tr>`).join('')}</table><p class="tip">回跳${c.jc?'计入':'不计'}。当前算法的数走完才显示。</p>`}
+function timeCalc(){if(!cfg)return;const s=cfg.cmp.find(r=>r.k===mode).s,n=cfg.c.req.length;const perT=+$('perT').value,rpm=+$('rpm').value,sec=+$('sec').value,ns=+$('nsec').value;
+  if(!(rpm>0&&sec>0&&ns>0&&perT>=0)){$('time').innerHTML='<p class="tip">四个数都要填。</p>';return}
+  const rev=60000/rpm,rot=rev/2,tr=rev/sec*ns,r=x=>+x.toFixed(4);
+  $('time').innerHTML=`<p>转一圈 60000 ÷ ${rpm} = ${r(rev)} ms</p><p>寻道 ${s} 道 × ${perT} = ${r(s*perT)} ms</p><p>旋转延迟 ${n} 次 × 半圈 ${r(rot)} = ${r(n*rot)} ms</p><p>传输 ${n} 次 × ${r(rev)}÷${sec}×${ns} = ${r(n*tr)} ms</p><p>合计 <b>${r(s*perT+n*rot+n*tr)} ms</b></p><p class="tip">访问时间 = 寻道 + 旋转延迟 + 传输，三项都要。2010-45 漏的是中间那项。Flash 没有寻道和旋转，调度用 FCFS 就行。</p>`}
+function run(){stop();const e=build();$('err').textContent=e;if(!e)render()}
+function setMode(m){mode=m;$('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
+  $('rules').innerHTML=MODES[m].rules.map(r=>`<li>${r}</li>`).join('');
+  document.querySelector('[data-for="c"]').hidden=!(m==='CSCAN'||m==='CLOOK');try{history.replaceState(null,'','#'+m)}catch{}run()}
+function applyPreset(i,keep){const v=PRESETS[i][1];for(const k of ['lo','hi','head','dir','req','perT','rpm','sec','nsec'])$(k).value=v[k];$('jumpCount').checked=v.jc;
+  $('presets').querySelectorAll('[data-pi]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.pi===i));if(keep)run();else setMode(v.alg)}
+$('modes').innerHTML=Object.entries(MODES).map(([k,v])=>`<button type="button" class="chip" data-m="${k}" aria-pressed="false">${v.name}</button>`).join('');
+$('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b)setMode(b.dataset.m)};
+$('presets').innerHTML='例子：'+PRESETS.map(([t],i)=>`<button type="button" class="chip" data-pi="${i}" aria-pressed="false">${t}</button>`).join('');
+$('presets').onclick=e=>{const b=e.target.closest('[data-pi]');if(b)applyPreset(+b.dataset.pi)};
+$('go').onclick=run;$('jumpCount').onchange=run;['perT','rpm','sec','nsec'].forEach(k=>$(k).oninput=timeCalc);
+wire();const h=location.hash.slice(1);applyPreset(0,true);setMode(MODES[h]?h:PRESETS[0][1].alg);
+</script>
+</body>
+</html>

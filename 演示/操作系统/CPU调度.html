@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CPU 调度甘特图</title>
+<style>
+/* Algorithm tabs, process table input, then a Gantt chart that grows one dispatch at a time, the ready queue, and the turnaround table. */
+/* Mode tabs, then the structure (hash slots, chains or a tree with failure nodes), then two tallies that fill in step by step. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6em}
+.form input.wide{width:min(26em,80vw)}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer}
+.form [hidden]{display:none}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.phase{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;margin-bottom:8px}
+.phase span{border:1px solid var(--line);border-radius:999px;padding:1px 10px;color:var(--muted)}
+.phase span.on{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.view{overflow-x:auto}
+.table{display:flex;gap:4px;padding:4px 0 26px}
+.slot{min-width:46px;text-align:center;border:1.5px solid var(--line);border-radius:5px;background:var(--bg);position:relative;font:16px/1.4 var(--mono);padding:6px 2px}
+.slot small{display:block;font-size:11px;color:var(--muted)}
+.cur{border-color:var(--q)!important;box-shadow:0 0 0 2px var(--q) inset}
+.cmp{border-color:var(--cmp)!important;background:color-mix(in srgb,var(--cmp) 24%,transparent)!important}
+.hit{border-color:var(--done)!important;background:color-mix(in srgb,var(--done) 26%,transparent)!important}
+.empty{border-color:var(--mv)!important;background:color-mix(in srgb,var(--mv) 18%,transparent)!important}
+.slot .n,.cn .n{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:2px;font:10px var(--mono);color:var(--q);font-weight:700;white-space:nowrap}
+.chains{display:grid;gap:6px;padding-bottom:6px}
+.crow{display:flex;align-items:center;gap:0;font:14px var(--mono)}
+.caddr{width:42px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--hl);padding:2px 0}
+.arrow{width:18px;text-align:center;color:var(--muted)}
+.cn{position:relative;min-width:40px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--bg);padding:2px 4px;margin-bottom:14px}
+.nul{color:var(--muted);padding:0 4px}
+svg text{font-family:var(--mono)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:8px}
+.note .ask{color:var(--q);font-weight:600}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.tallies{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.tw{overflow-x:auto}
+.tally{border-collapse:collapse;font:13px var(--mono)}
+.tally th,.tally td{border:1px solid var(--line);padding:2px 6px;text-align:center;white-space:nowrap}
+.tally th{color:var(--muted);font-weight:400;text-align:left}
+.tally td.new{background:color-mix(in srgb,var(--done) 22%,transparent);font-weight:700}
+.asl{margin-top:6px;font:14px var(--mono)}
+.asl b{color:var(--done)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.block{font-size:14px}
+.block table{border-collapse:collapse;font:13px var(--mono);margin:6px 0}
+.block td,.block th{border:1px solid var(--line);padding:2px 8px;text-align:center}
+
+.form textarea{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:4px 6px;width:min(22em,86vw);min-height:7.5em}
+.form[hidden]{display:none}
+.queue{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;margin:4px 0 8px}
+.queue .lab{color:var(--muted)}
+.queue .pc{font:14px var(--mono);border:1.5px solid;border-radius:5px;padding:1px 9px;background:var(--bg)}
+.queue .pc.pick{box-shadow:0 0 0 2px var(--q) inset;font-weight:700}
+.queue .cpu{font:14px var(--mono);border:1.5px dashed var(--line);border-radius:5px;padding:1px 9px}
+.gantt svg{display:block;max-width:none}
+.res{border-collapse:collapse;font:13px var(--mono)}
+.res th,.res td{border:1px solid var(--line);padding:2px 8px;text-align:center;white-space:nowrap}
+.res th{color:var(--muted);font-weight:400}
+.res tr.cur td{background:color-mix(in srgb,var(--q) 16%,transparent);font-weight:700}
+.avg{font:14px var(--mono);margin-top:6px}
+.avg b{color:var(--done)}
+select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="地址转换.html">地址转换</a><a href="磁盘调度.html">磁盘调度</a></div>
+  <header>
+    <h1>CPU 调度甘特图</h1>
+    <p class="sub">每到一个调度时刻先停下来问“下一个上 CPU 的是谁”，答完甘特图长一段。所有数字都由上面的进程表算出来，改数据图就跟着变。对应 2024-30（时间片轮转周转时间）和 2010-26（优先级什么时候调）。</p>
+  </header>
+  <div class="modes" id="modes" role="group" aria-label="调度算法"></div>
+  <section class="panel"><h2>这个算法怎么选</h2><ol class="rules" id="rules"></ol></section>
+  <section class="panel">
+    <div class="form">
+      <label>进程表：每行 名字 到达时刻 运行时间 [优先数]<textarea id="procs" spellcheck="false"></textarea></label>
+      <div style="display:grid;gap:8px">
+        <label data-for="rr">时间片 q<input id="q" type="number" min="1"></label>
+        <label class="chk" data-for="rr"><input id="newFirst" type="checkbox" checked> 同一时刻新到达的排在被换下的前面</label>
+        <label class="chk" data-for="prio"><input id="smallHigh" type="checkbox" checked> 优先数小的优先级高</label>
+        <label class="chk"><input id="guess" type="checkbox" checked> 先猜再看</label>
+        <button class="btn" id="go" type="button">按这组数据重新演示</button>
+      </div>
+    </div>
+    <div class="presets" id="presets"></div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="queue" id="queue"></div>
+    <div class="view gantt" id="view"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="2"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+
+    <p class="tip">“先猜再看”开着时，每个调度时刻先停一步问你。键盘 ← → 单步，空格播放／暂停。</p>
+  </section>
+  <section class="panel tallies">
+    <div><h2>周转时间表</h2><div class="tw" id="tally"></div></div>
+    <div><h2>同一组数据，各算法对比</h2><div class="tw" id="cmp"></div></div>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let frames=[],at=0,timer=null;
+const SPD=[3500,2500,1800,1200,800,500,300];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].q)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;draw(f);
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+function wire(){
+  $('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+  $('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+  $('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+  document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT'||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+  showSpd()}
+
+const COL=['#4d6fa8','#d99a1e','#c8553d','#3f7d4f','#8a5fb0','#2f8f9d','#b0607a','#7a8a2e','#a0703a','#5a6f8a'];
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const frac=(s,n)=>{const g=gcd(s,n)||1;return n/g===1?`${s/g}`:`${s/g}/${n/g} ≈ ${(s/n).toFixed(2)}`};
+const MODES={
+ FCFS:{name:'先来先服务',rules:['就绪的进程里，<b>到达最早</b>的先上。非抢占：一旦上 CPU 就做完。','对长作业有利，短作业跟在长作业后面会等很久（护航效应）。']},
+ SJF:{name:'短作业优先',rules:['调度时刻在<b>已经到达</b>的进程里挑运行时间最短的，非抢占。','还没到达的进程不能参与比较，这是最常见的错。','平均等待、平均周转在非抢占算法里最小；长作业可能饥饿。']},
+ SRTF:{name:'最短剩余时间（抢占）',rules:['每有新进程到达就比一次：新来的<b>运行时间</b> &lt; 正在运行的<b>剩余时间</b>才抢占，相等不抢。','进程做完时，在就绪进程里挑剩余时间最短的。']},
+ PRIO:{name:'优先级（非抢占）',rules:['调度时刻在已到达的进程里挑优先级最高的，上了 CPU 就做完。','先看清题目是“数小优先”还是“数大优先”，用上面的勾选切换。','2010-26：时间片用完的进程该<b>降</b>优先级；等太久、刚做完 I/O 的该<b>升</b>（防饥饿、照顾 I/O 型）。']},
+ PPRIO:{name:'优先级（抢占）',rules:['新进程到达时，优先级<b>严格高于</b>正在运行的才抢占。','其他和非抢占一样。']},
+ HRRN:{name:'高响应比优先',rules:['响应比 = (等待时间 + 运行时间) ÷ 运行时间 = 1 + 等待 ÷ 运行，挑最大的，非抢占。','等得越久响应比越高，所以长作业不会饥饿；同样的等待，短作业响应比高。','只在调度时刻算，算的是“此刻”的等待时间。']},
+ RR:{name:'时间片轮转',rules:['从队头取进程跑一个时间片（剩余不足一片就跑完为止），没跑完排回<b>队尾</b>。','<b>新到达的和刚被换下的同一时刻入队</b>时谁在前，教材和多数真题按“新到达的在前”，题目另有说明就照题目，可以用上面的勾选切换。','只有在每一轮都是“满员”时才能套公式；有人先做完就要老老实实一片一片排。2024-30 就是这样算 250ms 的。']}
+};
+const PRESETS=[
+ ['自拟 5 进程（看各算法差别）',{p:'A 0 3 3\nB 2 6 5\nC 4 4 2\nD 6 5 1\nE 8 2 4',q:2,nf:true,sh:true}],
+ ['2024-30 型：10 个进程 q=5',{p:'P1 0 30\nP2 0 30\nP3 0 30\nP4 0 30\nP5 0 30\nP6 0 30\nP7 0 30\nP8 0 30\nP9 0 30\nP 0 25',q:5,nf:true,sh:true,note:'按 10-12 批改记录：10 个进程同时就绪、q = 5ms、P 排在最后且需 25ms；其余 9 个原题只说更长，这里设为 30ms（只要 ≥ 25 结果不变）。'}],
+ ['同一时刻：新到达 vs 被换下',{p:'A 0 4\nB 1 3\nC 2 3',q:2,nf:true,sh:true}]];
+let mode='RR',cfg=null;
+
+function parse(s){const ps=[];for(const line of s.split(/\n|；|;/).map(x=>x.trim()).filter(Boolean)){const t=line.split(/[\s,，]+/);
+  if(t.length<3)return `“${line}”至少要写 名字 到达 运行时间。`;const [n,a,b,pr]=[t[0],+t[1],+t[2],t[3]!=null?+t[3]:0];
+  if(!(Number.isInteger(a)&&a>=0&&Number.isInteger(b)&&b>0&&Number.isFinite(pr)))return `“${line}”的数字不对（到达 ≥ 0、运行 > 0 的整数）。`;
+  if(ps.some(x=>x.n===n))return `名字 ${n} 重复了。`;ps.push({n,a,b,pr,i:ps.length})}
+  if(!ps.length)return '至少要一个进程。';if(ps.length>10)return '最多 10 个进程。';if(ps.reduce((s,x)=>s+x.b,0)+Math.max(...ps.map(x=>x.a))>600)return '总时间太长了。';return ps}
+
+/* 返回 {segs, events}：events 是每个调度时刻（谁在等、选了谁、为什么） */
+function simulate(alg,ps0,c){const ps=ps0.map(x=>({...x,rem:x.b,fin:null}));const segs=[],ev=[];let t=0;
+  const better=c.sh?(x,y)=>x<y:(x,y)=>x>y;
+  const seg=(n,s,e)=>{const last=segs[segs.length-1];if(last&&last.n===n&&last.e===s)last.e=e;else segs.push({n,s,e})};
+  const left=()=>ps.filter(x=>x.fin==null);
+  if(alg==='RR'){const q=[];let k=0;const arr=[...ps].sort((x,y)=>x.a-y.a||x.i-y.i);
+    const admit=(upto,strict)=>{while(k<arr.length&&(strict?arr[k].a<upto:arr[k].a<=upto))q.push(arr[k++])};
+    admit(0,false);
+    while(left().length){if(!q.length){const nt=arr[k].a;seg(null,t,nt);t=nt;admit(t,false);continue}
+      const before=q.map(x=>x.n);const p=q.shift();const d=Math.min(c.q,p.rem);
+      ev.push({t,queue:before,pick:p.n,why:`队头是 ${p.n}，跑 ${d===c.q?`一个时间片 ${d}`:`剩下的 ${d}（不足一片）`}。`});
+      seg(p.n,t,t+d);const t0=t;t+=d;p.rem-=d;
+      admit(t,true);
+      const same=[];while(k<arr.length&&arr[k].a===t)same.push(arr[k++]);
+      if(p.rem===0){p.fin=t;q.push(...same);ev[ev.length-1].after=`${p.n} 在 ${t} 做完。`+(same.length?` ${same.map(x=>x.n).join('、')} 此刻到达，入队。`:'')}
+      else if(c.nf){q.push(...same,p);ev[ev.length-1].after=`${p.n} 还剩 ${p.rem}，排回队尾。`+(same.length?` ${same.map(x=>x.n).join('、')} 同一时刻到达，排在 ${p.n} 前面。`:'')}
+      else{q.push(p,...same);ev[ev.length-1].after=`${p.n} 还剩 ${p.rem}，排回队尾。`+(same.length?` ${same.map(x=>x.n).join('、')} 同一时刻到达，排在 ${p.n} 后面。`:'')}
+      void t0}
+    return {segs,ev,ps}}
+  const pre=alg==='SRTF'||alg==='PPRIO';let cur=null;
+  while(left().length){const ready=left().filter(x=>x.a<=t);
+    if(!ready.length){const nt=Math.min(...left().map(x=>x.a));seg(null,t,nt);t=nt;continue}
+    let pick,why;const R=ready.slice().sort((x,y)=>x.a-y.a||x.i-y.i);
+    if(alg==='FCFS'){pick=R[0];why=`就绪：${R.map(x=>`${x.n}（${x.a} 到）`).join('、')}，${pick.n} 最早到。`}
+    else if(alg==='SJF'||alg==='SRTF'){const key=x=>alg==='SJF'?x.b:x.rem;pick=R.reduce((m,x)=>key(x)<key(m)||(key(x)===key(m)&&x===cur)?x:m);
+      if(cur&&cur.fin==null&&key(cur)===key(pick))pick=cur;
+      why=`就绪：${R.map(x=>`${x.n}（${alg==='SJF'?'运行':'剩余'} ${key(x)}）`).join('、')}，${pick.n} 最短${cur&&cur.fin==null&&pick===cur?'，继续运行':''}。`}
+    else if(alg==='PRIO'||alg==='PPRIO'){pick=R.reduce((m,x)=>better(x.pr,m.pr)?x:m);if(cur&&cur.fin==null&&cur.pr===pick.pr)pick=cur;
+      why=`就绪：${R.map(x=>`${x.n}（优先数 ${x.pr}）`).join('、')}，${pick.n} 优先级最高（${c.sh?'数小':'数大'}优先）${pre&&cur&&cur.fin==null&&pick===cur?'，不抢占':''}。`}
+    else{const rr=x=>(t-x.a+x.b)/x.b;pick=R.reduce((m,x)=>rr(x)>rr(m)+1e-12?x:m);
+      why=R.length===1?`只有 ${pick.n} 就绪。`:`响应比：${R.map(x=>`${x.n} = (${t-x.a}+${x.b})/${x.b} = ${(+rr(x).toFixed(2))}`).join('，')}，${pick.n} 最大。`}
+    let d=pick.rem;if(pre){const nxt=left().filter(x=>x.a>t).map(x=>x.a);if(nxt.length)d=Math.min(d,Math.min(...nxt)-t)}
+    const preempted=pre&&cur&&cur.fin==null&&cur!==pick&&cur.rem<cur.b&&segs.length&&segs[segs.length-1].n===cur.n&&segs[segs.length-1].e===t;
+    ev.push({t,queue:R.map(x=>x.n),pick:pick.n,why:(preempted?`${cur.n} 被抢占。`:'')+why,cont:pre&&cur===pick&&cur.fin==null});
+    seg(pick.n,t,t+d);t+=d;pick.rem-=d;if(!pick.rem){pick.fin=t;ev[ev.length-1].after=`${pick.n} 在 ${t} 做完。`}else ev[ev.length-1].after=`到 ${t} 有新进程到达，重新比较。`;cur=pick}
+  return {segs,ev,ps}}
+
+function stats(ps){const rows=ps.map(x=>({n:x.n,a:x.a,b:x.b,f:x.fin,T:x.fin-x.a,W:x.fin-x.a-x.b}));const n=rows.length;
+  const sT=rows.reduce((s,r)=>s+r.T,0);const sw=rows.reduce((s,r)=>s+r.T/r.b,0);return {rows,avgT:frac(sT,n),avgTn:sT/n,avgWT:(sw/n).toFixed(2),avgW:frac(rows.reduce((s,r)=>s+r.W,0),n)}}
+
+function build(){const ps=parse($('procs').value);if(typeof ps==='string')return ps;
+  const c={q:+$('q').value,nf:$('newFirst').checked,sh:$('smallHigh').checked};if(mode==='RR'&&!(c.q>=1))return '时间片要是正整数。';
+  const {segs,ev,ps:done}=simulate(mode,ps,c);const st=stats(done);cfg={ps,c,segs,st,end:Math.max(...segs.map(s=>s.e)),color:Object.fromEntries(ps.map((x,i)=>[x.n,COL[i%COL.length]]))};
+  const cmp=Object.keys(MODES).map(k=>{const r=simulate(k,ps,c);const s=stats(r.ps);return {k,avg:s.avgT,avgn:s.avgTn,w:s.avgWT}});cfg.cmp=cmp;
+  const F=[];let shown=0;const push=(note,o={})=>F.push(Object.assign({note,shown,queue:null,pick:null,t:null,final:false},o));
+  const pre=PRESETS.find(x=>x[1].p===$('procs').value);
+  push(`${MODES[mode].name}。${ps.length} 个进程${mode==='RR'?`，时间片 ${c.q}`:''}。${pre&&pre[1].note?pre[1].note:''}`);
+  ev.forEach(e=>{const segsBefore=shown;
+    if(e.cont){shown=segs.findIndex(s=>s.s<=e.t&&s.e>e.t)+1;push(`时刻 ${e.t}：${e.why} ${e.after}`,{queue:e.queue,pick:e.pick,t:e.t});return}
+    push(`<span class="ask">时刻 ${e.t}，就绪：${e.queue.join('、')}。下一个上 CPU 的是谁？</span>`,{q:true,queue:e.queue,t:e.t});
+    shown=segs.findIndex(s=>s.s<=e.t&&s.e>e.t)+1;
+    push(`时刻 ${e.t}：${e.why}${e.after?' '+e.after:''}`,{queue:e.queue,pick:e.pick,t:e.t});void segsBefore});
+  shown=segs.length;
+  push(`<span class="ask">全部做完。先自己算每个进程的周转时间（完成 − 到达）和平均值，再看下表。</span>`,{q:true});
+  push(`周转 = 完成 − 到达，带权周转 = 周转 ÷ 运行，等待 = 周转 − 运行。平均周转 <b>${st.avgT}</b>。`,{final:true});
+  frames=F;at=0;return ''}
+
+function gantt(f){const {segs,end,ps,color}=cfg;const L=64,R=14,unit=Math.max(8,Math.min(40,(Math.min(980,$('view').clientWidth||900)-80)/end));const W=L+end*unit+R;const rowH=24,top=34;const H=top+ps.length*rowH+30;
+  const X=t=>L+t*unit;const vis=segs.slice(0,f.shown);const now=vis.length?vis[vis.length-1].e:(f.t??0);
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="甘特图">`;
+  s+=`<text x="4" y="22" font-size="12" fill="var(--muted)">CPU</text>`;
+  vis.forEach((g,i)=>{const last=i===vis.length-1;s+=g.n==null?`<rect x="${X(g.s)}" y="8" width="${(g.e-g.s)*unit}" height="20" fill="none" stroke="var(--line)" stroke-dasharray="3 3"/><text x="${(X(g.s)+X(g.e))/2}" y="22" text-anchor="middle" font-size="11" fill="var(--muted)">空闲</text>`
+    :`<rect x="${X(g.s)}" y="8" width="${(g.e-g.s)*unit}" height="20" fill="${color[g.n]}" stroke="${last?'var(--ink)':'var(--paper)'}" stroke-width="${last?2:1}"/>${(g.e-g.s)*unit>=18?`<text x="${(X(g.s)+X(g.e))/2}" y="22" text-anchor="middle" font-size="12" fill="#fff" font-weight="700">${esc(g.n)}</text>`:''}`});
+  ps.forEach((p,i)=>{const y=top+i*rowH;s+=`<text x="4" y="${y+15}" font-size="12" fill="var(--ink)">${esc(p.n)}</text>`;
+    s+=`<line x1="${X(0)}" x2="${X(end)}" y1="${y+10}" y2="${y+10}" stroke="var(--line)"/>`;
+    if(p.a<=now){const fin=cfg.st.rows[i].f;const until=Math.min(now,fin);if(until>p.a)s+=`<rect x="${X(p.a)}" y="${y+6}" width="${(until-p.a)*unit}" height="8" fill="${color[p.n]}" opacity=".18"/>`;
+      s+=`<path d="M${X(p.a)} ${y+2} l-4 -6 h8 z" fill="${color[p.n]}"/>`}
+    vis.filter(g=>g.n===p.n).forEach(g=>{s+=`<rect x="${X(g.s)}" y="${y+4}" width="${(g.e-g.s)*unit}" height="12" fill="${color[p.n]}" rx="2"/>`});
+    const fin=cfg.st.rows[i].f;if(fin<=now&&vis.length)s+=`<text x="${X(fin)+3}" y="${y+14}" font-size="10" fill="var(--muted)">✓${fin}</text>`});
+  const ticks=new Set([0,...vis.map(g=>g.e),...vis.map(g=>g.s)]);
+  [...ticks].sort((a,b)=>a-b).forEach(t=>{s+=`<line x1="${X(t)}" x2="${X(t)}" y1="28" y2="${H-24}" stroke="var(--line)" stroke-dasharray="2 3"/><text x="${X(t)}" y="${H-10}" text-anchor="middle" font-size="10" fill="var(--muted)">${t}</text>`});
+  return s+'</svg><p class="tip">上面一条是 CPU 上跑的是谁；下面每行一个进程：三角是到达时刻，浅色是在就绪队列里等，深色是在运行，✓ 是完成时刻。</p>'}
+
+function draw(f){$('view').innerHTML=gantt(f);$('note').innerHTML=f.note;
+  $('queue').innerHTML=f.queue?`<span class="lab">时刻 ${f.t} 就绪${mode==='RR'?'队列（左边是队头）':''}：</span>${f.queue.map(n=>`<span class="pc ${f.pick===n?'pick':''}" style="border-color:${cfg.color[n]}">${esc(n)}</span>`).join('')}${f.pick?`<span class="lab">→ 上 CPU：</span><span class="pc pick" style="border-color:${cfg.color[f.pick]}">${esc(f.pick)}</span>`:''}`:'<span class="lab">就绪队列会显示在这里。</span>';
+  const st=cfg.st;$('tally').innerHTML=f.final?`<table class="res"><tr><th>进程</th><th>到达</th><th>运行</th><th>完成</th><th>周转</th><th>带权周转</th><th>等待</th></tr>${st.rows.map(r=>`<tr><td>${esc(r.n)}</td><td>${r.a}</td><td>${r.b}</td><td>${r.f}</td><td>${r.f}−${r.a} = <b>${r.T}</b></td><td>${(+(r.T/r.b).toFixed(2))}</td><td>${r.W}</td></tr>`).join('')}</table><div class="avg">平均周转 <b>${st.avgT}</b>　平均带权周转 <b>${st.avgWT}</b>　平均等待 ${st.avgW}</div>`:'<p class="tip">做完、自己算过以后显示。</p>';
+  $('cmp').innerHTML=f.final?`<table class="res"><tr><th>算法</th><th>平均周转</th><th>平均带权周转</th></tr>${cfg.cmp.map(r=>`<tr class="${r.k===mode?'cur':''}"><td>${MODES[r.k].name}</td><td>${r.avg}</td><td>${r.w}</td></tr>`).join('')}</table><p class="tip">点上面的算法按钮，用同一组数据换一个看。</p>`:'<p class="tip">做完后显示。</p>'}
+function run(){stop();const e=build();$('err').textContent=e;if(!e)render()}
+function setMode(m){mode=m;const M=MODES[m];$('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
+  $('rules').innerHTML=M.rules.map(r=>`<li>${r}</li>`).join('');
+  document.querySelectorAll('[data-for]').forEach(el=>{el.hidden=!(el.dataset.for==='rr'?m==='RR':(m==='PRIO'||m==='PPRIO'))});
+  try{history.replaceState(null,'','#'+m)}catch{}run()}
+function applyPreset(i){const v=PRESETS[i][1];$('procs').value=v.p;$('q').value=v.q;$('newFirst').checked=v.nf;$('smallHigh').checked=v.sh;
+  $('presets').querySelectorAll('[data-pi]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.pi===i));if(i===1&&mode!=='RR')setMode('RR');else run()}
+$('modes').innerHTML=Object.entries(MODES).map(([k,v])=>`<button type="button" class="chip" data-m="${k}" aria-pressed="false">${v.name}</button>`).join('');
+$('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b)setMode(b.dataset.m)};
+$('presets').innerHTML='例子：'+PRESETS.map(([t],i)=>`<button type="button" class="chip" data-pi="${i}" aria-pressed="false">${t}</button>`).join('');
+$('presets').onclick=e=>{const b=e.target.closest('[data-pi]');if(b)applyPreset(+b.dataset.pi)};
+$('go').onclick=run;$('newFirst').onchange=run;$('smallHigh').onchange=run;
+wire();{const v=PRESETS[0][1];$('procs').value=v.p;$('q').value=v.q;$('presets').querySelector('[data-pi="0"]').setAttribute('aria-pressed','true')}
+setMode(MODES[location.hash.slice(1)]?location.hash.slice(1):'RR');
+</script>
+</body>
+</html>
