@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>设备分配与 SPOOLing</title>
+<style>
+/* Four scenario tabs along one printer storyline: the I/O software layers for one print request, a device-allocation walk through LUT/SDT/DCT/COCT/CHCT, and the SPOOLing output and input animations from the PPT. Each scenario has a picture, a state card, the step note and the shared step controls; below are comparison tables, a quick true/false drill, closed-book questions and sources. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --hw:#8a6d3b;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:82ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:13px var(--sans);font-weight:600;margin:0 0 6px;color:var(--muted)}
+.modes{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.chip.sm{font-size:12px;padding:1px 10px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.opts{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:8px;align-items:center}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.opts .grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.stage{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:14px;align-items:start}
+.stage.lay{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
+.play{display:flex;flex-direction:column}
+.stage.one{display:contents}
+.stage.one .cards{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));order:1;margin-top:12px}
+@media (max-width:860px){.stage,.stage.lay{grid-template-columns:minmax(0,1fr)}.stage.lay{display:contents}.stage.lay .cards{order:1;margin-top:12px}}
+.view{overflow-x:auto;min-width:0}
+.view svg{display:block;width:100%;height:auto;min-width:640px}
+.hwv{overflow-x:auto}
+.hwv svg{display:block;width:100%;height:auto;min-width:470px}
+svg text{font-family:var(--sans)}
+svg .t{fill:var(--ink);font-size:14px}
+svg .ts{fill:var(--muted);font-size:12px}
+svg .tm{fill:var(--ink);font:13px var(--mono)}
+svg .th{fill:var(--ink);font-size:14px;font-weight:600}
+svg .tw{fill:var(--mv);font-size:13px;font-weight:600}
+svg .hdt{fill:var(--bg);font-size:13px;font-weight:600}
+svg .bx{fill:var(--paper);stroke:var(--line);stroke-width:1.5}
+svg .bx.on{stroke:var(--q);stroke-width:2.5;fill:color-mix(in srgb,var(--q) 14%,var(--paper))}
+svg .row{fill:var(--paper);stroke:var(--line);stroke-width:1}
+svg .row.on{fill:color-mix(in srgb,var(--cmp) 30%,var(--paper));stroke:var(--cmp);stroke-width:2}
+svg .hd{fill:var(--green)}
+svg .frame{fill:none;stroke:var(--q);stroke-width:1.5;stroke-dasharray:6 4}
+svg .well{fill:color-mix(in srgb,var(--hw) 10%,var(--paper));stroke:var(--hw);stroke-width:1.5}
+svg .mem{fill:color-mix(in srgb,var(--q) 8%,var(--paper));stroke:var(--q);stroke-width:1.5}
+svg .task{fill:color-mix(in srgb,var(--cmp) 38%,var(--paper));stroke:var(--cmp);stroke-width:1.5}
+svg .task.on{stroke:var(--mv);stroke-width:2.5}
+svg .proc{fill:color-mix(in srgb,var(--q) 24%,var(--paper));stroke:var(--q);stroke-width:1.5}
+svg .proc.on{stroke-width:3}
+svg .sysp{fill:color-mix(in srgb,var(--muted) 22%,var(--paper));stroke:var(--muted);stroke-width:1.5}
+svg .sysp.on{stroke:var(--q);stroke-width:3}
+svg .dev{fill:var(--paper);stroke:var(--q);stroke-width:1.5}
+svg .free{fill:color-mix(in srgb,var(--done) 18%,var(--paper));stroke:var(--done);stroke-width:1.5}
+svg .busy{fill:color-mix(in srgb,var(--mv) 22%,var(--paper));stroke:var(--mv);stroke-width:1.5}
+svg .mine{fill:color-mix(in srgb,var(--q) 26%,var(--paper));stroke:var(--q);stroke-width:2.5}
+svg .intb{fill:color-mix(in srgb,var(--done) 26%,var(--paper));stroke:var(--done);stroke-width:1.5}
+svg .blkb{fill:color-mix(in srgb,var(--mv) 26%,var(--paper));stroke:var(--mv);stroke-width:1.5}
+svg .ar{stroke:var(--muted);stroke-width:1.5;fill:none}
+svg .ar.on{stroke:var(--mv);stroke-width:2.6}
+svg .ah{fill:var(--muted)} svg .ah.on{fill:var(--mv)}
+.layers{display:grid;gap:4px;align-content:start}
+.layer{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:8px;align-items:start;border:1.5px solid var(--line);border-radius:5px;padding:5px 8px;background:var(--bg);transition:border-color .2s,background .2s}
+.layer .nm{font-size:13px;font-weight:600}
+.layer .dt{font-size:12px;color:var(--muted);font-family:var(--mono);overflow-wrap:anywhere}
+.layer.hwl .nm{color:var(--hw)}
+.layer.on{border-color:var(--q);background:color-mix(in srgb,var(--q) 14%,var(--paper));box-shadow:0 0 0 1px var(--q) inset}
+.layer.on .dt{color:var(--ink)}
+.layer.was{border-style:dashed}
+.sep{font-size:11px;color:var(--hw);display:flex;align-items:center;gap:8px;margin:4px 0}
+.sep::before,.sep::after{content:"";flex:1;border-top:1px dashed var(--hw)}
+.cards{display:grid;gap:10px;align-content:start;min-width:0}
+.card{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg);min-width:0;font-size:13px}
+.drv{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:8px}
+.drv .one{border:1px solid var(--line);border-radius:4px;padding:6px 8px;background:var(--paper);min-width:0}
+.drv .one.off{opacity:.45}
+.drv .one b{font-size:12px}
+.code{font:12px/1.6 var(--mono);margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.code span{display:block;border-radius:3px;padding:0 4px}
+.code span.on{background:color-mix(in srgb,var(--cmp) 32%,transparent);outline:1px solid var(--cmp)}
+.code i{color:var(--muted);font-style:normal}
+.mini{border-collapse:collapse;font:12px var(--mono);margin:4px 0;width:100%}
+.mini th,.mini td{border:1px solid var(--line);padding:1px 5px;text-align:left}
+.mini th{color:var(--muted);font-weight:400}
+.mini tr.on td{background:color-mix(in srgb,var(--cmp) 30%,transparent)}
+.kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;font-size:13px;margin:0}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;overflow-wrap:anywhere}
+.st{display:inline-block;border-radius:4px;padding:0 6px;font:12px/1.6 var(--sans);font-weight:600}
+.st.run{background:color-mix(in srgb,var(--done) 28%,transparent)}
+.st.rdy{background:color-mix(in srgb,var(--cmp) 30%,transparent)}
+.st.blk{background:color-mix(in srgb,var(--mv) 28%,transparent)}
+.st.idle{background:color-mix(in srgb,var(--muted) 20%,transparent)}
+.chg{background:color-mix(in srgb,var(--cmp) 28%,transparent);border-radius:3px;outline:1px solid var(--cmp)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:4.6em;margin-top:10px}
+.note .ask{color:var(--q);font-weight:600}
+.note .ref{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.note .warn{color:var(--mv)}
+.note .sup{color:var(--hw);font-size:13px}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.cmp{overflow-x:auto}
+.cmp table{border-collapse:collapse;font-size:13px;width:100%;min-width:640px;margin:4px 0 12px}
+.cmp th,.cmp td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.cmp thead th{background:var(--hl);font-weight:600}
+.cmp tbody th{font-weight:600;white-space:nowrap;color:var(--green)}
+.cmp td.k{color:var(--mv);font-weight:600}
+.cmp td.ref{color:var(--muted);font-size:12px}
+.drill{display:grid;gap:6px}
+.drill .it{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg);font-size:14px}
+.drill .bt{display:flex;gap:6px}
+.drill .fb{grid-column:1/-1;font-size:13px;color:var(--muted)}
+.drill .fb b.ok{color:var(--done)} .drill .fb b.no{color:var(--mv)}
+details{border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg);margin-top:6px}
+details summary{cursor:pointer;font-size:14px}
+details summary b{color:var(--q);font-weight:600}
+details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.src{font-size:13px;margin:0;padding-left:1.3em}
+.src li{margin:2px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="IO全链路.html">I/O 全链路</a><a href="IO控制方式与缓冲.html">I/O 控制方式与缓冲</a><a href="文件打开与读取.html">文件打开与读取</a><a href="磁盘调度.html">磁盘调度</a></div>
+  <header>
+    <h1>设备分配与 SPOOLing：一台打印机串起第 5 章后半</h1>
+    <p class="sub">同一台打印机看四遍。① 一次 print 请求从用户层走到硬件，重点看<b>设备独立性软件</b>和<b>设备驱动程序</b>怎么分工；② 设备独立性软件给 P1 分配这台打印机，顺着 LUT → SDT → DCT → COCT → CHCT 一路查下去；③④ 用 SPOOLing 把这台独占的打印机变成“大家都能用”的虚拟设备，输出和输入两个方向都照五章的逐页动画走。系统调用、中断响应的细节在“I/O 全链路”页，这里不重复。</p>
+  </header>
+  <div class="modes" id="modes" role="group" aria-label="场景"></div>
+  <section class="panel"><h2>这一段的主干</h2><ol class="rules" id="rules"></ol>
+    <div class="opts"><span class="grp" id="sopt"></span><label><input id="guess" type="checkbox" checked> 先猜再看</label></div>
+  </section>
+  <section class="panel play">
+    <div class="stage" id="stage"><div id="left" style="min-width:0"></div><div class="cards" id="right"></div></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="1"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+    <p class="tip">“先猜再看”开着时，关键步骤先停一步问你，下一步再给答案。键盘 ← → 单步，空格播放／暂停。上方的小按钮可以换打印机型号、换“哪一级忙”。</p>
+  </section>
+
+  <section class="panel"><h2>对照表</h2>
+    <h3>表一　设备按“能不能同时给几个进程用”分三类（五章 p35）</h3>
+    <div class="cmp"><table><thead><tr><th></th><th>独占设备</th><th>共享设备</th><th>虚拟设备</th></tr></thead><tbody>
+      <tr><th>定义</th><td>一个时段只能分配给<b>一个</b>进程</td><td>可同时分配给多个进程；宏观上同时使用，<b>微观上交替</b>使用</td><td>用 SPOOLing 把独占设备改造成<b>虚拟的共享设备</b>，可同时分配给多个进程</td></tr>
+      <tr><th>例子</th><td>打印机</td><td>磁盘</td><td>采用 SPOOLing 实现的共享打印机</td></tr>
+      <tr><th>分配时要注意</th><td>分给一个进程后，别人要用只能等它释放（本页整理）</td><td>不需要给某个进程独占（本页整理）</td><td>真正占着打印机的只有系统的输出进程，用户进程分到的是输出井里的一块空间（本页整理，依据 p77–86）</td></tr>
+    </tbody></table></div>
+    <h3>表二　没有和有 SPOOLing 时，P1、P2 先后要打印</h3>
+    <div class="cmp"><table><thead><tr><th></th><th>没有 SPOOLing（打印机按独占设备分配）</th><th>有 SPOOLing</th></tr></thead><tbody>
+      <tr><th>P1 请求时打印机正忙</th><td>P1 挂到打印机 DCT 的<b>设备阻塞队列</b>，等打印机释放（场景 ② 的“设备忙”）</td><td class="k">P1 不等：打印任务放进磁盘输出井就继续运行（p78–79）</td></tr>
+      <tr><th>P2 接着请求</th><td>也排进设备阻塞队列，要等 P1 用完</td><td>任务2 排在输出井里任务1 的后面，P2 也继续运行（p80）</td></tr>
+      <tr><th>谁在控制打印机</th><td>分到打印机的用户进程（经驱动程序）</td><td>系统的<b>输出进程</b>（p77“输出进程（控制输出）”）</td></tr>
+      <tr><th>打印机空出来以后</th><td>唤醒设备阻塞队列里的进程，再分配（本页整理）</td><td>打印完成发中断 → 唤醒<b>输出进程</b> → 取输出井队首任务（p81–83）</td></tr>
+      <tr><th>谁会阻塞</th><td>等打印机的用户进程</td><td>只有输出进程：送出一个任务后自阻塞等打印完成（p86）</td></tr>
+      <tr><th>代价</th><td>—</td><td>要外存（输入井、输出井在磁盘上）；输入进程、输出进程和用户进程并发运行，要多道程序设计支持（p75、p97 真题 A、B 两项）</td></tr>
+    </tbody></table></div>
+    <h3>表三　分配方式两组概念（五章 p36–38）</h3>
+    <div class="cmp"><table><thead><tr><th></th><th>做法</th><th>优点</th><th>缺点</th></tr></thead><tbody>
+      <tr><th>安全分配</th><td>为进程分配一个设备后就把进程阻塞，本次 I/O 完成后才唤醒（PPT 以请求打印机打印输出为例）</td><td>破坏“请求和保持”条件，不会死锁</td><td>对一个进程来说，CPU 和 I/O 设备只能串行工作</td></tr>
+      <tr><th>不安全分配</th><td>发出 I/O 请求、分到设备后进程继续执行，还可以再发新的请求；只有某个请求得不到满足时才阻塞</td><td>计算任务和 I/O 任务可以并行，进程推进快</td><td>可能死锁（要用死锁避免、检测和解除）</td></tr>
+      <tr><th>静态分配</th><td>进程运行前分配全部所需资源，运行结束后归还</td><td>破坏“请求和保持”条件，不会死锁</td><td>资源占用时间长、利用率低（本页补充）</td></tr>
+      <tr><th>动态分配</th><td>进程运行过程中动态申请设备</td><td>用到才申请，利用率高（本页补充）</td><td>要配合分配算法，防止死锁（本页补充）</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="panel"><h2>练一下：对还是错</h2>
+    <p class="tip" style="margin:0 0 6px">每句点“对”或“错”，马上看理由。全部出自本页四个场景用到的 PPT 页。</p>
+    <div class="drill" id="drill"></div>
+  </section>
+
+  <section class="panel"><h2>闭卷自测</h2><p class="tip" style="margin:0 0 4px">题干先显示，点开看参考要点。第 8 题是五章 p97（强化4 p175 同一题）“场景二：真题”的原题，PPT 没有标年份，也没有给答案，答案是本页整理的。</p><div id="qs"></div></section>
+  <section class="panel"><h2>来源</h2><ol class="src" id="src"></ol>
+    <p class="tip">场景 ② 的设备、控制器、通道连接关系（打印机 3、设备 4 接控制器 1，扫描仪 5 接控制器 2，两个控制器共用通道 1）是本页按五章 p39 的结构设定的，PPT 没有给这一组数据；LUT 里 /dev/printer → 3、驱动入口 1024 是 p47 的原数据。打印机命令字、地址和驱动伪代码是 PPT 的教学模型，不是真实打印机的指令集。</p></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let frames=[],at=0,timer=null,scen='layer';
+const SPD=[4500,3200,2400,1700,1200,800,500];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].ask)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].ask)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;SC[scen].draw(f);
+  $('note').innerHTML=f.note+(f.ref?`<span class="ref">${f.ask?f.ref:'出处：'+f.ref}</span>`:'');
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].ask?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+function wire(){
+  $('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+  $('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+  $('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+  $('guess').onchange=()=>{if(frames[at]&&frames[at].ask&&!$('guess').checked){at=Math.min(at+1,frames.length-1)}render()};
+  document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)||(e.target.tagName==='BUTTON'&&e.key===' ')||e.target.tagName==='SUMMARY')return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+  showSpd()}
+
+/* 由步骤生成帧：有 ask 的步骤先出一帧问题（状态停在上一步），下一帧才是答案和新状态。s 是浅合并的状态变化。 */
+function makeFrames(init,steps,first){const F=[];let st=JSON.parse(JSON.stringify(init));
+  F.push({st:JSON.parse(JSON.stringify(st)),note:first,ref:'',ch:[]});
+  steps.forEach(s=>{const prev=JSON.parse(JSON.stringify(st));
+    if(s.ask)F.push({st:{...prev,focus:s.s&&s.s.focus!==undefined?s.s.focus:prev.focus,L:s.s&&s.s.L!==undefined?s.s.L:prev.L,arrows:[]},ask:1,note:`<span class="ask">${s.ask}</span>`,ref:'先想一下，再按“下一步”看答案。',ch:[]});
+    const ch=[];const o=s.s||{};for(const k in o){if(JSON.stringify(st[k])!==JSON.stringify(o[k]))ch.push(k);st[k]=JSON.parse(JSON.stringify(o[k]))}
+    if(!('arrows' in o))st.arrows=[];if(!('bubble' in o))st.bubble=null;
+    F.push({st:JSON.parse(JSON.stringify(st)),note:s.note,ref:s.ref,ch})});
+  return F}
+const SUP='<span class="sup">（本页补充）</span>';
+const R=(x,y,w,h,c,rx=4)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" class="${c}"/>`;
+const T=(x,y,s,c='t',a='middle')=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}">${s}</text>`;
+const A=(x1,y1,x2,y2,on)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="ar ${on?'on':''}" marker-end="url(#${on?'mOn':'m'})"/>`;
+const P=(d,on)=>`<path d="${d}" class="ar ${on?'on':''}" marker-end="url(#${on?'mOn':'m'})"/>`;
+const DEFS=`<defs><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker><marker id="mOn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah on"/></marker></defs>`;
+const stCls=s=>/阻塞|忙/.test(s)?'blk':/就绪/.test(s)?'rdy':/运行|分配给|取得/.test(s)?'run':'idle';
+const chg=(f,k)=>f.ch.includes(k)?'chg':'';
+
+/* ───────── 场景 ①：I/O 软件层次 ───────── */
+const LAYERS=[['user','用户（用户进程）'],['ulib','用户层 I/O 软件'],['indep','设备独立性软件'],['drv','设备驱动程序'],['isr','中断处理程序'],['|','硬件'],['hw','打印机控制器与打印机']];
+const MODEL={1:{name:'型号 1',addr:'统一编址',dbr:'0xffff2021',csr:'0xffffe0f1',cmd:{print:'F6H',off:'F8H',init:'F4H'},
+  code:['print(char s[16]){ <i>// 假设传入的 s 是 F5H</i>','  F5H -> addr(0xffff2021);','  F6H -> addr(0xffffe0f1);','}']},
+ 2:{name:'型号 2',addr:'独立编址',dbr:'端口号 20H',csr:'端口号 21H',cmd:{print:'EEH',off:'EAH',init:'E8H'},
+  code:['print(char s[16]){ <i>// 假设传入的内容为 F5H</i>','  in F5H,20H <i>// F5H → 数据寄存器</i>','  in EEH,21H <i>// EEH → 控制寄存器</i>','}']}};
+let model=1;
+function layerSteps(){const M=MODEL[model],o=model===1?MODEL[2]:MODEL[1];
+ const w1=model===1?'F5H -> addr(0xffff2021)':'in F5H,20H',w2=model===1?'F6H -> addr(0xffffe0f1)':'in EEH,21H';
+ return [
+ {s:{L:'user',det:{user:'请求使用打印机打印文本'}},note:'用户进程要打印一段文本。它面对的是“打印机”这个抽象的东西，不知道也不该知道打印机有哪些寄存器。',ref:'五章 p5'},
+ {ask:'用户程序能不能自己往打印机的寄存器里写数据？它实际调用的是什么？',s:{L:'ulib',det:{ulib:'库函数 → 系统调用'}},
+  note:'不能直接写。用户层 I/O 软件是应用程序可以使用的接口：用户调用封装好的、与 I/O 相关的<b>库函数</b>，库函数发出<b>系统调用</b>请求 I/O 服务。访问设备寄存器要在内核里完成'+SUP+'。陷入内核的过程见“I/O 全链路”页，这里不展开。',ref:'五章 p5；一章 p24'},
+ {ask:'程序里写的是 /dev/printer，没有写“3 号打印机”，更没写寄存器地址。是哪一层把它对上具体那台打印机的？',s:{L:'indep',det:{indep:'操作逻辑设备 /dev/printer'}},
+  note:'<b>设备独立性软件</b>（又叫设备无关性软件）。它位于用户层 I/O 软件和设备驱动程序之间，让用户程序可以使用<b>逻辑设备名</b>，而不必使用物理设备名。系统里有打印机 1、2、3 好几台时，也由它来<b>选择</b>用哪一台。',ref:'五章 p6、p48'},
+ {s:{L:'indep',lut:1,det:{indep:'查 LUT：/dev/printer → 3，入口 1024'}},
+  note:'查<b>逻辑设备表 LUT</b>：逻辑设备名 /dev/printer 对应物理设备名 <b>3</b>，驱动程序入口地址 <b>1024</b>。这样用户换一台打印机，只要改表，程序不用改。真正“分配到这台打印机”的过程见场景 ②。',ref:'五章 p47、p45'},
+ {s:{L:'indep',det:{indep:'设备保护 · 分配与释放 · 安排缓冲'}},
+  note:'设备独立性软件还要做三件事：<b>设备的保护</b>（这个进程有没有权用）、<b>设备的分配与释放</b>、为设备数据传输<b>提供缓冲区</b>（p48 画作“安排设备缓存”）。它对上提供统一接口，对下“搜索和操作设备”。',ref:'五章 p6–7、p48'},
+ {ask:`型号 1 和型号 2 打印机的命令字、寄存器地址都不一样。设备独立性软件要不要知道这些区别？`,s:{L:'drv',det:{indep:'调用驱动：print(F5H)',drv:`${M.name}驱动：print(F5H)`},line:0},
+  note:`<b>不需要</b>。它只调用驱动程序的统一接口 <code>print(F5H)</code>：两种型号都是这一句。设备驱动程序<b>通常由设备生产厂商提供</b>，为内核提供统一的标准接口，同时<b>隐藏设备操作的细节</b>。“怎么操作”这件事全在驱动里。`,ref:'五章 p13、p8'},
+ {ask:`${M.name}打印机：要打印的内容 F5H 先送到哪个寄存器？用什么方式访问它？`,s:{L:'drv',line:1,dbr:'F5H',det:{drv:w1}},
+  note:model===1?'送进<b>数据缓冲寄存器</b>。型号 1 采用<b>统一编址</b>，数据缓冲寄存器的地址是 0xffff2021，像访问内存一样往这个地址写：<code>F5H -> addr(0xffff2021)</code>。':'送进<b>数据缓冲寄存器</b>。型号 2 采用<b>独立编址</b>，数据缓冲寄存器是<b>端口号 20H</b>，用专门的 I/O 指令按端口号访问：<code>in F5H,20H</code>。<span class="warn">PPT 这里写的是 in；按习惯，把数据送到端口的指令一般叫 out（本页补充）。</span>',ref:model===1?'五章 p8–9':'五章 p12'},
+ {ask:'F5H 已经在数据缓冲寄存器里了。打印机会自己打出来吗？驱动还要做什么？',s:{L:'drv',line:2,csr:M.cmd.print,det:{drv:w1+'；'+w2}},
+  note:`不会自己打。驱动再往<b>控制/状态寄存器</b>写命令字 <b>${M.cmd.print}</b>，意思是“打印数据缓冲寄存器中的值”。${model===1?'型号 1 的控制/状态寄存器地址是 0xffffe0f1。':'型号 2 的控制/状态寄存器是端口号 21H。'}同一个“打印”命令，在${o.name}上是 ${o.cmd.print}。`,ref:model===1?'五章 p8–9':'五章 p12'},
+ {s:{L:'hw',prn:'打出 F5H',det:{hw:'地址译码 → 外设控制逻辑 → 打印'}},
+  note:'打印机控制器的<b>地址译码和 I/O 控制</b>认出这是自己的寄存器，<b>外设控制逻辑</b>按命令字驱动打印机，把数据缓冲寄存器里的 F5H 打出来。',ref:'五章 p8'},
+ {s:{L:'isr',det:{isr:'打印完成 → 中断 → 中断处理程序'}},
+  note:'打印机做完以后向 CPU 发出中断，由<b>中断处理程序</b>接手（它和硬件直接打交道）。中断响应、唤醒等待进程这些细节在“I/O 全链路”页，这里只记住层次位置：中断处理程序在驱动程序下面、紧挨着硬件。',ref:'五章 p4、p81'},
+ {ask:`如果把型号 1 的驱动装给型号 2 的打印机用，会怎样？为什么不同型号要不同的驱动？`,s:{L:'drv',line:-1,det:{drv:'型号 1、型号 2 各有自己的驱动'}},fin:1,
+  note:'<b>打印不出来</b>。型号 1 的驱动往 0xffff2021、0xffffe0f1 这两个地址写，型号 2 的寄存器却是独立编址的端口 20H、21H；型号 1 的打印命令 F6H 在型号 2 的命令表里也没有，型号 2 的打印命令是 EEH（本页整理）。所以每种型号由厂商配自己的驱动，而上面的操作系统程序永远只调 <code>print(F5H)</code>。驱动里除了 print，还有 printer_init()（命令字 F4H，初始化打印机）和 shutdown()（F8H，关闭打印机）这些接口。',ref:'五章 p10–13'}
+ ]}
+const layerInit={L:null,det:{},line:-1,lut:0,dbr:'空',csr:'—',prn:'空闲'};
+function hwSVG(st){const M=MODEL[model];
+ return `<svg viewBox="0 0 560 210" role="img" aria-label="打印机控制器">${DEFS}
+  ${R(8,8,372,194,'frame')}${T(194,26,'打印机控制器（'+M.addr+'）','ts')}
+  ${R(22,38,190,46,'bx '+(st.line===1?'on':''))}${T(117,57,'数据缓冲寄存器','th')}${T(117,76,M.dbr+' · 内容 '+st.dbr,'tm')}
+  ${R(22,96,190,46,'bx '+(st.line===2?'on':''))}${T(117,115,'控制/状态寄存器','th')}${T(117,134,M.csr+' · 内容 '+st.csr,'tm')}
+  ${R(22,156,190,34,'bx')}${T(117,178,'地址译码和 I/O 控制','t')}
+  ${A(117,156,117,144,0)}${A(117,94,117,86,0)}
+  ${R(240,92,126,46,'bx '+(st.L==='hw'?'on':''))}${T(303,120,'外设控制逻辑','t')}
+  ${A(212,61,238,104,0)}${A(212,119,238,119,0)}
+  ${R(420,82,126,66,st.prn==='空闲'?'bx':'mine')}${T(483,110,'打印机','th')}${T(483,132,st.prn,'tm')}
+  ${A(366,115,418,115,st.L==='hw')}
+ </svg>`}
+function drawLayer(f){const st=f.st;$('stage').className='stage lay';
+ const was=new Set();for(let i=0;i<=at;i++){const L=frames[i].st.L;if(L&&!frames[i].ask)was.add(L)}
+ $('left').innerHTML=`<h3>这一步在哪一层（五章 p4）</h3><div class="layers">${LAYERS.map(([k,n])=>k==='|'?`<div class="sep">${n}</div>`:
+  `<div class="layer ${k==='hw'?'hwl':''} ${st.L===k?'on':(was.has(k)?'was':'')}"><span class="nm">${n}</span><span class="dt">${f.ask&&st.L===k?'？':(st.det[k]||'—')}</span></div>`).join('')}</div>
+  <div class="card" style="margin-top:10px"><h3>打印机控制器（五章 p8）</h3><div class="hwv">${hwSVG(f.ask?{...st,line:-1}:st)}</div></div>`;
+ const drv=[1,2].map(m=>{const M=MODEL[m];return `<div class="one ${m===model?'':'off'}"><b>${M.name}打印机驱动程序（${M.addr}）</b>
+   <div class="code">${M.code.map((l,i)=>`<span class="${m===model&&st.line===i&&!f.ask?'on':''}">${l}</span>`).join('')}</div>
+   <table class="mini"><tr><th>命令字</th><th>行为</th></tr><tr><td>${M.cmd.print}</td><td>打印数据缓冲寄存器中的值</td></tr><tr><td>${M.cmd.off}</td><td>关闭打印机</td></tr><tr><td>${M.cmd.init}</td><td>初始化打印机</td></tr></table>
+   <table class="mini"><tr><th>I/O 端口</th><th>${M.addr==='统一编址'?'统一编址地址':'独立编址方式'}</th></tr><tr><td>数据缓冲寄存器</td><td>${M.dbr}</td></tr><tr><td>控制/状态寄存器</td><td>${M.csr}</td></tr></table></div>`}).join('');
+ $('right').innerHTML=`<div class="card"><h3>操作系统程序只写一句：print(F5H)；下面按型号分给不同驱动（五章 p12–13）</h3><div class="drv">${drv}</div></div>
+  <div class="card"><h3>逻辑设备表 LUT（五章 p47）</h3><table class="mini"><tr><th>逻辑设备名</th><th>物理设备名</th><th>驱动程序入口地址</th></tr>
+   <tr class="${st.lut&&!f.ask?'on':''}"><td>/dev/printer</td><td>3</td><td>1024</td></tr><tr><td>/dev/scanner</td><td>5</td><td>2046</td></tr></table></div>`}
+
+/* ───────── 场景 ②：设备分配 ───────── */
+let busy='free';
+const BUSY={free:'都空闲',dev:'打印机 3 忙',ctl:'控制器 1 忙',chn:'通道 1 忙'};
+function allocInit(){const t={d3:'空闲',d4:'空闲',d5:'空闲',c1:'空闲',c2:'空闲',h1:'空闲'};
+ if(busy==='dev')t.d3='忙（P0 在用）';if(busy==='ctl'){t.d4='忙（P0 在用）';t.c1='忙（为设备 4 传送）'}
+ if(busy==='chn'){t.d5='忙（P0 在用）';t.c2='忙（为设备 5 传送）';t.h1='忙（为控制器 2 传送）'}
+ return {focus:null,lut:-1,sdt:-1,t,dq:[],cq:[],hq:[],P1:'运行',arrows:[],res:'未开始'}}
+function allocSteps(){const S=[];const ini=allocInit();
+ S.push({s:{focus:'p1',arrows:['p1lut']},note:'P1 要打印。程序里写的是<b>逻辑设备名</b> /dev/printer，经系统调用交给设备独立性软件。下面看它怎样一张表一张表地查下去。',ref:'五章 p46–48'});
+ S.push({ask:'P1 只给了 /dev/printer。第一张查的是哪张表？查到了什么？',s:{focus:'lut',lut:0,arrows:['p1lut']},note:'查<b>逻辑设备表 LUT</b>：/dev/printer 对应<b>物理设备名 3</b>，驱动程序入口地址 1024。',ref:'五章 p47'});
+ S.push({s:{focus:'sdt',sdt:0,arrows:['lutsdt']},note:'拿物理设备名 3 查<b>系统设备表 SDT</b>（整个系统一张，每台设备一个表目）。表目1：设备类型 打印机、设备标识符 3、指向它的 <b>DCT</b>、驱动程序入口。顺着 DCT 指针往下走。',ref:'五章 p43–44'});
+ if(busy==='dev'){
+  S.push({ask:'到了打印机 3 的 DCT。先看哪个字段？打印机 3 正被 P0 占用，P1 怎么办？',s:{focus:'dct',arrows:['sdtdct'],P1:'阻塞（设备阻塞队列）',dq:['P1'],res:'卡在设备这一级'}});
+  S[S.length-1].note='看<b>设备状态</b>：忙。P1 分不到设备，挂到 DCT3 的<b>设备阻塞队列</b>，后面的控制器、通道都不用查了。<span class="warn">这正是 p45 说的缺陷：如果进程请求的是这台物理设备，它在忙时，即使系统里还有同类型的打印机空着，进程也必须阻塞等待。p46 的办法是按<b>设备类型</b>在 SDT 里找同类的空闲设备。</span>“忙就挂到这一级的阻塞队列”是教材通行的分配流程，PPT 给了各表的阻塞队列字段'+SUP+'。';
+  S[S.length-1].ref='五章 p40、p44–46';
+  S.push({s:{focus:'dct',res:'P1 阻塞'},fin:1,note:'P0 用完释放打印机 3 后，系统从设备阻塞队列唤醒 P1，再接着往下分配控制器、通道'+SUP+'。换上方的小按钮，看“控制器忙”“通道忙”时 P1 卡在哪一级。',ref:'五章 p40'});
+  return {ini,S}}
+ S.push({ask:'到了打印机 3 的 DCT。先看哪个字段？',s:{focus:'dct',arrows:['sdtdct'],t:{...ini.t,d3:'分配给 P1'},res:'已分到设备 3'},
+  note:'看<b>设备状态</b>：空闲。把打印机 3 分给 P1，状态改成忙。设备要通过控制器才能工作，所以顺着 DCT 里的<b>控制器表指针</b>继续找 COCT1。',ref:'五章 p40、p44'});
+ const t2={...ini.t,d3:'分配给 P1'};
+ if(busy==='ctl'){
+  S.push({ask:'设备已经分到了。控制器 1 正在为设备 4 传送数据，P1 怎么办？分到的打印机 3 要不要还回去？',s:{focus:'coct',arrows:['dctcoct'],P1:'阻塞（控制器阻塞队列）',cq:['P1'],res:'卡在控制器这一级'},
+   note:'COCT1 的<b>控制器状态</b>是忙，P1 挂到<b>控制器阻塞队列</b>。一个设备控制器供多个同类设备共享（p39），所以设备空闲不代表控制器空闲。按通行的做法，已分到的设备先保留，等控制器空出来再继续'+SUP+'。',ref:'五章 p39、p41、p44'});
+  S.push({s:{focus:'coct',res:'P1 阻塞'},fin:1,note:'P1 停在控制器这一级。控制器 1 传完设备 4 的数据后唤醒 P1，再去查 CHCT1'+SUP+'。',ref:'五章 p41'});
+  return {ini,S}}
+ S.push({s:{focus:'coct',arrows:['dctcoct'],t:{...t2,c1:'分配给 P1'},res:'已分到设备 3、控制器 1'},
+  note:'COCT1 的<b>控制器状态</b>：空闲，分给 P1。顺着 COCT 里的<b>通道表指针</b>找通道控制表 CHCT1。',ref:'五章 p41、p44'});
+ const t3={...t2,c1:'分配给 P1'};
+ if(busy==='chn'){
+  S.push({ask:'通道 1 正在为控制器 2（扫描仪 5）传送。P1 能不能开始打印？',s:{focus:'chct',arrows:['coctchct'],P1:'阻塞（通道阻塞队列）',hq:['P1'],res:'卡在通道这一级'},
+   note:'不能。CHCT1 的<b>通道状态</b>是忙，P1 挂到<b>通道阻塞队列</b>。一个通道供多个设备控制器共享（p39），CHCT 的“通道链接控制器地址”里记着它连着 COCT1、COCT2。'+SUP.replace('）','：忙就挂队列）'),ref:'五章 p39、p42、p44'});
+  S.push({s:{focus:'chct',res:'P1 阻塞'},fin:1,note:'设备、控制器都到手了，就差通道。通道空出来以后唤醒 P1，分配完成才能启动 I/O'+SUP+'。',ref:'五章 p42'});
+  return {ini,S}}
+ S.push({s:{focus:'chct',arrows:['coctchct'],t:{...t3,h1:'分配给 P1'},res:'设备、控制器、通道都分到'},
+  note:'CHCT1 的<b>通道状态</b>：空闲，分给 P1。设备、控制器、通道三样都到手，分配才算成功。',ref:'五章 p42、p44'});
+ S.push({ask:'三样都分到了。接下来调用谁来真正操作打印机？从哪里知道它在哪？',s:{focus:'sdt',sdt:0,res:'按入口 1024 调驱动，启动 I/O'},fin:1,
+  note:'调用这台打印机的<b>设备驱动程序</b>，入口地址在 SDT 表目（和 LUT）里：<b>1024</b>。之后就是场景 ① 的驱动 → 控制器 → 打印机。',ref:'五章 p43、p47、p13'});
+ return {ini,S}}
+function drawAlloc(f){const st=f.st;$('stage').className='stage one';const on=k=>st.arrows.includes(k)&&!f.ask;const fc=k=>st.focus===k?'on':'';
+ const t=st.t;const sc=v=>/P1/.test(v)?'mine':/忙/.test(v)?'busy':'free';
+ const tbl=(x,y,w,title,fields,key)=>{let s=R(x,y,w,26,'hd',3)+T(x+w/2,y+18,title,'hdt');fields.forEach(([k,v,hl],i)=>{const yy=y+26+i*24;s+=R(x,yy,w,24,'row '+(hl?'on':''),0)+T(x+8,yy+17,k,'ts','start')+T(x+w-8,yy+17,v,/忙|P1/.test(v)?'tw':'tm','end')});return `<g>${s}${st.focus===key?R(x-4,y-4,w+8,26+fields.length*24+8,'frame',6):''}</g>`};
+ const q=a=>a.length?a.join('、'):'空';
+ const lutRows=[['/dev/printer','3','1024'],['/dev/scanner','5','2046']];
+ let s=`<svg viewBox="0 0 900 522" role="img" aria-label="设备分配的数据结构">${DEFS}`;
+ // P1
+ s+=`<circle cx="48" cy="78" r="32" class="proc ${fc('p1')}"/>`+T(48,83,'P1','th')+T(48,128,'/dev/printer','ts');
+ // LUT
+ s+=R(110,20,320,26,'hd',3)+T(270,38,'逻辑设备表 LUT','hdt');
+ s+=['逻辑设备名','物理设备名','驱动程序入口'].map((h,i)=>T(110+[60,175,268][i],62,h,'ts')).join('');
+ lutRows.forEach((r,i)=>{const y=70+i*26;s+=R(110,y,320,26,'row '+(st.lut===i&&!f.ask?'on':''),0)+T(170,y+18,r[0],'tm')+T(285,y+18,r[1],'tm')+T(378,y+18,r[2],'tm')});
+ if(st.focus==='lut')s+=R(106,16,328,110,'frame',6);
+ // SDT
+ s+=R(470,20,420,26,'hd',3)+T(680,38,'系统设备表 SDT','hdt');
+ s+=['表目','设备类型','设备标识符','DCT','驱动程序入口'].map((h,i)=>T(470+[30,105,190,275,365][i],62,h,'ts')).join('');
+ [['表目1','打印机','3','DCT3','1024'],['表目2','（其它）','4','DCT4','…'],['表目3','扫描仪','5','DCT5','2046']].forEach((r,i)=>{const y=70+i*24;s+=R(470,y,420,24,'row '+(st.sdt===i&&!f.ask?'on':''),0)+r.map((c,j)=>T(470+[30,105,190,275,365][j],y+17,c,'tm')).join('')});
+ if(st.focus==='sdt')s+=R(466,16,428,130,'frame',6);
+ // arrows top
+ s+=A(80,78,106,82,on('p1lut'))+P('M430,83 L466,83',on('lutsdt'));
+ // DCT, COCT, CHCT
+ const y2=190;
+ s+=tbl(20,y2,270,'设备控制表 DCT3',[['设备类型','打印机'],['物理设备名（设备标识符）','3'],['设备状态',t.d3,1],['控制器表指针','→ COCT1'],['设备阻塞队列',q(st.dq)],['其它','…']],'dct');
+ s+=tbl(320,y2,260,'控制器控制表 COCT1',[['控制器标识符','1'],['控制器状态',t.c1,1],['通道表指针','→ CHCT1'],['控制器阻塞队列',q(st.cq)],['其它','…']],'coct');
+ s+=tbl(610,y2,280,'通道控制表 CHCT1',[['通道标识符','1'],['通道状态',t.h1,1],['通道链接控制器地址','COCT1、COCT2'],['通道阻塞队列',q(st.hq)],['其它','…']],'chct');
+ s+=P('M640,118 C640,160 160,150 155,186',on('sdtdct'))+A(290,286,316,286,on('dctcoct'))+A(580,262,606,262,on('coctchct'));
+ s+=T(380,138,'DCT 指针','ts');
+ // topology
+ const ty=395;s+=T(20,ty-22,'连接关系（本页设定，仿五章 p39）：','ts','start');
+ s+=R(390,ty-14,120,30,sc(t.h1))+T(450,ty+6,'通道 1','t');
+ s+=R(200,ty+38,130,30,sc(t.c1))+T(265,ty+58,'控制器 1','t')+R(570,ty+38,130,30,sc(t.c2))+T(635,ty+58,'控制器 2','t');
+ s+=A(430,ty+16,290,ty+36,0)+A(470,ty+16,610,ty+36,0);
+ s+=R(110,ty+82,150,30,sc(t.d3))+T(185,ty+102,'打印机 3','t')+R(280,ty+82,130,30,sc(t.d4))+T(345,ty+102,'设备 4','t')+R(570,ty+82,130,30,sc(t.d5))+T(635,ty+102,'扫描仪 5','t');
+ s+=A(245,ty+68,190,ty+80,0)+A(285,ty+68,340,ty+80,0)+A(635,ty+68,635,ty+80,0);
+ s+=R(740,ty+40,14,14,'free',2)+T(760,ty+52,'空闲','ts','start')+R(740,ty+62,14,14,'busy',2)+T(760,ty+74,'忙','ts','start')+R(740,ty+84,14,14,'mine',2)+T(760,ty+96,'分配给 P1','ts','start');
+ s+='</svg>';
+ $('left').innerHTML=`<div class="view">${s}</div>`;
+ $('right').innerHTML=`<div class="card"><h3>这一次分配</h3><dl class="kv"><dt>请求</dt><dd>P1：/dev/printer</dd><dt>P1</dt><dd><span class="st ${stCls(st.P1)} ${chg(f,'P1')}">${st.P1}</span></dd><dt>进度</dt><dd class="${chg(f,'res')}">${st.res}</dd>
+   <dt>设备阻塞队列</dt><dd>${q(st.dq)}</dd><dt>控制器阻塞队列</dt><dd>${q(st.cq)}</dd><dt>通道阻塞队列</dt><dd>${q(st.hq)}</dd></dl></div>
+  <div class="card"><h3>查找顺序（五章 p44）</h3>物理设备名 → <b>SDT</b> →（设备控制表地址）→ <b>DCT</b> →（控制器控制表地址）→ <b>COCT</b> →（通道控制表地址）→ <b>CHCT</b>。按逻辑设备名请求时，先经 LUT 换成物理设备名（p47）；或按设备类型在 SDT 里找同类表目（p46）。</div>
+  <div class="card"><h3>为什么不让用户直接写物理设备名（五章 p45）</h3><ul style="margin:0;padding-left:1.2em"><li>编程时必须知道底层细节，不方便。</li><li>换一台物理设备（哪怕同是打印机、品牌不同），程序就跑不了。</li><li>请求的那台正忙时，即使还有同类设备空着，进程也得阻塞。</li></ul>用逻辑设备名，就是让设备独立性软件来替你选、替你换。</div>`}
+
+/* ───────── 场景 ③：SPOOLing 输出 ───────── */
+const outInit={well:[],buf:null,prn:'打印任务0',op:'阻塞（等打印完成）',P1:'运行',P2:'运行',p1t:null,p2t:null,arrows:[],bubble:null,focus:null,sel:null};
+const outSteps=()=>[
+ {ask:'P1 要打印“打印任务1”，而打印机正在打别人的打印任务0。P1 要不要等打印机空下来？',s:{well:['打印任务1'],p1t:'打印任务1',arrows:['put1'],focus:'P1'},
+  note:'<b>不等</b>。P1 把打印任务1 <b>放入磁盘输出井</b>就继续运行。打印机这时还在打任务0，跟 P1 无关。即使输出设备忙碌，进程也可以对设备进行输出操作。',ref:'五章 p78–79、p76 第 3 点；强化4 p156–157'},
+ {s:{well:['打印任务1','打印任务2'],p2t:'打印任务2',arrows:['put2'],focus:'P2'},
+  note:'P2 也要打印，打印任务2 同样放入输出井，<b>排在任务1 后面</b>。两个进程都没有阻塞，各自继续算自己的。在它们看来，像是各有一台打印机（图上虚线框是“虚拟的打印机设备”）。',ref:'五章 p80；强化4 p158'},
+ {ask:'打印任务0 打完了。打印机怎么让系统知道？',s:{prn:null,bubble:'int',focus:'prn'},
+  note:'打印机<b>打印任务完成，发出中断</b>，进行中断处理。',ref:'五章 p81；强化4 p159'},
+ {ask:'中断处理要唤醒谁？P1、P2，还是别的进程？',s:{op:'运行（被唤醒）',bubble:'int',arrows:['wake'],focus:'op'},
+  note:'唤醒的是<b>输出进程</b>。P1、P2 根本没在等打印机，它们一直在运行。等打印机的只有输出进程。',ref:'五章 p82；强化4 p160'},
+ {ask:'输出井里排着任务1、任务2。输出进程先送哪一个？',s:{sel:'打印任务1',arrows:['sel'],focus:'op'},
+  note:'<b>选择队首任务</b>：先来的打印任务1。',ref:'五章 p83；强化4 p161'},
+ {s:{well:['打印任务2'],buf:'打印任务1',sel:null,arrows:['w2b'],focus:'buf'},
+  note:'输出进程把打印任务1 从磁盘输出井读进<b>内存输出缓冲区</b>。输出井在磁盘上，输出缓冲区在内存里。',ref:'五章 p84、p75；强化4 p162'},
+ {s:{buf:null,prn:'打印任务1',arrows:['b2p'],focus:'prn'},
+  note:'再由输出进程把缓冲区里的打印任务1 送给<b>打印机</b>，打印机开始打。',ref:'五章 p85；强化4 p163'},
+ {ask:'打印机开始打任务1 了，要打很久。输出进程这时干什么？',s:{op:'阻塞（等打印完成）',bubble:'blk',focus:'op'},
+  note:'输出进程<b>自阻塞，等待打印完成</b>。下一次打印机打完、发中断，它才会再被唤醒。',ref:'五章 p86；强化4 p164'},
+ {s:{well:[],prn:'打印任务2',op:'阻塞（等打印完成）',focus:'prn'},fin:1,
+  note:'之后循环：任务1 打完 → 中断 → 唤醒输出进程 → 取队首任务2 → 输出缓冲区 → 打印机 → 输出进程再自阻塞'+SUP.replace('本页补充','本页按 p81–86 推演，PPT 动画到 p86 为止')+'。整个过程中 P1、P2 只阻塞过 0 次：<b>独占的打印机在逻辑上变成了共享设备</b>，物理上它仍然一次只打一个任务。',ref:'五章 p81–86、p35、p76 第 1 点'}];
+function drawOut(f){const st=f.st;$('stage').className='stage one';const on=k=>st.arrows.includes(k)&&!f.ask;const fo=k=>st.focus===k&&!f.ask?'on':'';
+ let s=`<svg viewBox="0 0 900 420" role="img" aria-label="SPOOLing 输出">${DEFS}`;
+ s+=R(190,30,700,375,'frame',6)+T(540,22,'虚拟的打印机设备','ts');
+ // processes
+ [['P1',110,st.p1t],['P2',290,st.p2t]].forEach(([n,y,tk])=>{s+=`<circle cx="70" cy="${y}" r="40" class="proc ${fo(n)}"/>`+T(70,y+5,'进程'+n,'th');
+   if(tk){s+=R(18,y-90,112,30,'task')+T(74,y-70,tk,'t')+A(70,y-42,70,y-58,0)}
+   s+=T(70,y+60,st[n],'ts')});
+ s+=A(132,60,226,110,on('put1'))+A(132,200,226,150,on('put2'));
+ s+=T(176,102,'放入','ts')+T(176,164,'放入','ts');
+ // output well
+ s+=T(305,58,'磁盘输出井','th')+R(230,70,150,310,'well');
+ st.well.forEach((w,i)=>{s+=R(245,90+i*48,120,34,'task '+((st.sel===w&&!f.ask)?'on':''))+T(305,112+i*48,w,'t')});
+ // buffer
+ s+=T(520,58,'内存输出缓冲区','th')+R(455,70,130,140,'mem '+(st.focus==='buf'&&!f.ask?'on':''));
+ if(st.buf)s+=R(463,122,114,34,'task')+T(520,144,st.buf,'t');
+ s+=A(380,108,452,130,on('w2b'));
+ // printer
+ s+=T(770,58,'打印机','th')+`<circle cx="770" cy="140" r="66" class="dev" style="${st.focus==='prn'&&!f.ask?'stroke-width:3':''}"/>`;
+ if(st.prn)s+=R(712,123,116,34,'task')+T(770,145,st.prn,'t');else s+=T(770,145,'空闲','ts');
+ s+=A(585,140,702,140,on('b2p'));
+ // output process
+ s+=R(455,330,150,42,'sysp '+fo('op'))+T(530,357,'输出进程','th')+T(530,392,st.op,'ts');
+ if(on('sel'))s+=P('M500,328 C470,260 400,200 368,112',1)+T(470,262,'选择队首任务','tw','start');
+ if(st.bubble==='int')s+=R(690,238,170,52,'intb',8)+T(775,260,'打印任务完成，','t')+T(775,280,'发出中断','t')+A(770,208,770,236,0);
+ if(st.bubble==='blk')s+=R(680,330,190,42,'blkb',8)+T(775,356,'自阻塞，等待打印完成','t')+A(605,351,678,351,1);
+ if(st.bubble==='int')s+=A(690,280,608,340,on('wake'))+(on('wake')?T(668,328,'唤醒','tw','start'):'');
+ s+='</svg>';
+ $('left').innerHTML=`<div class="view">${s}</div>`;
+ $('right').innerHTML=`<div class="card"><h3>谁在干什么</h3><dl class="kv">
+  <dt>进程 P1</dt><dd><span class="st ${stCls(st.P1)}">${st.P1}</span></dd><dt>进程 P2</dt><dd><span class="st ${stCls(st.P2)}">${st.P2}</span></dd>
+  <dt>输出进程</dt><dd><span class="st ${stCls(st.op)} ${chg(f,'op')}">${st.op}</span></dd>
+  <dt>输出井（磁盘）</dt><dd class="${chg(f,'well')}">${st.well.length?st.well.join(' → '):'空'}</dd>
+  <dt>输出缓冲区（内存）</dt><dd class="${chg(f,'buf')}">${st.buf||'空'}</dd><dt>打印机</dt><dd class="${chg(f,'prn')}">${st.prn?'正在打 '+st.prn:'空闲'}</dd></dl></div>
+  <div class="card"><h3>SPOOLing 的组成（五章 p75）</h3>磁盘上：<b>输入井、输出井</b>；内存里：<b>输入缓冲区、输出缓冲区</b>；两个系统进程：<b>输入进程、输出进程</b>。用户进程只和井打交道，井和设备之间的数据由输入、输出进程控制（p77、p87）。</div>
+  <div class="card"><h3>功能和效果（五章 p76）</h3><ol style="margin:0;padding-left:1.3em"><li>把独占设备改造成共享设备。</li><li>缓和 CPU 与低速设备之间的速度差异矛盾。</li><li>输出设备忙碌时，进程也可以进行输出操作。</li><li>输入设备的数据没有被特定进程取走，输入设备也可以持续输入后面的数据。</li></ol></div>`}
+
+/* ───────── 场景 ④：SPOOLing 输入 ───────── */
+const inInit={dev:null,buf:null,well:[],ip:'阻塞（等输入）',P1:'运行',P2:'运行',arrows:[],bubble:null,focus:null};
+const inSteps=()=>[
+ {ask:'输入设备上来了一批数据（输入数据1），可 P1、P2 都还没请求输入。数据就停在设备上等某个进程来取吗？',s:{dev:'输入数据1',bubble:'int',focus:'dev'},
+  note:'不用等进程。输入设备<b>输入完成，发出中断</b>，由系统先收下来。即使输入的数据还没被特定进程取走，输入设备也可以持续输入后面的数据。',ref:'五章 p88、p76 第 4 点；强化4 p166'},
+ {s:{dev:'输入数据1',bubble:'int',ip:'运行（被唤醒）',arrows:['i2ip'],focus:'ip'},
+  note:'中断交给<b>输入进程</b>处理。PPT 这一页画的是从“发出中断”指向输入进程的箭头；对照输出方向 p82 写的“唤醒”，这里就是唤醒输入进程。',ref:'五章 p89；强化4 p167'},
+ {s:{arrows:['d2b'],focus:'buf'},
+  note:'输入进程控制把输入数据1 从输入设备读进<b>内存输入缓冲区</b>。',ref:'五章 p90；强化4 p168'},
+ {s:{dev:null,buf:'输入数据1',arrows:['b2w'],focus:'buf'},
+  note:'输入数据1 到了内存输入缓冲区，接着由输入进程写到<b>磁盘输入井</b>。',ref:'五章 p91；强化4 p169'},
+ {s:{buf:null,well:['输入数据1'],focus:'well'},
+  note:'输入数据1 存进了磁盘输入井，缓冲区腾空。',ref:'五章 p92；强化4 p170'},
+ {ask:'输入数据2 又来了，可输入数据1 还没人取。输入设备要不要停下来？',s:{dev:'输入数据2',focus:'dev'},
+  note:'不用停。输入井在磁盘上，空间大，数据先存着，设备继续收。',ref:'五章 p93、p76 第 4 点；强化4 p171'},
+ {s:{dev:null,well:['输入数据1','输入数据2'],focus:'well'},
+  note:'输入数据2 同样经输入缓冲区进了输入井（PPT 这一页直接画出结果），排在数据1 后面。',ref:'五章 p94；强化4 p172'},
+ {ask:'暂时没有新的输入了。输入进程这时干什么？',s:{ip:'阻塞（等输入）',bubble:'blk',focus:'ip'},
+  note:'输入进程<b>自阻塞，等待输入</b>。下次设备有输入、发出中断，它才会再被唤醒。',ref:'五章 p95；强化4 p173'},
+ {ask:'P1、P2 现在请求输入。它们从哪里拿数据？要等输入设备吗？',s:{P1:'请求输入 → 取得输入数据1',P2:'请求输入 → 取得输入数据2',arrows:['w2p1','w2p2'],focus:'well'},fin:1,
+  note:'直接从<b>磁盘输入井</b>取：P1 拿到输入数据1，P2 拿到输入数据2，<b>不用等输入设备</b>，也不和设备打交道。输入方向和输出方向对称：用户进程只碰井，设备由输入进程控制。',ref:'五章 p96、p87；强化4 p174、p165'}];
+function drawIn(f){const st=f.st;$('stage').className='stage one';const on=k=>st.arrows.includes(k)&&!f.ask;const fo=k=>st.focus===k&&!f.ask;
+ let s=`<svg viewBox="0 0 900 420" role="img" aria-label="SPOOLing 输入">${DEFS}`;
+ s+=R(190,30,700,375,'frame',6)+T(540,22,'虚拟的输入设备','ts');
+ [['P1',120],['P2',280]].forEach(([n,y])=>{s+=`<circle cx="70" cy="${y}" r="40" class="proc"/>`+T(70,y+5,'进程'+n,'th');
+   const v=st[n];s+=T(70,y+60,v.includes('取得')?'取得'+v.split('取得')[1]:v,'ts');if(v.includes('请求'))s+=T(70,y-50,'请求输入','tw')});
+ s+=T(305,58,'磁盘输入井','th')+R(230,70,150,310,'well '+(fo('well')?'':''));
+ if(fo('well'))s+=R(227,67,156,316,'frame',6);
+ st.well.forEach((w,i)=>{s+=R(245,110+i*48,120,34,'task')+T(305,132+i*48,w,'t')});
+ s+=A(243,127,112,124,on('w2p1'))+A(243,175,112,274,on('w2p2'));
+ s+=T(520,58,'内存输入缓冲区','th')+R(455,70,130,140,'mem '+(fo('buf')?'on':''));
+ if(st.buf)s+=R(463,122,114,34,'task')+T(520,144,st.buf,'t');
+ s+=A(452,140,382,140,on('b2w'));
+ s+=T(770,58,'输入设备','th')+`<circle cx="770" cy="140" r="66" class="dev" style="${fo('dev')?'stroke-width:3':''}"/>`;
+ if(st.dev)s+=R(712,123,116,34,'task')+T(770,145,st.dev,'t');else s+=T(770,145,'无新数据','ts');
+ s+=A(702,140,588,140,on('d2b'));
+ s+=R(455,330,150,42,'sysp '+(fo('ip')?'on':''))+T(530,357,'输入进程','th')+T(530,392,st.ip,'ts');
+ if(st.bubble==='int')s+=R(690,238,170,52,'intb',8)+T(775,260,'输入完成，','t')+T(775,280,'发出中断','t')+A(770,208,770,236,0);
+ if(st.bubble==='blk')s+=R(680,330,190,42,'blkb',8)+T(775,356,'自阻塞，等待输入','t')+A(605,351,678,351,1);
+ if(st.bubble==='int')s+=A(690,280,608,340,on('i2ip'));
+ s+='</svg>';
+ $('left').innerHTML=`<div class="view">${s}</div>`;
+ $('right').innerHTML=`<div class="card"><h3>谁在干什么</h3><dl class="kv">
+  <dt>进程 P1</dt><dd><span class="st ${stCls(st.P1)} ${chg(f,'P1')}">${st.P1}</span></dd><dt>进程 P2</dt><dd><span class="st ${stCls(st.P2)} ${chg(f,'P2')}">${st.P2}</span></dd>
+  <dt>输入进程</dt><dd><span class="st ${stCls(st.ip)} ${chg(f,'ip')}">${st.ip}</span></dd>
+  <dt>输入设备</dt><dd class="${chg(f,'dev')}">${st.dev||'无新数据'}</dd><dt>输入缓冲区（内存）</dt><dd class="${chg(f,'buf')}">${st.buf||'空'}</dd>
+  <dt>输入井（磁盘）</dt><dd class="${chg(f,'well')}">${st.well.length?st.well.join('、'):'空'}</dd></dl></div>
+  <div class="card"><h3>和输出方向对照</h3>输出：用户进程 → <b>输出井</b> →（输出进程）→ 输出缓冲区 → 输出设备。<br>输入：输入设备 →（输入进程）→ 输入缓冲区 → <b>输入井</b> → 用户进程。<br>两个方向里，系统进程都是“设备有事发中断 → 被唤醒 → 搬一批 → 自阻塞”。</div>
+  <div class="card"><h3>PPT 笔误</h3>五章 p75 总图下面一行（输入方向）的方框也写成了“需要输出的用户进程”，应为“需要<b>输入</b>的用户进程”。</div>`}
+
+const SC={
+ layer:{name:'① 一次 print 走过的层次',draw:drawLayer,
+  rules:['用户层 I/O 软件：库函数 → <b>系统调用</b>。','设备独立性软件：用<b>逻辑设备名</b>，查 LUT 换成物理设备；负责设备保护、分配与释放、缓冲；对下只调驱动的<b>统一接口</b> print(F5H)。','设备驱动程序：知道这台设备的<b>命令字和寄存器地址</b>，把 print(F5H) 翻译成“写数据缓冲寄存器 + 写控制寄存器”。型号不同，驱动就不同。','中断处理程序 → 硬件：打印完成发中断（细节见 I/O 全链路）。'],
+  opts:()=>[1,2].map(m=>`<button type="button" class="chip sm" data-model="${m}" aria-pressed="${m===model}">${MODEL[m].name}打印机（${MODEL[m].addr}）</button>`).join(''),
+  build:()=>makeFrames(layerInit,layerSteps(),`初始状态：用户进程想打印。当前选的是<b>${MODEL[model].name}打印机</b>（${MODEL[model].addr}），可以在上方切换，对比两种驱动。按“下一步”开始。`)},
+ alloc:{name:'② 给 P1 分配打印机',draw:drawAlloc,
+  rules:['P1 用逻辑设备名 /dev/printer → 查 <b>LUT</b> 得物理设备名 3。','查 <b>SDT</b> 找到设备 3 的表目 → <b>DCT3</b>：设备忙就挂<b>设备阻塞队列</b>。','空闲则顺控制器表指针到 <b>COCT1</b>：忙就挂<b>控制器阻塞队列</b>。','空闲则顺通道表指针到 <b>CHCT1</b>：忙就挂<b>通道阻塞队列</b>；三样都到手才分配成功，按驱动入口启动 I/O。'],
+  opts:()=>'哪一级忙：'+Object.entries(BUSY).map(([k,v])=>`<button type="button" class="chip sm" data-busy="${k}" aria-pressed="${k===busy}">${v}</button>`).join(''),
+  build:()=>{const {ini,S}=allocSteps();return makeFrames(ini,S,`初始状态：${busy==='free'?'打印机 3、控制器 1、通道 1 都空闲':busy==='dev'?'打印机 3 正被 P0 使用':busy==='ctl'?'P0 在用设备 4，控制器 1 正为它传送':'P0 在用扫描仪 5，控制器 2 和通道 1 正为它传送'}。下方连接图：绿色空闲，红色忙，蓝色是分给 P1 的。按“下一步”开始。`)}},
+ out:{name:'③ SPOOLing 输出（P1、P2 先后打印）',draw:drawOut,
+  rules:['用户进程把打印任务<b>放入磁盘输出井</b>就继续运行，不等打印机。','打印机打完一个任务 → <b>发中断</b> → 唤醒<b>输出进程</b>。','输出进程取输出井<b>队首任务</b> → 内存输出缓冲区 → 打印机，然后<b>自阻塞</b>等打印完成。','结果：独占的打印机在逻辑上变成共享设备，P1、P2 都不必等打印机。'],
+  opts:()=>'',build:()=>makeFrames(outInit,outSteps(),'初始状态：打印机正在打之前的打印任务0，输出进程在等它打完；P1、P2 在运行，输出井是空的。按“下一步”开始。')},
+ inp:{name:'④ SPOOLing 输入',draw:drawIn,
+  rules:['输入设备有数据 → <b>发中断</b> → 唤醒<b>输入进程</b>。','输入进程：输入设备 → 内存输入缓冲区 → <b>磁盘输入井</b>；没有新输入就<b>自阻塞</b>。','用户进程请求输入时直接从输入井取，不用等输入设备。'],
+  opts:()=>'',build:()=>makeFrames(inInit,inSteps(),'初始状态：输入设备还没有数据，输入进程在等输入；P1、P2 在运行。按“下一步”开始。')}
+};
+
+function setScen(k){scen=k;$('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===k));
+ $('rules').innerHTML=SC[k].rules.map(r=>`<li>${r}</li>`).join('');$('sopt').innerHTML=SC[k].opts();
+ try{history.replaceState(null,'','#'+k)}catch(e){}stop();frames=SC[k].build();at=0;render()}
+$('modes').innerHTML=Object.entries(SC).map(([k,v])=>`<button type="button" class="chip" data-m="${k}" aria-pressed="false">${v.name}</button>`).join('');
+$('modes').onclick=e=>{const b=e.target.closest('[data-m]');if(b)setScen(b.dataset.m)};
+$('sopt').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.model)model=+b.dataset.model;if(b.dataset.busy)busy=b.dataset.busy;setScen(scen)};
+
+/* 判断题 */
+const DR=[
+ ['设备驱动程序通常由设备生产厂商提供。',1,'对。驱动为内核提供统一的标准接口，同时隐藏设备操作细节（五章 p8）。'],
+ ['设备独立性软件需要知道打印机的命令字 F6H 和寄存器地址 0xffff2021。',0,'错。它只调用驱动的统一接口 print(F5H)，命令字和地址只有驱动知道（五章 p8、p13）。'],
+ ['型号 2 打印机采用独立编址，数据缓冲寄存器是端口号 20H。',1,'对（五章 p12）。型号 1 是统一编址，地址 0xffff2021。'],
+ ['设备安全分配方式下，进程分到设备后可以继续执行并发出新的 I/O 请求。',0,'错。那是不安全分配。安全分配是分到设备就阻塞，本次 I/O 完成才唤醒，所以不会死锁，但 CPU 和 I/O 只能串行（五章 p36–37）。'],
+ ['分配设备时的查表顺序是 SDT → DCT → COCT → 通道控制表。',1,'对（五章 p44）。各表之间靠“设备控制表地址”“控制器控制表地址”“通道控制表地址”相连。'],
+ ['采用 SPOOLing 以后，打印机在物理上可以同时打印两个进程的任务。',0,'错。物理上仍一次打一个，是输出进程逐个送；只是在逻辑上变成了共享设备（五章 p35、p83–86）。'],
+ ['SPOOLing 输出时，打印机打完一个任务发出中断，被唤醒的是提交该任务的用户进程。',0,'错。被唤醒的是输出进程，用户进程放入输出井后就一直在运行（五章 p82）。'],
+ ['SPOOLing 的输入井和输出井在磁盘上，输入缓冲区和输出缓冲区在内存里。',1,'对（五章 p75）。']];
+$('drill').innerHTML=DR.map(([q],i)=>`<div class="it"><span>${i+1}. ${q}</span><span class="bt"><button type="button" class="btn" data-i="${i}" data-v="1">对</button><button type="button" class="btn" data-i="${i}" data-v="0">错</button></span><div class="fb" id="fb${i}"></div></div>`).join('');
+$('drill').onclick=e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.i,v=+b.dataset.v,[,a,why]=DR[i];$('fb'+i).innerHTML=`<b class="${v===a?'ok':'no'}">${v===a?'答对了。':'不对。'}</b>${why}`};
+
+/* 闭卷自测 */
+const QS=[
+ ['I/O 软件从上到下分哪几层？用“打印一段文本”各说一句这一层做了什么。','用户层 I/O 软件（调库函数，发系统调用）→ 设备独立性软件（用逻辑设备名，查表选出物理打印机；保护、分配、缓冲；调驱动统一接口 print）→ 设备驱动程序（按这台打印机的命令字和寄存器地址写数据缓冲寄存器、控制/状态寄存器）→ 中断处理程序（打印完成后处理中断）→ 硬件（控制器译码、外设控制逻辑驱动打印机）。依据五章 p4–13。'],
+ ['设备独立性软件负责哪些事？“设备独立性”指的是什么？','实现用户程序与设备驱动器的统一接口、设备的保护、设备的分配与释放、为设备数据传输提供缓冲区（p6，p48 画作安排设备缓存、设备安全保护、搜索和操作设备）。设备独立性又称设备无关性：应用程序可以使用逻辑设备名而不是物理设备名来使用设备（p6）。'],
+ ['同样是 print(F5H)，型号 1 和型号 2 打印机的驱动分别怎么写？为什么上层不用改？','型号 1（统一编址）：F5H → addr(0xffff2021) 写数据缓冲寄存器，F6H → addr(0xffffe0f1) 写控制/状态寄存器。型号 2（独立编址）：in F5H,20H；in EEH,21H（打印命令是 EEH，寄存器是端口 20H、21H）。上层只调驱动提供的统一接口，细节被驱动隐藏（五章 p8、p12–13）。'],
+ ['按物理设备名分配设备有哪三个缺陷？','① 编程时必须用物理设备名，底层细节对用户不透明，不方便编程；② 换一台物理设备（即使同类型、只是品牌不同），程序就无法运行；③ 请求的那台物理设备忙时，即使还有同类型设备，进程也必须阻塞等待（五章 p45）。'],
+ ['DCT、COCT、通道控制表各有哪些字段？它们怎样连起来？','DCT：设备类型、物理设备名（设备标识符）、设备状态、控制器表指针、设备阻塞队列、其它（p40）。COCT：控制器标识符、控制器状态、通道表指针、控制器阻塞队列、其它（p41）。通道控制表：通道标识符、通道状态、通道链接控制器地址、通道阻塞队列、其它（p42）。SDT 表目有设备类型、设备标识符、DCT、驱动程序入口（p43）。链：SDT → DCT → COCT → 通道控制表（p44）。'],
+ ['安全分配和静态分配为什么都不会死锁？安全分配的代价是什么？','安全分配：分到一个设备就阻塞，I/O 完成才唤醒，进程不会“占着一个再请求另一个”；静态分配：运行前一次分配全部资源。两者都破坏了“请求和保持”条件。安全分配的代价是对一个进程来说 CPU 和 I/O 设备只能串行工作（五章 p36、p38）。'],
+ ['SPOOLing 由哪几部分组成？它带来哪四点效果？','磁盘上的输入井、输出井，内存里的输入缓冲区、输出缓冲区，以及输入进程、输出进程（p75）。效果：把独占设备改造成共享设备；缓和 CPU 与低速设备的速度差异；输出设备忙时进程也能输出；输入数据没被取走时输入设备也能持续输入（p76）。'],
+ ['（五章 p97 / 强化4 p175 原题）下列关于 SPOOLing 技术的叙述中，错误的是：A. 需要外存的支持　B. 需要多道程序设计技术的支持　C. 可以让多个作业共享一台独占设备　D. 由用户作业控制设备与输入/输出井之间的数据传送','D（本页整理，PPT 未给答案）。设备与输入井、输出井之间的数据传送由系统的输入进程、输出进程控制（p77、p87 写的是“输出进程（控制输出）”“输入进程（控制输入）”），用户作业只和井打交道。A 对：井在磁盘上；B 对：输入、输出进程要和用户进程并发；C 对：这正是 SPOOLing 的作用。'],
+ ['（迁移）有 SPOOLing 时，P1 提交打印任务的瞬间打印机正忙、输出井里已排着 2 个任务。P1 会阻塞吗？之后打印机打完当前任务，谁先被唤醒、接着打谁的任务？','P1 不阻塞，把任务放进输出井排到第 3 位就继续运行。打印机打完当前任务发中断，唤醒的是输出进程；它选输出井的队首任务（先排的那个，不是 P1 的）送缓冲区再送打印机，然后自阻塞。P1 的任务要等前两个打完才轮到（本页按五章 p78–86 推演）。']];
+$('qs').innerHTML=QS.map(([q,a],i)=>`<details><summary><b>${i+1}.</b> ${q}</summary><div class="ans">${a}</div></details>`).join('');
+const SRC=['第五章 I/O 管理：p4–13（I/O 子系统层次结构；打印机命令字、端口地址、型号 1／型号 2 驱动伪代码）','第五章：p35（设备固有属性），p36–38（安全／不安全分配，静态／动态分配），p39–44（设备分配所需资源、DCT、COCT、通道控制表、SDT、分配物理设备的步骤），p45–48（按物理设备名分配的缺陷、按逻辑设备名分配、LUT、设备独立性软件）','第五章：p75–76（SPOOLing 组成、功能和效果），p77–86（输出动画），p87–96（输入动画），p97（场景二：真题）','强化4（文件系统）：p155–174（与五章 p77–96 相同的 SPOOLing 逐页动画），p175（同一道真题）','第一章 综述：p24（为什么要有设备驱动程序和设备独立性软件这两层）'];
+$('src').innerHTML=SRC.map(s=>`<li>${s}</li>`).join('');
+
+wire();const h=location.hash.slice(1);setScen(SC[h]?h:'layer');
+</script>
+</body>
+</html>

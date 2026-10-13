@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>磁盘空闲空间管理</title>
+<style>
+/* Partition layout strip, then one stepper over four methods (free table, free chains, bitmap, grouped linking) with a picture and a state card; below: a bitmap converter, a grouped-linking sandbox, a comparison table, closed-book questions and sources. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --hw:#8a6d3b;
+  --s1:#6f93c9; --s2:#e08a3c; --s3:#e7c14a; --s4:#7fae5a; --s5:#9a8fc4; --s6:#9aa0a6;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c;
+  --s1:#4f6f9f; --s2:#b3692c; --s3:#a88a2c; --s4:#5b8540; --s5:#6f6699; --s6:#666c71; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c;
+  --s1:#4f6f9f; --s2:#b3692c; --s3:#a88a2c; --s4:#5b8540; --s5:#6f6699; --s6:#666c71; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:82ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:13px var(--sans);font-weight:600;margin:0 0 6px;color:var(--muted)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.flow button{font:inherit;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:999px;padding:3px 12px;cursor:pointer}
+.flow button.on{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.flow button.past{color:var(--ink);border-color:var(--accent)}
+.flow .ar{color:var(--muted)}
+.stage{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}}
+.view{overflow-x:auto}
+.view svg{display:block;width:100%;height:auto;min-width:620px}
+svg text{font-family:var(--sans)}
+.card{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg);min-width:0;font-size:13px}
+.card table{border-collapse:collapse;font:12px var(--mono);margin:4px 0;width:100%}
+.card th,.card td{border:1px solid var(--line);padding:2px 6px;text-align:center}
+.card th{color:var(--muted);font-weight:400}
+.card td.h{background:color-mix(in srgb,var(--cmp) 26%,transparent);font-weight:700}
+.card td.del{text-decoration:line-through;color:var(--muted)}
+.card ul,.card ol{margin:4px 0;padding-left:1.2em}
+.card p{margin:4px 0}
+.card code,.mono{font-family:var(--mono);font-size:12px}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:4.6em;margin-top:10px}
+.note .ask{color:var(--q);font-weight:600}
+.note .ref{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.warn{color:var(--mv)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.opts{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input,.form select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6.5em}
+.form .rad{display:flex;gap:10px;align-items:center;color:var(--ink)}
+.form .rad label{display:flex;gap:4px;align-items:center;cursor:pointer;color:var(--ink)}
+.form .rad input,.form input[type=checkbox]{width:auto}
+fieldset{border:1px solid var(--line);border-radius:5px;padding:4px 10px 6px;margin:0;min-width:0}
+legend{font-size:12px;color:var(--muted);padding:0 4px}
+.calc p{margin:4px 0;font:14px var(--mono)}
+.calc b{color:var(--done)}
+.calc p.tip{font:12px/1.6 var(--sans)}
+.form .opts label{display:flex;color:var(--muted)}
+.bad{color:var(--mv)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;margin-top:10px}
+@media (max-width:860px){.two{grid-template-columns:minmax(0,1fr)}}
+.card ol.log{font:12px var(--mono);margin:4px 0;padding-left:2.2em;max-height:14em;overflow:auto}
+.card ol.log li{margin:1px 0}
+details{border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg);margin-top:6px}
+details summary{cursor:pointer;font-size:14px}
+details summary b{color:var(--q);font-weight:600}
+details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.cmp{overflow-x:auto}
+.cmp table{border-collapse:collapse;font-size:13px;width:100%;min-width:640px;margin:4px 0 12px}
+.cmp th,.cmp td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.cmp thead th{background:var(--hl);font-weight:600}
+.cmp tbody th{font-weight:600;white-space:nowrap;color:var(--green)}
+.cmp td.k{color:var(--mv);font-weight:600}
+.src{font-size:13px;margin:0;padding-left:1.3em}
+.src li{margin:2px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="开机到用户进程.html">开机到用户进程</a><a href="文件打开与读取.html">文件打开与读取</a><a href="磁盘调度.html">磁盘调度</a></div>
+  <header>
+    <h1>磁盘空闲空间管理：四种方法放在一起看</h1>
+    <p class="sub">同一个分区的数据区，哪些块是空的、要一块时给哪块、文件删了块还回哪里，分别用空闲表法、空闲链表法（盘块链、盘区链）、位图法和成组链接法来管。上面的阶段可以点，每一步下方写出处页码。成组链接法是重点，四章 p150–165 和强化4 p96–109 是同一套动画，这里逐页照着画，下面还有一个可以自己点“分配一块”“回收块号”的演练区。PPT 没讲、本页补充的地方都写明了。</p>
+  </header>
+
+  <section class="panel"><h2>先看位置：空闲空间管理区在分区里的哪一段</h2>
+    <div class="view" id="layout"></div>
+    <p class="tip">四章 p130 的外存布局：引导块、超级块、inodes 表区域、空闲空间管理区、数据块区域；超级块里记着“空闲空间管理块起始块”等字段。p132 在空闲空间管理区下面提问“如何表示磁盘中空闲的磁盘块？”，这一页回答的就是它。强化4 p78–88 用的是位图（bitmap 从块 18 开始，共 12 块），各字段怎么算见 <a href="开机到用户进程.html">开机到用户进程</a> 页的超级块计算器，这里不重复。</p>
+    <p class="tip">PPT 先讲了两点区别（四章 p135–136）：空闲块的数目远大于一个文件占用的块数，所以不适合把全部信息调入内存，除非做特殊处理（如位图法）；空闲块每一块地位相同，分配哪一块都可以，不像文件那样有逻辑上的先后。本页的理解：空闲表和位图本身占着空闲空间管理区；链表法把“下一块在哪”写在空闲块自己身上；成组链接法的索引块0 放在超级块里（四章 p152），其余索引块也是空闲块本身。</p>
+  </section>
+
+  <section class="panel"><div class="flow" id="flow"></div>
+    <div class="opts" style="margin-top:8px"><label><input id="guess" type="checkbox" checked> 先猜再看</label></div></section>
+  <section class="panel">
+    <div class="stage"><div class="view" id="view"></div><div class="card" id="card"></div></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="1"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+    <p class="tip">上方阶段可以点，直接跳到那一段。键盘 ← → 单步，空格播放／暂停。图例：绿色是空闲块，灰色是已占用，红色是刚分出去的，橙色是刚回收的；蓝色块是成组链接法里的索引块。</p>
+  </section>
+
+  <section class="panel calc"><h2>位图换算器：块号 ↔ 字号、位号</h2>
+    <p class="tip" style="margin:0 0 6px">四章 p146 只说“D<sub>i</sub> = 0 表明数据块 i 是空闲，否则表示已分配”，强化4 p94、p115 也是“找取值为 0 的位置 1”“回收时置 0”，所以默认 0 = 空闲。按字存放、字长、编号从 0 还是从 1 开始，是题目里常换的设定，PPT 没讲，换算公式是<span class="warn">本页补充</span>。下面的位图共 64 块：前 33 位是 p146 那串数字，后 31 位是本页自拟的。</p>
+    <div class="form">
+      <label>字长（位）<select id="wl"><option>8</option><option selected>16</option><option>32</option><option>64</option></select></label>
+      <fieldset><legend>块号、字号、位号</legend><div class="rad"><label><input type="radio" name="base" value="0" checked> 都从 0 开始</label><label><input type="radio" name="base" value="1"> 都从 1 开始</label></div></fieldset>
+      <fieldset><legend>哪个值表示空闲</legend><div class="rad"><label><input type="radio" name="mean" value="0" checked> 0 = 空闲（PPT）</label><label><input type="radio" name="mean" value="1"> 1 = 空闲</label></div></fieldset>
+    </div>
+    <div class="form" style="margin-top:8px">
+      <label>块号 b<input id="bb" type="number" value="20"></label>
+      <span style="color:var(--muted)">或者</span>
+      <label>字号 i<input id="bi" type="number" value="1"></label>
+      <label>位号 j<input id="bj" type="number" value="4"></label>
+      <button class="btn" id="b2b" type="button">由字号、位号求块号</button>
+    </div>
+    <div class="err" id="bErr" role="alert"></div>
+    <div id="bOut"></div>
+    <div class="view" id="bView" style="margin-top:6px"></div>
+    <div class="ctrl" style="margin-top:6px">
+      <button class="btn primary" id="bAlloc" type="button">分配一块</button>
+      <label class="form" style="gap:6px;align-items:center"><span style="color:var(--muted)">回收块号</span><input id="bFreeX" type="number" value="3" style="width:5em"></label>
+      <button class="btn" id="bFree" type="button">回收</button>
+      <button class="btn" id="bReset" type="button">重置位图</button>
+    </div>
+    <div class="note" id="bNote" role="status" aria-live="polite" style="min-height:2.6em"></div>
+  </section>
+
+  <section class="panel"><h2>成组链接法演练：自己分配、回收</h2>
+    <p class="tip" style="margin:0 0 6px">初始是四章 p152、p156（强化4 p96、p100）的数据：索引块0 在超级块里，N=4，记着 18、30、6、9；块 18 里记着分组1（33、11、7、5），块 33 里记着分组2（60、1、3、99）。块 60 里的内容这套图没画，本页按 p155 的约定当作“N=-1，后面没有分组了”。分组上限默认 5，和 p163 的假设一致。块号范围 0–199 是本页设定。</p>
+    <div class="form">
+      <button class="btn primary" id="gAlloc" type="button">分配一块</button>
+      <label>回收块号<input id="gX" type="number" value="50"></label>
+      <button class="btn" id="gFree" type="button">回收</button>
+      <label>分组上限<input id="gLim" type="number" min="2" max="8" value="5"></label>
+      <button class="btn" id="gReset" type="button">重置为 PPT 数据</button>
+      <span class="opts"><label><input id="gGuess" type="checkbox" checked> 先猜再看</label></span>
+    </div>
+    <div class="err" id="gErr" role="alert"></div>
+    <div class="note" id="gNote" role="status" aria-live="polite" style="min-height:2.6em"></div>
+    <div class="two"><div class="view" id="gView"></div><div class="card" id="gCard"></div></div>
+  </section>
+
+  <section class="panel"><h2>四种方法对照</h2>
+    <div class="cmp"><table><thead><tr><th></th><th>空闲表法</th><th>空闲盘块链</th><th>空闲盘区链</th><th>位图法</th><th>成组链接法</th></tr></thead><tbody>
+      <tr><th>记什么</th><td>每个连续空闲区一项：起始块号、空闲盘块数，按起始块号递增排列（p137）</td><td>每个空闲块里存“下一块物理地址”（p140）</td><td>每个空闲盘区存“下一盘区物理地址”和“本盘区大小”（p143）</td><td>每块一位，D<sub>i</sub>=0 空闲（p146）</td><td>索引块记下一分组的块数 N 和全部块号；每组第一块作为下一组的索引块（p151–153）</td></tr>
+      <tr><th>空间开销</th><td>和空闲区个数成正比，碎片多时表长（本页补充）</td><td>几乎不另占空间，指针就写在空闲块里（本页整理）</td><td>同左，额外只多一个大小字段（本页整理）</td><td>每块 1 位；强化4 的例子 12 块位图管 98304 块（强化4 p86）</td><td>内存里只放索引块0，其余索引块就是空闲块本身（p152、p166）</td></tr>
+      <tr><th>分配一块的速度</th><td>按首次适应等算法查表（本页补充，类比三章 p55–56）</td><td>从链首摘，但要读出被摘块里的指针才知道新链首，摘 n 块大约读 n 次盘（本页补充）</td><td>首次适应找够大的盘区（p139、p144）</td><td>从头扫描找第一个 0 位（强化4 p94）；位图可放在内存里扫（p135）</td><td>多数情况在内存里取栈顶，只有分组0 用完才读一次盘（p166）</td></tr>
+      <tr><th>回收</th><td>与前、后空闲区合并，四种情况（本页补充）</td><td>插入链尾（p139、p142）</td><td>要与相邻的空闲盘区合并（p139、p145）</td><td>对应位置 0（强化4 p115）</td><td>压进分组0，N+1；满了才写一次盘（p161–166）</td></tr>
+      <tr><th>适合大文件系统吗</th><td>不太适合，主要配合连续分配（p138）</td><td class="k">不适合：链过长</td><td>只有连续空闲块很多时链才短</td><td>位图会很大，但结构简单</td><td class="k">适合（本页补充：早期 UNIX 文件系统就用它）</td></tr>
+      <tr><th>PPT 怎么评价</th><td>“类似于内存分配中动态分区算法，主要适用于文件的连续分配方法”（p138）</td><td>“链过长，进行大量空闲盘块分配时效率极低”（p147）</td><td>“只有存在大量连续的空闲磁盘块时链表才比较短，条件苛刻”（p147）</td><td>“使用简单但是可能会是一个很大的向量表”（p146）</td><td>“空闲链表法与索引方式的结合”（p149）；分配、回收只有分组0 用完或超上限时才需要 I/O（p166）</td></tr>
+    </tbody></table></div>
+    <p class="tip">表里没写书名的页码都是四章。“为何不直接用索引表？”PPT 的回答是空闲块太多，索引表过于庞大，放入内存需要很多次磁盘 I/O（p147–148）。</p>
+  </section>
+
+  <section class="panel"><h2>闭卷自测</h2><p class="tip" style="margin:0 0 4px">前几题是 PPT 上的原题（页码在题后），迁移题是本页改的条件。参考要点里 PPT 给了答案的照抄，其余是本页整理的，已注明。</p><div id="qs"></div></section>
+  <section class="panel"><h2>来源</h2><ol class="src" id="src"></ol>
+    <p class="tip">“索引块0”“N=-1 表示末尾”“分组上限 5”都是 PPT 的教学模型和设定；408 只要求掌握成组链接法分配、回收时栈的变化。动画里分配、回收各用一套从初始状态出发的数据，这是 PPT 的安排（p161 的回收重新从 N=4、18 30 6 9 开始）。</p></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let frames=[],at=0,timer=null;
+const SPD=[4500,3200,2400,1700,1200,800,500];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].ask)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].ask)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;draw(f);
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].ask?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+$('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+$('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+$('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','SUMMARY'].includes(e.target.tagName)||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+
+const MK=(id,c)=>`<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="${c}"/></marker>`;
+const DEFS=`<defs>${MK('aq','var(--q)')}${MK('am','var(--muted)')}${MK('a1','var(--s1)')}${MK('a2','var(--s2)')}${MK('ac','var(--cmp)')}</defs>`;
+const BUSY='color-mix(in srgb,var(--s6) 38%,transparent)';
+const T=(x,y,t,o='')=>`<text x="${x}" y="${y}" ${o}>${t}</text>`;
+
+/* 分区布局（四章 p130、p132） */
+(function(){const segs=[['引导块',90,'--s3'],['超级块',90,'--s2'],['inodes 表区域',150,'--s6'],['空闲空间管理区',170,'--s5'],['数据块区域',340,'--s4']];
+  let s=`<svg viewBox="0 0 880 200" role="img" aria-label="分区布局">`+DEFS,x=20;
+  segs.forEach(([l,w,c],i)=>{const on=i===3;s+=`<rect x="${x}" y="20" width="${w-2}" height="36" rx="3" fill="var(${c})" ${on?'stroke="var(--ink)" stroke-width="2.5"':''}/>`+T(x+(w-2)/2,43,l,`text-anchor="middle" font-size="13" fill="#fff" font-weight="${on?700:400}"`);if(i===1)s+=`<line x1="${x+44}" y1="58" x2="${x+44}" y2="82" stroke="var(--muted)"/>`;if(i===3)s+=`<line x1="${x+84}" y1="58" x2="${x+84}" y2="82" stroke="var(--muted)" marker-end="url(#am)"/>`+T(x+84,100,'如何表示磁盘中空闲的磁盘块？',`text-anchor="middle" font-size="12" fill="var(--q)"`)+T(x+84,118,'（四章 p132）',`text-anchor="middle" font-size="11" fill="var(--muted)"`);x+=w});
+  const f=['文件系统总块数','总数据块数','空闲空间管理块起始块','inodes 区总块数','inodes 区起始块'];
+  s+=`<rect x="40" y="82" width="200" height="${f.length*20+8}" rx="3" fill="color-mix(in srgb,var(--s1) 22%,transparent)" stroke="var(--s1)"/>`;
+  f.forEach((t,i)=>s+=T(140,100+i*20,t,`text-anchor="middle" font-size="12" fill="${i===2?'var(--mv)':'var(--ink)'}" font-weight="${i===2?700:400}"`));
+  s+=T(600,150,'数据块区域又分目录区和文件区（四章 p131）',`text-anchor="middle" font-size="12" fill="var(--muted)"`);
+  $('layout').innerHTML=s+'</svg>'})();
+
+/* ========== 空闲表 / 空闲盘区链：0–49 号块的条带 ========== */
+const SX=40,CW=32,ROWY=[54,142];
+const isIn=(b,ex)=>ex.some(([a,l])=>b>=a&&b<a+l);
+const cellXY=b=>[SX+(b%25)*CW,ROWY[b<25?0:1]];
+function segs(a,l){const r=[];let b=a;while(b<a+l){const e=Math.min(a+l,(b<25?25:50));r.push([b,e-b]);b=e}return r}
+function strip(free,o={}){const H=o.chain?300:200;let s=`<svg viewBox="0 0 880 ${H}" role="img" aria-label="0 到 49 号块">`+DEFS;
+  s+=T(SX,18,o.title||'数据区 0–49 号块（每行 25 块）',`font-size="13" fill="var(--muted)"`);
+  for(let b=0;b<50;b++){const [x,y]=cellXY(b);const fr=isIn(b,free);let fill=fr?'var(--s4)':BUSY,st='',tc=fr?'#fff':'var(--muted)';
+    (o.hl||[]).forEach(h=>{if(b>=h[0]&&b<h[0]+h[1]){fill=h[2]==='a'?'var(--mv)':'var(--cmp)';st='stroke="var(--ink)" stroke-width="1.5"';tc='#fff'}});
+    s+=`<rect x="${x}" y="${y}" width="${CW-3}" height="32" rx="2" fill="${fill}" ${st}/>`+T(x+(CW-3)/2,y+21,b,`text-anchor="middle" font-size="12" fill="${tc}"`)}
+  free.forEach(([a,l],k)=>{const [b,n]=segs(a,l)[0];const [x,y]=cellXY(b);s+=T(x+n*CW/2-1,y-8,o.chain?`${a} 起 ${l} 块`:`区${k+1}`,`text-anchor="middle" font-size="13" fill="var(--done)" font-weight="600"`)});
+  (o.hl||[]).forEach(h=>{const [b,n]=segs(h[0],h[1])[0];const [x,y]=cellXY(b);s+=T(Math.max(x+n*CW/2-1,50),y-26,h[3],`text-anchor="middle" font-size="13" fill="${h[2]==='a'?'var(--mv)':'var(--cmp)'}" font-weight="700"`)});
+  if(o.chain){const y=214,w=128,st=150,x0=96;s+=T(20,y+25,'链头',`font-size="13" fill="var(--q)" font-weight="700"`)+`<line x1="52" y1="${y+20}" x2="${x0-3}" y2="${y+20}" stroke="var(--q)" stroke-width="1.6" marker-end="url(#aq)"/>`;
+    free.forEach(([a,l],k)=>{const x=x0+k*st,on=(o.chg||[]).includes(k);s+=`<rect x="${x}" y="${y}" width="${w}" height="40" rx="4" fill="color-mix(in srgb,var(--s4) 22%,transparent)" stroke="${on?'var(--cmp)':'var(--s4)'}" stroke-width="${on?3:1.5}"/>`+T(x+w/2,y+25,`起始 ${a}，${l} 块`,`text-anchor="middle" font-size="13" fill="var(--ink)" font-weight="${on?700:400}"`);
+      if(k<free.length-1)s+=`<line x1="${x+w+1}" y1="${y+20}" x2="${x+st-3}" y2="${y+20}" stroke="var(--q)" stroke-width="1.6" marker-end="url(#aq)"/>`;else s+=T(x+w+8,y+25,'∧',`font-size="14" fill="var(--muted)"`)});
+    s+=T(20,y+66,'链上每个结点就是一个空闲盘区，指针和大小写在盘区的第一块里',`font-size="12" fill="var(--muted)"`)}
+  return s+'</svg>'}
+function ftab(rows,hl,dels,hdr){hl=hl||[];dels=dels||[];return `<h3>${hdr||'空闲盘块表（四章 p138）'}</h3><table><tr><th>空闲区号</th><th>起始块号</th><th>空闲盘块数</th></tr>${rows.map(([a,l],k)=>`<tr><td>${k+1}</td><td class="${hl.includes(k)?'h':''}">${a}</td><td class="${hl.includes(k)?'h':''}">${l}</td></tr>`).join('')}${dels.map(([a,l])=>`<tr><td class="del">—</td><td class="del">${a}</td><td class="del">${l}</td></tr>`).join('')}</table>`}
+const F0=[[2,4],[9,3],[15,5],[26,10],[45,5]],F1=[[2,4],[9,3],[15,5],[32,4],[45,5]],F2=[[2,6],[9,3],[15,5],[32,4],[45,5]],F3=[[2,6],[9,3],[13,7],[32,4],[45,5]],F4=[[2,6],[9,11],[32,4],[45,5]],F5=[[2,6],[9,11],[32,4],[40,2],[45,5]];
+const MERGE=`<h3>回收时的四种情况（本页补充）</h3><table><tr><th>回收区</th><th>表怎么改</th></tr><tr><td>只挨着前一个空闲区</td><td>前一项块数增加</td></tr><tr><td>只挨着后一个空闲区</td><td>后一项起始块号改小，块数增加</td></tr><tr><td>前后都挨着</td><td>三区合一，表少一项</td></tr><tr><td>都不挨着</td><td>按起始块号插入新项</td></tr></table>`;
+
+/* ========== 空闲盘块链：10 个位置的条带 ========== */
+const SLOT={b0:1,b3:3,b2:5,b1:8,bx:6};const NAME={b0:'空闲盘块0',b1:'空闲盘块1',b2:'空闲盘块2',b3:'空闲盘块3',bx:'盘块 X'};
+function bchain(st){/* st:{free:[k], next:{k:k}, out:[k], back:[k], dash:[k], head, tail} */
+  let s=`<svg viewBox="0 0 880 262" role="img" aria-label="空闲盘块链">`+DEFS;const y=104,h=36,X=i=>40+i*80;
+  s+=T(40,254,'磁盘空间：同一块盘上的 10 个位置（PPT 没给块号），灰色是已占用的块',`font-size="13" fill="var(--muted)"`);
+  for(let i=0;i<10;i++){const k=Object.keys(SLOT).find(k=>SLOT[k]===i&&(st.free.includes(k)||(st.out||[]).includes(k)||(st.back||[]).includes(k)));
+    let fill=BUSY,txt='',tc='var(--muted)';if(k){if((st.out||[]).includes(k)){fill='var(--mv)';txt='分给文件';tc='#fff'}else{fill=(st.back||[]).includes(k)?'var(--cmp)':'var(--s4)';txt=NAME[k];tc='#fff'}}
+    s+=`<rect x="${X(i)+2}" y="${y}" width="76" height="${h}" rx="3" fill="${fill}"/>`+T(X(i)+40,y+23,txt,`text-anchor="middle" font-size="14" fill="${tc}"`);
+    if(k&&(st.out||[]).includes(k))s+=T(X(i)+40,y+h+18,`（原${NAME[k].replace('空闲','')}）`,`text-anchor="middle" font-size="12" fill="var(--mv)"`)}
+  Object.entries(st.next).forEach(([a,b])=>{const x1=X(SLOT[a])+40,x2=X(SLOT[b])+40,cy=y-Math.min(176,50+Math.abs(x2-x1)*.25),d=(st.dash||[]).includes(a);
+    s+=`<path d="M${x1} ${y-2} Q${(x1+x2)/2} ${cy} ${x2} ${y-4}" fill="none" stroke="var(--q)" stroke-width="1.6" ${d?'stroke-dasharray="5 4"':''} marker-end="url(#aq)"/>`});
+  if(st.head){const x=X(SLOT[st.head])+40;s+=`<line x1="${x}" y1="${y+h+58}" x2="${x}" y2="${y+h+4}" stroke="var(--q)" stroke-width="2" marker-end="url(#aq)"/>`+T(x,y+h+74,'链头',`text-anchor="middle" font-size="14" fill="var(--q)" font-weight="700"`)}
+  if(st.tail){const x=X(SLOT[st.tail])+40;s+=`<line x1="${x}" y1="${y+h+58}" x2="${x}" y2="${y+h+4}" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#am)"/>`+T(x,y+h+74,'链尾',`text-anchor="middle" font-size="14" fill="var(--muted)" font-weight="700"`)}
+  return s+'</svg>'}
+const BLK=`<h3>每个空闲盘块里（四章 p140）</h3><table><tr><td style="text-align:left">文件数据信息（空闲时没用）</td></tr><tr><td style="text-align:left;color:var(--mv)">下一块物理地址</td></tr></table>`;
+const EXT=`<h3>每个空闲盘区的第一块里（四章 p143）</h3><table><tr><td style="text-align:left">文件数据信息</td></tr><tr><td style="text-align:left;color:var(--mv)">下一盘区物理地址</td></tr><tr><td style="text-align:left;color:var(--mv)">本盘区大小</td></tr></table>`;
+
+/* ========== 位图（四章 p146） ========== */
+const PPTBITS='111111111111111001110101011101111';const FILL='1101111011111101111110111011111';
+function bmpSVG(bits,o={}){/* bits: 32 chars; o:{pick, scan, chg, out, back, lab} */
+  let s=`<svg viewBox="0 0 880 262" role="img" aria-label="位图与磁盘块">`+DEFS;const gx=120,cw=46,gh=30,BY=[50,86],DY=[176,212];
+  s+=T(20,20,'位图：每一位管一块，0 = 空闲',`font-size="13" fill="var(--muted)"`)+T(gx-10,42,'位号',`text-anchor="end" font-size="11" fill="var(--muted)"`);
+  for(let j=0;j<16;j++)s+=T(gx+j*cw+cw/2,42,j,`text-anchor="middle" font-size="11" fill="var(--muted)"`);
+  s+=T(20,166,'磁盘数据区 0–31 号块（和上面的位逐列对齐）',`font-size="13" fill="var(--muted)"`);
+  for(let i=0;i<2;i++){s+=T(gx-10,BY[i]+20,`字 ${i}`,`text-anchor="end" font-size="13" fill="var(--muted)"`)+T(gx-10,DY[i]+20,`块 ${i*16}–${i*16+15}`,`text-anchor="end" font-size="12" fill="var(--muted)"`);
+    for(let j=0;j<16;j++){const b=i*16+j,v=bits[b],x=gx+j*cw,pk=o.pick===b,sc=o.scan!=null&&b<o.scan,ch=(o.chg||[]).includes(b);
+      s+=`<rect x="${x+1}" y="${BY[i]}" width="${cw-4}" height="${gh}" rx="3" fill="${v==='0'?'color-mix(in srgb,var(--s4) 45%,transparent)':BUSY}" stroke="${pk?'var(--q)':(ch?'var(--cmp)':(sc?'var(--muted)':'var(--line)'))}" stroke-width="${pk||ch?2.5:1}" ${sc&&!pk?'stroke-dasharray="3 2"':''}/>`+T(x+cw/2-1,BY[i]+20,v,`text-anchor="middle" font-size="15" fill="var(--ink)" font-weight="${pk||ch?700:400}" font-family="var(--mono)"`);
+      let fill=v==='0'?'var(--s4)':BUSY;if((o.out||[]).includes(b))fill='var(--mv)';if((o.back||[]).includes(b))fill='var(--cmp)';
+      s+=`<rect x="${x+1}" y="${DY[i]}" width="${cw-4}" height="${gh}" rx="2" fill="${fill}" ${pk?'stroke="var(--q)" stroke-width="2.5"':''}/>`+T(x+cw/2-1,DY[i]+20,b,`text-anchor="middle" font-size="13" fill="${fill===BUSY?'var(--muted)':'#fff'}"`)}}
+  if(o.pick!=null){const i=Math.floor(o.pick/16),j=o.pick%16,x=gx+j*cw+cw/2-1;
+    s+=`<line x1="${x}" y1="${BY[i]+gh+1}" x2="${x}" y2="${DY[i]-3}" stroke="var(--q)" stroke-width="2" stroke-dasharray="${i===0?'4 3':'0'}" marker-end="url(#aq)"/>`;
+    if(o.lab){const left=x>560;s+=`<rect x="${left?x-12-o.lab.length*13:x+10}" y="128" width="${o.lab.length*13}" height="24" rx="4" fill="var(--paper)" stroke="var(--q)"/>`+T(left?x-12-o.lab.length*6.5:x+10+o.lab.length*6.5,145,o.lab,`text-anchor="middle" font-size="13" fill="var(--q)" font-weight="700"`)}}
+  return s+'</svg>'}
+const B0=PPTBITS.slice(0,32),B1=B0.slice(0,15)+'1'+B0.slice(16),B2=B1.slice(0,3)+'0'+B1.slice(4);
+
+/* ========== 成组链接：模型 ========== */
+const clone=s=>JSON.parse(JSON.stringify(s));
+const GINIT={N:4,list:[18,30,6,9],disk:{18:{N:4,list:[33,11,7,5]},33:{N:4,list:[60,1,3,99]},60:{N:-1,list:[]}}};
+function groups(s){const cols=[];if(s.N<=0)return cols;let l=s.list;const seen=new Set();
+  while(l&&l.length){cols.push(l);const h=l[0];if(seen.has(h))break;seen.add(h);const c=s.disk[h];if(!c||c.N<=0)break;l=c.list}return cols}
+function freeSet(s){return new Set(groups(s).flat())}
+function gAllocOp(s){if(s.N<=0)return{err:'索引块0 里 N=-1，已经没有空闲块了，分配失败。'};const t=clone(s);
+  if(t.N>1){const b=t.list.pop();t.N--;return{s:t,blk:b}}
+  const b=t.list[0],c=t.disk[b];delete t.disk[b];if(!c||c.N<=0){t.N=-1;t.list=[]}else{t.N=c.N;t.list=[...c.list]}return{s:t,blk:b,read:b,end:!c||c.N<=0}}
+function gFreeOp(s,x,lim){const t=clone(s);
+  if(t.N<=0){t.disk[x]={N:-1,list:[]};t.N=1;t.list=[x];return{s:t,write:x,fromEnd:1}}
+  if(t.N<lim){t.list.push(x);t.N++;return{s:t}}
+  t.disk[x]={N:t.N,list:[...t.list]};t.N=1;t.list=[x];return{s:t,write:x}}
+function grpSVG(s,o={}){const cols=groups(s),rows=Math.max(4,s.list.length,...cols.map(c=>c.length));
+  const top=70,RH=40,MX=16,MW=118,C0=210,CWg=140,W=Math.max(760,C0+cols.length*CWg+130),H=top+rows*RH+64;
+  let v=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="成组链接法" style="min-width:${Math.round(W*.7)}px">`+DEFS;
+  v+=T(MX,22,'内存：超级块里的索引块0',`font-size="14" fill="var(--muted)"`)+T(C0,22,'磁盘上的空闲块（蓝色兼作下一组的索引块）',`font-size="14" fill="var(--muted)"`);
+  const mh=rows*RH-14;v+=`<rect x="${MX}" y="${top-6}" width="${MW}" height="${mh}" rx="3" fill="var(--s1)" ${o.memhl?'stroke="var(--ink)" stroke-width="2.5"':''}/>`;
+  const lines=['索引块0',`N=${s.N}`,...s.list];const lh=Math.min(20,(mh-10)/lines.length);
+  lines.forEach((t,i)=>v+=T(MX+MW/2,top+14+i*lh,t,`text-anchor="middle" font-size="${i?15:13}" fill="#fff" font-weight="${i===1?700:400}"`));
+  if(s.N<=0)v+=T(C0,top+30,'没有空闲块了：N=-1 表示后面没有分组。',`font-size="13" fill="var(--mv)"`);
+  const pos={};cols.forEach((c,k)=>{const x=C0+k*CWg;v+=T(x+27,top-14,`分组${k}`,`text-anchor="middle" font-size="14" fill="var(--ink)"`);
+    c.forEach((b,i)=>{pos[b]=[x,top+i*RH];})});
+  const mY=top-6+mh/2;
+  cols.forEach((c,k)=>c.forEach((b,i)=>{const [x,y]=pos[b];const col=i===0?'var(--s1)':'var(--s2)';
+    if(k===0)v+=`<line x1="${MX+MW}" y1="${mY}" x2="${x-2}" y2="${y+14}" stroke="${col}" stroke-width="1.4" marker-end="url(#a${i===0?1:2})"/>`;
+    else{const p=cols[k-1][0],[px,py]=pos[p];v+=`<line x1="${px+54}" y1="${py+14}" x2="${x-2}" y2="${y+14}" stroke="${col}" stroke-width="1.4" marker-end="url(#a${i===0?1:2})"/>`}}));
+  cols.forEach((c,k)=>c.forEach((b,i)=>{const [x,y]=pos[b];const hl=(o.hl||[]).includes(b),nw=(o.back||[]).includes(b);
+    v+=`<rect x="${x}" y="${y}" width="54" height="28" rx="2" fill="${i===0?'var(--s1)':'var(--s2)'}" ${hl?'stroke="var(--ink)" stroke-width="2.5"':(nw?'stroke="var(--ink)" stroke-width="3"':'')}/>`+T(x+27,y+19,b,`text-anchor="middle" font-size="15" fill="#fff" font-weight="${hl||nw?700:400}"`)}));
+  if(cols.length){const last=cols[cols.length-1][0],c=s.disk[last];if(c&&c.N===-1){const [x,y]=pos[last];v+=T(x+60,y+12,`块 ${last} 里记 N=-1`,`font-size="12" fill="var(--muted)"`)+T(x+60,y+27,'后面没有分组',`font-size="12" fill="var(--muted)"`)}}
+  let by=H-22;const bits=[];if(o.out!=null)bits.push([`分给文件：块 ${o.out}`,'var(--mv)']);if(o.read!=null)bits.push([`读盘 1 次：块 ${o.read} 的内容 → 索引块0`,'var(--q)']);if(o.write!=null)bits.push([`写盘 1 次：索引块0 的内容 → 块 ${o.write}`,'var(--cmp)']);
+  let bx=MX;bits.forEach(([t,c])=>{const tw=[...t].reduce((a,ch)=>a+(/[\x00-\x7f]/.test(ch)?7.5:13),0)+18;if(bx+tw>W-10){bx=MX;by+=0}v+=`<rect x="${bx}" y="${by-17}" width="${tw}" height="26" rx="13" fill="none" stroke="${c}" stroke-width="1.6"/>`+T(bx+9,by+1,t,`font-size="13" fill="${c}" font-weight="700"`);bx+=tw+10});
+  return v+'</svg>'}
+function gcard(s,title){const cols=groups(s);let h=`<h3>${title||'此刻的状态'}</h3><table><tr><th>位置</th><th>N</th><th>记着的块号</th></tr><tr><td>索引块0（内存）</td><td class="h">${s.N}</td><td>${s.list.join(' ')||'—'}</td></tr>`;
+  cols.forEach(c=>{const d=s.disk[c[0]];if(d)h+=`<tr><td>块 ${c[0]}（磁盘）</td><td>${d.N}</td><td>${d.list.join(' ')||'—'}</td></tr>`});
+  return h+`</table><p class="tip">空闲块共 ${freeSet(s).size} 块。分配时 N 减 1、取表里最后一个；N=1 时只剩第一个块号，它就是下一组的索引块。</p>`}
+/* PPT 那套动画的各个状态 */
+const S0=GINIT,A1=gAllocOp(S0),A2=gAllocOp(A1.s),A3=gAllocOp(A2.s),A4=gAllocOp(A3.s);
+const R1=gFreeOp(S0,50,5),R2=gFreeOp(R1.s,128,5),R3=gFreeOp(R2.s,66,5);
+function concept(withNum){let v=`<svg viewBox="0 0 880 300" role="img" aria-label="索引块链接">`+DEFS;const xs=[60,330,600],nums=[[18,30,6,9],[33,11,7,5],[60,1,3,99]],lab=['2','18','33'];
+  xs.forEach((x,k)=>{v+=`<rect x="${x}" y="40" width="96" height="48" rx="3" fill="var(--s1)"/>`+T(x+48,69,`索引块${k}`,`text-anchor="middle" font-size="13" fill="#fff"`);
+    if(withNum)v+=T(x+48,32,`块 ${lab[k]}`,`text-anchor="middle" font-size="11" fill="var(--muted)"`);
+    if(k<2)v+=`<line x1="${x+98}" y1="64" x2="${xs[k+1]-4}" y2="64" stroke="var(--s1)" stroke-width="1.6" marker-end="url(#a1)"/>`+T((x+98+xs[k+1])/2,56,withNum?'':'链接',`text-anchor="middle" font-size="12" fill="var(--muted)"`);
+    v+=`<line x1="${x+48}" y1="90" x2="${x+48}" y2="104" stroke="var(--muted)" marker-end="url(#am)"/>`;
+    for(let i=0;i<4;i++){const blue=withNum&&i===0;v+=`<rect x="${x+23}" y="${110+i*44}" width="50" height="30" rx="2" fill="var(${blue?'--s1':'--s2'})" ${blue?'stroke="var(--ink)" stroke-width="2"':''}/>`;if(withNum)v+=T(x+48,130+i*44,nums[k][i],`text-anchor="middle" font-size="13" fill="#fff"`)}
+    v+=T(x+130,180,`索引块${k} 指向的盘块`,`text-anchor="middle" font-size="11" fill="var(--muted)"`)});
+  if(withNum)for(let k=0;k<2;k++)v+=`<path d="M${xs[k]+75} 125 Q${(xs[k]+xs[k+1])/2+40} 120 ${xs[k+1]+20} 90" fill="none" stroke="var(--mv)" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ac)"/>`+T((xs[k]+xs[k+1])/2+60,112,`${nums[k][0]} 就是索引块${k+1}`,`text-anchor="middle" font-size="12" fill="var(--mv)" font-weight="700"`);
+  return v+'</svg>'}
+
+/* ========== 步骤 ========== */
+const ST=[['tab','空闲表法'],['chain','空闲链表法'],['bmp','位图法'],['grp','成组链接法（重点）']];
+const STEPS=[
+ {g:'tab',sv:strip(F0),card:ftab(F0),note:'<b>空闲表法</b>：每一段连续的空闲盘块组成一个空闲区，系统为所有空闲区建一张空闲盘块表，每个空闲区一项，记该区第一个盘块号和空闲盘块数，表项按起始盘块号递增排列。图里就是 PPT 那张表：区1 是 2–5，区2 是 9–11，区3 是 15–19，区4 是 26–35，区5 是 45–49。',ref:'四章 p137–138'},
+ {g:'tab',sv:strip(F1,{hl:[[26,6,'a','分出 26–31']]}),card:ftab(F1,[3]),pre:{sv:strip(F0),card:ftab(F0)},ask:'一个文件要连续的 6 块。按首次适应从表头往下找，分哪几块？表怎么变？',
+  note:'区1 只有 4 块、区2 只有 3 块、区3 只有 5 块，都不够；区4 有 10 块，<b>分出 26–31</b>。区4 剩下 32–35，表项改成<b>起始 32、4 块</b>。PPT 只说“类似于内存分配中动态分区算法”，用首次适应是本页选的，算法和三章动态分区一样。',ref:'四章 p138；三章 p55–56（首次适应）'},
+ {g:'tab',sv:strip(F2,{hl:[[6,2,'r','回收 6–7']]}),card:ftab(F2,[0])+MERGE,pre:{sv:strip(F1,{hl:[[6,2,'r','要回收 6–7']]}),card:ftab(F1)},ask:'删掉一个文件，块 6–7 要还回来。它前面的 2–5 是区1，后面的块 8 被占着。表怎么改？',
+  note:'回收区的开头 6 正好接在区1 的末尾 5 后面，只和<b>前一个空闲区</b>相邻：区1 起始不变，块数 4 + 2 = <b>6</b>，表项个数不变。<span class="warn">本页补充</span>：PPT 在空闲表这里没有展开回收，在盘区链处只说“要将回收区与相邻接的空闲盘区相合并”，四种情况是按三章动态分区回收整理的。',ref:'四章 p139、p145；三章 p52、p56'},
+ {g:'tab',sv:strip(F3,{hl:[[13,2,'r','回收 13–14']]}),card:ftab(F3,[2])+MERGE,pre:{sv:strip(F2,{hl:[[13,2,'r','要回收 13–14']]}),card:ftab(F2)},ask:'再回收 13–14。前面的 12 被占着，后面 15 开始是区3。表怎么改？',
+  note:'只和<b>后一个空闲区</b>相邻：区3 的起始块号从 15 改成 <b>13</b>，块数 5 + 2 = <b>7</b>。',ref:'本页补充（同上）'},
+ {g:'tab',sv:strip(F4,{hl:[[12,1,'r','回收 12']]}),card:ftab(F4,[1],[[13,7]])+MERGE,pre:{sv:strip(F3,{hl:[[12,1,'r','要回收 12']]}),card:ftab(F3)},ask:'再回收块 12。前面 9–11 是区2，后面 13–19 是区3。表怎么改？',
+  note:'<b>前后都相邻</b>：三段合成一段，区2 改成起始 9、块数 3 + 1 + 7 = <b>11</b>，原来的区3 那一项删掉，后面的区号往前挪，表少了一项。',ref:'本页补充（同上）'},
+ {g:'tab',sv:strip(F5,{hl:[[40,2,'r','回收 40–41']]}),card:ftab(F5,[3])+MERGE,pre:{sv:strip(F4,{hl:[[40,2,'r','要回收 40–41']]}),card:ftab(F4)},ask:'最后回收 40–41。前面的空闲区到 35 结束，后面的从 45 开始。表怎么改？',
+  note:'<b>前后都不相邻</b>：新建一项起始 40、2 块，按起始块号递增的次序插在 32 和 45 两项之间。到这里四种情况都走了一遍。PPT 对空闲表法的评价：主要适用于文件的<b>连续分配</b>方法。',ref:'四章 p137–138；本页补充（回收）'},
+ {g:'chain',sv:bchain({free:['b0','b3','b2','b1'],next:{b0:'b1',b1:'b2',b2:'b3'},dash:['b2'],head:'b0',tail:'b3'}),card:BLK,
+  note:'<b>空闲盘块链</b>：把磁盘上所有空闲空间以<b>盘块为单位</b>拉成一条链，每个空闲块里存“下一块物理地址”。块在盘上的位置是乱的（PPT 图里从左到右是 0、3、2、1），链按 0 → 1 → 2 走。PPT 的图只画到盘块2，2 → 3 这一段是本页按编号补上的（虚线）。系统要记住链头在哪，PPT 没说记在哪里。',ref:'四章 p139–140'},
+ {g:'chain',sv:bchain({free:['b3','b2'],out:['b0','b1'],next:{b2:'b3'},head:'b2',tail:'b3'}),card:BLK,pre:{sv:bchain({free:['b0','b3','b2','b1'],next:{b0:'b1',b1:'b2',b2:'b3'},dash:['b2'],head:'b0',tail:'b3'}),card:BLK},ask:'创建文件要 2 块。从链的哪一头摘？摘完链头指向谁？',
+  note:'分配时<b>从链首开始</b>，依次摘下所需数目的盘块：先摘盘块0，再摘盘块1，链头改指盘块2。<span class="warn">本页补充</span>：每摘一块都要读出它里面的“下一块物理地址”才知道新的链头，所以摘 n 块大约要读 n 次盘，这就是 PPT 说“效率极低”的原因。',ref:'四章 p139、p141、p147'},
+ {g:'chain',sv:bchain({free:['b3','b2','bx'],back:['bx'],next:{b2:'b3',b3:'bx'},head:'b2',tail:'bx'}),card:BLK,pre:{sv:bchain({free:['b3','b2','bx'],back:['bx'],next:{b2:'b3'},head:'b2',tail:'b3'}),card:BLK},ask:'删掉另一个文件，释放出盘块 X（橙色）。按 PPT 的说法，它挂到链的哪一头？',
+  note:'回收时<b>将回收的盘块依次插入链尾</b>：原链尾盘块3 里的“下一块地址”改成 X，链尾变成 X。<span class="warn">本页补充</span>：要改原链尾那一块，所以系统除了链头一般还记着链尾。',ref:'四章 p139、p142'},
+ {g:'chain',sv:strip(F0,{chain:1,title:'空闲盘区链（盘区数据借用 p138 那张表）'}),card:EXT,
+  note:'<b>空闲盘区链</b>：把所有空闲<b>盘区</b>（每个盘区可含若干盘块）拉成一条链，每个盘区除了指向下一盘区的指针，还要有本盘区大小（盘块数）。PPT 这里的图没有数据，本页把空闲表那一页的 5 个空闲区借来画。',ref:'四章 p139、p143'},
+ {g:'chain',sv:strip(F1,{chain:1,chg:[3],hl:[[26,6,'a','分出 26–31']],title:'空闲盘区链'}),card:EXT,pre:{sv:strip(F0,{chain:1,title:'空闲盘区链'}),card:EXT},ask:'文件要 6 个盘块，盘区链怎么分？',
+  note:'选择一个大小足够的盘区分配对应数量的磁盘块，通常用<b>首次适应</b>：沿链找到第一个够 6 块的盘区（26 起 10 块），分出 26–31，这个盘区剩下 32 起 4 块，链不变、只改大小和起点。',ref:'四章 p139、p144'},
+ {g:'chain',sv:strip([[2,10],[15,5],[32,4],[45,5]],{chain:1,chg:[0],hl:[[6,3,'r','回收 6–8']],title:'空闲盘区链'}),card:EXT,pre:{sv:strip(F1,{chain:1,hl:[[6,3,'r','要回收 6–8']],title:'空闲盘区链'}),card:EXT},ask:'回收 6–8 这 3 块。它前面 2–5、后面 9–11 都是空闲盘区，链怎么变？',
+  note:'回收时需要考虑与<b>相邻的空闲盘区合并</b>：2–5、6–8、9–11 并成一个 2 起 10 块的盘区，链上少了一个结点。PPT 对两种链的评价：盘块链太长，大量分配时效率极低；盘区链只有存在大量连续空闲块时才短，条件苛刻。',ref:'四章 p139、p145、p147'},
+ {g:'bmp',sv:bmpSVG(B0,{pick:0,lab:'第 0 位管第 0 块'}),card:`<h3>p146 的位图</h3><p class="mono" style="overflow-wrap:anywhere">${PPTBITS}…</p><p>D<sub>i</sub> = 0 表明数据块 i 空闲，否则已分配。</p><p class="tip">图里只画前 32 位，按 16 位一个字排成两行（字长 16 是本页设定）。</p>`,
+  note:'<b>位图法</b>：用一串二进制位代表空闲块列表，第 i 位对应数据块 i。p146 给的串前 15 位是 1（已分配），第 15、16 位是 0（空闲）。使用简单，但块多时可能是一个很大的向量表。',ref:'四章 p146'},
+ {g:'bmp',sv:bmpSVG(B0,{pick:20,lab:'字 1 位 4 → 块 16×1+4 = 20'}),card:`<h3>换算（本页补充）</h3><p>字长 n，都从 0 编号：</p><p class="mono">块号 b = n × i + j</p><p class="mono">i = ⌊b ÷ n⌋，j = b mod n</p><p>都从 1 编号：</p><p class="mono">b = n × (i − 1) + j</p><p class="mono">i = ⌊(b − 1) ÷ n⌋ + 1，j = (b − 1) mod n + 1</p>`,pre:{sv:bmpSVG(B0,{}),card:'<h3>换算</h3><p>先自己算。</p>'},ask:'位图按 16 位一个字存放，块号、字号、位号都从 0 编号。字 1 的第 4 位管的是几号块？',
+  note:'前面整整一个字管了 0–15 号块，所以字 1 从块 16 开始，第 4 位是 <b>16 × 1 + 4 = 20</b> 号块。反过来 20 ÷ 16 = 1 余 4。下方换算器可以换字长、换编号起点。',ref:'本页补充（PPT 没讲按字换算）'},
+ {g:'bmp',sv:bmpSVG(B1,{pick:15,scan:15,chg:[15],out:[15],lab:'第一个 0 在第 15 位'}),card:`<h3>分配一块（强化4 p93–94）</h3><ol><li>从头扫描，找第一个值为 0 的位</li><li>把它置为 1</li><li>它所代表的块分给文件</li></ol>`,pre:{sv:bmpSVG(B0,{}),card:'<h3>分配一块</h3><p>先想再看。</p>'},ask:'用位图法给文件分配一个空闲块，怎么做？按 p146 这串位，分到几号块？',
+  note:'找到 bitmap 中一个取值为 0 的位，将其置为 1，并将它所代表的磁盘块分配给文件使用。从头扫，第 0～14 位都是 1，<b>第 15 位</b>是第一个 0，于是块 15 分出去，这一位改成 1。',ref:'强化4 p93–94；四章 p146'},
+ {g:'bmp',sv:bmpSVG(B2,{pick:3,chg:[3],back:[3],lab:'块 3 释放：第 3 位置 0'}),card:`<h3>回收一块（强化4 p114–115）</h3><p>直接将位图的对应比特位置 0 即可。</p><p class="tip">位图法回收不用合并，相邻的 0 自然连在一起（本页补充）。</p>`,pre:{sv:bmpSVG(B1,{}),card:'<h3>回收一块</h3><p>先想再看。</p>'},ask:'文件的块 3 要释放，位图怎么改？',
+  note:'直接把块 3 对应的位（字 0 第 3 位）<b>置 0</b>。PPT 说空闲块数目太多，一般不适合全部调入内存，“除非进行特殊处理（如位图法）”：一位管一块，强化4 的例子里 12 块位图就能管 98304 块，可以放进内存里扫。',ref:'强化4 p114–115、p86；四章 p135'},
+ {g:'grp',sv:concept(0),card:`<h3>两种链表的缺陷（p147）</h3><ul><li>空闲盘块链：链过长，大量分配时效率极低</li><li>空闲盘区链：只有大量连续空闲块时链才短，条件苛刻</li></ul>`,pre:{sv:concept(0),card:'<h3>两种链表的缺陷</h3><p>盘块链太长，盘区链条件苛刻。</p>'},ask:'链表太长，那为什么不像文件实现那样用索引表把空闲块都记下来？',
+  note:'PPT 的回答：<b>空闲磁盘块数目过多，索引表过于庞大，放入内存需要很多次磁盘 I/O</b>。于是取个折中，成组链接法是<b>空闲链表法与索引方式的结合</b>：一个索引块指向的所有空闲块作为一个分组，每次 I/O 取出一个索引块，就拿到它指向的全部空闲块；这些块不需要连续。',ref:'四章 p147–150；强化4 p96'},
+ {g:'grp',sv:concept(1),card:`<h3>约定（p151）</h3><p>让每个索引块指向的第一个数据块作为下一个分组的索引块。</p><p class="tip">p151 索引块0 上方标着“2”，PPT 没有解释，可能是它所在的块号；p152 起索引块0 的内容放在超级块里。</p>`,pre:{sv:concept(0),card:'<h3>约定</h3><p>先想再看。</p>'},ask:'索引块自己也要占磁盘块。PPT 做了什么约定，省掉单独的索引块？',
+  note:'改变链接方式：<b>每个索引块指向的第一个块，作为下一个分组的索引块</b>。索引块0 指向 18、30、6、9，其中 18 就是索引块1；索引块1 指向 33、11、7、5，33 就是索引块2。索引块本身也是空闲块，以后也能分出去。',ref:'四章 p151；强化4 p96'},
+ {g:'grp',sv:grpSVG(S0),card:gcard(S0,'PPT 的初始数据'),
+  note:'实际的链接如图：<b>索引块0 的内容放在超级块中，一开始就被放入内存</b>（常驻内存）；每一组的第一个盘块作为下一组的索引块。分组0 是 18、30、6、9，分组1 是 33、11、7、5，分组2 是 60、1、3、99。',ref:'四章 p152；强化4 p96'},
+ {g:'grp',sv:grpSVG(S0,{memhl:1}),card:`<h3>索引块0（p153）</h3><table><tr><td class="h">N=4</td></tr><tr><td>18</td></tr><tr><td>30</td></tr><tr><td>6</td></tr><tr><td>9</td></tr></table>`,pre:{sv:grpSVG(S0),card:'<h3>索引块0</h3><p>先想再看。</p>'},ask:'索引块0 里除了 18、30、6、9 这四个块号，还记着什么？',
+  note:'索引块中除了包含下一分组中的所有磁盘块号，<b>还包含下一分组的盘块数量 N</b>。这里 N=4。每个索引块能记的块号有<b>数量上限</b>，超过上限要特殊处理（回收时会看到）。<b>最后一个分组只有一个索引块，其中记录 N=-1</b>（PPT 用块 18 → 索引块118 举例）；这套数据里块 60 的内容 PPT 没画，本页按这个约定当作 N=-1。',ref:'四章 p153–155；强化4 p97–99'},
+ {g:'grp',sv:grpSVG(A1.s,{out:9}),card:gcard(A1.s,'分出 9 以后（p157）'),pre:{sv:grpSVG(S0),card:gcard(S0,'分配前（p156）')},ask:'现在 N=4。要分配一个空闲块，分出哪一块？N 变成多少？要读盘吗？',
+  note:'每次分配都<b>从分组0 中分配</b>：取索引块0 里最后一个块号 <b>9</b>，N 减 1 变成 <b>3</b>。全在内存里完成，不用读盘。',ref:'四章 p156–157；强化4 p100–101'},
+ {g:'grp',sv:grpSVG(A2.s,{out:6}),card:gcard(A2.s,'分出 6 以后（p158）'),pre:{sv:grpSVG(A1.s),card:gcard(A1.s)},ask:'再分配一块呢？',
+  note:'分出 <b>6</b>，N 变成 <b>2</b>，索引块0 里剩 18、30。',ref:'四章 p158；强化4 p102'},
+ {g:'grp',sv:grpSVG(A3.s,{out:30}),card:gcard(A3.s,'分出 30 以后（p159）'),pre:{sv:grpSVG(A2.s),card:gcard(A2.s)},ask:'再分配一块呢？',
+  note:'分出 <b>30</b>，N 变成 <b>1</b>，只剩 18。注意 18 不是普通空闲块，它里面记着分组1 的全部信息。',ref:'四章 p159；强化4 p103'},
+ {g:'grp',sv:grpSVG(A4.s,{out:18,read:18,memhl:1}),card:gcard(A4.s,'分出 18 以后（p160）'),pre:{sv:grpSVG(A3.s,{hl:[18]}),card:gcard(A3.s)},ask:'N=1，分组0 里只剩唯一一个块 18（它是分组1 的索引块）。再分配一块，各分组和内存里的索引块会怎样变？（强化4 p95 原题）',
+  note:'若 N=1 后还要继续分配，就<b>把分组1 的索引块（块 18）的内容复制到索引块0 中</b>，再把块 18 分配出去。读块 18 是这一步唯一的一次磁盘 I/O。之后链长减 1，原来的分组1（33、11、7、5）成了分组0，N=4。强化4 p110 的答案：分组0 中的索引块内容将被复制到超级块中，并将该索引块分配给文件使用。',ref:'四章 p159–160；强化4 p95、p103–104、p110'},
+ {g:'grp',sv:grpSVG(S0),card:gcard(S0,'回收前（p161）'),
+  note:'<b>回收</b>：PPT 这一组图从初始状态重新开始（N=4，18、30、6、9），不接着上面的分配。规则是<b>每次回收到分组0 上</b>。',ref:'四章 p161；强化4 p105'},
+ {g:'grp',sv:grpSVG(R1.s,{back:[50],memhl:1}),card:gcard(R1.s,'回收 50 以后（p162）'),pre:{sv:grpSVG(S0),card:gcard(S0)},ask:'文件删除，块 50 要回收。索引块0 怎么变？要写盘吗？',
+  note:'把 50 记到索引块0 的末尾，N 加 1 变成 <b>5</b>，分组0 变成 18、30、6、9、50。只改内存，不用写盘。',ref:'四章 p162；强化4 p106'},
+ {g:'grp',sv:grpSVG(R2.s,{back:[128],write:128,memhl:1}),card:gcard(R2.s,'回收 128 以后（p164）'),pre:{sv:grpSVG(R1.s),card:gcard(R1.s,'现在 N=5（p163）')},ask:'假设分组上限是 5 个空闲块，现在 N=5 已经满了。再回收块 128，会怎样？',
+  note:'<b>将新回收的块作为一个新分组的索引，并将索引块0 的信息复制过去</b>：把 N=5、18 30 6 9 50 写进块 128（一次写盘），索引块0 变成 N=1、只记 128。组数加一：128 自成分组0，原分组0 成了分组1，后面依次后移。',ref:'四章 p163–164；强化4 p107–108'},
+ {g:'grp',sv:grpSVG(R3.s,{back:[66]}),card:gcard(R3.s,'回收 66 以后（p165）'),pre:{sv:grpSVG(R2.s),card:gcard(R2.s)},ask:'接着回收块 66 呢？',
+  note:'此后就可以在新的分组0 里继续插入了：66 记到索引块0 末尾，N=2，索引块0 是 128、66。',ref:'四章 p165；强化4 p109'},
+ {g:'grp',sv:grpSVG(R3.s),card:`<h3>成组链接法的优势（p166）</h3><ul><li>分配时：只有分组0 中的空闲块都分配完，才需要 I/O</li><li>回收时：只有分组0 中的空闲块数超出上限，才需要 I/O</li></ul>`,
+  note:'总结：内存里只放一个索引块，绝大多数分配、回收只改内存里的 N 和块号表，只有分组0 用完（读一次）或超上限（写一次）才动磁盘。下方演练区可以从 PPT 的数据出发自己点“分配一块”“回收块号 x”。',ref:'四章 p166'}
+];
+function build(){const F=[];STEPS.forEach((s,i)=>{if(s.ask)F.push({...s,...(s.pre||{}),si:i,q:s.ask,ask:1});F.push({...s,si:i,ask:0})});frames=F;at=0}
+function draw(f){$('view').innerHTML=f.sv;$('card').innerHTML=f.card||'';
+  const gi=ST.findIndex(x=>x[0]===f.g);
+  $('flow').innerHTML=ST.map(([k,n],i)=>`${i?'<span class="ar">→</span>':''}<button type="button" data-g="${k}" class="${i===gi?'on':(i<gi?'past':'')}">${n}</button>`).join('');
+  $('note').innerHTML=f.ask?`<span class="ask">${f.q}</span><span class="ref">先想一下，再按“下一步”看答案。</span>`:f.note+`<span class="ref">出处：${f.ref}</span>`}
+$('flow').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;stop();at=frames.findIndex(f=>f.g===b.dataset.g);render()};
+showSpd();build();render();
+
+/* ========== 位图换算器 ========== */
+const BMN=64;let bmFree,bmPick=null,bmChg=null;
+function bmReset(){const all=PPTBITS+FILL;bmFree=[...all].map(c=>c==='0');bmPick=null;bmChg=null}
+bmReset();
+const radio=n=>+document.querySelector(`input[name="${n}"]:checked`).value;
+function bmCfg(){return{n:+$('wl').value,b0:radio('base'),m:radio('mean')}}
+const bitOf=(p,m)=>bmFree[p]?String(m):String(1-m);
+function bmDraw(){const {n,b0,m}=bmCfg();const rows=Math.ceil(BMN/n),cw=Math.min(44,800/n),gx=70,top=34,rh=30;
+  const W=Math.max(880,gx+n*cw+20),H=top+rows*(rh+4)+16;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="位图" style="min-width:${Math.max(620,Math.round(n*cw*.75))}px">`;
+  const step=n>32?4:(n>16?2:1);
+  for(let j=0;j<n;j+=step)s+=T(gx+j*cw+cw/2,top-8,j+b0,`text-anchor="middle" font-size="10" fill="var(--muted)"`);
+  s+=T(gx-8,top-8,'位号',`text-anchor="end" font-size="10" fill="var(--muted)"`);
+  for(let i=0;i<rows;i++){s+=T(gx-8,top+i*(rh+4)+19,`字 ${i+b0}`,`text-anchor="end" font-size="11" fill="var(--muted)"`);
+    for(let j=0;j<n;j++){const p=i*n+j;if(p>=BMN)break;const x=gx+j*cw,y=top+i*(rh+4),pk=bmPick===p,ch=bmChg===p;
+      s+=`<rect x="${x+1}" y="${y}" width="${cw-2}" height="${rh}" rx="2" fill="${bmFree[p]?'color-mix(in srgb,var(--s4) 45%,transparent)':BUSY}" stroke="${pk?'var(--q)':(ch?'var(--cmp)':'var(--line)')}" stroke-width="${pk||ch?2.5:1}"/>`+T(x+cw/2,y+19,bitOf(p,m),`text-anchor="middle" font-size="${cw<20?10:13}" fill="var(--ink)" font-family="var(--mono)" font-weight="${pk||ch?700:400}"`)}}
+  $('bView').innerHTML=s+'</svg>'}
+function fromBlock(b,{n,b0}){const q=b-b0;return{i:Math.floor(q/n)+b0,j:q%n+b0}}
+function toBlock(i,j,{n,b0}){return n*(i-b0)+(j-b0)+b0}
+function fmB(b,c){const {n,b0}=c;const r=fromBlock(b,c);return b0===0?`字号 i = ⌊${b} ÷ ${n}⌋ = <b>${r.i}</b>，位号 j = ${b} mod ${n} = <b>${r.j}</b>`:`字号 i = ⌊(${b} − 1) ÷ ${n}⌋ + 1 = <b>${r.i}</b>，位号 j = (${b} − 1) mod ${n} + 1 = <b>${r.j}</b>`}
+function fmI(i,j,c){const {n,b0}=c;const b=toBlock(i,j,c);return b0===0?`块号 b = ${n} × ${i} + ${j} = <b>${b}</b>`:`块号 b = ${n} × (${i} − 1) + ${j} = <b>${b}</b>`}
+function bmFromB(){const c=bmCfg();$('bErr').textContent='';const b=+$('bb').value;
+  if($('bb').value===''||!Number.isInteger(b)||b<c.b0){$('bErr').textContent=`块号要填不小于 ${c.b0} 的整数。`;bmPick=null;bmDraw();return}
+  const r=fromBlock(b,c);$('bi').value=r.i;$('bj').value=r.j;const p=b-c.b0;bmPick=p<BMN?p:null;
+  $('bOut').innerHTML=`<p>块 ${b}：${fmB(b,c)}</p><p class="tip">${bmPick!=null?`这一位现在是 ${bitOf(p,c.m)}，表示${bmFree[p]?'空闲':'已分配'}。`:`超出下图的 64 块，只算公式。`}</p>`;bmDraw()}
+function bmFromIJ(){const c=bmCfg();$('bErr').textContent='';const i=+$('bi').value,j=+$('bj').value;
+  if($('bi').value===''||$('bj').value===''||!Number.isInteger(i)||!Number.isInteger(j)||i<c.b0||j<c.b0||j>c.n-1+c.b0){$('bErr').textContent=`字号要是不小于 ${c.b0} 的整数，位号要在 ${c.b0}～${c.n-1+c.b0} 之间。`;return}
+  const b=toBlock(i,j,c);$('bb').value=b;const p=b-c.b0;bmPick=p<BMN?p:null;
+  $('bOut').innerHTML=`<p>字 ${i} 位 ${j}：${fmI(i,j,c)}</p><p class="tip">${bmPick!=null?`这一位现在是 ${bitOf(p,c.m)}，表示${bmFree[p]?'空闲':'已分配'}。`:`超出下图的 64 块，只算公式。`}</p>`;bmDraw()}
+$('bb').oninput=bmFromB;$('b2b').onclick=bmFromIJ;['bi','bj'].forEach(k=>$(k).onchange=bmFromIJ);
+[...document.querySelectorAll('input[name="base"],input[name="mean"]'),$('wl')].forEach(el=>el.onchange=()=>{bmFromB();bmMsg()});
+let bmLast='';function bmMsg(t){if(t!=null)bmLast=t;$('bNote').innerHTML=bmLast||'点“分配一块”从头扫描找第一个表示空闲的位；回收就是把那一位改回表示空闲的值。'}
+$('bAlloc').onclick=()=>{const c=bmCfg();const p=bmFree.indexOf(true);if(p<0){bmMsg('<span class="warn">64 块都已分配，没有空闲块了。</span>');return}
+  bmFree[p]=false;bmPick=p;bmChg=p;const b=p+c.b0,r=fromBlock(b,c);$('bb').value=b;$('bi').value=r.i;$('bj').value=r.j;
+  bmMsg(`从头扫到字 ${r.i} 位 ${r.j}，它是第一个值为 ${c.m} 的位（表示空闲），改成 ${1-c.m}。${fmI(r.i,r.j,c)}，块 ${b} 分给文件。`);
+  $('bOut').innerHTML=`<p>块 ${b}：${fmB(b,c)}</p>`;bmDraw()};
+$('bFree').onclick=()=>{const c=bmCfg();const b=+$('bFreeX').value;const p=b-c.b0;
+  if($('bFreeX').value===''||!Number.isInteger(b)||p<0||p>=BMN){bmMsg(`<span class="warn">块号要在 ${c.b0}～${BMN-1+c.b0} 之间。</span>`);return}
+  if(bmFree[p]){bmMsg(`<span class="warn">块 ${b} 本来就空闲，不能重复回收。</span>`);return}
+  bmFree[p]=true;bmPick=p;bmChg=p;const r=fromBlock(b,c);$('bb').value=b;$('bi').value=r.i;$('bj').value=r.j;
+  bmMsg(`回收块 ${b}：${fmB(b,c).replace(/<\/?b>/g,'')}，把这一位改成 ${c.m}（表示空闲）。`);$('bOut').innerHTML=`<p>块 ${b}：${fmB(b,c)}</p>`;bmDraw()};
+$('bReset').onclick=()=>{bmReset();bmMsg('');bmFromB()};
+bmFromB();bmMsg();
+
+/* ========== 成组链接演练 ========== */
+let gS=clone(GINIT),gPend=null,gLog=[],gIO={r:0,w:0};
+function gLim(){const v=+$('gLim').value;return Number.isInteger(v)&&v>=2&&v<=8?v:null}
+function gShow(o){$('gView').innerHTML=grpSVG(gS,o||{});$('gCard').innerHTML=gcard(gS)+`<p>磁盘 I/O 累计：读 ${gIO.r} 次，写 ${gIO.w} 次</p>${gLog.length?`<h3>操作记录</h3><ol class="log">${gLog.map(x=>`<li>${x}</li>`).join('')}</ol>`:''}`}
+function gAsk(q,act){gPend=act;$('gNote').innerHTML=`<span class="ask">${q}</span> <button class="btn" id="gRev" type="button">揭晓</button>`;$('gRev').onclick=()=>{const a=gPend;gPend=null;a()};$('gRev').focus()}
+function doAlloc(){const r=gAllocOp(gS);if(r.err){$('gNote').innerHTML=`<span class="warn">${r.err}</span>`;gShow();return}
+  gS=r.s;let t;if(r.read!=null){gIO.r++;t=r.end?`N 原来是 1，只剩块 ${r.blk}。读出块 ${r.blk} 的内容是 N=-1，说明后面没有分组了；索引块0 记成 N=-1，块 ${r.blk} 作为最后一个空闲块分出去（这里的处理是本页补充，PPT 没讲到这一步）。`:`N 原来是 1，只剩块 ${r.blk}：先把块 ${r.blk} 的内容（N=${gS.N}，${gS.list.join(' ')}）读进索引块0（读盘 1 次），再把块 ${r.blk} 分出去。`}
+  else t=`取索引块0 的最后一个块号 ${r.blk} 分出去，N 减 1 变成 ${gS.N}。不用读盘。`;
+  gLog.push(`分配 → 块 ${r.blk}${r.read!=null?'（读盘）':''}`);$('gNote').innerHTML=t;gShow({out:r.blk,read:r.read,memhl:1})}
+function doFree(x){const lim=gLim();const r=gFreeOp(gS,x,lim);gS=r.s;let t;
+  if(r.write!=null){gIO.w++;t=r.fromEnd?`索引块0 原来是 N=-1（没有空闲块）。本页的处理：把 N=-1 写进块 ${x}，让它当末尾分组的索引块，索引块0 变成 N=1、${x}（写盘 1 次，本页补充）。`:`索引块0 已有 ${lim} 个块号，到了上限：把它的内容写进块 ${x}（写盘 1 次），块 ${x} 成为新分组的索引块，索引块0 变成 N=1、${x}。`}
+  else t=`把 ${x} 记到索引块0 末尾，N 加 1 变成 ${gS.N}。不用写盘。`;
+  gLog.push(`回收 ${x}${r.write!=null?'（写盘）':''}`);$('gNote').innerHTML=t;gShow({back:[x],write:r.write,memhl:1})}
+$('gAlloc').onclick=()=>{$('gErr').textContent='';if($('gGuess').checked&&gS.N>0){gShow();gAsk(gS.N>1?`现在 N=${gS.N}。这次分出哪一块？N 变成多少？要读盘吗？`:`现在 N=1，只剩块 ${gS.list[0]}。再分配一块会发生什么？`,doAlloc)}else doAlloc()};
+$('gFree').onclick=()=>{$('gErr').textContent='';const x=+$('gX').value,lim=gLim();
+  if(lim==null){$('gErr').textContent='分组上限填 2～8 的整数。';return}
+  if($('gX').value===''||!Number.isInteger(x)||x<0||x>199){$('gErr').textContent='块号填 0～199 的整数。';return}
+  if(freeSet(gS).has(x)){$('gErr').textContent=`块 ${x} 现在就是空闲块（在某个分组里），不能重复回收。`;return}
+  if($('gGuess').checked){gShow();gAsk(gS.N>0&&gS.N<lim?`回收块 ${x}：N 会变成多少？要写盘吗？`:(gS.N<=0?`现在没有空闲块（N=-1），回收块 ${x} 会怎样？`:`索引块0 已经有 ${gS.N} 个，上限是 ${lim}。回收块 ${x} 会怎样？`),()=>doFree(x))}else doFree(x)};
+$('gReset').onclick=()=>{gS=clone(GINIT);gLog=[];gIO={r:0,w:0};gPend=null;$('gErr').textContent='';$('gNote').innerHTML='已重置为 PPT 的初始数据。';gShow()};
+$('gNote').innerHTML='点“分配一块”或填块号后点“回收”。勾着“先猜再看”时会先问你结果，按“揭晓”再执行。';gShow();
+
+/* ========== 自测与来源 ========== */
+const QS=[
+ ['1) 空闲磁盘块管理和文件分配有哪些区别？可以用完全一样的方案吗？为什么？（四章 p134）','PPT 的答案（p135–136）：空闲块数目远大于一个文件占用的块数，不适合把所有信息调入内存，除非做特殊处理（如位图法）；空闲块每一块地位相同，分配任意位置的块均可，不像文件那样有逻辑上的先后差异。所以不能照搬文件的索引分配。'],
+ ['2) 空闲盘块链和空闲盘区链分别怎样分配、怎样回收？各有什么缺陷？（四章 p139–147）','盘块链：从链首依次摘下所需数目的块；回收的块依次插入链尾；缺陷是链过长，大量分配时效率极低。盘区链：选一个大小足够的盘区（通常首次适应）；回收时要和相邻空闲盘区合并；缺陷是只有大量连续空闲块时链才短，条件苛刻。'],
+ ['3) 为何不用类似文件实现中的索引表法管理空闲块？（四章 p147）','PPT 答案（p148）：空闲磁盘块数目过多，索引表过于庞大，放入内存需要很多次磁盘 I/O。'],
+ ['4) 若磁盘空闲空间管理使用位图法，如何分配一个空闲的磁盘块给文件？如何将文件的某个磁盘块释放？（强化4 p93、p114）','PPT 答案：找到 bitmap 中一个取值为 0 的位，将其置为 1，并将它所代表的磁盘块分配给文件使用（p94）；释放时直接将位图的对应比特位置 0 即可（p115）。'],
+ ['5) 若管理空闲磁盘块的方法是成组链接法，且 0 号分组（即首个分组）中仅剩唯一一个索引块，则进行一次空闲盘块分配后，各分组和内存中的索引块会发生哪些变化？（强化4 p95、p110）','PPT 答案（p110）：分组0 中的索引块内容将被复制到超级块中，并将该索引块分配给文件使用。对照数据：内存里 N=1、只剩 18 时，读块 18 → 索引块0 变成 N=4、33 11 7 5，块 18 分出去，链长减 1，原分组1 成为分组0（四章 p159–160）。'],
+ ['6)（迁移）空闲盘块表是 (2,4)、(9,3)、(15,5)、(26,10)、(45,5)，每项是（起始块号，块数）。现在回收块 6–8，表变成什么？','6–8 前接区1（2–5）、后接区2（9–11），前后都相邻，三区合一：(2,10)、(15,5)、(26,10)、(45,5)，表少一项。（本页整理）'],
+ ['7)（迁移）位图按字存放，字长 16 位，块号、字号、位号都从 1 开始编号，1 表示空闲。块 70 对应哪个字哪一位？字 3 位 9 对应几号块？分配块 70 时这一位改成几？','字号 ⌊(70−1)÷16⌋+1 = 5，位号 (70−1) mod 16 + 1 = 6；字 3 位 9：16×(3−1)+9 = 41 号块；1 表示空闲，分配后改成 0。可以在上面的换算器里切换设定验证。（本页整理）'],
+ ['8)（迁移）成组链接法，分组上限 5。内存里的索引块0 是 N=2、记着 128、66；块 128 里是 N=5、18 30 6 9 50。连续分配 3 个空闲块，依次分出哪几块？共读几次盘？最后索引块0 是什么？','先分 66（N=1，只剩 128）；再分配时把块 128 的内容读进索引块0（读盘 1 次），N=5、18 30 6 9 50，然后分出 128；第三次分出 50，N=4、18 30 6 9。依次是 66、128、50，读盘 1 次。这正是 p165 之后接着分配的情形，可以在演练区先回收 50、128、66 再分配验证。（本页整理）'],
+ ['9)（迁移）成组链接法，分组上限 5，从 PPT 初始状态（N=4、18 30 6 9）出发，依次回收 50、128、66、77、88、95。哪几次要写盘？最后索引块0 是什么？','回收 50 后 N=5；回收 128 时已满，写盘一次，索引块0 变成 N=1、128；之后 66、77、88、95 依次压入，N=5、128 66 77 88 95，刚好到上限，没有再写盘；再回收一块才会第二次写盘。可以在演练区照着点一遍验证。（本页整理）']
+];
+$('qs').innerHTML=QS.map(([q,a])=>`<details><summary><b>问</b> ${q}</summary><div class="ans">${a}</div></details>`).join('');
+$('src').innerHTML=['四章 p130–132（外存布局，空闲空间管理区），p134–136（空闲块管理与文件分配的区别），逐页看过图','四章 p137–138（空闲表法，表格数据），p139–145（空闲盘块链、空闲盘区链），p146（位图），p147–149（链表缺陷，为何不用索引）','四章 p150–166（成组链接法整套动画：链接方式、索引块内容、上限、末尾 N=-1、分配、回收、优势），逐页看过图','强化4 p78–88（超级块与位图，计算见开机到用户进程页），p89–95（写入时分配一块：位图法、成组链接法的问题），p96–110（成组链接法，与四章同一套动画），p113–115（删除与位图回收），逐页看过图','三章 p50–52、p55–56（动态分区的空闲块表、首次适应、回收合并；本页用来类比空闲表法的分配与回收）'].map(x=>`<li>${x}</li>`).join('');
+</script>
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>I/O 控制方式与缓冲</title>
+<style>
+/* Part 1: three parameterised timelines (polling, interrupt, DMA) with a time cursor and a tally. Part 2: a stepped Gantt chart of T/M/C for single, double and no buffer. Part 3: a clickable buffer pool and the 0–15 circular buffer. Then tables, closed-book questions and sources. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --hw:#8a6d3b;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:82ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:17px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:13px var(--sans);font-weight:600;margin:10px 0 4px;color:var(--muted)}
+.modes{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px;margin-top:8px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form label>span{white-space:nowrap}
+.form input[type=number]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6.5em}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.view{overflow-x:auto;margin-top:6px}
+.view svg{display:block;min-width:760px;width:100%;height:auto}
+svg text{font-family:var(--mono);font-size:11px;fill:var(--ink)}
+svg text.lab{font-family:var(--sans);font-size:12px;fill:var(--muted)}
+svg text.ttl{font-family:var(--sans);font-size:13px;font-weight:600}
+svg .axis{stroke:var(--line);stroke-width:1}
+svg .tick{fill:var(--muted);font-size:10px}
+svg .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 3}
+.s-io{fill:color-mix(in srgb,var(--mv) 34%,var(--paper));stroke:var(--mv)}
+.s-poll{fill:color-mix(in srgb,var(--mv) 16%,var(--paper));stroke:var(--mv);stroke-dasharray:3 2}
+.s-oth{fill:color-mix(in srgb,var(--done) 30%,var(--paper));stroke:var(--done)}
+.s-dev{fill:color-mix(in srgb,var(--cmp) 32%,var(--paper));stroke:var(--cmp)}
+.s-dma{fill:color-mix(in srgb,var(--hw) 30%,var(--paper));stroke:var(--hw)}
+.s-T{fill:color-mix(in srgb,var(--q) 34%,var(--paper));stroke:var(--q)}
+.s-M{fill:color-mix(in srgb,var(--done) 34%,var(--paper));stroke:var(--done)}
+.s-C{fill:color-mix(in srgb,var(--cmp) 38%,var(--paper));stroke:var(--cmp)}
+.s-new{stroke-width:2.5}
+.intm{fill:var(--mv)}
+.cursor{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 3}
+.startmk{stroke:var(--q);stroke-width:3}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:4px;vertical-align:-2px;border:1px solid}
+.lg-io{background:color-mix(in srgb,var(--mv) 34%,var(--paper));border-color:var(--mv)!important}
+.lg-poll{background:color-mix(in srgb,var(--mv) 16%,var(--paper));border-color:var(--mv)!important;border-style:dashed!important}
+.lg-oth{background:color-mix(in srgb,var(--done) 30%,var(--paper));border-color:var(--done)!important}
+.lg-dev{background:color-mix(in srgb,var(--cmp) 32%,var(--paper));border-color:var(--cmp)!important}
+.lg-dma{background:color-mix(in srgb,var(--hw) 30%,var(--paper));border-color:var(--hw)!important}
+.lg-int{background:var(--mv);border-color:var(--mv)!important;clip-path:polygon(50% 100%,0 0,100% 0)}
+.lg-T{background:color-mix(in srgb,var(--q) 34%,var(--paper));border-color:var(--q)!important}
+.lg-M{background:color-mix(in srgb,var(--done) 34%,var(--paper));border-color:var(--done)!important}
+.lg-C{background:color-mix(in srgb,var(--cmp) 38%,var(--paper));border-color:var(--cmp)!important}
+.cur-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px}
+.cur-row input{flex:1 1 200px;accent-color:var(--green);min-width:0}
+.now{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:8px;margin-top:6px}
+.now div{border:1px solid var(--line);border-radius:5px;padding:6px 9px;background:var(--bg);font-size:13px}
+.now b{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:4.6em;margin-top:10px}
+.note .ask{color:var(--q);font-weight:600}
+.note .ref{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.note .warn{color:var(--mv)}
+.note .ok{color:var(--done);font-weight:600}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.tw{overflow-x:auto}
+.res{border-collapse:collapse;font-size:13px}
+.res th,.res td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+.res th{color:var(--muted);font-weight:400}
+.res thead th{color:var(--ink);font-weight:600;background:var(--hl);white-space:nowrap}
+.res td.num{font-family:var(--mono);text-align:right;white-space:nowrap}
+.res td b{color:var(--mv)}
+.res tr.sup td,.res tr.sup th{background:color-mix(in srgb,var(--muted) 8%,transparent)}
+.fm{font:13px var(--mono);overflow-wrap:anywhere}
+.sumgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px;margin-top:10px}
+.card{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg);min-width:0}
+.card.on{border-color:var(--q);box-shadow:0 0 0 1px var(--q) inset}
+.card .big{font:22px var(--mono);font-weight:600;color:var(--green)}
+.card h4{margin:0;font-size:13px}
+.sup-tag{display:inline-block;font-size:11px;border:1px solid var(--muted);color:var(--muted);border-radius:3px;padding:0 4px;margin-left:4px;vertical-align:1px;font-weight:400}
+/* buffer pool */
+.pool{display:grid;gap:10px}
+.pool .emq{border:1.5px solid var(--q);border-radius:6px;padding:6px 8px;background:var(--bg)}
+.pool .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:560px){.pool .cols{grid-template-columns:minmax(0,1fr)}}
+.pool .col{border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--bg);display:grid;gap:6px}
+.slotrow{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-height:30px}
+.slotrow .nm{font-size:12px;color:var(--muted);min-width:6.2em}
+.wb{border:1.5px dashed var(--line);border-radius:4px;min-width:62px;min-height:26px;padding:1px 6px;font:12px var(--mono);display:inline-flex;align-items:center;justify-content:center;color:var(--muted)}
+.buf{display:inline-flex;align-items:center;gap:3px;border:1.5px solid var(--ink);border-radius:4px;padding:1px 6px;font:12px var(--mono);background:var(--paper);color:var(--ink);transition:background .3s}
+.buf.empty{border-color:var(--q)}
+.buf.din{border-color:var(--cmp);background:color-mix(in srgb,var(--cmp) 26%,var(--paper))}
+.buf.dout{border-color:var(--done);background:color-mix(in srgb,var(--done) 26%,var(--paper))}
+.buf.flash{outline:3px solid var(--mv);outline-offset:1px}
+.down{font-size:12px;color:var(--muted);padding-left:6.2em}
+.ops{display:flex;flex-wrap:wrap;gap:6px}
+.ring{display:grid;grid-template-columns:repeat(16,minmax(26px,1fr));gap:2px;min-width:480px;padding-bottom:4px}
+.cell{text-align:center;border:1.5px solid var(--line);border-radius:3px;font:13px var(--mono);padding:4px 0;background:color-mix(in srgb,var(--q) 22%,var(--paper))}
+.cell.full{background:color-mix(in srgb,var(--done) 38%,var(--paper));border-color:var(--done)}
+.ptr{font:11px var(--mono);text-align:center;min-height:2.6em;line-height:1.3}
+.ptr .pi{color:var(--q);font-weight:700}
+.ptr .po{color:var(--done);font-weight:700}
+details{border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg);margin-top:6px}
+details summary{cursor:pointer;font-size:14px}
+details summary b{color:var(--q);font-weight:600}
+details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.src{font-size:13px;margin:0;padding-left:1.3em}
+.src li{margin:2px 0}
+@media (prefers-reduced-motion:reduce){.buf{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="IO全链路.html">I/O 全链路</a><a href="磁盘调度.html">磁盘调度</a></div>
+  <header>
+    <h1>I/O 控制方式与缓冲</h1>
+    <p class="sub">“I/O 全链路”页已经把 scanf、read、缺页三条链路一层一层走过了，这里不再重复那些步骤，只做两件事：把同一个读任务放在三种控制方式下并排计时，看 CPU 到底被占了多少；再把单缓冲、双缓冲按块画成时间线，算出处理 n 块的总时间，并和 PPT 的公式对上。最后是缓冲池和循环缓冲区的小动画。</p>
+  </header>
+
+  <!-- ===== 1 ===== -->
+  <section class="panel">
+    <h2>一、同一个任务，三种控制方式：从设备读 N 个字到内存</h2>
+    <ol class="rules">
+      <li><b>轮询</b>：每次读<b>一个字</b>，对读入的每个字，CPU 循环检查设备状态，直到这个字已经在 I/O 控制器的数据寄存器里，再由 CPU 取走。CPU 与 I/O 设备<b>串行</b>工作。<span class="tip">（五章 p50）</span></li>
+      <li><b>中断</b>：设备独立完成对自身寄存器的读写，完成后向 CPU 发中断，由 CPU 完成设备寄存器与内存的数据交换，数据要借助 CPU 的寄存器，CPU 仍参与具体传输。仍是<b>每个字一次中断</b>。<span class="tip">（五章 p51；逐层过程见“I/O 全链路”页场景 ①）</span></li>
+      <li><b>DMA</b>：以<b>数据块</b>为基本单位，CPU 发出传输命令（初始化方向、磁盘地址、内存地址、长度）后由 DMA 控制器完成，不需要 CPU 参与，<b>整块传完才中断一次</b>。<span class="tip">（五章 p52、p54–59；强化3 p99–105）</span></li>
+    </ol>
+    <div class="form" id="f1">
+      <label><span>数据量 N（字）</span><input id="pN" type="number" min="1" max="32" value="8"></label>
+      <label><span>DMA 每块 B（字）</span><input id="pB" type="number" min="1" max="32" value="4"></label>
+      <label><span>设备准备一个字 t<sub>d</sub></span><input id="pTd" type="number" min="1" max="200" value="10"></label>
+      <label><span>启动／初始化 t<sub>s</sub></span><input id="pTs" type="number" min="0" max="50" value="1"></label>
+      <label><span>轮询取一个字 t<sub>x</sub></span><input id="pTx" type="number" min="0" max="50" value="1"></label>
+      <label><span>一次中断处理 t<sub>i</sub></span><input id="pTi" type="number" min="1" max="50" value="2"></label>
+    </div>
+    <div class="err" id="e1" role="alert"></div>
+    <p class="tip">单位是“时间单位”，可以当作 μs。PPT 没给这一部分的数值，默认数据和下面的计时模型是<b>本页补充</b>：轮询时每个字 CPU 一直查状态到字准备好，再花 t<sub>x</sub> 取走；中断方式下中断处理程序花 t<sub>i</sub> 把字搬进内存并启动下一个字；DMA 每块先花 t<sub>s</sub> 初始化，块传完花 t<sub>i</sub> 处理一次中断。DMA 传送时偷用总线的几个周期忽略不计。</p>
+    <div id="tl1"></div>
+    <div class="legend"><span><i class="lg-io"></i>CPU 忙于这次 I/O（启动、取数、中断处理）</span><span><i class="lg-poll"></i>CPU 在轮询，空转查状态</span><span><i class="lg-oth"></i>CPU 可以执行其他进程</span><span><i class="lg-dev"></i>设备准备一个字</span><span><i class="lg-dma"></i>DMA 控制器把一块逐字送进内存</span><span><i class="lg-int"></i>中断发生</span></div>
+    <div class="cur-row"><label for="cur1">时间游标</label><input id="cur1" type="range" min="0" max="100" value="0"><span class="count" id="cur1v"></span></div>
+    <div class="now" id="now1"></div>
+    <h3>算一下（随参数自动更新）</h3>
+    <div class="tw" id="tally1"></div>
+    <p class="tip">五章 p65–66 的“阻塞 I/O／非阻塞 I/O”可以对照着看：阻塞 I/O 读数据时进程进入阻塞，直到数据读出；PPT 说的非阻塞 I/O 是 CPU 一直轮询设备，进程一直占用 CPU，正对应上面第一条时间线。</p>
+  </section>
+
+  <!-- ===== 2 ===== -->
+  <section class="panel">
+    <h2>二、单缓冲和双缓冲：T 输入、M 传送、C 处理</h2>
+    <ol class="rules">
+      <li>T：数据从 I/O 设备输入到缓冲区；M：从缓冲区传送到工作区；C：CPU 在工作区处理。<span class="tip">（五章 p17–18）</span></li>
+      <li><b>同一个部件的使用必须互斥</b>：缓冲区在 T 和 M 时都被占着，工作区在 M 和 C 时都被占着。这是算时间的唯一规则。<span class="tip">（五章 p18 “计算缓冲时间的注意事项”）</span></li>
+      <li>单缓冲：缓冲区被 M 取空后才能输入下一块；双缓冲：设备可以往另一个缓冲区输入，<b>C 与 M 可以和 T 并行</b>。<span class="tip">（五章 p19–28，p26 页眉手写“C 与 M 可以与 T 并行”）</span></li>
+    </ol>
+    <div class="modes" id="modes2" role="group" aria-label="缓冲方式"></div>
+    <div class="form">
+      <label>T 输入<input id="qT" type="number" min="1" max="1000" value="100"></label>
+      <label>M 传送<input id="qM" type="number" min="1" max="1000" value="50"></label>
+      <label>C 处理<input id="qC" type="number" min="1" max="1000" value="10"></label>
+      <label>块数 n<input id="qN" type="number" min="1" max="20" value="10"></label>
+      <label class="chk"><input id="guess" type="checkbox" checked> 先猜再看</label>
+    </div>
+    <div class="presets"><span>换一组：</span><button class="btn" type="button" data-p="100,50,10,10">PPT 例题 p29（T 最大）</button><button class="btn" type="button" data-p="50,20,40,5">C 和 T 接近</button><button class="btn" type="button" data-p="30,20,60,6">C 最大</button><button class="btn" type="button" data-p="40,30,30,6">M+C 大于 T</button></div>
+    <div class="err" id="e2" role="alert"></div>
+    <div class="view" id="tl2"></div>
+    <div class="legend"><span><i class="lg-T"></i>T 输入</span><span><i class="lg-M"></i>M 传送（同时占缓冲区和工作区）</span><span><i class="lg-C"></i>C 处理</span><span>行的画法照 PPT p30–31：T 画在 I/O 设备行，M 画在它取数的缓冲区行，C 画在工作区行。</span></div>
+    <div class="note" id="note2" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="3"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+    <p class="tip">每一步停在某个 T／M／C 开始或结束的时刻。“先猜再看”开着时，前 3 块的 T、M 开始前先问你它在等什么。键盘 ← → 单步，空格播放／暂停。</p>
+    <div class="sumgrid" id="sum2"></div>
+  </section>
+
+  <!-- ===== 3 ===== -->
+  <section class="panel">
+    <h2>三、缓冲池：空缓冲队列、输入队列、输出队列</h2>
+    <p class="tip" style="margin:0 0 8px">照五章 p33–34 的图。缓冲池里的缓冲区挂在三个队列上；hin、sin、hout、sout 是正在用的四个<b>工作缓冲区</b>。点下面四个按钮，看缓冲区怎么流转。每次操作分两拍：先从某个队列摘下一个缓冲区当工作缓冲区，用完再挂到另一个队列。</p>
+    <div class="ops" id="ops">
+      <button class="btn" type="button" data-op="hin">收容输入</button>
+      <button class="btn" type="button" data-op="sin">提取输入</button>
+      <button class="btn" type="button" data-op="hout">收容输出</button>
+      <button class="btn" type="button" data-op="sout">提取输出</button>
+      <button class="btn" type="button" id="poolReset">重置</button>
+    </div>
+    <div class="pool" style="margin-top:10px">
+      <div class="emq"><div class="slotrow"><span class="nm">空缓冲队列</span><span id="qE"></span></div></div>
+      <div class="cols">
+        <div class="col"><h3 style="margin:0">输入这一侧</h3>
+          <div class="slotrow"><span class="nm">hin</span><span id="wHin"></span><span class="tip" style="margin:0">输入设备 → 收容输入</span></div>
+          <div class="down">↓ 装满后挂到队尾</div>
+          <div class="slotrow"><span class="nm">输入队列</span><span id="qI"></span></div>
+          <div class="down">↓ 从队首摘下</div>
+          <div class="slotrow"><span class="nm">sin</span><span id="wSin"></span><span class="tip" style="margin:0">提取输入 → 等待输入的用户进程</span></div>
+        </div>
+        <div class="col"><h3 style="margin:0">输出这一侧</h3>
+          <div class="slotrow"><span class="nm">hout</span><span id="wHout"></span><span class="tip" style="margin:0">准备输出的用户进程 → 收容输出</span></div>
+          <div class="down">↓ 装满后挂到队尾</div>
+          <div class="slotrow"><span class="nm">输出队列</span><span id="qO"></span></div>
+          <div class="down">↓ 从队首摘下</div>
+          <div class="slotrow"><span class="nm">sout</span><span id="wSout"></span><span class="tip" style="margin:0">提取输出 → 输出设备</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note" id="note3" role="status" aria-live="polite"></div>
+    <p class="tip">p33 只画了四个工作缓冲区和设备、进程的关系；p34 补上三个队列。p34 图里“收容输出”的箭头画成从 hout 指向池外，和 p33（准备输出的用户进程 → hout）方向相反，按 p33 理解：数据是进程放进 hout 的。</p>
+
+    <h3 style="margin-top:16px">循环缓冲区（五章 p32）</h3>
+    <p class="tip" style="margin:0">缓冲区构成一个循环，in 指向输入位置，out 指向输出位置，类似管道和循环队列。初始状态照 PPT：in = 5，out = 12，绿色是已装数据的格子（12～15、0～4），蓝色是空格子。</p>
+    <div class="ops" style="margin-top:8px"><button class="btn" type="button" id="rIn">输入一个（写 in 处）</button><button class="btn" type="button" id="rOut">输出一个（读 out 处）</button><button class="btn" type="button" id="rReset">回到 PPT 的状态</button></div>
+    <div class="view"><div class="ring" id="ring"></div><div class="ring" id="ringP"></div></div>
+    <div class="note" id="note4" role="status" aria-live="polite"></div>
+  </section>
+
+  <!-- ===== 4 ===== -->
+  <section class="panel"><h2>对照表：四种控制方式</h2><div class="tw" id="cmp1"></div>
+    <p class="tip">五章 p49 只列了轮询、中断、DMA 三种；通道在五章 p39 只作为“一个通道供多个设备控制器共享使用”的硬件层次出现，没有讲成一种控制方式，所以通道这一行是<b>本页补充</b>。</p></section>
+  <section class="panel"><h2>对照表：三种缓冲情形的时间</h2><div class="tw" id="cmp2"></div></section>
+  <section class="panel"><h2>闭卷自测</h2><p class="tip" style="margin:0 0 4px">参考要点是本页整理的；PPT 自己有答案的已注明。数值题可以用上面的计算器核对。</p><div id="qs"></div></section>
+  <section class="panel"><h2>来源</h2><ol class="src" id="src"></ol></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=x=>Number.isInteger(x)?String(x):x.toFixed(2).replace(/\.?0+$/,'');
+const num=(id,lo,hi)=>{const v=Number($(id).value);if(!Number.isFinite(v)||v<lo||v>hi||!Number.isInteger(v))return null;return v};
+
+/* ================= 1. 控制方式时间线 ================= */
+function sim1(mode,P){const {N,B,td,ts,tx,ti}=P;const seg=[],ints=[];let t=0;
+  const add=(lane,s,e,cls,lab)=>{if(e>s)seg.push({lane,s,e,cls,lab})};
+  if(mode==='poll'){add('io',0,ts,'io','启动');t=ts;
+    for(let k=1;k<=N;k++){add('dev',t,t+td,'dev','字'+k);add('io',t,t+td,'poll','查状态');add('io',t+td,t+td+tx,'io','取'+k);t+=td+tx}}
+  else if(mode==='int'){add('io',0,ts,'io','启动');t=ts;
+    for(let k=1;k<=N;k++){add('dev',t,t+td,'dev','字'+k);add('oth',t,t+td,'oth','');ints.push(t+td);add('io',t+td,t+td+ti,'io','中断'+k);t+=td+ti}}
+  else{let left=N,b=0;while(left>0){const sz=Math.min(B,left);left-=sz;b++;
+      add('io',t,t+ts,'io','设置');t+=ts;add('dev',t,t+sz*td,'dma','块'+b+'（'+sz+'字）');seg[seg.length-1].words=sz;add('oth',t,t+sz*td,'oth','');t+=sz*td;ints.push(t);add('io',t,t+ti,'io','中断');t+=ti}}
+  const cpuIO=seg.filter(s=>s.lane==='io').reduce((a,s)=>a+s.e-s.s,0);
+  const oth=seg.filter(s=>s.lane==='oth').reduce((a,s)=>a+s.e-s.s,0);
+  return {seg,ints,total:t,cpuIO,oth}}
+const M1=[['poll','程序直接控制（轮询）'],['int','中断驱动'],['dma','DMA']];
+const LANES=[['io','CPU：这次 I/O'],['oth','CPU：其他进程'],['dev','设备／DMA']];
+let R1={},P1=null;
+function draw1(){$('e1').textContent='';
+  const N=num('pN',1,32),B=num('pB',1,32),td=num('pTd',1,200),ts=num('pTs',0,50),tx=num('pTx',0,50),ti=num('pTi',1,50);
+  if([N,B,td,ts,tx,ti].includes(null)){$('e1').textContent='请填整数：N、B 在 1～32，t_d 在 1～200，t_s、t_x 在 0～50，t_i 在 1～50。';return}
+  P1={N,B,td,ts,tx,ti};M1.forEach(([m])=>R1[m]=sim1(m,P1));
+  const maxT=Math.max(...M1.map(([m])=>R1[m].total));
+  const W=900,L=118,Rp=16,sc=(W-L-Rp)/maxT,rowH=24,top=30;
+  const step=niceStep(maxT/9);
+  $('tl1').innerHTML=M1.map(([m,name])=>{const r=R1[m];const H=top+LANES.length*(rowH+6)+22;
+    let g=`<text class="ttl" x="4" y="16">${name}</text><text class="lab" x="${W-Rp}" y="16" text-anchor="end">总时间 ${fmt(r.total)}，中断 ${r.ints.length} 次</text>`;
+    for(let x=0;x<=maxT+1e-9;x+=step){const X=L+x*sc;g+=`<line class="grid" x1="${X}" y1="${top-4}" x2="${X}" y2="${H-18}"/><text class="tick" x="${X}" y="${H-6}" text-anchor="middle">${fmt(x)}</text>`}
+    LANES.forEach(([ln,lab],i)=>{const y=top+i*(rowH+6);g+=`<text class="lab" x="4" y="${y+rowH/2+4}">${lab}</text><line class="axis" x1="${L}" y1="${y+rowH}" x2="${W-Rp}" y2="${y+rowH}"/>`;
+      r.seg.filter(s=>s.lane===ln).forEach(s=>{const x=L+s.s*sc,w=(s.e-s.s)*sc;
+        g+=`<rect class="s-${s.cls}" x="${x}" y="${y}" width="${Math.max(w,1)}" height="${rowH}" rx="2"><title>${esc((s.lab||'执行其他进程')+'：'+fmt(s.s)+'～'+fmt(s.e))}</title></rect>`;
+        if(s.words){for(let k=1;k<s.words;k++){const xx=x+w*k/s.words;g+=`<line x1="${xx}" y1="${y+4}" x2="${xx}" y2="${y+rowH-4}" style="stroke:var(--hw);stroke-width:1"/>`}}
+        if(s.lab&&w>=s.lab.length*12+4)g+=`<text x="${x+w/2}" y="${y+rowH/2+4}" text-anchor="middle">${esc(s.lab)}</text>`})});
+    r.ints.forEach(t=>{const X=L+t*sc;g+=`<path class="intm" d="M${X-5} ${top-11} L${X+5} ${top-11} L${X} ${top-3} Z"><title>中断：t = ${fmt(t)}</title></path>`});
+    g+=`<line class="cursor" id="cur-${m}" x1="${L}" y1="${top-12}" x2="${L}" y2="${H-18}"/>`;
+    return `<div class="view"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${name}的时间线">${g}</svg></div>`}).join('');
+  $('cur1').max=maxT;if(+$('cur1').value>maxT)$('cur1').value=0;cur1();tally1()}
+function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(x)));for(const m of [1,2,5,10])if(m*p>=x)return m*p;return 10*p}
+function cur1(){if(!P1)return;const t=+$('cur1').value;const maxT=Math.max(...M1.map(([m])=>R1[m].total));const W=900,L=118,sc=(W-L-16)/maxT;
+  $('cur1v').textContent='t = '+fmt(t);
+  $('now1').innerHTML=M1.map(([m,name])=>{const r=R1[m];const X=L+t*sc;const c=document.getElementById('cur-'+m);if(c){c.setAttribute('x1',X);c.setAttribute('x2',X)}
+    if(t>=r.total)return `<div><b>${name}</b>已经读完（${fmt(r.total)} 时刻结束），CPU 全部还给其他进程。</div>`;
+    const at=ln=>r.seg.find(s=>s.lane===ln&&s.s<=t&&t<s.e);const io=at('io'),dv=at('dev'),ot=at('oth');
+    let cpu=io?(io.cls==='poll'?'在轮询：反复读状态寄存器，什么也做不了':'在做这次 I/O：'+io.lab):(ot?'在执行其他进程':'空闲');
+    let dev=dv?(dv.cls==='dma'?'DMA 正在传 '+dv.lab:'设备正在准备'+dv.lab):'设备在等 CPU';
+    return `<div><b>${name}</b>CPU ${cpu}；${dev}。</div>`}).join('')}
+function tally1(){const {N,B,td,ts,tx,ti}=P1;const m=Math.ceil(N/B);
+  const fm={poll:`t<sub>s</sub> + N(t<sub>d</sub>+t<sub>x</sub>) = ${ts} + ${N}×(${td}+${tx})`,int:`t<sub>s</sub> + N(t<sub>d</sub>+t<sub>i</sub>) = ${ts} + ${N}×(${td}+${ti})`,dma:`⌈N/B⌉(t<sub>s</sub>+t<sub>i</sub>) + N·t<sub>d</sub> = ${m}×(${ts}+${ti}) + ${N}×${td}`};
+  const fc={poll:`t<sub>s</sub> + N(t<sub>d</sub>+t<sub>x</sub>)，全程都占`,int:`t<sub>s</sub> + N·t<sub>i</sub> = ${ts} + ${N}×${ti}`,dma:`⌈N/B⌉(t<sub>s</sub>+t<sub>i</sub>) = ${m}×(${ts}+${ti})`};
+  const unit={poll:'每个字',int:'每个字',dma:`每块（${B} 字）`};
+  $('tally1').innerHTML=`<table class="res"><thead><tr><th>方式</th><th>CPU 介入的单位</th><th>中断次数</th><th>总时间</th><th>CPU 用于这次 I/O</th><th>占总时间</th><th>CPU 可给其他进程</th></tr></thead>
+   ${M1.map(([k,name])=>{const r=R1[k];return `<tr><th>${name}</th><td>${unit[k]}</td><td class="num">${r.ints.length}</td><td class="num">${fmt(r.total)}<div class="fm">${fm[k]}</div></td><td class="num">${fmt(r.cpuIO)}<div class="fm">${fc[k]}</div></td><td class="num"><b>${(100*r.cpuIO/r.total).toFixed(1)}%</b></td><td class="num">${fmt(r.oth)}</td></tr>`}).join('')}</table>
+   <p class="tip">轮询时 CPU 在设备准备期间也只能等，所以占比是 100%。中断方式把“等”还给了其他进程，但每个字仍要中断一次、由 CPU 搬一次。DMA 把中断次数从 N 降到 ⌈N/B⌉，CPU 只在每块开头和结尾出现。</p>`}
+
+/* ================= 2. 缓冲时间线 ================= */
+const MODES2={single:'单缓冲',double:'双缓冲',none:'无缓冲（本页补充）'};
+let mode2='single',frames=[],at=0,timer=null,G2=null;
+function sim2(mode,T,M,C,n){const S=[];const Te=[],Me=[],Ce=[],Ts=[];
+  for(let k=1;k<=n;k++){
+    if(mode==='single'){const ts=k===1?0:Me[k-1],te=ts+T;
+      const why=k===1?'设备一开始就往空缓冲区输入':`缓冲区刚被 M${k-1} 取空（单缓冲只有一个缓冲区，T 必须等 M 取完）`;
+      const cPrev=k===1?0:Ce[k-1];const ms=Math.max(te,cPrev),me=ms+M;
+      const whyM=k===1?'缓冲区刚装满，工作区空着':(cPrev>te?`缓冲区早在 ${fmt(te)} 就满了，但要等 C${k-1} 在 ${fmt(cPrev)} 处理完，工作区才空`:(cPrev===te?`T${k} 装满缓冲区和 C${k-1} 腾空工作区恰好同时发生`:`T${k} 刚装满缓冲区；C${k-1} 早在 ${fmt(cPrev)} 就处理完了，工作区空着`));
+      S.push({k,kind:'T',row:'dev',s:ts,e:te,why,lab:'T'+k},{k,kind:'M',row:'buf1',s:ms,e:me,why:whyM,lab:'M'+k},{k,kind:'C',row:'work',s:me,e:me+C,why:`M${k} 一结束数据就在工作区，马上处理`,lab:'C'+k});
+      Te[k]=te;Me[k]=me;Ce[k]=me+C}
+    else if(mode==='double'){const b=k%2?1:2;const dev=k===1?0:Te[k-1],bufFree=k<=2?0:Me[k-2];const ts=Math.max(dev,bufFree),te=ts+T;
+      let why;if(k===1)why='设备往缓冲区 1 输入';else if(k===2)why='缓冲区 2 一开始就空着，设备做完 T1 立刻接着往缓冲区 2 输入';
+      else why=bufFree>dev?`缓冲区 ${b} 要等 M${k-2} 在 ${fmt(bufFree)} 取空，设备在 ${fmt(dev)} 就闲了`:`设备在 ${fmt(dev)} 做完 T${k-1}，缓冲区 ${b} 早在 ${fmt(bufFree)} 被 M${k-2} 取空`;
+      const cPrev=k===1?0:Ce[k-1];const ms=Math.max(te,cPrev),me=ms+M;
+      const whyM=k===1?'缓冲区 1 刚装满，工作区空着':(cPrev>te?`缓冲区 ${b} 在 ${fmt(te)} 就满了，但工作区要等 C${k-1} 在 ${fmt(cPrev)} 处理完`:(cPrev===te?`T${k} 装满和 C${k-1} 腾空工作区恰好同时`:`T${k} 刚装满缓冲区 ${b}；工作区早在 ${fmt(cPrev)} 就空了`));
+      S.push({k,kind:'T',row:'dev',s:ts,e:te,why,lab:'T'+k+'→缓'+b},{k,kind:'M',row:'buf'+b,s:ms,e:me,why:whyM,lab:'M'+k},{k,kind:'C',row:'work',s:me,e:me+C,why:`M${k} 结束马上处理`,lab:'C'+k});
+      Te[k]=te;Me[k]=me;Ce[k]=me+C}
+    else{const ts=k===1?0:Ce[k-1],te=ts+T;
+      S.push({k,kind:'T',row:'dev',s:ts,e:te,why:k===1?'设备直接往工作区输入':`工作区要等 C${k-1} 处理完才能再接收输入`,lab:'T'+k+'→工作区'},{k,kind:'C',row:'work',s:te,e:te+C,why:`T${k} 结束数据已在工作区`,lab:'C'+k});
+      Te[k]=te;Ce[k]=te+C}}
+  return {S,total:Ce[n]}}
+function formula(mode,T,M,C,n){
+  if(mode==='single'){const per=Math.max(T,C)+M;return {per,val:T+(n-1)*per+M+C,txt:`T + (n−1)·[max(T,C)+M] + M + C = ${T} + ${n-1}×${per} + ${M+C}`}}
+  if(mode==='double'){const per=Math.max(T,M+C);return {per,val:T+(n-1)*per+M+C,txt:`T + (n−1)·max(T, M+C) + M + C = ${T} + ${n-1}×${per} + ${M+C}`}}
+  return {per:T+C,val:n*(T+C),txt:`n·(T+C) = ${n}×${T+C}`}}
+const ROWS={single:[['work','工作区'],['buf1','缓冲区'],['dev','I/O 设备']],double:[['work','工作区'],['buf2','缓冲区 2'],['buf1','缓冲区 1'],['dev','I/O 设备']],none:[['work','工作区'],['dev','I/O 设备']]};
+const REF2={single:'五章 p18–23（单缓冲两块：T、T+M、T+M+max(T,C)、T+M+max(T,C)+M+C），p30（单缓冲时间线）',double:'五章 p24–28（双缓冲两块：T、T+max(T,M+C)、T+max(T,M+C)+M+C），p31（双缓冲时间线）',none:'本页补充：PPT 没有讲无缓冲，这里假设设备直接输入到工作区，工作区在 T、C 期间都被占用'};
+function build2(){$('e2').textContent='';stop();
+  const T=num('qT',1,1000),M=num('qM',1,1000),C=num('qC',1,1000),n=num('qN',1,20);
+  if([T,M,C,n].includes(null)){$('e2').textContent='T、M、C 填 1～1000 的整数，n 填 1～20。';return false}
+  const r=sim2(mode2,T,M,C,n);const f=formula(mode2,T,M,C,n);G2={T,M,C,n,...r,f};
+  const times=[...new Set(r.S.flatMap(s=>[s.s,s.e]))].sort((a,b)=>a-b);
+  const F=[];F.push({t:0,start:[],end:[],note:`初始状态：缓冲区和工作区都空着。共 ${n} 块，T = ${T}，M = ${M}，C = ${C}。按“下一步”开始。`,init:1});
+  times.forEach((t,i)=>{const st=r.S.filter(s=>s.s===t),en=r.S.filter(s=>s.e===t);
+    const askS=st.find(s=>s.k>=2&&s.k<=3&&(s.kind==='T'||s.kind==='M'));
+    if(askS){const q=askS.kind==='T'?`第 ${askS.k} 块的输入 T${askS.k} 最早什么时候能开始？它在等什么？`:`第 ${askS.k} 块的传送 M${askS.k} 要等哪几件事都做完？最早什么时候开始？`;
+      F.push({t:F[F.length-1].t,start:[],end:[],ask:1,note:`<span class="ask">${q}</span>`,askFor:t})}
+    let parts=[];
+    en.forEach(s=>parts.push(`<b>${s.lab}</b> 在 ${fmt(t)} 结束`+(s.kind==='T'&&mode2!=='none'?`，第 ${s.k} 块已在缓冲区`:s.kind==='C'?`，第 ${s.k} 块处理完`:'')));
+    st.forEach(s=>parts.push(`<b>${s.lab}</b> 在 ${fmt(t)} 开始：${s.why}`));
+    const last=i===times.length-1;
+    let note=parts.join('。<br>')+'。';
+    if(last){const ok=f.val===r.total;note+=`<br>${n} 块全部处理完，总时间 <b>${fmt(r.total)}</b>。公式 ${f.txt} = ${fmt(f.val)} <span class="${ok?'ok':'warn'}">${ok?'✓ 与模拟一致':'✗ 与模拟不一致'}</span>。`}
+    F.push({t,start:st,end:en,note,last})});
+  frames=F;at=0;return true}
+function draw2(fr){const {S,total,n,T}=G2;const rows=ROWS[mode2];const W=900,L=80,Rp=16,rowH=28,top=12;const sc=(W-L-Rp)/total;const H=top+rows.length*(rowH+6)+24;
+  const step=niceStep(total/9);let g='';
+  for(let x=0;x<=total+1e-9;x+=step){const X=L+x*sc;g+=`<line class="grid" x1="${X}" y1="${top}" x2="${X}" y2="${H-20}"/><text class="tick" x="${X}" y="${H-7}" text-anchor="middle">${fmt(x)}</text>`}
+  const rowY=Object.fromEntries(rows.map(([k],i)=>[k,top+i*(rowH+6)]));
+  rows.forEach(([k,lab])=>{const y=rowY[k];g+=`<text class="lab" x="4" y="${y+rowH/2+4}">${lab}</text><line class="axis" x1="${L}" y1="${y+rowH}" x2="${W-Rp}" y2="${y+rowH}"/>`});
+  const t=fr.t;
+  S.forEach(s=>{const y=rowY[s.row];if(s.s<t||(fr.last)){const e=Math.min(s.e,t);const x=L+s.s*sc,w=(e-s.s)*sc;const isNew=fr.end&&fr.end.includes(s);
+      g+=`<rect class="s-${s.kind} ${isNew?'s-new':''}" x="${x}" y="${y}" width="${Math.max(w,1)}" height="${rowH}" rx="2"><title>${esc(s.lab+'：'+fmt(s.s)+'～'+fmt(s.e))}</title></rect>`;
+      if(w>=s.lab.length*7.5+4)g+=`<text x="${x+w/2}" y="${y+rowH/2+4}" text-anchor="middle">${esc(s.lab)}</text>`}
+    if(fr.start&&fr.start.includes(s)){const x=L+s.s*sc;g+=`<line class="startmk" x1="${x}" y1="${y}" x2="${x}" y2="${y+rowH}"/>`}});
+  const X=L+t*sc;g+=`<line class="cursor" x1="${X}" y1="${top-6}" x2="${X}" y2="${H-20}"/>`;
+  $('tl2').innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${MODES2[mode2]}的时间线">${g}</svg>`;
+  const ref=fr.ask?'先想一下，再按“下一步”看答案。':'出处：'+REF2[mode2];
+  $('note2').innerHTML=`<span class="count">t = ${fmt(t)}</span>　`+fr.note+`<span class="ref">${ref}</span>`}
+function sum2(){if(!G2)return;const {T,M,C,n}=G2;
+  $('sum2').innerHTML=Object.entries(MODES2).map(([k,name])=>{const r=sim2(k,T,M,C,n),f=formula(k,T,M,C,n);
+    return `<div class="card ${k===mode2?'on':''}"><h4>${name}</h4><div class="big">${fmt(r.total)}</div><div class="fm">稳定后每块 ${fmt(f.per)}<br>${f.txt} = ${fmt(f.val)} ${f.val===r.total?'✓':'✗'}</div></div>`}).join('')+
+   `<div class="card"><h4>怎么读这三个数</h4><div style="font-size:13px">只有第一块要从头等 T，只有最后一块要把 M、C 做完，中间 n−1 块每块花一个“周期”。单缓冲的周期是 max(T,C)+M，因为 M 期间设备和 CPU 都停着；双缓冲的周期是 max(T, M+C)，因为 M、C 都占工作区，只有 T 能在另一个缓冲区并行。</div></div>`}
+const SPD=[4500,3200,2400,1700,1200,800,500];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].ask)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].ask)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;draw2(f);
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].ask?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+function wire(){
+  $('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+  $('first').onclick=()=>{stop();at=0;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;render()};
+  $('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+  document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)||(e.target.tagName==='BUTTON'&&e.key===' ')||e.target.tagName==='SUMMARY')return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+  showSpd()}
+function setMode2(k){mode2=k;$('modes2').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===k));if(build2()){render();sum2()}}
+
+/* ================= 3. 缓冲池 ================= */
+let pool,busy=false,inSeq,outSeq;
+function poolInit(){pool={E:['B1','B2','B3','B4','B5','B6'].map(id=>({id,d:''})),I:[],O:[],hin:null,sin:null,hout:null,sout:null};inSeq=0;outSeq=0;
+  drawPool();$('note3').innerHTML='初始：6 个缓冲区都在空缓冲队列里，输入队列、输出队列为空，四个工作缓冲区都没用。<span class="ref">出处：五章 p33–34</span>'}
+const bufHtml=(b,fl)=>`<span class="buf ${b.d?(b.d.startsWith('入')?'din':'dout'):'empty'} ${fl===b.id?'flash':''}">${b.id}${b.d?'：'+b.d:''}</span>`;
+function drawPool(fl){const q=(a)=>a.length?a.map(b=>bufHtml(b,fl)).join(' '):'<span class="tip" style="margin:0">空</span>';
+  $('qE').innerHTML=q(pool.E);$('qI').innerHTML=q(pool.I);$('qO').innerHTML=q(pool.O);
+  [['wHin','hin'],['wSin','sin'],['wHout','hout'],['wSout','sout']].forEach(([el,k])=>$(el).innerHTML=pool[k]?bufHtml(pool[k],fl):'<span class="wb">未用</span>');
+  $('ops').querySelectorAll('[data-op]').forEach(b=>{const op=b.dataset.op;b.disabled=busy||((op==='hin'||op==='hout')?!pool.E.length:(op==='sin'?!pool.I.length:!pool.O.length))})}
+const OPS={
+ hin:{src:'E',dst:'I',fill:()=>'入'+(++inSeq),a:b=>`<b>收容输入</b>：从<b>空缓冲队列</b>队首摘下 ${b.id} 作为 hin，输入设备把数据写进去。`,b:b=>`${b.id} 装满了（${b.d}），挂到<b>输入队列</b>队尾，hin 释放。`},
+ sin:{src:'I',dst:'E',a:b=>`<b>提取输入</b>：从<b>输入队列</b>队首摘下 ${b.id}（${b.d}）作为 sin，等待输入的用户进程从里面取走数据。`,b:b=>`数据取完，${b.id} 变空，挂回<b>空缓冲队列</b>队尾。`},
+ hout:{src:'E',dst:'O',fill:()=>'出'+(++outSeq),a:b=>`<b>收容输出</b>：从<b>空缓冲队列</b>摘下 ${b.id} 作为 hout，准备输出的用户进程把数据放进去。`,b:b=>`${b.id} 装好了（${b.d}），挂到<b>输出队列</b>队尾，hout 释放。`},
+ sout:{src:'O',dst:'E',a:b=>`<b>提取输出</b>：从<b>输出队列</b>队首摘下 ${b.id}（${b.d}）作为 sout，送给输出设备。`,b:b=>`输出完，${b.id} 变空，挂回<b>空缓冲队列</b>队尾。`}};
+function doOp(op){const o=OPS[op];if(busy||!pool[o.src].length)return;busy=true;const b=pool[o.src].shift();if(o.fill)b.d=o.fill();pool[op]=b;drawPool(b.id);
+  $('note3').innerHTML=`第 1 拍：${o.a(b)}<span class="ref">出处：五章 p33–34</span>`;
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setTimeout(()=>{const t1=o.a(b);pool[op]=null;if(o.dst==='E')b.d='';pool[o.dst].push(b);busy=false;drawPool(b.id);
+    $('note3').innerHTML=`第 1 拍：${t1}<br>第 2 拍：${o.b(b)}<span class="ref">出处：五章 p33–34</span>`},reduce?0:900)}
+$('ops').onclick=e=>{const b=e.target.closest('[data-op]');if(b)doOp(b.dataset.op)};
+$('poolReset').onclick=()=>{busy=false;poolInit()};
+
+/* 循环缓冲区 */
+let ring;
+function ringInit(){ring={inP:5,outP:12,cnt:9};drawRing('PPT p32 的状态：in = 5，out = 12。装数据的是从 out 往后数到 in 前一格：12、13、14、15、0、1、2、3、4，共 9 格；5～11 这 7 格是空的。')}
+function full(i){const {outP,cnt}=ring;return ((i-outP+16)%16)<cnt}
+function drawRing(msg){$('ring').innerHTML=Array.from({length:16},(_,i)=>`<div class="cell ${full(i)?'full':''}">${i}</div>`).join('');
+  $('ringP').innerHTML=Array.from({length:16},(_,i)=>`<div class="ptr">${i===ring.inP?'<span class="pi">in</span><br>':''}${i===ring.outP?'<span class="po">out</span>':''}</div>`).join('');
+  $('rIn').disabled=ring.cnt===16;$('rOut').disabled=ring.cnt===0;
+  $('note4').innerHTML=msg+`<span class="ref">已装 ${ring.cnt} 格，空 ${16-ring.cnt} 格。出处：五章 p32；满／空的判断方法 PPT 没讲，本页用一个计数区分（本页补充）。</span>`}
+$('rIn').onclick=()=>{if(ring.cnt===16)return;const p=ring.inP;ring.inP=(p+1)%16;ring.cnt++;drawRing(`数据写进第 ${p} 格，in 后移到 ${ring.inP}${p===15?'（从 15 绕回 0）':''}。`+(ring.cnt===16?'<span class="warn"> 现在满了：in 追上了 out，再输入就要等输出腾出位置。</span>':''))};
+$('rOut').onclick=()=>{if(ring.cnt===0)return;const p=ring.outP;ring.outP=(p+1)%16;ring.cnt--;drawRing(`从第 ${p} 格取出数据，out 后移到 ${ring.outP}${p===15?'（从 15 绕回 0）':''}。`+(ring.cnt===0?'<span class="warn"> 现在空了：out 追上了 in，再取就要等输入。</span>':''))};
+$('rReset').onclick=ringInit;
+
+/* ================= 表、自测、来源 ================= */
+$('cmp1').innerHTML=`<table class="res"><thead><tr><th></th><th>轮询（程序直接控制）</th><th>中断驱动</th><th>DMA</th><th>通道<span class="sup-tag">本页补充</span></th></tr></thead>
+<tr><th>传送单位</th><td>字</td><td>字</td><td>块</td><td>一组块</td></tr>
+<tr><th>CPU 何时介入</th><td>全程：循环查状态、取每个字</td><td>每个字一次中断，CPU 搬数据</td><td>每块开头发命令、结尾处理一次中断</td><td>发出 I/O 指令后，一组块完成才中断</td></tr>
+<tr><th>数据经过 CPU 吗</th><td>经过</td><td>经过，借助 CPU 的寄存器</td><td>不经过，DMA 控制器直接在设备和内存之间传</td><td>不经过，通道执行通道程序控制传送</td></tr>
+<tr><th>读 N 字的中断次数</th><td>0</td><td>N</td><td>⌈N/B⌉</td><td>更少（一组块一次）</td></tr>
+<tr><th>CPU 与设备</th><td>串行，效率低</td><td>设备准备期间可并行</td><td>整块传送期间可并行</td><td>并行度更高</td></tr>
+<tr><th>出处</th><td>五章 p50</td><td>五章 p51</td><td>五章 p52–59；强化3 p99–105</td><td>五章 p39 仅有硬件层次图</td></tr></table>`;
+$('cmp2').innerHTML=`<table class="res"><thead><tr><th></th><th>两块的时间（PPT 写法）</th><th>n 块的总时间</th><th>稳定后每块</th><th>PPT 例题 p29（T=100，M=50，C=10，n=10）</th></tr></thead>
+<tr><th>单缓冲</th><td class="fm">T + M + max(T,C) + M + C</td><td class="fm">T + (n−1)[max(T,C)+M] + M + C</td><td class="fm">max(C,T) + M</td><td class="num">100 + 9×150 + 60 = <b>1510</b></td></tr>
+<tr><th>双缓冲</th><td class="fm">T + max(T, M+C) + M + C</td><td class="fm">T + (n−1)·max(T, M+C) + M + C</td><td class="fm">max(C+M, T)</td><td class="num">100 + 9×100 + 60 = <b>1060</b></td></tr>
+<tr class="sup"><th>无缓冲<span class="sup-tag">本页补充</span></th><td class="fm">2(T+C)</td><td class="fm">n(T+C)</td><td class="fm">T + C</td><td class="num">10×110 = 1100</td></tr></table>
+<p class="tip">“两块”一列照五章 p23、p27 的板书；n 块的写法是把两块推广：只有第一块从头等 T，只有最后一块要补上 M+C，中间每块一个周期，本页用上面的模拟逐个核对过。p29 的手写答案：单缓冲右侧写 1500 + 10 = 1510，双缓冲写 1000 + 60 = 1060，和公式一致；单缓冲左侧那行板书字迹潦草，以 1510 为准。在这组数据下无缓冲反而比单缓冲快：单缓冲每块多了一次 M，只有 M &lt; min(T,C) 时单缓冲每块才比无缓冲快。缓冲区的其他作用（p17 说的减少中断频率、解决数据粒度不匹配等）不在这个时间模型里。</p>`;
+const QS=[
+ ['读 N 个字，轮询、中断、DMA（每块 B 字）三种方式分别产生几次中断？CPU 介入的单位各是什么？','轮询 0 次中断，按字，CPU 全程查状态；中断方式 N 次，按字；DMA ⌈N/B⌉ 次，按块。（五章 p50–52）'],
+ ['中断驱动方式下，设备寄存器到内存的数据要经过 CPU 吗？DMA 呢？','中断方式要经过：设备寄存器与内存的数据交换借助 CPU 的寄存器，CPU 仍参与具体传输（五章 p51 原话）。DMA 不经过 CPU，由 DMA 控制器控制完成，块传完才发中断（五章 p52）。'],
+ ['N = 8，t<sub>d</sub> = 10，t<sub>s</sub> = 1，t<sub>x</sub> = 1，t<sub>i</sub> = 2，B = 4。按本页模型，三种方式下 CPU 用于这次 I/O 的时间占比各是多少？','轮询 1 + 8×11 = 89，占 100%。中断：总时间 1 + 8×12 = 97，CPU 1 + 8×2 = 17，约 17.5%。DMA：总时间 2×(1+2) + 8×10 = 86，CPU 2×3 = 6，约 7.0%。（本页模型，数值是本页补充）'],
+ ['（PPT 例题，五章 p29）单缓冲和双缓冲两个系统：数据从设备进入缓冲区 100 ns，从缓冲区进入工作区 50 ns，进程处理 10 ns。获取并处理 10 个数据各要多少时间？','单缓冲 100 + 9×(100+50) + 60 = 1510 ns；双缓冲 T = 100 ≥ M+C = 60，100 + 9×100 + 60 = 1060 ns。PPT 手写答案 1510、1060。'],
+ ['（迁移）T = 50，M = 20，C = 40，处理 5 块。单缓冲和双缓冲各要多少时间？稳定后每块各是多少？','单缓冲每块 max(50,40)+20 = 70，总 50 + 4×70 + 60 = 390。双缓冲每块 max(50, 20+40) = 60，总 50 + 4×60 + 60 = 350。这组数据里 M+C 超过了 T，双缓冲的瓶颈变成了工作区。可用上面“C 和 T 接近”预设核对。'],
+ ['为什么双缓冲每块是 max(T, M+C)，而不是 max(T, C)？','M 是把数据从缓冲区送进工作区，C 在工作区处理，两者都占工作区；PPT p18 说同一个部件的使用必须互斥，所以 M、C 只能串行，能和它们并行的只有往另一个缓冲区做的 T。'],
+ ['单缓冲的第 k 块输入 T<sub>k</sub> 为什么不能紧接着 T<sub>k−1</sub> 开始？它最早什么时候开始？','缓冲区只有一个，T<sub>k−1</sub> 装满后要等 M<sub>k−1</sub> 把它送进工作区，缓冲区才空；所以 T<sub>k</sub> 在 M<sub>k−1</sub> 结束时开始（见五章 p30 时间线）。'],
+ ['缓冲池里，“提取输入”从哪个队列取缓冲区？用完挂到哪？“收容输出”呢？','提取输入：从输入队列队首取下作为 sin，进程取完数据后挂回空缓冲队列。收容输出：从空缓冲队列取下作为 hout，进程放入输出数据后挂到输出队列队尾。（五章 p33–34）'],
+ ['循环缓冲区 0～15，in = 5，out = 12（in 指输入位置，out 指输出位置）。有几格装着数据？再输入 3 个、输出 2 个之后，in、out 各是多少？','装数据的是 12～15、0～4 共 9 格。输入 3 个后 in = 8；输出 2 个后 out = 14，还剩 9 + 3 − 2 = 10 格。（初始状态出自五章 p32）'],
+ ['（2011.26，强化1 p125–127）用户程序发出磁盘 I/O 请求后，系统的正确处理流程是：A. 用户程序→系统调用处理程序→中断处理程序→设备驱动程序；B. 用户程序→系统调用处理程序→设备驱动程序→中断处理程序；C. 用户程序→设备驱动程序→系统调用处理程序→中断处理程序；D. 用户程序→设备驱动程序→中断处理程序→系统调用处理程序。','B。系统调用处理程序调用设备驱动程序的接口向磁盘发出传输命令，再阻塞自身等待 I/O 完成；传输完成发中断，若为 DMA 方式数据已经读入内存（强化1 p127 解析）。'],
+ ['五章 p17 列的缓冲区作用有哪四条？','缓和 CPU 与 I/O 设备间速度不匹配；减少对 CPU 的中断频率，放宽对 CPU 中断响应时间的限制；解决数据粒度不匹配；提高 CPU 和 I/O 设备之间的并行性。（PPT 原文）']];
+$('qs').innerHTML=QS.map(([q,a],i)=>`<details><summary><b>${i+1}.</b> ${q}</summary><div class="ans">${a}</div></details>`).join('');
+const SRC=['五章（I/O 管理）p17：缓冲区的作用；p18–23：单缓冲两块的时间推导；p24–28：双缓冲两块的时间推导；p29：例题（含手写答案）；p30–31：单缓冲、双缓冲时间线','五章 p32：循环缓冲区；p33–34：缓冲池（hin、sin、hout、sout，空缓冲队列、输入队列、输出队列）','五章 p39：设备、控制器、通道的层次；p49–52：I/O 控制方式（轮询、中断、DMA）；p53–59：DMA 初始化、逐字传送、阻塞唤醒时机；p65–66：阻塞 I/O 与非阻塞 I/O；p73–74：存储设备的中断控制方式','强化3（内存管理）p99–105：DMA 方式与进程阻塞、唤醒时机','强化1（绪论与进程基础）p125–127：2011.26 磁盘 I/O 处理流程与解析','同一主题的逐层链路见本目录的“I/O 全链路”页；轮询、中断、DMA 的计时模型和默认参数、无缓冲对照、通道一行、循环缓冲区的满空判断是本页补充'];
+$('src').innerHTML=SRC.map(s=>`<li>${s}</li>`).join('');
+
+/* init */
+$('f1').addEventListener('input',draw1);$('cur1').oninput=cur1;
+$('modes2').innerHTML=Object.entries(MODES2).map(([k,v])=>`<button type="button" class="chip" data-m="${k}" aria-pressed="false">${v}</button>`).join('');
+$('modes2').onclick=e=>{const b=e.target.closest('[data-m]');if(b)setMode2(b.dataset.m)};
+['qT','qM','qC','qN'].forEach(id=>$(id).addEventListener('input',()=>{if(build2()){render();sum2()}}));
+document.querySelector('.presets').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const [T,M,C,n]=b.dataset.p.split(',');$('qT').value=T;$('qM').value=M;$('qC').value=C;$('qN').value=n;if(build2()){render();sum2()}};
+wire();draw1();setMode2('single');poolInit();ringInit();
+</script>
+</body>
+</html>

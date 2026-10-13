@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>磁盘结构与固态硬盘</title>
+<style>
+/* Stage pills, then a disk drawing (top view of one surface on the left, side view of the platter stack on the right) above a p192 I/O timeline, a detail card, the step note and controls; below that a clickable geometry explorer with a block-number converter, a RAID table and failure demo, an SSD/FTL simulator, a comparison table, closed-book questions and sources. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --hw:#8a6d3b;
+  --plat:#dfe7f1; --plat2:#c4d2e4;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c;
+  --plat:#26303b; --plat2:#3a4757; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --hw:#d0ad6c;
+  --plat:#26303b; --plat2:#3a4757; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:82ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:13px var(--sans);font-weight:600;margin:10px 0 6px;color:var(--muted)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.flow button{font:inherit;border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:999px;padding:3px 12px;cursor:pointer}
+.flow button.on{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.flow button.past{color:var(--ink);border-color:var(--accent)}
+.flow .ar{color:var(--muted)}
+.stage{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.stage{grid-template-columns:minmax(0,1fr)}}
+.view{overflow-x:auto}
+.view svg{display:block;width:100%;height:auto;min-width:620px}
+svg text{font-family:var(--sans)}
+svg .lb{paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:round}
+.card{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg);min-width:0;font-size:13px}
+.card h3{margin-top:0}
+.card table{border-collapse:collapse;font:12px var(--mono);margin:4px 0;width:100%}
+.card th,.card td{border:1px solid var(--line);padding:2px 6px;text-align:center}
+.card th{color:var(--muted);font-weight:400}
+.card td.h{background:color-mix(in srgb,var(--cmp) 26%,transparent);font-weight:700}
+.card ul{margin:4px 0;padding-left:1.2em}
+.mono{font-family:var(--mono);font-size:12px}
+.chk{color:var(--done);font-weight:700}
+.todo{color:var(--muted)}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:4.6em;margin-top:10px}
+.note .ask{color:var(--q);font-weight:600}
+.note .ref{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.warn{color:var(--mv)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.opts{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.opts label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input,.form select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:7em}
+.form input.wide{width:min(22em,78vw)}
+.calc p{margin:4px 0;font:14px var(--mono);overflow-wrap:anywhere}
+.calc b{color:var(--done)}
+.calc p.tip{font:12px/1.7 var(--sans)}
+.raid th{white-space:nowrap}
+.cmp thead th{white-space:nowrap}
+.bad{color:var(--mv)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
+.ex svg{display:block;width:100%;height:auto;min-width:620px}
+.ex [data-t],.ex [data-h]{cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);margin-top:4px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.cmp{overflow-x:auto}
+.cmp table{border-collapse:collapse;font-size:13px;width:100%;min-width:640px;margin:4px 0 12px}
+.cmp th,.cmp td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.cmp thead th{background:var(--hl);font-weight:600}
+.cmp tbody th{font-weight:600;white-space:nowrap;color:var(--green)}
+.cmp td.k{color:var(--mv);font-weight:600}
+.cmp .sup{color:var(--muted);font-size:12px}
+.small{border-collapse:collapse;font:13px var(--mono);margin:4px 0}
+.small th,.small td{border:1px solid var(--line);padding:2px 8px;text-align:center;white-space:nowrap}
+.small th{color:var(--muted);font-weight:400}
+.raidw{overflow-x:auto}
+.raid{border-collapse:separate;border-spacing:4px;font:12px var(--mono)}
+.raid th{font-weight:400;color:var(--muted);padding:0 2px}
+.raid th button{font:12px var(--sans);border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:5px;padding:4px 8px;cursor:pointer;min-width:74px}
+.raid th button.dead{border-color:var(--mv);background:color-mix(in srgb,var(--mv) 22%,transparent);font-weight:700}
+.raid td{min-width:74px;height:40px;text-align:center;border:1.5px solid var(--line);border-radius:4px;background:var(--bg);line-height:1.25;padding:2px 4px}
+.raid td small{display:block;font-size:10px;color:var(--muted)}
+.raid td.d{background:color-mix(in srgb,var(--q) 16%,var(--bg))}
+.raid td.m{background:color-mix(in srgb,var(--q) 9%,var(--bg));border-style:dashed}
+.raid td.p{background:color-mix(in srgb,var(--cmp) 24%,var(--bg))}
+.raid td.dead{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--mv) 20%,transparent) 0 6px,transparent 6px 12px);color:var(--muted)}
+.raid td.rec{outline:2px solid var(--done);outline-offset:-4px}
+.raid td.lost{outline:2px solid var(--mv);outline-offset:-4px}
+.verdict{font-size:14px;margin-top:6px}
+.verdict b.ok{color:var(--done)} .verdict b.no{color:var(--mv)}
+.ssd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,15em);gap:14px;align-items:start}
+@media (max-width:760px){.ssd{grid-template-columns:minmax(0,1fr)}}
+.blocks{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.blk{border:1.5px solid var(--line);border-radius:6px;padding:5px;background:var(--bg)}
+.blk.act{border-color:var(--q);box-shadow:0 0 0 1px var(--q) inset}
+.blk.er{border-color:var(--cmp);box-shadow:0 0 0 2px var(--cmp) inset}
+.blk .bh{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px;gap:4px}
+.blk .bh b{color:var(--ink)}
+.pages{display:grid;grid-template-columns:repeat(2,1fr);gap:3px}
+.pg{font:11px var(--mono);text-align:center;border:1px solid var(--line);border-radius:3px;padding:2px 0;background:var(--paper);color:var(--muted)}
+.pg.v{background:color-mix(in srgb,var(--done) 26%,var(--paper));color:var(--ink);border-color:color-mix(in srgb,var(--done) 60%,var(--line))}
+.pg.x{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--mv) 22%,transparent) 0 4px,transparent 4px 8px);color:var(--mv);text-decoration:line-through}
+.pg.new{outline:2px solid var(--cmp);outline-offset:0}
+.lp{display:flex;flex-wrap:wrap;gap:4px}
+.lp button{font:12px var(--mono);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:4px;padding:2px 6px;cursor:pointer;min-width:44px}
+.lp button.hot{border-color:var(--mv)}
+.ftl{border-collapse:collapse;font:12px var(--mono);width:100%}
+.ftl th,.ftl td{border:1px solid var(--line);padding:1px 6px;text-align:center}
+.ftl th{color:var(--muted);font-weight:400}
+.ftl tr.new td{background:color-mix(in srgb,var(--cmp) 24%,transparent);font-weight:700}
+.bars{display:flex;gap:6px;align-items:flex-end;height:96px;border-bottom:1px solid var(--line);padding-top:14px}
+.bars div{flex:1;min-width:0;background:var(--q);border-radius:3px 3px 0 0;position:relative}
+.bars div span{position:absolute;bottom:100%;left:0;right:0;text-align:center;font:11px var(--mono);color:var(--ink)}
+.barl{display:flex;gap:6px;font:11px var(--mono);color:var(--muted)}
+.barl span{flex:1;text-align:center;min-width:0}
+.log{font-size:13px;margin:4px 0 0;padding-left:1.2em;max-height:12em;overflow:auto}
+.log li{margin:2px 0}
+.log li:first-child{color:var(--ink);font-weight:600}
+.log li:not(:first-child){color:var(--muted)}
+.fig{display:grid;grid-template-columns:auto auto auto auto auto;gap:6px;align-items:center;font-size:13px;margin:4px 0 10px;overflow-x:auto}
+.fig span.b{border:1.5px solid var(--q);border-radius:5px;padding:3px 10px;background:color-mix(in srgb,var(--q) 14%,var(--paper));white-space:nowrap}
+.fig span.a{color:var(--muted)}
+@media (max-width:560px){.fig{grid-template-columns:auto}.fig span.a{transform:rotate(90deg);justify-self:start;padding-left:20px}}
+details{border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg);margin-top:6px}
+details summary{cursor:pointer;font-size:14px}
+details summary b{color:var(--q);font-weight:600}
+details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.src{font-size:13px;margin:0;padding-left:1.3em}
+.src li{margin:2px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="磁盘调度.html">磁盘调度</a><a href="开机到用户进程.html">开机到用户进程</a><a href="IO全链路.html">I/O 全链路</a></div>
+  <header>
+    <h1>磁盘结构、RAID 与固态硬盘</h1>
+    <p class="sub">先认机械硬盘的部件（盘片、盘面、磁道、扇区、柱面、磁头组），再看读一个扇区时磁臂怎么移、盘片怎么转，以及四章 p192 的 I/O 时间线。下面是 (柱面，盘面，扇区) 和扇区号、簇号的换算器，RAID 的对比表和“弄坏一块盘”演示，最后是固态硬盘的闪存翻译层和磨损均衡模拟。调度算法的轨迹和访问时间的数值计算在<a href="磁盘调度.html">磁盘调度</a>页，格式化、分区、引导在<a href="开机到用户进程.html">开机到用户进程</a>页，这里不重复。PPT 没讲、本页补充的地方会写明。</p>
+  </header>
+  <section class="panel"><div class="flow" id="flow"></div>
+    <div class="opts" style="margin-top:8px"><label><input id="guess" type="checkbox" checked> 先猜再看</label></div></section>
+  <section class="panel">
+    <div class="stage"><div><div class="view" id="view"></div><div class="view" id="tlv"></div></div><div class="card" id="card"></div></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="1"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
+    <p class="tip">上方阶段可以点，直接跳到那一段。键盘 ← → 单步，空格播放／暂停。寻道、旋转、传送三步会在图上动起来；往回翻时直接显示结果。</p>
+  </section>
+
+  <section class="panel calc"><h2>点一点：(柱面，盘面，扇区) 与扇区号、簇号互换</h2>
+    <p class="tip" style="margin:0 0 6px">强化4 p178 真题的数据：300 个柱面，每个柱面 10 个磁道（即 10 个盘面），每个磁道 200 个扇区，扇区 512B，每簇 2 个扇区。编号按“先扇区、再盘面、再柱面”：同一磁道的扇区编完，换下一个盘面的同号磁道，整个柱面编完才换下一个柱面。强化4 p180 给的就是这个思路，但式子 u = i*j+k 写错了，应为 u = i×(10×200) + j×200 + k。柱面、盘面、扇区都从 0 数（本页设定，和这道题的常见答案一致）。在下图左边点扇区格子可以选柱面和扇区，点右边的盘面选盘面。</p>
+    <div class="row" id="geoPre"></div>
+    <div class="form" style="margin-top:8px">
+      <label>柱面数 C<input id="gC" type="number" min="1" value="300"></label>
+      <label>盘面数（磁头数）H<input id="gH" type="number" min="1" value="10"></label>
+      <label>每道扇区数 S<input id="gS" type="number" min="1" value="200"></label>
+      <label>每簇扇区数 K<input id="gK" type="number" min="1" value="2"></label>
+    </div>
+    <div class="form" style="margin-top:8px">
+      <label>柱面号 c<input id="fc" type="number" min="0"></label>
+      <label>盘面号 h<input id="fh" type="number" min="0"></label>
+      <label>扇区号 s<input id="fs" type="number" min="0"></label>
+      <span style="align-self:center;color:var(--muted)">⇄</span>
+      <label>反查<select id="rk"><option value="cl">簇号</option><option value="sec">扇区号（线性）</option></select></label>
+      <label>值<input id="rv" type="number" min="0" value="100530"></label>
+    </div>
+    <div class="err" id="gErr" role="alert"></div>
+    <div class="two" style="margin-top:6px">
+      <div><div class="view ex" id="ex"></div>
+        <div class="legend"><span><i style="background:color-mix(in srgb,var(--q) 40%,transparent)"></i>柱面（所有盘面同号磁道）</span><span><i style="background:var(--cmp)"></i>磁道（选中的盘面）</span><span><i style="background:var(--mv)"></i>扇区</span></div>
+        <p class="tip" id="exNote"></p></div>
+      <div id="gOut"></div>
+    </div>
+    <h3>为什么按柱面编号：连续读一段扇区要移几次磁臂</h3>
+    <div class="form">
+      <label>起始扇区号<input id="sb0" type="number" min="0" value="0"></label>
+      <label>连续扇区数<input id="sbn" type="number" min="1" value="4000"></label>
+    </div>
+    <div id="seekOut"></div>
+    <h3>批量换算簇号（强化4 p178 第 2 问的四个请求）</h3>
+    <div class="form"><label>簇号<input id="batch" class="wide" type="text" value="100260, 60005, 101660, 110560"></label><label>磁头所在柱面<input id="bh" type="number" min="0" value="85"></label></div>
+    <div id="batchOut"></div>
+  </section>
+
+  <section class="panel"><h2>RAID：几块盘怎么放数据（强化4 p181–186）</h2>
+    <div class="cmp"><table><thead><tr><th>级别</th><th>做法（p181）</th><th>最小磁盘数</th><th>容错能力</th><th>磁盘空间开销</th><th>读取速度</th><th>写入速度</th><th>硬件成本</th><th>出处</th></tr></thead><tbody>
+      <tr><th>RAID 0</th><td>条带化（数据分块），但没有冗余，提供较高的读写性能</td><td>2</td><td>无冗余，不具备容错能力</td><td>0%</td><td>高</td><td>高</td><td>低</td><td>p181、p182</td></tr>
+      <tr><th>RAID 1</th><td>镜像，数据完全复制到另一个驱动器，提供容错能力</td><td>2</td><td>可容忍单个磁盘故障</td><td>50%</td><td>高</td><td class="k">低</td><td>中</td><td>p181、p183</td></tr>
+      <tr><th>RAID 5</th><td>条带化加分布式奇偶校验，提供数据冗余和读取性能</td><td>3</td><td>可容忍单个磁盘故障</td><td>1/N（N 为磁盘数）</td><td>中</td><td>低</td><td>中</td><td>p181、p184</td></tr>
+      <tr><th>RAID 6</th><td>类似 RAID 5，但提供更高级别的容错能力</td><td>4</td><td>可容忍两个磁盘故障</td><td>2/N</td><td>中</td><td>低</td><td>高</td><td>p181、p185</td></tr>
+      <tr><th>RAID 10</th><td>RAID 1+0：先两两做 RAID 1 镜像，再把这些镜像组做 RAID 0 条带化，提供较高的容错能力和读写性能</td><td>4</td><td>可容忍多个磁盘故障<br><span class="sup">本页补充：前提是坏的盘不在同一个镜像组里</span></td><td>50%</td><td>高</td><td>中</td><td>高</td><td>p181、p186</td></tr>
+    </tbody></table></div>
+    <p class="tip" style="margin-top:-6px">表里的读写速度、成本是 PPT 给的相对评价。PPT 只讲了这五级，RAID 2、3、4 没讲，本页也不画。“空间开销”指拿去存冗余的那部分占总容量的比例。</p>
+    <h3>演示：点磁盘名字让它坏掉，再点一次修好</h3>
+    <div class="row" id="raidLv"></div>
+    <div class="row" style="margin-top:6px" id="raidN"></div>
+    <div class="raidw" style="margin-top:6px" id="raidG"></div>
+    <div class="verdict" id="raidV"></div>
+    <p class="tip">每个数据块旁边是一个 4 位的示意数值。RAID 5 的校验块 P 是同一行数据块按位异或，坏一块就用剩下的异或回来（异或这层细节是本页补充，PPT 只说“分布式奇偶校验”）。校验块在各盘之间轮换，本页按“每行往左挪一块盘”画，具体轮换方式是本页设定。RAID 6 的第二个校验 Q 不是简单异或，408 不要求它的算法，本页只标位置。</p>
+  </section>
+
+  <section class="panel"><h2>固态硬盘 SSD：闪存翻译层与磨损均衡（五章 p98–101）</h2>
+    <div class="fig" aria-label="SSD 结构"><span class="b">文件系统：读写逻辑磁盘块</span><span class="a">→</span><span class="b">闪存翻译层 FTL</span><span class="a">→</span><span class="b">存储介质：闪存芯片 → 块 → 页</span></div>
+    <p class="tip" style="margin:-4px 0 8px">五章 p98：SSD 对外仍是“读写逻辑磁盘块”，中间的闪存翻译层把逻辑块翻译成闪存里的物理位置。p99–100：介质由很多块组成，每块又分成若干页；<b>以页为单位读写，以块为单位擦除；已经写入的页不能再写，除非整个块被擦除</b>。p101：动态磨损均衡让擦除次数少的块来写入数据；静态磨损均衡让 SSD 自动迁移数据，老旧的块承担更多读任务，新块承担更多写任务。PPT 图里是 16 块、每块 6 页，这里默认 6 块、每块 4 页，方便看清（可改）。</p>
+    <div class="row" id="ssdMode"></div>
+    <div class="form" style="margin-top:8px">
+      <label>块数<input id="sB" type="number" min="3" max="10" value="6"></label>
+      <label>每块页数<input id="sP" type="number" min="2" max="8" value="4"></label>
+      <label>逻辑页数<input id="sL" type="number" min="1" value="14"></label>
+      <label>热数据页数<input id="sHot" type="number" min="1" value="4"></label>
+      <label>静态均衡阈值<input id="sTh" type="number" min="1" value="3"></label>
+      <button class="btn" id="sReset" type="button">按这些数重置</button>
+    </div>
+    <div class="err" id="sErr" role="alert"></div>
+    <h3>写逻辑页 x（红框是热数据页）</h3>
+    <div class="lp" id="lpBtns"></div>
+    <div class="row" style="margin-top:6px"><button class="btn" id="sFill" type="button">所有逻辑页各写一次</button><button class="btn" id="sHot1" type="button">随机写一次热数据</button><button class="btn" id="sHot20" type="button">热数据连写 20 次</button><button class="btn" id="sClear" type="button">清空重来</button></div>
+    <div class="ssd" style="margin-top:10px">
+      <div><div class="blocks" id="blocks"></div>
+        <div class="legend"><span><i style="background:var(--paper);border:1px solid var(--line)"></i>空闲页</span><span><i style="background:color-mix(in srgb,var(--done) 40%,var(--paper))"></i>有效页（L 后是逻辑页号）</span><span><i style="background:color-mix(in srgb,var(--mv) 40%,transparent)"></i>无效页</span><span><i style="border:2px solid var(--q)"></i>正在写的块</span><span><i style="border:2px solid var(--cmp)"></i>刚擦除的块</span></div>
+        <h3>刚才发生了什么</h3><ol class="log" id="slog"></ol>
+      </div>
+      <div><h3 style="margin-top:0">FTL 映射表</h3><div id="ftl"></div>
+        <h3>各块擦除次数</h3><div class="bars" id="bars"></div><div class="barl" id="barl"></div><div class="calc" id="sStat"></div></div>
+    </div>
+    <h3>同一串写入，三种做法各跑一遍</h3>
+    <p class="tip" style="margin:0 0 4px">先把所有逻辑页各写一次（冷数据就此不动），再对热数据页随机写 200 次（固定随机种子，三种做法写的序列完全相同）。</p>
+    <button class="btn" id="sCmp" type="button">跑一遍对比（用当前生效的块数、页数等设置）</button><div class="cmp" id="sCmpOut"></div>
+    <p class="tip"><span class="warn">本页补充</span>（PPT 没讲的模拟细节）：改写一页时写到新的空闲页、旧页标成无效；正在写的块写满后，再挑一个空闲块接着写；始终留一个空闲块，空闲块只剩这一个时先做<b>垃圾回收</b>：挑无效页最多的块，把它的有效页搬到留着的空闲块里，再擦除它。“不做均衡”按块号从小到大挑空闲块；“动态”挑擦除次数最少的空闲块；“静态”在动态的基础上，当最大、最小擦除次数之差达到阈值时，把擦除次数最少、装满冷数据的块搬到擦除次数最多的空闲块上，再擦除它，让这块年轻的块回去接热数据。真实 SSD 的策略更复杂，408 只要求知道两种均衡的思路。</p>
+  </section>
+
+  <section class="panel"><h2>机械硬盘和固态硬盘对照</h2>
+    <div class="cmp"><table><thead><tr><th></th><th>机械硬盘（磁盘）</th><th>固态硬盘 SSD</th><th>出处</th></tr></thead><tbody>
+      <tr><th>存储介质</th><td>涂磁性材料的盘片，绕轴旋转</td><td>闪存芯片，没有机械部件</td><td>四章 p190；五章 p98</td></tr>
+      <tr><th>地址怎么定位</th><td>三元组 (柱面，盘面，扇区)；簇号到物理地址由驱动程序换算<span class="sup">（驱动程序这句是本页补充）</span></td><td>闪存翻译层 FTL 把逻辑磁盘块映射到物理块、页</td><td>四章 p190；强化4 p178；五章 p98</td></tr>
+      <tr><th>读写单位</th><td>扇区</td><td class="k">以页为单位读写，以块为单位擦除</td><td>五章 p100</td></tr>
+      <tr><th>能否原地改写</th><td>能，直接覆盖原扇区<span class="sup">（本页补充）</span></td><td class="k">不能：已经写入的页不能再写，除非整个块被擦除</td><td>五章 p100</td></tr>
+      <tr><th>访问时间组成</th><td>寻道 Ts + 平均旋转延迟 1/(2r) + 传输 b/(rN)</td><td>没有寻道和旋转<span class="sup">（本页补充）</span></td><td>四章 p192–195</td></tr>
+      <tr><th>什么样的访问快</th><td>连续扇区、同一柱面：不用再寻道</td><td>随机访问也快，不怕不连续<span class="sup">（本页补充）</span></td><td>四章 p191；强化4 p176</td></tr>
+      <tr><th>寿命问题</th><td>—</td><td>块擦除次数有限，所以要磨损均衡（动态、静态）<span class="sup">（“次数有限”是本页补充，PPT 直接讲均衡）</span></td><td>五章 p101</td></tr>
+      <tr><th>调度</th><td>需要磁盘调度算法减少寻道</td><td>没有寻道，按 FCFS 就行<span class="sup">（本页补充）</span></td><td>四章 p196–201</td></tr>
+    </tbody></table></div>
+  </section>
+  <section class="panel"><h2>闭卷自测</h2><p class="tip" style="margin:0 0 4px">第 4 题是强化4 p178 的原题（PPT 只在 p179 给了第 1 问的答案，p180 说第 2、3 问“不做太多具体计算”），其余是本页按 PPT 内容整理的题。</p><div id="qs"></div></section>
+  <section class="panel"><h2>来源</h2><ol class="src" id="src"></ol></section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+let frames=[],at=0,timer=null,shown=null,raf=0;
+const SPD=[4500,3200,2400,1700,1200,800,500];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].ask)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].ask)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+let lastAt=-1;
+function render(){const f=frames[at];if(!f)return;draw(f,at>lastAt);lastAt=at;
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放')}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].ask?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1){at=0;lastAt=-1}timer=setTimeout(tick,delay());render()}
+$('play').onclick=play;$('next').onclick=()=>{stop();at=nextIdx(at);render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};
+$('first').onclick=()=>{stop();at=0;lastAt=-1;render()};$('scrub').oninput=e=>{stop();at=+e.target.value;lastAt=at;render()};
+$('speed').oninput=()=>{showSpd();if(timer){clearTimeout(timer);timer=setTimeout(tick,delay())}};
+document.addEventListener('keydown',e=>{if(['INPUT','SELECT','TEXTAREA','SUMMARY'].includes(e.target.tagName)||(e.target.tagName==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+
+/* ===== 磁盘示意图：左边俯视一个盘面，右边侧视整叠盘片 =====
+   o: {T 磁道数, S 每道扇区数, NS 盘面数, c 柱面, h 盘面, s 扇区, hl:{platter,surface,track,sector,cyl,heads}, arm 磁头所在磁道（可为小数）, rot 盘片转过的角度, click, labels} */
+const pol=(cx,cy,r,a)=>{const t=a*Math.PI/180;return [cx+r*Math.cos(t),cy+r*Math.sin(t)]};
+const F=x=>x.toFixed(1);
+function wedge(cx,cy,r0,r1,a0,a1){const [x1,y1]=pol(cx,cy,r1,a0),[x2,y2]=pol(cx,cy,r1,a1),[x3,y3]=pol(cx,cy,r0,a1),[x4,y4]=pol(cx,cy,r0,a0);const lg=a1-a0>180?1:0;
+  return `M${F(x1)} ${F(y1)}A${r1} ${r1} 0 ${lg} 1 ${F(x2)} ${F(y2)}L${F(x3)} ${F(y3)}A${r0} ${r0} 0 ${lg} 0 ${F(x4)} ${F(y4)}Z`}
+function diskSVG(o){const hl=o.hl||{};const P=Math.ceil(o.NS/2);
+  const cx=195,cy=177,Ro=156,Ri=52,w=(Ro-Ri)/o.T,d=360/o.S;const rm=t=>Ro-(t+.5)*w;
+  let s=`<svg viewBox="0 0 900 352" role="img" aria-label="磁盘俯视图和侧视图"><defs><marker id="rotA" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--muted)"/></marker></defs>`;
+  s+=`<text x="10" y="18" font-size="13" fill="var(--muted)">俯视：盘面 ${o.labels&&o.labels.h!=null?o.labels.h:o.h}</text>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="${Ro+3}" fill="var(--plat2)"/>`;
+  for(let t=0;t<o.T;t++){const r1=Ro-t*w,r0=r1-w;for(let k=0;k<o.S;k++){const a0=k*d-o.rot,a1=a0+d;
+      let fill='var(--plat)';const onT=t===o.c;
+      if(hl.cyl&&onT)fill='color-mix(in srgb,var(--q) 38%,var(--plat))';
+      if(hl.track&&onT)fill='color-mix(in srgb,var(--cmp) 55%,var(--plat))';
+      if(hl.sector&&onT&&k===o.s)fill='var(--mv)';
+      s+=`<path d="${wedge(cx,cy,r0,r1,a0,a1)}" fill="${fill}" stroke="var(--paper)" stroke-width="1.2" ${o.click?`data-t="${t}" data-k="${k}"`:''}/>`}}
+  if(o.S<=16){for(let k=0;k<o.S;k++){const [x,y]=pol(cx,cy,Ro+12,(k+.5)*d-o.rot);s+=`<text x="${F(x)}" y="${F(y+4)}" text-anchor="middle" font-size="10" fill="${hl.sector&&k===o.s?'var(--mv)':'var(--muted)'}" font-weight="${hl.sector&&k===o.s?700:400}">${o.labels&&o.labels.sec?o.labels.sec[k]:k}</text>`}}
+  if(hl.cyl){s+=`<circle cx="${cx}" cy="${cy}" r="${rm(o.c)}" fill="none" stroke="var(--q)" stroke-width="2" stroke-dasharray="5 4"/>`}
+  s+=`<circle cx="${cx}" cy="${cy}" r="${Ri-2}" fill="var(--bg)" stroke="var(--line)"/><circle cx="${cx}" cy="${cy}" r="11" fill="var(--muted)"/>`;
+  if(o.T<=8&&!(o.labels&&o.labels.noTrack)){for(let t=0;t<o.T;t++)s+=`<text class="lb" x="${F(cx-rm(t))}" y="${cy+4}" text-anchor="middle" font-size="10" fill="var(--ink)">${o.labels&&o.labels.trk?o.labels.trk[t]:t}</text>`;
+    s+=`<text class="lb" x="${cx-Ro+4}" y="${cy-10}" font-size="10" fill="var(--muted)">磁道号</text>`}
+  const [ra0x,ra0y]=pol(cx,cy,Ro+24,248),[ra1x,ra1y]=pol(cx,cy,Ro+24,212);
+  s+=`<path d="M${F(ra0x)} ${F(ra0y)}A${Ro+24} ${Ro+24} 0 0 0 ${F(ra1x)} ${F(ra1y)}" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#rotA)"/><text x="${F(ra1x-4)}" y="${F(ra1y+16)}" font-size="11" fill="var(--muted)" text-anchor="end">转向</text>`;
+  const hx=cx+rm(o.arm);
+  s+=`<rect x="${F(hx+6)}" y="${cy-4}" width="${F(424-hx-6)}" height="8" rx="2" fill="var(--hw)" opacity=".9"/><rect x="${F(hx-7)}" y="${cy-8}" width="14" height="16" rx="2" fill="var(--hw)" stroke="${hl.heads?'var(--q)':'var(--ink)'}" stroke-width="${hl.heads?3:1.2}"/>`;
+  s+=`<text class="lb" x="${F(hx)}" y="${cy-14}" text-anchor="middle" font-size="11" fill="var(--hw)" font-weight="600">读写头</text>`;
+  /* 侧视 */
+  const c2=650,rx=150,ry=26,th=8,k=rx/Ro,yy=p=>P===1?150:68+p*(Math.min(95,220/(P-1)));const ery=r=>r*ry/rx;
+  const ell=(y,r,attr)=>`<ellipse cx="${c2}" cy="${F(y)}" rx="${F(r)}" ry="${F(ery(r))}" ${attr}/>`;
+  s+=`<rect x="${c2-7}" y="30" width="14" height="${F(yy(P-1)+th+30-30)}" fill="var(--muted)"/>`;
+  s+=`<text x="${c2+14}" y="40" font-size="11" fill="var(--muted)">磁盘轴</text>`;
+  const sel=hl.surface||hl.track||hl.sector;
+  for(let p=P-1;p>=0;p--){const y=yy(p);
+    s+=`<path d="M${c2-rx} ${F(y)}V${F(y+th)}A${rx} ${ry} 0 0 0 ${c2+rx} ${F(y+th)}V${F(y)}Z" fill="var(--plat2)" stroke="${hl.platter&&p===o.h>>1?'var(--accent)':'none'}" stroke-width="3"/>`;
+    s+=ell(y,rx,`fill="var(--plat)" stroke="${hl.platter&&p===o.h>>1?'var(--accent)':'var(--line)'}" stroke-width="${hl.platter&&p===o.h>>1?3:1}" ${o.click?`data-h="${2*p}"`:''}`);
+    for(let t=1;t<o.T;t++)s+=ell(y,(Ro-t*w)*k,'fill="none" stroke="var(--line)" stroke-width=".8" pointer-events="none"');
+    if(2*p+1<o.NS&&o.click)s+=ell(y+th,rx,`fill="none" stroke="transparent" stroke-width="10" data-h="${2*p+1}"`);
+    for(const hh of [2*p,2*p+1]){if(hh>=o.NS)continue;const fy=hh%2?y+th:y;const R=rm(o.c)*k;
+      if(hl.surface&&hh===o.h)s+=ell(fy,rx-2,`fill="none" stroke="var(--accent)" stroke-width="3" ${hh%2?'stroke-dasharray="6 4"':''} pointer-events="none"`);
+      if(hl.cyl)s+=ell(fy,R,`fill="none" stroke="var(--q)" stroke-width="2.5" ${hh%2?'stroke-dasharray="4 3"':''} pointer-events="none"`);
+      if((hl.track||hl.sector)&&hh===o.h)s+=ell(fy,R,`fill="none" stroke="var(--cmp)" stroke-width="5" ${hh%2?'stroke-dasharray="6 3"':''} pointer-events="none"`);
+      if(hl.sector&&hh===o.h){let pts=[];const a0=o.s*d-o.rot;for(let i=0;i<=12;i++){const a=(a0+d*i/12)*Math.PI/180;pts.push(`${F(c2+R*Math.cos(a))},${F(fy+ery(R)*Math.sin(a))}`)}s+=`<polyline points="${pts.join(' ')}" fill="none" stroke="var(--mv)" stroke-width="7" stroke-linecap="round" pointer-events="none"/>`}}
+    s+=`<rect x="${c2-7}" y="${F(p?yy(p-1)+th+ery(rx)*0:30)}" width="14" height="${F(y-(p?yy(p-1)+th:30))}" fill="var(--muted)" pointer-events="none"/>`;
+    s+=`<ellipse cx="${c2}" cy="${F(y)}" rx="14" ry="4" fill="var(--muted)" pointer-events="none"/>`;
+    s+=`<text class="lb" x="${c2-rx-6}" y="${F(y+3)}" text-anchor="end" font-size="11" fill="${sel&&o.h===2*p?'var(--ink)':'var(--muted)'}" font-weight="${sel&&o.h===2*p?700:400}">盘面${o.labels&&o.labels.surf?o.labels.surf[2*p]:2*p}</text>`;
+    if(2*p+1<o.NS)s+=`<text class="lb" x="${c2-rx-6}" y="${F(y+th+17)}" text-anchor="end" font-size="11" fill="${sel&&o.h===2*p+1?'var(--ink)':'var(--muted)'}" font-weight="${sel&&o.h===2*p+1?700:400}">盘面${o.labels&&o.labels.surf?o.labels.surf[2*p+1]:2*p+1}</text>`}
+  if(hl.cyl){const R=rm(o.c)*k;[c2-R,c2+R].forEach(x=>{s+=`<line x1="${F(x)}" x2="${F(x)}" y1="${F(yy(0))}" y2="${F(yy(P-1)+th)}" stroke="var(--q)" stroke-width="1.5" stroke-dasharray="5 4"/>`});s+=`<text class="lb" x="${F(c2-R+4)}" y="${F(yy(0)-ery(R)-6)}" font-size="11" fill="var(--q)" font-weight="700">柱面${o.labels&&o.labels.cyl!=null?o.labels.cyl:o.c}</text>`}
+  const hx2=c2+rm(o.arm)*k;
+  for(let hh=0;hh<o.NS;hh++){const p=hh>>1,y=yy(p),ya=hh%2?y+th+11:y-11;const on=hl.heads||(sel&&hh===o.h);
+    s+=`<line x1="${F(hx2)}" x2="852" y1="${F(ya)}" y2="${F(ya)}" stroke="var(--hw)" stroke-width="${on?5:3.5}" opacity="${on?1:.75}"/><rect x="${F(hx2-6)}" y="${F(ya-4)}" width="12" height="8" rx="2" fill="var(--hw)" stroke="${on?'var(--q)':'none'}" stroke-width="2"/>`}
+  s+=`<rect x="852" y="${F(yy(0)-30)}" width="20" height="${F(yy(P-1)-yy(0)+70)}" rx="3" fill="var(--hw)" stroke="${hl.heads?'var(--q)':'none'}" stroke-width="3"/><text class="lb" x="862" y="${F(yy(0)-36)}" text-anchor="middle" font-size="11" fill="var(--hw)" font-weight="600">磁头组</text>`;
+  if(hl.platter)s+=`<text class="lb" x="${c2}" y="${F(yy(o.h>>1)+ery(rx)+th+28)}" text-anchor="middle" font-size="11" fill="var(--accent)" font-weight="700">一张盘片，上下两个盘面</text>`;
+  return s+'</svg>'}
+
+/* p192 时间线 */
+function tlSVG(m){m=m||{};const seg=[['dev','等待设备可用',20,205,'tick'],['ch','等待通道可用',205,305,'tick'],['seek','寻道',305,475,'dash'],['rot','旋转延时',475,650,'dash'],['xfer','数据传送',650,830,'solid']];
+  let s=`<svg viewBox="0 0 900 182" role="img" aria-label="磁盘 I/O 时间线"><defs><marker id="tlA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--q)"/></marker></defs>`;
+  s+=`<text x="10" y="14" font-size="11" fill="var(--muted)">磁盘 I/O 时间线（四章 p192）</text>`;
+  seg.forEach(([k,l,x0,x1,st])=>{const cur=m.cur===k||(m.cur==='ta'&&['seek','rot','xfer'].includes(k)),done=(m.done||[]).includes(k);
+    if(cur)s+=`<rect x="${x0+2}" y="20" width="${x1-x0-4}" height="52" rx="4" fill="color-mix(in srgb,var(--cmp) 22%,transparent)"/>`;
+    s+=`<text x="${(x0+x1)/2}" y="38" text-anchor="middle" font-size="13" fill="${cur?'var(--ink)':done?'var(--done)':'var(--muted)'}" font-weight="${cur||done?700:400}">${done&&!cur?'✓ ':''}${l}</text>`;
+    const col=cur?'var(--cmp)':done?'var(--done)':'var(--q)';
+    if(st==='tick'){for(let x=x0+22;x<x1-6;x+=22)s+=`<line x1="${x}" x2="${x}" y1="52" y2="66" stroke="${col}" stroke-width="2"/>`}
+    else s+=`<line x1="${x0}" x2="${x1}" y1="59" y2="59" stroke="${col}" stroke-width="2.5" ${st==='dash'?'stroke-dasharray="5 4"':''}/>`;
+    s+=`<line x1="${x0}" x2="${x0}" y1="48" y2="70" stroke="var(--q)" stroke-width="3"/>`});
+  s+=`<line x1="830" x2="830" y1="48" y2="70" stroke="var(--q)" stroke-width="3"/>`;
+  s+=`<line x1="215" x2="470" y1="90" y2="90" stroke="var(--q)" stroke-width="2" marker-start="url(#tlA)"/><line x1="560" x2="822" y1="90" y2="90" stroke="var(--q)" stroke-width="2" marker-end="url(#tlA)"/><text x="515" y="95" text-anchor="middle" font-size="13" fill="var(--q)" font-weight="700">设备忙</text>`;
+  /* 公式 Ta = Ts + 1/(2r) + b/(rN) */
+  const y=140,fx=360;
+  s+=`<text x="${fx}" y="${y}" font-size="17" fill="var(--ink)" font-style="italic">T<tspan font-size="11" dy="4">a</tspan><tspan dy="-4"> = T</tspan><tspan font-size="11" dy="4">s</tspan><tspan dy="-4"> +</tspan></text>`;
+  s+=`<text x="${fx+84}" y="${y-8}" text-anchor="middle" font-size="15" fill="var(--ink)" font-style="italic">1</text><line x1="${fx+70}" x2="${fx+98}" y1="${y-4}" y2="${y-4}" stroke="var(--ink)"/><text x="${fx+84}" y="${y+13}" text-anchor="middle" font-size="15" fill="var(--ink)" font-style="italic">2r</text>`;
+  s+=`<text x="${fx+104}" y="${y}" font-size="17" fill="var(--ink)">+</text><text x="${fx+134}" y="${y-8}" text-anchor="middle" font-size="15" fill="var(--ink)" font-style="italic">b</text><line x1="${fx+118}" x2="${fx+150}" y1="${y-4}" y2="${y-4}" stroke="var(--ink)"/><text x="${fx+134}" y="${y+13}" text-anchor="middle" font-size="15" fill="var(--ink)" font-style="italic">rN</text>`;
+  const C={Ta:[fx+9,'访问时间'],Ts:[fx+46,'寻道时间'],rot:[fx+84,'旋转延迟'],xfer:[fx+134,'传输时间']}[m.circle];
+  if(C)s+=`<ellipse cx="${C[0]}" cy="${y-3}" rx="17" ry="24" fill="none" stroke="var(--mv)" stroke-width="2"/><text x="${C[0]}" y="${y+40}" text-anchor="middle" font-size="12" fill="var(--mv)" font-weight="700">${C[1]}</text>`;
+  return s+'</svg>'}
+
+/* ===== 步进演示 ===== */
+const G0={T:4,S:8,NS:6,c:2,h:2,s:5};
+const ST=[['struct','认部件'],['access','读一个扇区'],['time','I/O 时间线']];
+const PARTS=n=>`<h3>部件（四章 p190）</h3><ul style="list-style:none;padding-left:0">${[['盘片','叠在一起，绕磁盘轴转'],['盘面','盘片的一面，配一个读写头'],['磁道','盘面上的同心圆环'],['扇区','磁道分成的一段'],['柱面','各盘面同号磁道合起来'],['磁头组','所有磁臂一起移动']].map(([a,b],i)=>`<li class="${i<n?'chk':'todo'}">${i<n?'✓ ':'○ '}<b>${a}</b>：${b}</li>`).join('')}</ul>`;
+const TRI=`<h3>扇区地址三元组（四章 p190）</h3><p class="mono" style="font-size:14px">(柱面，盘面，扇区)</p><p class="tip">“盘面号”也叫“磁头号”，强化4 p178 的题里说成“每个柱面有 10 个磁道”。</p>`;
+function PROG(st,nd,curp){const cur=Math.floor(((st.rot%360)+360)%360/45);const ph=[['seek','寻道'],['rot','旋转延迟'],['xfer','传送']];const phase=curp;
+  return `<h3>目标 (柱面 2，盘面 2，扇区 5)</h3><table><tr><th>项目</th><th>现在</th></tr><tr><td>磁头组在柱面</td><td class="${phase==='seek'?'h':''}">${Math.round(st.arm)}</td></tr><tr><td>磁头下的扇区</td><td class="${phase==='rot'||phase==='xfer'?'h':''}">${cur}</td></tr></table><ul style="list-style:none;padding-left:0">${ph.map(([k,l],i)=>`<li class="${i<nd?'chk':'todo'}">${i<nd?'✓ ':'○ '}${l}${k===curp?'（进行中）':''}</li>`).join('')}</ul><p class="tip">本页的盘片一圈 8 个扇区，每个扇区占 45°。盘片一直在转，寻道的同时扇区也在走。</p>`}
+const VARS=`<h3>公式里的量（四章 p193–195）</h3><table><tr><th>记号</th><th>含义</th></tr><tr><td>T<sub>s</sub></td><td>寻道时间</td></tr><tr><td>r</td><td>磁盘转数（转速）</td></tr><tr><td>1/r</td><td>旋转一周的时间</td></tr><tr><td>b</td><td>传输的比特数</td></tr><tr><td>N</td><td>磁道上的比特数</td></tr></table><p class="tip">数值计算（寻道距离 × 每道时间、半圈、读几个扇区）见<a href="磁盘调度.html">磁盘调度</a>页下方的“换算成访问时间”。</p>`;
+const S0={arm:0,rot:10};
+const STEPS=[
+ {g:'struct',st:S0,hl:{},card:PARTS(0),note:'机械硬盘由几张叠在一起的<b>盘片</b>组成，绕<b>磁盘轴</b>高速旋转；右边的<b>磁头组</b>带着一排磁臂，每条磁臂末端是一个<b>读写头</b>。左边是从上往下看一个盘面，右边是侧面看整叠盘片，照四章 p190 的图画。下面逐个认部件。',ref:'四章 p190；强化4 p176'},
+ {g:'struct',st:S0,hl:{platter:1,surface:1},card:PARTS(2),ask:'一张盘片的上下两面都能记录数据。每一面叫什么？每一面配几个读写头？',
+  note:'每一面叫一个<b>盘面</b>，每个盘面配一个读写头，所以“盘面号”和“磁头号”说的是同一个东西。图里 3 张盘片共 6 个盘面，编号 0～5，绿色框是盘面 2。<span class="warn">本页补充</span>：PPT 的图每张盘片只画了上面一个磁头，两面各一个磁头、盘面从上往下先上表面后下表面编号，是本页的画法和设定。',ref:'四章 p190（扇区地址三元组里的“盘面”）'},
+ {g:'struct',st:S0,hl:{surface:1,track:1},card:PARTS(3),ask:'盘面上一圈一圈的同心圆环叫什么？',
+  note:'<b>磁道</b>：盘面上的一个同心圆环。图里每个盘面画 4 条磁道，橙色是盘面 2 上的 2 号磁道。读写时磁头必须先被定位到期望的磁道上。本页把最外圈记为 0 号（本页设定，PPT 没规定方向）。',ref:'四章 p190'},
+ {g:'struct',st:S0,hl:{surface:1,track:1,sector:1},card:PARTS(4),
+  note:'<b>扇区</b>：每条磁道再分成若干段，每段是一个扇区。图里每道 8 个，红色是 2 号磁道上的 5 号扇区，左图外圈的小数字是扇区号。本页里外圈每道扇区数相同，和 408 计算题的设定一致（如强化4 p178 的“每个磁道有 200 个扇区”）。扇区是磁盘读写的基本单位（本页补充；扇区内部的 ID、GAP、DATA 见<a href="开机到用户进程.html">开机到用户进程</a>页）。',ref:'四章 p190；强化4 p178'},
+ {g:'struct',st:S0,hl:{cyl:1},card:PARTS(5),ask:'6 个盘面上半径相同的 2 号磁道合起来叫什么？',
+  note:'<b>柱面</b>：所有盘面上同一半径的磁道合起来，像一个圆柱面（侧视图的蓝色虚线，照 PPT 的虚线画）。所以柱面号就是磁道号，一个柱面里的磁道数等于盘面数，强化4 p179 写的“10 磁道/柱面”就是 10 个盘面。',ref:'四章 p190；强化4 p179'},
+ {g:'struct',st:S0,hl:{heads:1},card:PARTS(6)+TRI,ask:'所有磁臂固定在磁头组上一起移动。这意味着任一时刻各个磁头在什么位置？',
+  note:'<b>磁头组</b>带着所有磁头一起移动，所以任一时刻所有磁头都停在<b>同一个柱面</b>上。要读同一柱面里另一个盘面，只要换一个磁头读，不用移动磁臂（换磁头是电子切换，本页补充）。所以一个扇区的位置用三元组 <b>(柱面，盘面，扇区)</b> 表示。',ref:'四章 p190（右侧“扇区地址三元组”）'},
+ {g:'access',st:S0,hl:{track:1,sector:1},nd:0,
+  note:'现在要读 <b>(柱面 2，盘面 2，扇区 5)</b>。磁头组停在柱面 0，磁头下面正好是 0 号扇区。PPT：读取或写入时，磁头必须被定位在期望的磁道，并从所期望的柱面和扇区的开始。',ref:'四章 p190'},
+ {g:'access',st:{arm:2,rot:100},anim:1,tl:{cur:'seek'},hl:{track:1,sector:1},phase:'seek',nd:1,ask:'磁头组在柱面 0，目标在柱面 2。第一步做什么？这段时间叫什么？',
+  note:'<b>寻道</b>：磁臂带着整组磁头沿半径方向移到 2 号柱面，花的时间叫<b>寻道时间</b>：定位到期望的磁道所花费的时间。看右图，6 个磁头一起移动。盘片一直在转，寻道的同时扇区也走过了两格。',ref:'四章 p190、p193'},
+ {g:'access',st:{arm:2,rot:225},anim:1,tl:{cur:'rot',done:['seek']},hl:{track:1,sector:1},phase:'rot',nd:2,ask:'磁头已经在 2 号磁道上，可 5 号扇区还没转到磁头下。这段等待叫什么？平均要等多久？',
+  note:'<b>旋转延迟</b>：等盘片把目标扇区转到磁头下。PPT 的定义是“从零扇区开始处到达目的地花费的时间”。目标扇区可能刚过去，也可能马上就到，<b>平均旋转延迟 = 磁盘旋转一周时间的一半</b>，即 1/(2r)。',ref:'四章 p190、p194'},
+ {g:'access',st:{arm:2,rot:270},anim:1,tl:{cur:'xfer',done:['seek','rot']},hl:{track:1,sector:1},phase:'xfer',nd:3,
+  note:'<b>数据传送</b>：5 号扇区从磁头下整个划过，数据就读出来了。转一周 1/r 能读完一整条磁道的 N 个比特，所以读 b 个比特要 b/(rN)。图里一道 8 个扇区，读一个扇区要转 1/8 圈。',ref:'四章 p195'},
+ {g:'access',st:{arm:2,rot:315},anim:1,tl:{cur:'xfer',done:['seek','rot']},hl:{track:1,sector:1},phase:'xfer',nd:3,sNext:6,ask:'接着要读同一磁道上的 6 号扇区，还要再寻道、再等一次旋转延迟吗？',
+  note:'<b>不用</b>。6 号紧跟在 5 号后面，盘片再转 1/8 圈就直接读到。四章 p191：这种机制决定了访问连续的扇区或者磁盘块时访问效率更高。强化4 p176 也写：主要耗时操作为寻道，访问连续扇区时，由于连续扇区在同一个磁道上，不需要再次寻道，因此性能较高。',ref:'四章 p191；强化4 p176'},
+ {g:'time',st:{arm:2,rot:315},tl:{},hl:{},card:VARS,
+  note:'四章 p192 把一次磁盘 I/O 画成一条时间线：<b>等待设备可用 → 等待通道可用 → 寻道 → 旋转延时 → 数据传送</b>。前两段是在排队，后三段磁盘才真正在为这次请求动作。',ref:'四章 p192'},
+ {g:'time',st:{arm:2,rot:315},tl:{cur:'ta'},hl:{},card:VARS,circle:'Ta',ask:'时间线上的五段里，访问时间 Ta 包括哪几段？',
+  note:'PPT 的公式 <b>T<sub>a</sub> = T<sub>s</sub> + 1/(2r) + b/(rN)</b>，访问时间只算<b>寻道、旋转延迟、传送</b>三段，不含前面两段等待。PPT 把“设备忙”的箭头画在从等待通道可用开始到传送结束；本页的理解是：设备已经分给这次请求，等通道期间它也不能为别的请求服务。',ref:'四章 p192'},
+ {g:'time',st:{arm:2,rot:315},tl:{cur:'seek'},hl:{},card:VARS,circle:'Ts',
+  note:'<b>T<sub>s</sub>：寻道时间</b>。三项里通常它最大，磁盘调度算法优化的就是这一项，轨迹见<a href="磁盘调度.html">磁盘调度</a>页。',ref:'四章 p193'},
+ {g:'time',st:{arm:2,rot:315},tl:{cur:'rot'},hl:{},card:VARS,circle:'rot',ask:'转速 6000 r/min 时，平均旋转延迟是多少？',
+  note:'<b>1/(2r)：平均旋转延迟</b>，1/r 是旋转一周的时间。6000 r/min 即 100 r/s，转一周 10 ms，平均旋转延迟 <b>5 ms</b>（这个例子是本页补充）。',ref:'四章 p194'},
+ {g:'time',st:{arm:2,rot:315},tl:{cur:'xfer'},hl:{},card:VARS,circle:'xfer',
+  note:'<b>b/(rN)：传输时间</b>，b 是传输的比特数，N 是磁道上的比特数，r 是磁盘转数。题目常给“每道扇区数”，这时 b/N 就是“读的扇区数 ÷ 每道扇区数”，即读这些扇区要转几分之几圈（这层换算是本页补充）。',ref:'四章 p195'}
+];
+function build(){const F2=[];let prev=S0,pnd=0;STEPS.forEach((s,i)=>{if(s.ask)F2.push({...s,si:i,q:s.ask,ask:1,st:prev,anim:0,nd:pnd,phase:null,tl:s.g==='access'?{cur:null,done:(s.tl&&s.tl.done)||[]}:(s.tl?{}:undefined),circle:null,card0:1});F2.push({...s,si:i,ask:0,from:prev});prev=s.st;if(s.nd!=null)pnd=s.nd});frames=F2;at=0}
+function drawDisk(st,f){const o={...G0,hl:f.hl||{},arm:st.arm,rot:st.rot};if(f.sNext&&!f.ask)o.s=f.sNext;$('view').innerHTML=diskSVG(o)}
+function draw(f,fwd){cancelAnimationFrame(raf);
+  const tgt=f.st;
+  if(f.anim&&fwd&&!RM&&f.from){const a=f.from,dur=Math.min(1500,delay()*.6),t0=performance.now();
+    const stepA=now=>{const u=Math.min(1,(now-t0)/dur),e=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;const st={arm:a.arm+(tgt.arm-a.arm)*e,rot:a.rot+(tgt.rot-a.rot)*e};drawDisk(st,f);$('card').innerHTML=PROG(st,u<1?f.nd-1:f.nd,u<1?f.phase:null);if(u<1)raf=requestAnimationFrame(stepA)};
+    raf=requestAnimationFrame(stepA);drawDisk(a,f)}
+  else drawDisk(tgt,f);
+  $('tlv').innerHTML=tlSVG(f.tl?{...f.tl,circle:f.circle}:{});
+  if(f.g==='access'){if(!(f.anim&&fwd&&!RM&&f.from))$('card').innerHTML=PROG(tgt,f.nd||0,null)}else $('card').innerHTML=f.card||'';
+  const gi=ST.findIndex(x=>x[0]===f.g);
+  $('flow').innerHTML=ST.map(([k,n],i)=>`${i?'<span class="ar">→</span>':''}<button type="button" data-g="${k}" class="${i===gi?'on':(i<gi?'past':'')}">${n}</button>`).join('');
+  $('note').innerHTML=f.ask?`<span class="ask">${f.q}</span><span class="ref">先想一下，再按“下一步”看答案。</span>`:f.note+`<span class="ref">出处：${f.ref}</span>`}
+$('flow').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;stop();at=frames.findIndex(f=>f.g===b.dataset.g);lastAt=at;render()};
+showSpd();build();render();
+
+/* ===== 换算器 ===== */
+const GP=[['强化4 p178 真题',{C:300,H:10,S:200,K:2,rk:'cl',rv:100530}],['小盘（能完整画出来）',{C:4,H:6,S:8,K:2,rk:'sec',rv:101}]];
+let cur=0;
+const gv=()=>({C:+$('gC').value,H:+$('gH').value,S:+$('gS').value,K:+$('gK').value});
+function gOK(g){return [g.C,g.H,g.S,g.K].every(x=>Number.isInteger(x)&&x>0)}
+function tri(b,g){const per=g.H*g.S;return {c:Math.floor(b/per),h:Math.floor((b%per)/g.S),s:b%g.S}}
+function lin(c,h,s,g){return c*g.H*g.S+h*g.S+s}
+function geoRender(src){const g=gv();$('gErr').textContent='';
+  if(!gOK(g)){$('gErr').textContent='柱面数、盘面数、每道扇区数、每簇扇区数都要是正整数。';return}
+  const tot=g.C*g.H*g.S;
+  if(src==='f'){const c=+$('fc').value,h=+$('fh').value,s=+$('fs').value;
+    if(![c,h,s].every(x=>Number.isInteger(x)&&x>=0)||c>=g.C||h>=g.H||s>=g.S){$('gErr').textContent=`柱面号要在 0～${g.C-1}，盘面号 0～${g.H-1}，扇区号 0～${g.S-1}。`;return}
+    cur=lin(c,h,s,g)}
+  else if(src==='r'){const v=+$('rv').value;const b=$('rk').value==='cl'?v*g.K:v;
+    if(!Number.isInteger(v)||v<0||b>=tot){$('gErr').textContent=`超出范围：一共 ${tot} 个扇区（${Math.ceil(tot/g.K)} 个簇），从 0 数。`;return}
+    cur=b}
+  if(cur>=tot)cur=tot-1;
+  const t=tri(cur,g);$('fc').value=t.c;$('fh').value=t.h;$('fs').value=t.s;
+  if(src!=='r'){$('rv').value=$('rk').value==='cl'?Math.floor(cur/g.K):cur}
+  const per=g.H*g.S,cl=Math.floor(cur/g.K);
+  $('gOut').innerHTML=`<p>每柱面扇区数：${g.H} × ${g.S} = <b>${per}</b></p>
+   <p>总扇区数：${g.C} × ${g.H} × ${g.S} = <b>${tot}</b></p>
+   <p>扇区号 = c×${per} + h×${g.S} + s<br>= ${t.c}×${per} + ${t.h}×${g.S} + ${t.s} = <b>${cur}</b></p>
+   <p>簇号 = ⌊${cur} ÷ ${g.K}⌋ = <b>${cl}</b>（簇内第 ${cur%g.K} 个扇区）</p>
+   <p class="tip" style="font-family:var(--sans)">反过来：柱面 = ⌊扇区号 ÷ ${per}⌋ = ${t.c}；余数 ${cur%per}，盘面 = ⌊${cur%per} ÷ ${g.S}⌋ = ${t.h}，扇区 = ${cur%per} mod ${g.S} = ${t.s}。</p>
+   ${g.C===300&&g.H===10&&g.S===200&&g.K===2?`<p class="tip" style="font-family:var(--sans)">p179 第 1 问的答案：300×10×200 = 600000 个扇区，容量 300000KB，1 簇 = 1KB。第 3 问 100530 簇：本页按上面的算法得 (柱面 100，盘面 5，扇区 60)，即 100530×2 = 201060，201060 ÷ 2000 = 100 余 1060，1060 ÷ 200 = 5 余 60。PPT 没给这一问的数值答案，这是本页算的；“簇号换成物理地址由谁完成”PPT 也没答，通常答磁盘驱动程序（本页补充）。</p>`:''}`;
+  const Td=Math.min(g.C,6),Sd=Math.min(g.S,16),Hd=Math.min(g.H,6),sc=Td<g.C||Sd<g.S||Hd<g.H;
+  const tD=Math.floor(t.c*Td/g.C),kD=Math.floor(t.s*Sd/g.S),hD=Math.floor(t.h*Hd/g.H);
+  const lab=sc?{h:t.h,cyl:t.c,noTrack:1,surf:Array.from({length:Hd},(_,i)=>Math.floor(i*g.H/Hd)),sec:Array.from({length:Sd},(_,i)=>Math.floor(i*g.S/Sd))}:null;
+  $('ex').innerHTML=diskSVG({T:Td,S:Sd,NS:Hd,c:tD,h:hD,s:kD,hl:{cyl:1,track:1,sector:1,surface:1},arm:tD,rot:0,click:1,labels:lab});
+  $('exNote').textContent=sc?`示意图按比例缩画：只画 ${Td} 条磁道、每道 ${Sd} 个扇区、${Hd} 个盘面，选中位置按比例落在附近的格子上，点格子会取那一段的第一个号。数字以右边的计算为准。`:'左边俯视的是选中的盘面；磁头组停在选中的柱面上。';
+  seekCalc();batchCalc()}
+$('ex').onclick=e=>{const g=gv();if(!gOK(g))return;const t=tri(cur,g);const Td=Math.min(g.C,6),Sd=Math.min(g.S,16),Hd=Math.min(g.H,6);
+  const a=e.target.closest('[data-t]'),b=e.target.closest('[data-h]');
+  if(a){$('fc').value=Math.ceil(+a.dataset.t*g.C/Td);$('fs').value=Math.ceil(+a.dataset.k*g.S/Sd);$('fh').value=t.h;geoRender('f')}
+  else if(b){$('fh').value=Math.ceil(+b.dataset.h*g.H/Hd);$('fc').value=t.c;$('fs').value=t.s;geoRender('f')}};
+function seekCalc(){const g=gv();if(!gOK(g))return;const b0=+$('sb0').value,n=+$('sbn').value,tot=g.C*g.H*g.S;
+  if(!(Number.isInteger(b0)&&b0>=0&&Number.isInteger(n)&&n>0&&b0+n<=tot)){$('seekOut').innerHTML=`<p class="bad">起点和长度要是整数，且 起点 + 长度 ≤ ${tot}。</p>`;return}
+  const per=g.H*g.S,e=b0+n-1;const mC=Math.floor(e/per)-Math.floor(b0/per),hs=Math.floor(e/g.S)-Math.floor(b0/g.S);
+  const mS=Math.floor(e/g.S)-Math.floor(b0/g.S);
+  $('seekOut').innerHTML=`<p>按柱面编号（本页上面的编法）：扇区 ${b0}～${e} 跨过 ${hs} 次磁道边界，其中只有 <b>${mC}</b> 次要移动磁臂（换柱面），其余 ${hs-mC} 次只是换一个磁头。</p>
+   <p>假如改成“先把一个盘面的所有柱面编完，再换下一个盘面”：每 ${g.S} 个扇区就换一次柱面，要移动磁臂 <b class="bad">${mS}</b> 次。</p>
+   <p class="tip" style="font-family:var(--sans)">道理：磁头组让所有磁头停在同一个柱面上，一个柱面里的 ${per} 个扇区不移动磁臂就都能读到。按柱面连续编号，逻辑上相邻的块就落在同一柱面里，连续读写时寻道最少（四章 p191、强化4 p176 讲的“连续扇区访问效率更高”）。第二种编法是本页为了对比假设的，PPT 没讲。</p>`}
+function batchCalc(){const g=gv();if(!gOK(g))return;const xs=$('batch').value.split(/[\s,，、]+/).filter(Boolean).map(Number),hd=+$('bh').value,tot=g.C*g.H*g.S;
+  if(!xs.length||xs.some(x=>!Number.isInteger(x)||x<0||x*g.K>=tot)||!(Number.isInteger(hd)&&hd>=0&&hd<g.C)){$('batchOut').innerHTML='<p class="bad">簇号要是范围内的非负整数，磁头柱面要在范围内。</p>';return}
+  const rows=xs.map(x=>({x,b:x*g.K,...tri(x*g.K,g)}));
+  let pos=hd,rest=rows.slice(),ord=[],dist=0;while(rest.length){let bi=0;rest.forEach((r,i)=>{if(Math.abs(r.c-pos)<Math.abs(rest[bi].c-pos))bi=i});const r=rest.splice(bi,1)[0];dist+=Math.abs(r.c-pos);pos=r.c;ord.push(r.x)}
+  $('batchOut').innerHTML=`<div class="cmp"><table class="small" style="min-width:0"><tr><th>簇号</th><th>首扇区号</th><th>柱面</th><th>盘面</th><th>扇区</th></tr>${rows.map(r=>`<tr><td>${r.x}</td><td>${r.b}</td><td><b>${r.c}</b></td><td>${r.h}</td><td>${r.s}</td></tr>`).join('')}</table></div>
+   <p>磁头在柱面 ${hd}，按 SSTF 只看柱面距离：<b>${ord.join(' → ')}</b>（共移动 ${dist} 个柱面）</p>
+   <p class="tip" style="font-family:var(--sans)">PPT 没给第 2 问的数值答案，这是本页算的；距离相同时本页取先输入的。SSTF 的逐步轨迹可以把柱面号填进<a href="磁盘调度.html">磁盘调度</a>页看。</p>`}
+$('geoPre').innerHTML='例子：'+GP.map(([t],i)=>`<button type="button" class="chip" data-gi="${i}" aria-pressed="${i===0}">${t}</button>`).join('');
+$('geoPre').onclick=e=>{const b=e.target.closest('[data-gi]');if(!b)return;const v=GP[+b.dataset.gi][1];$('gC').value=v.C;$('gH').value=v.H;$('gS').value=v.S;$('gK').value=v.K;$('rk').value=v.rk;$('rv').value=v.rv;
+  $('geoPre').querySelectorAll('[data-gi]').forEach(x=>x.setAttribute('aria-pressed',x===b));if(v.C===4){$('sb0').value=0;$('sbn').value=60}else{$('sb0').value=0;$('sbn').value=4000}geoRender('r')};
+['gC','gH','gS','gK'].forEach(k=>$(k).oninput=()=>geoRender('r'));['fc','fh','fs'].forEach(k=>$(k).oninput=()=>geoRender('f'));$('rv').oninput=()=>geoRender('r');$('rk').onchange=()=>geoRender('r');
+['sb0','sbn'].forEach(k=>$(k).oninput=seekCalc);['batch','bh'].forEach(k=>$(k).oninput=batchCalc);
+geoRender('r');
+
+/* ===== RAID ===== */
+const LV={0:{min:2,max:5,def:4},1:{min:2,max:2,def:2},5:{min:3,max:5,def:4},6:{min:4,max:5,def:5},10:{min:4,max:6,def:4,even:1}};
+let rl=5,rn=4,dead=new Set();const ROWS=4;
+const val=i=>(i*7+3)&15,bin=v=>v.toString(2).padStart(4,'0');
+function layout(){const g=[];let di=0;for(let r=0;r<ROWS;r++){const row=[];
+  if(rl==0){for(let d=0;d<rn;d++)row.push({t:'d',i:di++})}
+  else if(rl==1){const i=di++;row.push({t:'d',i},{t:'m',i})}
+  else if(rl==10){for(let p=0;p<rn/2;p++){const i=di++;row.push({t:'d',i,pair:p},{t:'m',i,pair:p})}}
+  else{const pd=((rn-1-r)%rn+rn)%rn,qd=rl==6?(pd+1)%rn:-1;for(let d=0;d<rn;d++)row.push(d===pd?{t:'p',k:'P'}:d===qd?{t:'p',k:'Q'}:{t:'d',i:-1});
+    for(let d=0;d<rn;d++)if(row[d].t==='d')row[d].i=di++;
+    const x=row.filter(c=>c.t==='d').reduce((a,c)=>a^val(c.i),0);row.forEach(c=>{if(c.k==='P')c.v=x})}
+  g.push(row)}return g}
+function raidRender(){const g=layout();const lost=[],rec=[];let xorEx='';
+  const rows=g.map((row,r)=>{const fr=row.map((_,d)=>dead.has(d));const nf=fr.filter(Boolean).length;
+    return row.map((c,d)=>{let st='';if(fr[d]){
+        if(rl==0)st='lost';else if(rl==1||rl==10){const pr=rl==1?[0,1]:[2*c.pair,2*c.pair+1];st=pr.every(x=>dead.has(x))?'lost':'rec'}
+        else{const lim=rl==5?1:2;st=nf<=lim?'rec':'lost'}
+        if(c.t==='d'||c.t==='m'){if(st==='lost'&&!lost.includes(c.i))lost.push(c.i);if(st==='rec'&&c.t==='d'&&!rec.includes(c.i))rec.push(c.i)}
+        if(rl==5&&st==='rec'&&!xorEx){const others=row.filter((_,j)=>j!==d);const v=c.t==='p'?c.v:val(c.i);xorEx=`第 ${r} 行：${c.t==='p'?'P':'D'+c.i} = ${others.map(o=>(o.t==='p'?'P':'D'+o.i)).join(' ⊕ ')} = ${others.map(o=>bin(o.t==='p'?o.v:val(o.i))).join(' ⊕ ')} = <b>${bin(v)}</b>`}}
+      const lab=c.t==='p'?`${c.k}<small>${c.k==='P'?bin(c.v):'校验'}</small>`:`D${c.i}${c.t==='m'?'′':''}<small>${bin(val(c.i))}</small>`;
+      return `<td class="${c.t}${fr[d]?' dead':''}${st?' '+st:''}" title="${st==='rec'?'可恢复':st==='lost'?'丢失':''}">${lab}</td>`}).join('')});
+  const head=Array.from({length:rn},(_,d)=>`<th><button type="button" data-d="${d}" class="${dead.has(d)?'dead':''}" aria-pressed="${dead.has(d)}">${dead.has(d)?'✕ ':''}磁盘 ${d}</button>${rl==10?`<br><small>镜像组 ${d>>1}</small>`:''}</th>`).join('');
+  $('raidG').innerHTML=`<table class="raid"><tr><th></th>${head}</tr>${rows.map((r,i)=>`<tr><th>条带 ${i}</th>${r}</tr>`).join('')}</table>`;
+  const nData=g.flat().filter(c=>c.t==='d').length,eff=nData/(ROWS*rn);
+  let v=`有效容量 ${nData}/${ROWS*rn} 格 = ${Math.round(eff*100)}%，冗余开销 ${Math.round((1-eff)*100)}%`;
+  v+=rl==5?`（1/N = 1/${rn}）`:rl==6?`（2/N = 2/${rn}）`:'';
+  v+='。';
+  if(!dead.size)v+=' 现在没有坏盘，点上面的磁盘名字试试。';
+  else if(!lost.length)v+=` 坏了 ${dead.size} 块盘：<b class="ok">数据全部还能读出</b>${rl==1||rl==10?'（读镜像那一份）':rl==5?'（用同一行其余块异或恢复）':rl==6?'（用 P、Q 两个校验联立恢复）':''}。`;
+  else{lost.sort((a,b)=>a-b);v+=` 坏了 ${dead.size} 块盘：<b class="no">丢失 ${lost.map(i=>'D'+i).join('、')}</b>${rl==0?'（RAID 0 没有冗余，坏一块就丢）':rl==10?'（同一镜像组的两块都坏了）':rl==5?'（RAID 5 一行坏两块就解不出来）':rl==6?'（RAID 6 最多容忍两块）':''}。`}
+  if(xorEx)v+=`<br><span class="mono">${xorEx}</span>`;
+  $('raidV').innerHTML=v}
+function raidCtl(){$('raidLv').innerHTML='级别：'+Object.keys(LV).sort((a,b)=>a-b).map(k=>`<button type="button" class="chip" data-l="${k}" aria-pressed="${+k===rl}">RAID ${k}</button>`).join('');
+  const L=LV[rl];const ns=[];for(let n=L.min;n<=L.max;n++)if(!L.even||n%2===0)ns.push(n);
+  $('raidN').innerHTML='磁盘数：'+ns.map(n=>`<button type="button" class="chip" data-n="${n}" aria-pressed="${n===rn}">${n} 块</button>`).join('')+(ns.length===1?'<span class="tip" style="margin:0 0 0 6px">PPT 的 RAID 1 是两块盘互为镜像</span>':'');raidRender()}
+$('raidLv').onclick=e=>{const b=e.target.closest('[data-l]');if(!b)return;rl=+b.dataset.l;rn=LV[rl].def;dead.clear();raidCtl()};
+$('raidN').onclick=e=>{const b=e.target.closest('[data-n]');if(!b)return;rn=+b.dataset.n;dead.clear();raidCtl()};
+$('raidG').onclick=e=>{const b=e.target.closest('[data-d]');if(!b)return;const d=+b.dataset.d;dead.has(d)?dead.delete(d):dead.add(d);raidRender()};
+raidCtl();
+
+/* ===== SSD 模拟 ===== */
+const MODES={none:'不做均衡（对照，本页补充）',dynamic:'动态磨损均衡',static:'静态磨损均衡'};
+let smode='dynamic',S=null,scfg={B:6,P:4,L:14,hot:4,th:3},lastEv=null,logs=[];
+function mk(B,P){return {B,P,blocks:Array.from({length:B},()=>({pg:Array.from({length:P},()=>({st:0,l:-1})),er:0})),map:{},act:-1,uw:0,pw:0}}
+const freePages=b=>b.pg.filter(p=>p.st===0).length;
+const isFree=(S,i)=>S.blocks[i].pg.every(p=>p.st===0);
+function pickFree(S,mode){const c=[];for(let i=0;i<S.B;i++)if(i!==S.act&&isFree(S,i))c.push(i);if(!c.length)return -1;if(mode==='none')return c[0];return c.reduce((a,b)=>S.blocks[b].er<S.blocks[a].er?b:a)}
+function nFree(S){let n=0;for(let i=0;i<S.B;i++)if(i!==S.act&&isFree(S,i))n++;return n}
+function copyValid(S,from,to,ev){let n=0;S.blocks[from].pg.forEach(p=>{if(p.st===1){const d=S.blocks[to].pg.findIndex(q=>q.st===0);S.blocks[to].pg[d]={st:1,l:p.l};S.map[p.l]=[to,d];S.pw++;n++;ev.touched.push(to+'.'+d)}});return n}
+function erase(S,i,ev){S.blocks[i].pg.forEach(p=>{p.st=0;p.l=-1});S.blocks[i].er++;ev.erased.push(i)}
+function gc(S,mode,ev){let v=-1,best=-1;for(let i=0;i<S.B;i++){if(i===S.act||isFree(S,i))continue;const inv=S.blocks[i].pg.filter(p=>p.st===2).length;if(inv>best||(inv===best&&mode!=='none'&&S.blocks[i].er<S.blocks[v].er)){best=inv;v=i}}
+  if(best<=0)return false;const sp=pickFree(S,mode);const n=copyValid(S,v,sp,ev);erase(S,v,ev);S.act=sp;
+  ev.msg.push(`空闲块只剩一个，先<b>垃圾回收</b>：块 ${v} 的无效页最多（${best} 个），把它的 ${n} 个有效页搬到空闲块 ${sp}，再擦除块 ${v}（它的擦除次数变成 ${S.blocks[v].er}）。之后接着往块 ${sp} 写。`);return true}
+function staticWL(S,th,ev){const er=S.blocks.map(b=>b.er);const mx=Math.max(...er),mn=Math.min(...er);if(mx-mn<th)return;
+  let c=-1;for(let i=0;i<S.B;i++){if(i===S.act||!S.blocks[i].pg.every(p=>p.st===1))continue;if(c<0||S.blocks[i].er<S.blocks[c].er)c=i}
+  if(c<0||S.blocks[c].er>mn)return;
+  let t=-1;for(let i=0;i<S.B;i++)if(i!==S.act&&isFree(S,i)&&(t<0||S.blocks[i].er>S.blocks[t].er))t=i;
+  if(t<0||S.blocks[t].er<=S.blocks[c].er)return;
+  copyValid(S,c,t,ev);erase(S,c,ev);ev.msg.push(`<b>静态磨损均衡</b>：擦除次数最多 ${mx}、最少 ${mn}，差达到阈值 ${th}。把块 ${c}（擦除 ${S.blocks[c].er-1} 次，装满不常改的冷数据）整块搬到擦除 ${S.blocks[t].er} 次的旧块 ${t}，再擦除块 ${c}，让它回去承担写入。`)}
+function write(S,l,mode,th){const ev={msg:[],touched:[],erased:[],l};S.uw++;
+  if(S.act<0||freePages(S.blocks[S.act])===0){const full=S.act;
+    if(nFree(S)<=1){S.act=-1;if(!gc(S,mode,ev)){ev.msg.push('没有可回收的块了。');return ev}if(mode==='static')staticWL(S,th,ev)}
+    else{S.act=pickFree(S,mode);ev.msg.push(`${full>=0?`块 ${full} 写满了，`:''}换一个空闲块：${mode==='none'?`按块号挑最小的块 ${S.act}`:`挑擦除次数最少的块 ${S.act}（${S.blocks[S.act].er} 次）`}。`)}}
+  let old='';if(S.map[l]){const [b,p]=S.map[l];S.blocks[b].pg[p].st=2;old=`原来在块 ${b} 页 ${p}，不能原地改写，那一页标成<b>无效</b>；`}
+  const d=S.blocks[S.act].pg.findIndex(q=>q.st===0);S.blocks[S.act].pg[d]={st:1,l};S.map[l]=[S.act,d];S.pw++;ev.touched.push(S.act+'.'+d);
+  ev.msg.push(`写逻辑页 ${l}：${old}写到块 ${S.act} 页 ${d}，FTL 映射改成 ${l} → (${S.act}, ${d})。`);return ev}
+function sReset(){const B=+$('sB').value,P=+$('sP').value,L=+$('sL').value,hot=+$('sHot').value,th=+$('sTh').value;$('sErr').textContent='';
+  if(![B,P,L,hot,th].every(x=>Number.isInteger(x)&&x>0)||B<3||B>10||P<2||P>8){$('sErr').textContent='块数 3～10，每块页数 2～8，其余填正整数。';return false}
+  if(L>(B-1)*P-1){$('sErr').textContent=`逻辑页数最多 ${(B-1)*P-1}：要留一个空闲块给垃圾回收，并且至少还要有一页余量。`;return false}
+  if(hot>L){$('sErr').textContent='热数据页数不能超过逻辑页数。';return false}
+  scfg={B,P,L,hot,th};S=mk(B,P);lastEv=null;logs=[];sRender();return true}
+function sDo(l){const ev=write(S,l,smode,scfg.th);lastEv=ev;logs.unshift(...ev.msg.slice().reverse());logs=logs.slice(0,40);sRender()}
+let seed=7;const rnd=()=>{seed=(seed*1103515245+12345)%2147483648;return seed>>8};
+const hotPick=r=>scfg.L-scfg.hot+r%scfg.hot;
+function sRender(){const {B,P,L,hot}=scfg;
+  $('ssdMode').innerHTML='做法：'+Object.entries(MODES).map(([k,v])=>`<button type="button" class="chip" data-sm="${k}" aria-pressed="${k===smode}">${v}</button>`).join('')+'<span class="tip" style="margin:0 0 0 6px">切换做法不清空，之后的写入按新做法分配。</span>';
+  $('lpBtns').innerHTML=Array.from({length:L},(_,l)=>`<button type="button" data-l="${l}" class="${l>=L-hot?'hot':''}">写 ${l}</button>`).join('');
+  const tc=new Set(lastEv?lastEv.touched:[]),ec=new Set(lastEv?lastEv.erased:[]);
+  $('blocks').innerHTML=S.blocks.map((b,i)=>`<div class="blk${i===S.act?' act':''}${ec.has(i)?' er':''}"><div class="bh"><b>块 ${i}</b><span>擦除 ${b.er} 次</span></div><div class="pages">${b.pg.map((p,k)=>`<div class="pg${p.st===1?' v':p.st===2?' x':''}${tc.has(i+'.'+k)&&p.st===1?' new':''}" title="页 ${k}">${p.st?'L'+p.l:'空'}</div>`).join('')}</div></div>`).join('');
+  $('slog').innerHTML=logs.length?logs.map(m=>`<li>${m}</li>`).join(''):'<li>还没有写入。点上面的“写 x”，或先“所有逻辑页各写一次”。</li>';
+  $('ftl').innerHTML=`<table class="ftl"><tr><th>逻辑页</th><th>块</th><th>页</th></tr>${Array.from({length:L},(_,l)=>{const m=S.map[l];return `<tr class="${lastEv&&lastEv.l===l?'new':''}"><td>${l}${l>=L-hot?' 热':''}</td><td>${m?m[0]:'—'}</td><td>${m?m[1]:'—'}</td></tr>`}).join('')}</table>`;
+  const mx=Math.max(1,...S.blocks.map(b=>b.er));
+  $('bars').innerHTML=S.blocks.map(b=>`<div style="height:${Math.max(2,b.er/mx*80)}px"><span>${b.er}</span></div>`).join('');
+  $('barl').innerHTML=S.blocks.map((_,i)=>`<span>块${i}</span>`).join('');
+  const er=S.blocks.map(b=>b.er);
+  $('sStat').innerHTML=`<p>用户写 ${S.uw} 页，闪存实际写 ${S.pw} 页（含搬运）</p><p>擦除共 ${er.reduce((a,b)=>a+b,0)} 次，最多 − 最少 = <b>${Math.max(...er)-Math.min(...er)}</b></p><p class="tip" style="font-family:var(--sans)">实际写 ÷ 用户写叫写放大（本页补充）。</p>`}
+$('ssdMode').onclick=e=>{const b=e.target.closest('[data-sm]');if(!b)return;smode=b.dataset.sm;sRender()};
+$('lpBtns').onclick=e=>{const b=e.target.closest('[data-l]');if(b)sDo(+b.dataset.l)};
+$('sFill').onclick=()=>{for(let l=0;l<scfg.L;l++){const ev=write(S,l,smode,scfg.th);lastEv=ev;logs.unshift(...ev.msg.slice().reverse())}logs=logs.slice(0,40);sRender()};
+$('sHot1').onclick=()=>sDo(hotPick(rnd()));
+$('sHot20').onclick=()=>{let ev0={touched:[],erased:[],msg:[]};for(let i=0;i<20;i++){const ev=write(S,hotPick(rnd()),smode,scfg.th);ev0.touched=ev.touched;ev0.erased.push(...ev.erased);ev0.l=ev.l;logs.unshift(...ev.msg.slice().reverse())}lastEv=ev0;logs=logs.slice(0,40);sRender()};
+$('sClear').onclick=()=>{S=mk(scfg.B,scfg.P);lastEv=null;logs=[];sRender()};
+$('sReset').onclick=sReset;
+$('sCmp').onclick=()=>{const out=Object.keys(MODES).map(m=>{const T=mk(scfg.B,scfg.P);for(let l=0;l<scfg.L;l++)write(T,l,m,scfg.th);let sd=12345;for(let k=0;k<200;k++){sd=(sd*1103515245+12345)%2147483648;write(T,hotPick(sd>>8),m,scfg.th)}const er=T.blocks.map(b=>b.er);return {m,er,d:Math.max(...er)-Math.min(...er),pw:T.pw,uw:T.uw}});
+  $('sCmpOut').innerHTML=`<table><thead><tr><th>做法</th>${Array.from({length:scfg.B},(_,i)=>`<th>块${i}</th>`).join('')}<th>最多 − 最少</th><th>闪存实际写 / 用户写</th></tr></thead><tbody>${out.map(r=>`<tr><th>${MODES[r.m]}</th>${r.er.map(x=>`<td>${x}</td>`).join('')}<td class="k">${r.d}</td><td>${r.pw} / ${r.uw}</td></tr>`).join('')}</tbody></table><p class="tip">读法：不做均衡时，冷数据所在的块一次都不擦，擦除集中在少数块上；动态均衡让空闲块里擦得少的先用，但装着冷数据的块始终不参与；静态均衡把冷数据搬到旧块上，所有块的擦除次数最接近，代价是多搬了一些页。</p>`};
+smode='dynamic';sReset();
+
+/* ===== 自测与来源 ===== */
+const QS=[
+ ['1) 扇区地址用什么三元组表示？为什么“盘面号”也叫“磁头号”？','(柱面，盘面，扇区)（四章 p190）。每个盘面配一个读写头，选盘面就是选磁头（本页补充）。'],
+ ['2) 柱面是什么？一个柱面里有几条磁道？','所有盘面上同一半径的磁道合起来构成一个柱面（四章 p190 的虚线圆柱）。柱面里的磁道数等于盘面数（强化4 p179 的“10 磁道/柱面”）。'],
+ ['3) 读一个扇区的访问时间由哪三部分组成？四章 p192 时间线上的“等待设备可用”“等待通道可用”算不算进 Ta？','寻道时间 Ts、旋转延迟（平均 1/(2r)）、传输时间 b/(rN)。按 PPT 公式 Ta = Ts + 1/(2r) + b/(rN)，两段等待不算进 Ta（四章 p192–195）。'],
+ ['4) 某磁盘有 300 个柱面，每个柱面有 10 个磁道，每个磁道有 200 个扇区，扇区大小为 512B，文件系统每个簇含 2 个扇区。(1) 磁盘容量是多少？(2) 磁头在 85 号柱面，有 4 个磁盘访问请求，簇号分别为 100260、60005、101660、110560，若采用 SSTF，访问簇的先后次序是什么？(3) 第 100530 簇在磁盘上的物理地址是什么？簇号转换成物理地址由 I/O 系统的什么程序完成？（强化4 p178）','(1) PPT p179：300×10×200 = 600000 个扇区，×512B = 300000KB。(2) 本页计算：四个簇在柱面 100、60、101、110，从 85 出发按 SSTF：100260 → 101660 → 110560 → 60005。(3) 本页计算：100530×2 = 201060 号扇区，÷2000 得柱面 100 余 1060，÷200 得盘面（磁头）5、扇区 60，即 (100，5，60)；由磁盘驱动程序完成（本页补充，PPT 未答）。可以在上面的换算器里核对。'],
+ ['5) 强化4 p180 写“第 i 个柱面上第 j 个磁道上的第 k 个扇区为第 u = i*j+k 个扇区”。这个式子对吗？','不对，是笔误。每柱面 10×200 = 2000 个扇区、每磁道 200 个扇区，应为 u = 2000i + 200j + k；簇号是 ⌊u/2⌋。'],
+ ['6)（迁移）一块盘 200 个柱面、4 个盘面、每道 50 个扇区，都从 0 编号，按“先扇区、再盘面、再柱面”编号。12345 号扇区的 (柱面，盘面，扇区) 是多少？','每柱面 4×50 = 200 个扇区。12345 ÷ 200 = 61 余 145；145 ÷ 50 = 2 余 45。答案 (61，2，45)。换算器里把几何改成 200、4、50，反查扇区号 12345 验证。'],
+ ['7) 为什么扇区按柱面连续编号，能减少连续读写时的寻道？','磁头组上所有磁头一起移动，停在同一柱面时，这个柱面所有盘面上的扇区都不用移动磁臂就能读到，换盘面只是换磁头。按柱面编号让逻辑上相邻的块落在同一柱面，连续访问时只有跨柱面才寻道（依据四章 p190–191、强化4 p176，整理是本页的）。'],
+ ['8) 5 块盘做 RAID 5，冗余开销多少？同时坏两块会怎样？换成 4 块盘的 RAID 10，同时坏两块一定丢数据吗？','RAID 5 开销 1/N = 1/5（强化4 p184），只能容忍单个磁盘故障，同一行坏两块解不出来，会丢数据。RAID 10 开销 50%，坏两块时如果不在同一个镜像组就还能读出（6 种组合里 4 种没事），同组两块都坏才丢（本页补充，PPT p186 只说“可容忍多个磁盘故障”）。在上面的 RAID 演示里点两块盘试试。'],
+ ['9) 固态硬盘的读写单位和擦除单位分别是什么？改写一个逻辑块时为什么不能原地写？','以页为单位读写，以块为单位擦除；已经写入的页不能再写，除非整个块被擦除（五章 p100）。所以改写写到新的空闲页，FTL 把映射改过去，旧页标成无效，等垃圾回收时整块擦除（后半句是本页补充）。'],
+ ['10) 动态磨损均衡和静态磨损均衡的区别？只做动态均衡，有什么块会一直磨损不到？','动态：尽可能让擦除次数少的块来写入数据。静态：SSD 检测并自动进行数据迁移、分配，让老旧的块承担更多的读任务，让新块承担更多的写任务（五章 p101）。只做动态时，存着很少修改的冷数据的块从来不被擦除，热数据的写入全压在其余块上；静态均衡把冷数据搬走，这些块才能参与写入（后半句是本页补充，可在上面的对比里看到）。']];
+$('qs').innerHTML=QS.map(([q,a])=>`<details><summary><b>问</b> ${q}</summary><div class="ans">${a}</div></details>`).join('');
+$('src').innerHTML=['四章 p190–191（磁盘工作机制和性能参数：盘片、磁道、扇区、柱面、磁头组，扇区地址三元组；连续访问效率更高），逐页看过图','四章 p192–195（磁盘 I/O 传输时间：五段时间线、设备忙、Ta = Ts + 1/(2r) + b/(rN) 及各项含义），逐页看过图','强化4 p176（场景三：磁盘访问时间，左侧“连续扇区不需要再次寻道”），p178–180（真题：柱面、磁道、扇区与簇的换算）','强化4 p181–186（RAID 0、1、5、6、10，每页一张参数表），逐页看过图','五章 p98–101（SSD 结构：闪存翻译层、存储介质；块与页；以页读写、以块擦除；动态与静态磨损均衡），逐页看过图','四章 p196–201（磁盘调度算法，仅用于对照表“调度”一行；轨迹见磁盘调度页）'].map(x=>`<li>${x}</li>`).join('');
+</script>
+</body>
+</html>
