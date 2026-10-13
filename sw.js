@@ -12,7 +12,9 @@ self.addEventListener('fetch',e=>{
   e.respondWith((async()=>{
     const cache=await caches.open(CACHE);
     const network=fetch(req).then(res=>{if(res.ok)cache.put(req,res.clone());return res;});
-    const timeout=new Promise(r=>setTimeout(r,4000));
+    // A page asking for a fresh copy (fetch(...,{cache:'no-cache'}), e.g. the 演示 catalog) waits for the network
+    // and only falls back to the cache when offline, so a slow connection cannot show a stale list.
+    const timeout=['no-cache','reload','no-store'].includes(req.cache)?new Promise(()=>{}):new Promise(r=>setTimeout(r,4000));
     try{const res=await Promise.race([network,timeout]);if(res)return res;}catch{}
     const hit=await cache.match(req,{ignoreSearch:true})||(req.mode==='navigate'&&await cache.match('index.html'));
     return hit||network;
