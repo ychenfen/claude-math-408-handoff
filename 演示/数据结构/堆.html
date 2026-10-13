@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>堆的插入与删除</title>
+<style>
+/* Heap stepper: tree (SVG) and array kept in sync, one comparison decision per step, with a running comparison counter. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:80ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:17px var(--serif);font-weight:600;margin:0 0 8px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chips+.chips{margin-top:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px;margin-top:10px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.form input[type=text]{width:15em;max-width:100%}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:var(--bg);color:var(--ink);padding:4px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--green);color:var(--bg);font-weight:600}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.ctrl .muted{color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.q{font-size:14px;padding:8px 12px;border:1px dashed var(--line);border-radius:5px;margin-top:8px}
+.q .opt{display:block;font-family:var(--mono);font-size:13px}
+.q .ans{color:var(--done)}
+.q .ans b{color:var(--done)}
+details summary{cursor:pointer;color:var(--muted);font-size:13px}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:10px}
+.note b{color:var(--done)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:6em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font:14px var(--mono);margin-top:10px;align-items:baseline}
+.stats .big{font-size:24px;font-weight:700;color:var(--mv)}
+.stats .lab{color:var(--muted);font-family:var(--sans);font-size:13px}
+.stats .gone{color:var(--mv)}
+.view{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;margin-top:10px;align-items:start}
+@media (max-width:760px){.view{grid-template-columns:minmax(0,1fr)}}
+#tree{overflow-x:auto}
+svg{width:100%;height:auto;display:block}
+.t-edge{stroke:var(--line);stroke-width:2}
+.t-edge.cmp{stroke:var(--q);stroke-width:3}
+.t-edge.pick{stroke:var(--cmp);stroke-width:4}
+.t-node{fill:var(--paper);stroke:var(--green);stroke-width:2}
+.t-node.done{fill:color-mix(in srgb,var(--done) 28%,var(--paper))}
+.t-node.cmp{stroke:var(--q);stroke-width:3.5}
+.t-node.pick{stroke:var(--cmp);stroke-width:4}
+.t-node.cur{fill:var(--cmp);stroke:var(--cmp)}
+.t-node.gone{fill:var(--mv);stroke:var(--mv)}
+.t-num{font:600 15px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.t-num.on{fill:#222}.t-num.gone{fill:#fff}
+.t-idx{font:11px var(--mono);fill:var(--muted);text-anchor:middle}
+.arr{overflow-x:auto;padding:4px 0}
+.arow{display:flex;gap:3px;font:14px var(--mono)}
+.cell{width:34px;height:34px;flex:none;display:grid;place-items:center;border:1px solid var(--line);border-radius:3px;background:var(--bg)}
+.cell.done{background:color-mix(in srgb,var(--done) 28%,transparent)}
+.cell.cmp{border:3px solid var(--q)}
+.cell.pick{border:3px solid var(--cmp)}
+.cell.cur{background:var(--cmp);color:#222;font-weight:700;border-color:var(--cmp)}
+.cell.gone{background:var(--mv);color:#fff;font-weight:700;border-color:var(--mv)}
+.cell.idx{border:none;background:none;color:var(--muted);font-size:11px;height:16px}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:2px}
+.log{font:13px var(--mono);margin:8px 0 0;padding-left:1.4em}
+.log li{margin-bottom:4px}
+.log small{color:var(--muted);display:block}
+.log b{color:var(--mv)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="排序演示.html">排序演示台（堆排序整体动画）</a></div>
+  <header>
+    <h1>堆：建堆、插入、删除堆顶</h1>
+    <p class="sub">按罗素讲义第八章（插入 p57–62、删除 p63–67、建堆 p68–79、总结 p92）和强化第四讲 p24–27 的做法，一次只走一步比较：树和数组同步变，比较次数实时累计。大根堆、小根堆可切换。堆的选择题 408 考过 2009、2011、2015、2018、2020、2021、2024 年，最爱问“比较了几次”和“调整后的序列”。</p>
+  </header>
+  <section class="panel">
+    <h2>五句话</h2>
+    <ol class="rules">
+      <li><b>数组就是完全二叉树</b>：第 i 位的孩子是第 2i、2i+1 位，父结点是第 ⌊i/2⌋ 位。大根堆要求父 ≥ 孩子，小根堆要求父 ≤ 孩子；<b>兄弟之间没有大小要求</b>。</li>
+      <li><b>建堆（筛选法）</b>：从最后一个非叶结点第 ⌊n/2⌋ 位开始，往前一直到第 1 位，每个结点做一次<b>下滤</b>。时间 O(n)。讲义 p92 说“从 n/2 处开始向上调整”，“向上”是指处理顺序从 ⌊n/2⌋ 往第 1 位走，每个结点自己是往下筛。把序列<b>依次插入空堆</b>得到的堆一般和筛选法不同（2021 年考的就是这个）。</li>
+      <li><b>插入</b>：放到末尾，<b>上滤</b>：只和父结点比，比父结点大（小根堆是小）就换，直到不换或到了堆顶。<b>不和兄弟比</b>：兄弟本来就不超过父结点，新元素比得过父结点就一定比得过兄弟。</li>
+      <li><b>删除堆顶</b>：把末尾元素搬到堆顶，<b>下滤</b>：两个孩子先互比 1 次选出较大者（小根堆选较小者），较大者再和它比 1 次，决定换不换；只有一个孩子时只比 1 次；没有孩子就停。</li>
+      <li><b>比较次数这样数</b>（和王道、讲义答案一致）：上滤每和父结点比一次算 1 次；下滤每层“两孩子互比 1 次 + 较大孩子和当前结点比 1 次”，只有一个孩子算 1 次。<b>最后那次“发现不用换”的比较也算</b>；搬元素、交换本身不算比较。</li>
+    </ol>
+  </section>
+  <section class="panel">
+    <div class="chips" id="pg0">讲义：</div>
+    <div class="chips" id="pg1">强化 PPT：</div>
+    <div class="chips" id="pg2">统考真题：</div>
+    <div class="q" id="question"></div>
+    <div class="chips hidden" id="tweaks" style="margin-top:8px"></div>
+    <div class="form">
+      <label>堆的类型<span class="seg" id="kind"><button type="button" data-k="max" aria-pressed="true">大根堆</button><button type="button" data-k="min" aria-pressed="false">小根堆</button></span></label>
+      <label>初始序列<input id="inA" type="text" spellcheck="false" autocomplete="off" inputmode="numeric"></label>
+      <label>这个序列<select id="mode"><option value="heap">已经是堆</option><option value="build">先用筛选法建堆</option><option value="seq">依次插入空堆</option></select></label>
+      <label>然后的操作<input id="inOps" type="text" spellcheck="false" autocomplete="off" placeholder="例：+10 -"></label>
+      <button class="btn primary" id="go" type="button">演示</button>
+    </div>
+    <p class="legend">数字用空格或逗号隔开，最多 31 个。操作里 <code>+10</code> 是插入 10，<code>-</code> 是删除堆顶，可以连写，如 <code>+3 - -</code>。</p>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="ctrl">
+      <button class="btn" id="reset" type="button">从头</button>
+      <button class="btn" id="prev" type="button">上一步</button>
+      <button class="btn primary" id="next" type="button">下一步</button>
+      <button class="btn" id="all" type="button">跑到底</button>
+      <label class="muted"><input type="checkbox" id="guessMode" checked> 先猜再看（每次比较先自己选）</label>
+      <span class="muted" id="prog"></span>
+    </div>
+    <div class="guess hidden" id="gbox"><span id="gq"></span><span id="gctl"></span></div>
+    <div class="note" id="note"></div>
+    <div class="stats" id="stats"></div>
+    <div class="view">
+      <div id="tree"></div>
+      <div>
+        <div class="arr" id="arr"></div>
+        <p class="legend"><span class="sw" style="background:var(--cmp)"></span>正在调整的元素　<span class="sw" style="border:3px solid var(--q)"></span>和它比的结点　<span class="sw" style="border:3px solid var(--cmp)"></span>比出来的那个　<span class="sw" style="background:color-mix(in srgb,var(--done) 40%,transparent)"></span>已经是堆　<span class="sw" style="background:var(--mv)"></span>要被删掉的堆顶。圆圈下的小字是数组下标（从 1 数）。</p>
+        <h2 style="margin-top:10px">每个操作的结果</h2>
+        <ol class="log" id="log"></ol>
+      </div>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>这个例子从哪来</h2>
+    <p class="sub" id="srcnote"></p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const WD='答案和解析见王道《数据结构》第 8 章 8.4 节选择题 15–21 的解答。';
+const PRESETS=[
+ {g:0,t:'建堆 3 5 9 7 2 4 6',kind:'max',A:'3 5 9 7 2 4 6',mode:'build',ops:'',
+  q:'讲义第八章 p68–79：把序列 (3, 5, 9, 7, 2, 4, 6) 建成大根堆。p68 还问了一句：能不能按照插入的方式建？',
+  a:'从第 ⌊7/2⌋ = 3 位开始往前逐个下滤：9 不动；5 和 7 换；3 先和 9 换，再和 6 换。得到 <b>9, 7, 6, 5, 2, 4, 3</b>（p79），一共比较 8 次、交换 3 次。按插入的方式（依次插入空堆）得到的是 9, 7, 6, 3, 2, 4, 5，和筛选法不一样，点下面“对照”看。',
+  src:'罗素《第八章 排序》p68–79 的建堆动画，代码是 p70 的 BuildMaxHeap / HeapAdjust。建好的 9, 7, 6, 5, 2, 4, 3 正是后面插入、删除两个例子用的堆。',
+  tw:[['对照：依次插入空堆',{mode:'seq'}],['回到筛选法建堆',{mode:'build'}]]},
+ {g:0,t:'插入 10',kind:'max',A:'9 7 6 5 2 4 3',mode:'heap',ops:'+10',
+  q:'讲义第八章 p57–62：在大根堆 (9, 7, 6, 5, 2, 4, 3) 中插入元素 10。',
+  a:'10 放到第 8 位，依次和父结点 5、7、9 比，三次都换，到堆顶。结果 <b>10, 9, 6, 7, 2, 4, 3, 5</b>，比较 3 次。讲义 p60–61 标的“不需要与兄弟节点比较”就是上滤的要点，p62 的“沿单侧树高向上调整”说明最多比较树高那么多次，O(log n)。',
+  src:'罗素《第八章 排序》p57–62。'},
+ {g:0,t:'删除 9',kind:'max',A:'9 7 6 5 2 4 3',mode:'heap',ops:'-',
+  q:'讲义第八章 p63–67：在大根堆 (9, 7, 6, 5, 2, 4, 3) 中删除堆顶元素 9。',
+  a:'3 搬到堆顶；7 和 6 互比，7 再和 3 比，换；5 和 2 互比，5 再和 3 比，换；3 到了第 4 位没有孩子，停。结果 <b>7, 5, 6, 3, 2, 4</b>，比较 4 次、交换 2 次。讲义 p65–66 标的“两个孩子结点都要比较”就是每层多出来的那 1 次。',
+  src:'罗素《第八章 排序》p63–67。注意讲义这里是对原来的堆 (9, 7, 6, 5, 2, 4, 3) 删除，不是插入 10 之后的堆。'},
+ {g:1,t:'p24 初始小根堆',kind:'min',A:'32 47 12 8 2 19 30',mode:'build',ops:'',
+  q:'【例题】对于序列（32，47，12，8，2，19，30），其堆顶元素最小的初始堆是（ ）。',opts:['A. （2，8，12，32，47，19，30）','B. （2，8，12，19，30，32，47）','C. （2，12，8，32，19，47，30）','D. （2，12，8，30，19，32，47）'],
+  a:'<b>A</b>。“堆顶元素最小”就是小根堆。从第 3 位 12 开始：12 比 19、30 都小，不动；47 和较小的孩子 2 换；32 和 2 换，再和 8 换。得到 2, 8, 12, 32, 47, 19, 30，比较 8 次。B 是排好序的序列，不是建堆的结果。',
+  src:'数据结构强化第四讲 PPT 第 24 页，PPT 上标的答案是 A。'},
+ {g:1,t:'p25 插 3 再删堆顶（含 2009）',kind:'min',A:'5 8 12 19 28 20 15 22',mode:'heap',ops:'+3 -',
+  q:'【例题】已知小根堆序列{5，8，12，19，28，20，15，22}，插入关键字 3 并调整后，然后删除堆顶元素，最后得到的小根堆序列是？<br>前半问就是【2009 统考真题】已知关键字序列 5, 8, 12, 19, 28, 20, 15, 22 是小根堆，插入关键字 3，调整好后得到的小根堆是（ ）。',opts:['A. 3, 5, 12, 8, 28, 20, 15, 22, 19','B. 3, 5, 12, 19, 20, 15, 22, 8, 28','C. 3, 8, 12, 5, 20, 15, 22, 28, 19','D. 3, 12, 5, 8, 28, 20, 15, 22, 19'],
+  a:'插入 3：放第 9 位，和父结点 19、8、5 比，三次都换，得 <b>3, 5, 12, 8, 28, 20, 15, 22, 19</b>（2009 选 A），比较 3 次。再删堆顶：19 搬上去，5 和 12 互比、5 和 19 比，换；8 和 28 互比、8 和 19 比，换；19 到第 4 位只有左孩子 22，比 1 次不换。最后 <b>5, 8, 12, 19, 28, 20, 15, 22</b>，比较 5 次。删完恰好回到原来的堆，这是这组数据的巧合，不是规律。',
+  src:'数据结构强化第四讲 PPT 第 25–26 页；前半问是 2009 年 408 选择题，'+WD},
+ {g:1,t:'p27 插 18 比较几次（2011）',kind:'max',A:'25 13 10 12 9',mode:'heap',ops:'+18',
+  q:'【例题】已知大根堆序列{25，13，10，12，9}，插入 18，再调整为大根堆，则调整过程中关键字之间的比较次数？（同 2011 统考真题）',opts:['A. 1','B. 2','C. 4','D. 5'],
+  a:'<b>B</b>。18 放第 6 位，父结点是第 3 位 10：比 1 次，换；再和父结点 25 比 1 次，不换，停。共 2 次。上滤不和兄弟比，也不用和 13 比。',
+  src:'数据结构强化第四讲 PPT 第 27 页（标答 B）；也是 2011 年 408 选择题，'+WD},
+ {g:2,t:'2015 删除后比较次数',kind:'min',A:'8 15 10 21 34 16 12',mode:'heap',ops:'-',
+  q:'【2015 统考真题】已知小根堆为 8, 15, 10, 21, 34, 16, 12，删除关键字 8 之后需重建堆，在此过程中，关键字之间的比较次数是（ ）。',opts:['A. 1','B. 2','C. 3','D. 4'],
+  a:'<b>C</b>。12 搬到堆顶；15 和 10 互比（1），10 和 12 比，换（2）；12 到第 3 位，只剩左孩子 16，还要比 1 次（3），不换。共 3 次。最容易漏的是最后这一次。',
+  src:'2015 年 408 选择题，'+WD},
+ {g:2,t:'2018 建堆过程',kind:'max',A:'6 1 5 9 8 4 7',mode:'build',ops:'',
+  q:'【2018 统考真题】在将序列 (6, 1, 5, 9, 8, 4, 7) 建成大根堆时，正确的序列变化过程是（ ）。',opts:['A. 6,1,7,9,8,4,5 → 6,9,7,1,8,4,5 → 9,6,7,1,8,4,5 → 9,8,7,1,6,4,5','B. 6,9,5,1,8,4,7 → 6,9,7,1,8,4,5 → 9,6,7,1,8,4,5 → 9,8,7,1,6,4,5','C. 6,9,5,1,8,4,7 → 9,6,5,1,8,4,7 → 9,6,7,1,8,4,5 → 9,8,7,1,6,4,5','D. 6,1,7,9,8,4,5 → 7,1,6,9,8,4,5 → 7,9,6,1,8,4,5 → 9,7,6,1,8,4,5 → 9,8,6,1,7,4,5'],
+  a:'<b>A</b>。从第 3 位 5 开始（不是从第 1 位），5 和 7 换；再到第 2 位 1，和 9 换；最后第 1 位 6 和 9 换，6 继续和 8 换。“每个操作的结果”里列出了每次交换后的序列，和 A 一致。B、C 先处理了第 2 位，顺序错；D 是从第 1 位往后做的。',
+  src:'2018 年 408 选择题，'+WD},
+ {g:2,t:'2021 依次插入空堆',kind:'max',A:'6 9 1 5 8 4 7',mode:'seq',ops:'',
+  q:'【2021 统考真题】将关键字 6, 9, 1, 5, 8, 4, 7 依次插入初始为空的大根堆 H，得到的 H 是（ ）。',opts:['A. 9,8,7,6,5,4,1','B. 9,8,7,5,6,1,4','C. 9,8,7,5,6,4,1','D. 9,6,7,5,8,4,1'],
+  a:'<b>B</b>。每个关键字放末尾再上滤：插 9 和 6 换；插 5 不换；插 8 和 6 换；插 4 和 1 换；插 7 和 4 换。得 9, 8, 7, 5, 6, 1, 4。若把这个序列直接用筛选法建堆，得到 9, 8, 7, 5, 6, 4, 1，会误选 C（王道解析也特别提醒了），点下面“对照”看。',
+  src:'2021 年 408 选择题，'+WD,
+  tw:[['对照：同一序列筛选法建堆',{mode:'build'}],['回到依次插入',{mode:'seq'}]]},
+ {g:2,t:'2024 删两次',kind:'max',A:'28 22 20 19 8 12 15 5',mode:'heap',ops:'- -',
+  q:'【2024 统考真题】已知关键字序列 28, 22, 20, 19, 8, 12, 15, 5 是大根堆（最大堆），对该堆进行两次删除操作后，得到的新堆为（ ）。',opts:['A. 20, 19, 15, 12, 8, 5','B. 20, 19, 15, 5, 8, 12','C. 20, 19, 12, 15, 8, 5','D. 20, 19, 8, 12, 15, 5'],
+  a:'<b>B</b>。第一次删 28：5 搬到堆顶，和 22 换、再和 19 换，得 22, 19, 20, 5, 8, 12, 15（比较 4 次）。第二次删 22：15 搬到堆顶，和 20 换，再和唯一的左孩子 12 比，不换，得 20, 19, 15, 5, 8, 12（比较 3 次）。“删除”指删除堆顶。',
+  src:'2024 年 408 选择题，'+WD}
+];
+let MX=true,F=[],LOG=[],pos=0,answered=new Set(),cur=-1;
+const better=(x,y)=>MX?x>y:x<y;
+const BIG=()=>MX?'大':'小';
+const KIND=()=>MX?'大根堆':'小根堆';
+const GE=()=>MX?'≥':'≤';
+const lst=a=>a.length?a.join(', '):'（空）';
+function sub(i,n){const r=[];const go=k=>{if(k<n){r.push(k);go(2*k+1);go(2*k+2)}};go(i);return r}
+/* ---------- build frames ---------- */
+function gen(init,mode,ops){F=[];LOG=[];let a=[],tot=0,done=new Set();
+  const push=o=>F.push(Object.assign({a:[...a],cur:-1,cmp:[],pick:-1,gone:-1,done:[...done],tot,logN:LOG.length},o));
+  function siftDown(k,n,C){
+    while(true){const l=2*k+1,r=l+1;
+      if(l>=n){push({cur:k,label:C.label,c:C.c,s:C.s,txt:`${a[k]} 到了第 ${k+1} 位，没有孩子了，下滤结束。`});return}
+      const two=r<n,cb=C.c;let c=l;
+      if(two){C.c++;if(better(a[r],a[l]))c=r}
+      C.c++;tot+=C.c-cb;const sw=better(a[c],a[k]);
+      const opts=two?[`和左孩子 ${a[l]} 换`,`和右孩子 ${a[r]} 换`,'不换，停']:[`和左孩子 ${a[l]} 换`,'不换，停'];
+      const ans=sw?(c===l?0:1):opts.length-1,other=two?(c===l?r:l):-1,K=a[k],Cv=a[c];
+      const hint=i=>{if(i===ans)return'';if(i===opts.length-1)return `${Cv} 比 ${K} ${BIG()}，${KIND()}要求父 ${GE()} 孩子，得换。`;
+        if(!sw)return `${K} 已经${MX?'不小于':'不大于'}较${BIG()}的孩子 ${Cv}，不用换，下滤到此结束。`;
+        return `两个孩子要先互比一次，${BIG()}的那个才能上去。换 ${a[other]} 的话，它比另一个孩子 ${Cv} 还${MX?'小':'大'}，又不是堆了。`};
+      const txt=(two?`第 ${cb+1} 次比较：两个孩子 ${a[l]} 和 ${a[r]} 互比，较${BIG()}的是 ${Cv}。第 ${cb+2} 次比较：${Cv} 和 ${K} 比，`:`只有左孩子 ${a[l]}，只比 1 次（第 ${cb+1} 次）：${Cv} 和 ${K} 比，`)
+        +(sw?`${Cv} ${MX?'>':'<'} ${K}，<b>交换</b>，${K} 下沉到第 ${c+1} 位。`:`${K} ${GE()} ${Cv}，<b>不换，停</b>。`);
+      push({cur:k,cmp:two?[l,r]:[l],pick:c,label:C.label,cb,c:C.c,sb:C.s,s:C.s+(sw?1:0),totb:tot-(C.c-cb),txt,
+        ask:{type:'choice',q:`${K} 在第 ${k+1} 位，孩子是 ${two?`${a[l]}、${a[r]}`:`只有 ${a[l]}`}（蓝圈）。下一步？`,opts,a:ans,hint}});
+      if(!sw)return;[a[k],a[c]]=[a[c],a[k]];C.s++;C.seq.push(a.join(','));k=c}}
+  function siftUp(k,C){
+    while(k>0){const p=(k-1)>>1,cb=C.c;C.c++;tot++;const sw=better(a[k],a[p]);const sib=k%2?k+1:k-1,hasSib=sib<a.length;
+      const opts=[`和父结点 ${a[p]} 换`];if(hasSib)opts.push(`先和兄弟 ${a[sib]} 比`);opts.push('不换，停');const ans=sw?0:opts.length-1,V=a[k],P=a[p];
+      const hint=i=>{if(i===ans)return'';if(hasSib&&i===1)return '上滤不和兄弟比：兄弟本来就不超过父结点（小根堆是不小于），新元素比得过父结点就一定比得过兄弟。';
+        return sw?`${V} 比父结点 ${P} ${BIG()}，要换上去。`:`${V} 没有父结点 ${P} ${BIG()}，已经满足${KIND()}，停。`};
+      push({cur:k,cmp:[p],pick:p,label:C.label,cb,c:C.c,sb:C.s,s:C.s+(sw?1:0),totb:tot-1,
+        txt:`第 ${cb+1} 次比较：${V} 和父结点 ${P}（第 ${p+1} 位）比，`+(sw?`${V} ${MX?'>':'<'} ${P}，<b>交换</b>，${V} 上浮到第 ${p+1} 位。`:`${V} ${MX?'≤':'≥'} ${P}，<b>不换，停</b>。`),
+        ask:{type:'choice',q:`${V} 在第 ${k+1} 位，父结点是第 ${p+1} 位的 ${P}（蓝圈）。下一步？`,opts,a:ans,hint}});
+      if(!sw)return;[a[k],a[p]]=[a[p],a[k]];C.s++;C.seq.push(a.join(','));k=p}
+    if(C.s>0)push({cur:0,label:C.label,c:C.c,s:C.s,txt:`${a[0]} 到了堆顶，没有父结点，上滤结束（到堆顶这一下不用再比）。`})}
+  const finish=(C,txt,askCount)=>{done=new Set(a.keys());LOG.push({label:C.label,c:C.c,s:C.s,arr:[...a],seq:C.seq,kind:C.kind});
+    push({label:C.label,c:C.c,s:C.s,end:true,txt,ask:askCount?{type:'num',q:`这次${C.kind==='build'?'建堆':C.kind==='ins'?'插入':'删除'}一共比较了几次？`,l:'比较次数 = ',a:C.c,hint:v=>{
+      if(v===C.s&&C.c!==C.s)return '你数的是交换次数。最后“发现不用换”的那次比较也要算。';
+      if(C.kind==='ins'&&v>C.c)return '上滤每层只和父结点比 1 次，不和兄弟比。';
+      if(C.kind!=='ins'&&v<C.c)return '下滤时有两个孩子，要先让两个孩子互比 1 次，再和较'+BIG()+'的比 1 次，每层 2 次；只有一个孩子才是 1 次。';return ''}}:null})};
+  function doIns(v,askCount){const C={label:`插入 ${v}`,kind:'ins',c:0,s:0,seq:[]};done=new Set();a.push(v);const k=a.length-1;
+    if(k===0){push({cur:0,label:C.label,c:0,s:0,txt:`堆是空的，${v} 直接当堆顶，不用比较。`})}
+    else{push({cur:k,label:C.label,c:0,s:0,txt:`把 ${v} 放到末尾第 ${k+1} 位（完全二叉树下一个空位），它的父结点是第 ${(k-1>>1)+1} 位的 ${a[(k-1)>>1]}。接下来上滤。`});siftUp(k,C)}
+    finish(C,`插入 ${v} 完成：比较 <b>${C.c}</b> 次，交换 ${C.s} 次。现在是 ${lst(a)}。`,askCount&&k>0)}
+  function doDel(){const top=a[0],n=a.length,C={label:`删除堆顶 ${top}`,kind:'del',c:0,s:0,seq:[]};done=new Set();
+    push({gone:0,cur:n-1,label:C.label,c:0,s:0,txt:n>1?`删除堆顶 ${top}（红色）：拿走它，把末尾第 ${n} 位的 ${a[n-1]}（橙色）搬到堆顶。搬元素不算比较。`:`堆里只有 ${top}，删掉就空了。`});
+    const last=a.pop();if(a.length){a[0]=last;C.seq.push(a.join(','));siftDown(0,a.length,C)}
+    finish(C,`删除 ${top} 完成：比较 <b>${C.c}</b> 次，交换 ${C.s} 次。现在是 ${lst(a)}。`,a.length>1)}
+  function doBuild(){const n=a.length,h=n>>1,C={label:'筛选法建堆',kind:'build',c:0,s:0,seq:[]};done=new Set();for(let i=h;i<n;i++)done.add(i);
+    push({label:C.label,c:0,s:0,txt:`n = ${n}，最后一个非叶结点是第 ⌊n/2⌋ = ${h} 位${h?`（${a[h-1]}）`:''}。后面的叶子自己就是堆（绿色）。从第 ${h} 位往前到第 1 位，逐个下滤。`});
+    for(let i=h-1;i>=0;i--){push({cur:i,label:C.label,c:C.c,s:C.s,txt:`调整以第 ${i+1} 位 ${a[i]} 为根的子树：它的左右子树已经是堆，只要把 ${a[i]} 下滤。`});
+      siftDown(i,n,C);sub(i,n).forEach(j=>done.add(j))}
+    finish(C,`建堆完成：比较 <b>${C.c}</b> 次，交换 ${C.s} 次。${KIND()}是 ${lst(a)}。`,n>1)}
+  if(mode==='seq'){push({label:'依次插入空堆',c:0,s:0,txt:`从空堆开始，把 ${lst(init)} 一个一个插进去，每个都是“放末尾、上滤”。`});init.forEach(v=>doIns(v,false))}
+  else{a=[...init];if(mode==='heap'){done=new Set(a.keys());push({label:'初始堆',c:0,s:0,txt:`初始${KIND()}：${lst(a)}。数组第 i 位就是树里按层数第 i 个结点。`})}else doBuild()}
+  ops.forEach(o=>o.k==='ins'?doIns(o.v,true):doDel());
+  F.push(Object.assign({},F[F.length-1],{ask:null,cur:-1,cmp:[],pick:-1,gone:-1,done:[...a.keys()],final:true,txt:`全部做完。最终：<b>${lst(a)}</b>，累计比较 ${tot} 次。`}))}
+/* ---------- parse ---------- */
+function parse(){const raw=$('inA').value.trim(),opsRaw=$('inOps').value.trim(),mode=$('mode').value;
+  const init=raw?raw.split(/[\s,，、;；()（）{}]+/).filter(Boolean).map(t=>{if(!/^-?\d+$/.test(t))throw `“${t}”不是整数。`;const v=+t;if(Math.abs(v)>999)throw `${t} 太大了，用 −999～999。`;return v}):[];
+  if(init.length>31)throw `最多 31 个数，现在 ${init.length} 个。`;
+  const ops=[];let n=init.length;
+  for(const t of opsRaw.split(/[\s,，、;；]+/).filter(Boolean)){let m;
+    if((m=t.match(/^(?:\+|插入?)(-?\d+)$/))){const v=+m[1];if(Math.abs(v)>999)throw `${m[1]} 太大了，用 −999～999。`;ops.push({k:'ins',v});n++;if(n>31)throw '堆里最多 31 个数。'}
+    else if(/^(-|删除?|删除堆顶)$/.test(t)){if(n===0)throw '堆已经空了，不能再删。';ops.push({k:'del'});n--}
+    else throw `看不懂“${t}”：插入写 +10，删除堆顶写 -。`}
+  if(!init.length&&!ops.length)throw '请输入初始序列或操作。';
+  if(mode==='heap'){for(let i=1;i<init.length;i++){const p=(i-1)>>1;if(better(init[i],init[p]))throw `第 ${i+1} 位 ${init[i]} 比它的父结点第 ${p+1} 位 ${init[p]} 还${BIG()}，不是${KIND()}。把“这个序列”改成“先用筛选法建堆”，或者换数据。`}}
+  return {init,mode,ops}}
+function run(){try{const {init,mode,ops}=parse();$('err').textContent='';gen(init,mode,ops);pos=0;answered=new Set();render();return true}catch(e){$('err').textContent=e;return false}}
+/* ---------- render ---------- */
+function pending(){const f=F[pos];return $('guessMode').checked&&f&&f.ask&&!answered.has(pos)}
+function drawTree(f,pend){const a=f.a,n=a.length;if(!n){$('tree').innerHTML='<p class="legend">堆是空的。</p>';return}
+  const D=Math.floor(Math.log2(n)),W=Math.max(340,Math.pow(2,D)*48),H=40+D*64+36;
+  const xy=i=>{const d=Math.floor(Math.log2(i+1)),p=i+1-Math.pow(2,d);return [(p+.5)*W/Math.pow(2,d),28+d*64]};
+  const cls=i=>i===f.gone?'gone':i===f.cur?'cur':!pend&&i===f.pick?'pick':f.cmp.includes(i)?'cmp':f.done.includes(i)?'done':'';
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="min-width:${Math.min(W,Math.pow(2,D)*40)}px" role="img" aria-label="堆的完全二叉树">`;
+  for(let i=1;i<n;i++){const p=(i-1)>>1,[x1,y1]=xy(p),[x2,y2]=xy(i);let c='t-edge';
+    if((i===f.cur&&p===f.pick)||(p===f.cur&&i===f.pick))c+=pend?' cmp':' pick';else if((p===f.cur&&f.cmp.includes(i))||(i===f.cur&&f.cmp.includes(p)))c+=' cmp';
+    s+=`<line class="${c}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`}
+  for(let i=0;i<n;i++){const [x,y]=xy(i),c=cls(i);s+=`<circle class="t-node ${c}" cx="${x}" cy="${y}" r="18"/><text class="t-num${c==='cur'?' on':c==='gone'?' gone':''}" x="${x}" y="${y}">${a[i]}</text><text class="t-idx" x="${x}" y="${y+31}">${i+1}</text>`}
+  $('tree').innerHTML=s+'</svg>';
+  $('arr').innerHTML=`<div class="arow">${a.map((_,i)=>`<div class="cell idx">${i+1}</div>`).join('')}</div><div class="arow">${a.map((v,i)=>`<div class="cell ${cls(i)}">${v}</div>`).join('')}</div>`}
+function render(){const f=F[pos],pend=pending();drawTree(f,pend);
+  const c=pend&&f.cb!==undefined?f.cb:f.c,tot=pend&&f.totb!==undefined?f.totb:f.tot,s=pend&&f.cb!==undefined?f.sb:f.s;
+  $('stats').innerHTML=f.final?`<span class="lab">累计比较</span><span class="big">${f.tot}</span>`:`<span class="lab">${esc(f.label||'')}：比较</span><span class="big">${pend&&f.end?'?':c}</span><span class="lab">次 · 交换</span><span>${pend&&f.end?'?':s}</span><span class="lab">次 · 累计比较</span><span>${pend&&f.end?'?':tot}</span>${f.gone>=0?`<span class="gone">取走 ${f.a[f.gone]}</span>`:''}`;
+  $('note').innerHTML=pend?f.ask.q:f.txt;
+  $('log').innerHTML=LOG.slice(0,f.final?LOG.length:f.logN-(f.end&&pend?1:0)).map(r=>`<li>${esc(r.label)}：比较 <b>${r.c}</b> 次，交换 ${r.s} 次 → ${r.arr.join(', ')}${r.kind==='build'&&r.seq.length?`<small>每次交换后：${r.seq.map(x=>x.replace(/,/g,', ')).join(' → ')}</small>`:''}</li>`).join('')||'<li style="list-style:none;margin-left:-1.4em;color:var(--muted)">还没有做完的操作。</li>';
+  $('prog').textContent=`第 ${pos} / ${F.length-1} 步`;$('prev').disabled=pos===0;$('next').disabled=pos===F.length-1&&!pend;
+  $('gbox').classList.toggle('hidden',!pend);
+  if(pend){const k=f.ask;$('gq').innerHTML=k.type==='num'?k.l:'';
+    $('gctl').innerHTML=k.type==='num'?`<input id="gin" type="text" inputmode="numeric" aria-label="你的答案"> <button class="btn" id="gbtn" type="button">对答案</button>`:k.opts.map((o,i)=>`<button class="btn" type="button" data-o="${i}">${esc(o)}</button>`).join(' ');
+    if(k.type==='num'){$('gbtn').onclick=()=>check($('gin').value);$('gin').onkeydown=e=>{if(e.key==='Enter')check($('gin').value)}}
+    else $('gctl').querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>check(+b.dataset.o))}}
+function check(v){const f=F[pos],k=f.ask;let ok,said;
+  if(k.type==='num'){v=String(v).trim();if(v==='')return;ok=+v===k.a;said=`你填 ${esc(v)}，应为 ${k.a}。`;var h=ok?'':k.hint(+v)}
+  else{ok=v===k.a;said=`你选“${esc(k.opts[v])}”，应为“${esc(k.opts[k.a])}”。`;var h=ok?'':k.hint(v)}
+  answered.add(pos);render();$('note').innerHTML=(ok?'<span class="ok">对了。</span> ':`<span class="bad">${said}</span>${h} `)+f.txt}
+function step(d){if(d>0&&pending()){const b=$('gctl').querySelector('input,button');if(b)b.focus();return}pos=Math.max(0,Math.min(F.length-1,pos+d));render()}
+$('next').onclick=()=>step(1);$('prev').onclick=()=>step(-1);$('reset').onclick=()=>{pos=0;answered=new Set();render()};
+$('all').onclick=()=>{F.forEach((_,i)=>answered.add(i));pos=F.length-1;render()};
+$('guessMode').onchange=render;
+function setKind(k){MX=k==='max';$('kind').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k))}
+$('kind').onclick=e=>{const b=e.target.closest('[data-k]');if(!b)return;setKind(b.dataset.k);run()};
+$('go').onclick=()=>{if(run()){cur=-1;document.querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed','false'));$('question').innerHTML='自己输入的数据。';$('tweaks').classList.add('hidden');$('srcnote').textContent='自己输入的数据。'}};
+['inA','inOps'].forEach(id=>$(id).onkeydown=e=>{if(e.key==='Enter')$('go').click()});
+function usePreset(i){cur=i;const p=PRESETS[i];setKind(p.kind);$('inA').value=p.A;$('mode').value=p.mode;$('inOps').value=p.ops;
+  document.querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===i));
+  $('question').innerHTML=`${p.q}${p.opts?p.opts.map(o=>`<span class="opt">${esc(o)}</span>`).join(''):''}<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${p.a}</span></details>`;
+  $('srcnote').textContent=p.src;
+  $('tweaks').classList.toggle('hidden',!p.tw);$('tweaks').innerHTML=p.tw?'对照：'+p.tw.map(([t],k)=>`<button type="button" class="chip" data-t="${k}">${t}</button>`).join(''):'';run()}
+$('tweaks').onclick=e=>{const b=e.target.closest('[data-t]');if(!b||cur<0)return;const o=PRESETS[cur].tw[+b.dataset.t][1];if(o.mode)$('mode').value=o.mode;run()};
+PRESETS.forEach((p,i)=>$('pg'+p.g).insertAdjacentHTML('beforeend',`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p.t}</button>`));
+document.querySelector('.panel:nth-of-type(2)').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(b)usePreset(+b.dataset.p)});
+usePreset(0);
+</script>
+</body>
+</html>
