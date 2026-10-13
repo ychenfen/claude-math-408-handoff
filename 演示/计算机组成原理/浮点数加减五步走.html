@@ -72,6 +72,16 @@ th{background:var(--hl);font-weight:600}
 .lost{color:var(--muted);text-decoration:line-through}
 .warn{color:var(--mv);font-weight:600}
 .ok{color:var(--done);font-weight:600}
+.zone{display:grid;grid-template-columns:1.1fr 2fr 1fr .5fr 1fr 2fr 1.1fr;margin:10px 0 4px;font-size:12px;text-align:center}
+.zone div{padding:8px 2px;border:1px solid var(--line);margin-right:-1px;color:var(--muted);line-height:1.35}
+.zone .ov{background:color-mix(in srgb,var(--mv) 14%,transparent)}
+.zone .un{background:color-mix(in srgb,var(--q) 16%,transparent)}
+.zone .rp{background:color-mix(in srgb,var(--done) 14%,transparent)}
+.zone .hit{outline:3px solid var(--ink);outline-offset:-3px;color:var(--ink);font-weight:700}
+.sgt{border-collapse:collapse;font-size:13px;margin:6px 0;min-width:0;width:auto}
+.sgt td,.sgt th{border:1px solid var(--line);padding:3px 8px}
+.sgt tr.hit td{background:var(--hl);font-weight:700}
+.pts{font-size:14px;margin:6px 0 0;padding-left:1.3em}
 .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:13px;color:var(--muted)}
 </style>
 </head>
@@ -90,7 +100,7 @@ th{background:var(--hl);font-weight:600}
       <li><b>尾数求和</b>：双符号位补码直接相加；减法先把 [My]补 变成 [−My]补。符号位 01 或 10 只是尾数暂时溢出，不是结果溢出。</li>
       <li><b>规格化</b>：补码尾数规格化要求<b>符号位与最高数值位不同</b>（00.1×× 或 11.0××）。出现 01.×× 或 10.×× 右规 1 位、阶码加 1；出现 00.0×× 或 11.1×× 左规，每左移 1 位阶码减 1，可能要左规多次。</li>
       <li><b>舍入</b>：对阶和右规丢掉的位才需要舍入。“0 舍 1 入”：移掉的最高位是 1 就在末位加 1，加完可能又要右规；“截断”：直接丢掉。</li>
-      <li><b>溢出判断</b>：只看<b>规格化之后的阶码</b>。阶码超过最大值是上溢（真溢出，转中断处理）；小于最小值是下溢，按机器零处理。</li>
+      <li><b>溢出判断</b>：只看<b>规格化、舍入之后的阶码</b>（第二章 p289）。阶码的双符号位是 00 或 11 不溢出；01 是阶码上溢，浮点数上溢（转中断处理）；10 是阶码下溢，浮点数下溢（绝对值太小，按机器零处理）。上溢还是下溢由阶码定，正还是负由尾数符号定。定点数加减乘、标志位和符号判断见 <a href="溢出与符号判断.html">溢出与符号判断</a>。</li>
     </ol>
   </section>
 
@@ -112,6 +122,9 @@ th{background:var(--hl);font-weight:600}
       <button class="chip" data-p="1">第二章 p285 例（x+y）</button>
       <button class="chip" data-p="2">第二章 p290 例（x−y）</button>
       <button class="chip" data-p="3">相近两数相减要多次左规</button>
+      <button class="chip" data-p="4">负上溢</button>
+      <button class="chip" data-p="5">下溢</button>
+      <button class="chip" data-p="6">阶差超出范围</button>
     </div>
     <p class="tip" id="presetNote"></p>
     <div class="err" id="err"></div>
@@ -139,7 +152,10 @@ const PRE=[
  {m:3,n:5,ex:'7',mx:'29/32',op:'+',ey:'5',my:'5/8',rnd:'r',note:'2009-13：阶码 5 位、尾数 7 位（都含 2 位符号位），X = 2⁷×29/32，Y = 2⁵×5/8，求 X+Y。最后一步阶码变成 8，超出 3 位数值位能表示的 7，结果溢出。'},
  {m:2,n:4,ex:'1',mx:'0.1101',op:'+',ey:'3',my:'-0.1010',rnd:'r',note:'第二章 PPT p285–288：x = 0.1101×2⁰¹，y = (−0.1010)×2¹¹，阶符、阶码数值、数符、尾数数值分别取 2、2、2、4 位。'},
  {m:3,n:6,ex:'-5',mx:'-0.101000',op:'-',ey:'-4',my:'0.111011',rnd:'r',note:'第二章 PPT p290–294：x = 2⁻¹⁰¹×(−0.101000)，y = 2⁻¹⁰⁰×(+0.111011)，求 x−y。右规丢掉一个 1，0 舍 1 入后末位加 1。'},
- {m:3,n:5,ex:'2',mx:'0.11010',op:'-',ey:'2',my:'0.11001',rnd:'r',note:'自拟：两个很接近的数相减，尾数差很小，要连续左规，阶码一路减小。'}
+ {m:3,n:5,ex:'2',mx:'0.11010',op:'-',ey:'2',my:'0.11001',rnd:'r',note:'自拟：两个很接近的数相减，尾数差很小，要连续左规，阶码一路减小。'},
+ {m:3,n:5,ex:'7',mx:'-29/32',op:'+',ey:'7',my:'-5/8',rnd:'r',note:'自拟：两个负数相加，尾数和是 10 开头，右规后阶码变成 8，负上溢。'},
+ {m:2,n:5,ex:'-4',mx:'0.11010',op:'-',ey:'-4',my:'0.11001',rnd:'r',note:'自拟：阶码已经是最小值 −4，相近两数相减后左规 4 次，阶码到 −8，正下溢，按机器零处理。'},
+ {m:3,n:5,ex:'7',mx:'0.10000',op:'+',ey:'-6',my:'0.10000',rnd:'r',note:'自拟：阶差 13 超出阶码范围，Y 的尾数在对阶时全部移出，结果就是 X，没有溢出。'}
 ];
 function frac(s){s=String(s).trim().replace(/\s+/g,'').replace('−','-');let m;
   if((m=s.match(/^([+-]?)(\d+)\/(\d+)$/))){const d=+m[3];if(!d)return null;return {v:(m[1]==='-'?-1:1)*(+m[2])/d}}
@@ -189,6 +205,7 @@ function render(){
   const dE=Ex-Ey;let E=Math.max(Ex,Ey),A=Mx,B=My2,s1;
   s1=`<div class="mach">ΔE = [Ex]补 + [−Ey]补 = ${estr(Ex,m)} + ${estr(-Ey,m)} = ${estr(dE,m)}   （${nf(dE)}）</div>`;
   let r1=null;
+  if(dE>Emax||dE<Emin)s1+=`<p class="warn">阶差 ${nf(dE)} 超出了阶码能表示的 ${nf(Emin)}～${Emax}，${m+2} 位的阶差${Math.abs(dE)<2**(m+1)?`符号位是 ${bin(dE,m+2).slice(0,2)}`:'连双符号位都装不下'}。这说明两个数差得太远（强化 1 p72 的问题），小数的尾数会被全部移出，结果约等于大数。这不是结果溢出，阶差还是按真值 ${nf(dE)} 去对阶。</p>`;
   if(dE===0)s1+='<p>阶码相等，不用对阶。</p>';
   else{const small=dE<0?'X':'Y',k=Math.abs(dE);r1=shr(dE<0?A:B,k,rnd);
     s1+=`<p>${dE<0?'X 的阶码小':'Y 的阶码小'}，${small} 的尾数算术右移 ${k} 位，阶码加 ${k} 变成 ${nf(E)}。</p>`;
@@ -206,8 +223,8 @@ function render(){
     let guard=0;
     while(S>=2**n||S<-(2**n)){const r=shr(S,1,rnd);log3.push(`右规：${mstr(S,n)} → ${mstr(r.pre,n)}，阶码 ${nf(E)} → ${nf(E+1)}，移出 ${r.lost}`);
       log4.push(r.up?`右规移出 1，0 舍 1 入：${mstr(r.pre,n)} → ${mstr(r.M,n)}`:(rnd==='r'?'右规移出的是 0，舍去，尾数不变。':'截断：移出位直接丢掉。'));
-      S=r.M;E+=1;if(r.up&&(S>=2**n||S<-(2**n)))log4.push('舍入后又出现溢出形式，再右规一次。');if(++guard>4)break}
-    while(!normd(S,n)){log3.push(`左规：${mstr(S,n)} → ${mstr(S*2,n)}，阶码 ${nf(E)} → ${nf(E-1)}`);S*=2;E-=1}
+      S=r.M;E+=1;if(E===Emax+1)log3.push(`  阶码已到 ${E}，超过最大阶码 ${Emax}，记下，第 ⑤ 步判上溢。`);if(r.up&&(S>=2**n||S<-(2**n)))log4.push('舍入后又出现溢出形式，再右规一次。');if(++guard>4)break}
+    while(!normd(S,n)){log3.push(`左规：${mstr(S,n)} → ${mstr(S*2,n)}，阶码 ${nf(E)} → ${nf(E-1)}`);S*=2;E-=1;if(E===Emin-1)log3.push(`  阶码已到 ${nf(E)}，低于最小阶码 ${nf(Emin)}，记下，第 ⑤ 步判下溢。`)}
     if(!log3.length)log3.push('尾数已经是规格化形式（符号位与最高数值位不同），不用调整。');
     s3=`<div class="mach">${log3.join('\n')}</div>`;
   }
@@ -218,12 +235,30 @@ function render(){
   }else s4='<p>结果为 0，不需要舍入。</p>';
   out.push(['④ 舍入',rnd==='r'?'规则：0 舍 1 入。':'规则：截断。',s4]);
   // step 5 overflow
-  let s5;
-  if(zero)s5=`<p class="ok">结果为 0。</p>`;
-  else if(E>Emax)s5=`<p class="warn">阶码 ${E} &gt; 最大阶码 ${Emax}：上溢，结果溢出（转中断处理）。</p><div class="mach">阶码 ${E} 用 ${m+2} 位双符号位补码写出来是 ${ehtml(E,m)}，符号位 01 表示正溢出。</div>`;
-  else if(E<Emin)s5=`<p class="warn">阶码 ${nf(E)} &lt; 最小阶码 ${nf(Emin)}：下溢，按机器零处理。</p>`;
-  else s5=`<p class="ok">阶码 ${nf(E)} 在 ${nf(Emin)}～${Emax} 之内，没有溢出。</p><div class="mach">[${name}]补 = ${ehtml(E,m)} ; ${mhtml(S,n)}\n${name} = 2${sup(E)} × (${bfrac(S,n)}) = ${nf(S/2**n*2**E)}</div>`;
-  out.push(['⑤ 溢出判断','只看规格化后的阶码。',s5]);
+  const fx2=Mx/2**n,fy2=My/2**n,tv=fx2*2**Ex+(op==='+'?1:-1)*fy2*2**Ey;
+  const pw=(e,f)=>`2${sup(e)} × (${f})`;
+  const B4=[['最小负数',pw(Emax,'−1'),-(2**Emax),Emax,-(2**n)],['最大负数（规格化）',pw(Emin,`−(2⁻¹ + 2${sup(-n)})`),-(2**Emin)*(0.5+2**-n),Emin,-(2**(n-1))-1],
+    ['最小正数（规格化）',pw(Emin,'2⁻¹'),2**Emin*0.5,Emin,2**(n-1)],['最大正数',pw(Emax,`1 − 2${sup(-n)}`),2**Emax*(1-2**-n),Emax,2**n-1]];
+  const pos=S>=0,zn=zero?'z':E>Emax?(pos?'po':'no'):E<Emin?(pos?'pu':'nu'):(pos?'pr':'nr');
+  const Z=[['no','ov','负上溢'],['nr','rp','可表示的负数'],['nu','un','负下溢'],['z','','0'],['pu','un','正下溢'],['pr','rp','可表示的正数'],['po','ov','正上溢']];
+  const zone=`<div class="zone">${Z.map(([k,c,t])=>`<div class="${c}${k===zn?' hit':''}">${t}</div>`).join('')}</div>`;
+  const inE=Math.abs(E)<2**(m+1)||E===-(2**(m+1)),esb=inE?bin(E,m+2).slice(0,2):null;
+  const SG=[['00','阶码为正，在范围内','不溢出'],['11','阶码为负，在范围内','不溢出'],['01','阶码大于最大阶码','上溢：转中断处理'],['10','阶码小于最小阶码','下溢：当机器零']];
+  let s5='';
+  if(zero)s5=`<p class="ok">尾数为 0，结果是机器零，不用判溢出。</p>`;
+  else{
+    s5+=`<p>规格化、舍入后阶码 E = ${nf(E)}，写成 ${m+2} 位双符号位补码：${inE?ehtml(E,m):'（超出 '+(m+2)+' 位能写的范围）'}</p>`;
+    s5+=`<div class="tw"><table class="sgt"><tr><th>阶码符号位</th><th>含义</th><th>结论</th></tr>${SG.map(([b,w,c])=>`<tr class="${b===esb?'hit':''}"><td class="mono">${b}</td><td>${w}</td><td>${c}</td></tr>`).join('')}</table></div>`;
+    if(!inE)s5+=`<p class="warn">左规次数太多，阶码 ${nf(E)} 连 ${m+2} 位双符号位都装不下，肯定是下溢。</p>`;
+    const sgn=pos?'尾数符号位 00，结果为正':'尾数符号位 11，结果为负';
+    if(E>Emax)s5+=`<p class="warn">阶码 ${E} &gt; 最大阶码 ${Emax}：浮点数上溢。${sgn}，所以是<b>${pos?'正上溢':'负上溢'}</b>，转中断处理。</p>`;
+    else if(E<Emin)s5+=`<p class="warn">阶码 ${nf(E)} &lt; 最小阶码 ${nf(Emin)}：浮点数下溢。${sgn}，所以是<b>${pos?'正下溢':'负下溢'}</b>，按机器零处理。</p>`;
+    else s5+=`<p class="ok">阶码 ${nf(E)} 在 ${nf(Emin)}～${Emax} 之内，没有溢出。</p><div class="mach">[${name}]补 = ${ehtml(E,m)} ; ${mhtml(S,n)}\n${name} = 2${sup(E)} × (${bfrac(S,n)}) = ${nf(S/2**n*2**E)}</div>`;
+  }
+  s5+=zone+`<p class="tip">不按比例。不考虑位数限制时，真值 ${name} = ${nf(tv)}。</p>`;
+  s5+=`<div class="tw"><table class="sgt"><tr><th>这种格式的边界</th><th>真值</th><th>十进制</th><th>机器数</th></tr>${B4.map(([t,f,v,e,mm])=>`<tr><td>${t}</td><td>${f}</td><td class="mono">${nf(v)}</td><td class="mono">${estr(e,m)} ; ${mstr(mm,n)}</td></tr>`).join('')}</table></div>`;
+  s5+=`<ul class="pts"><li>尾数求和出现 01、10 只是尾数暂时溢出，右规一次就好，不是浮点溢出（第二章 p286–287）。</li><li>右规（包括舍入后再右规）让阶码加 1，可能加出上溢；左规让阶码减小，可能减出下溢。</li><li>名词别混：定点补码那页（第二章 p161）把双符号位 10 叫“下溢”，指结果比最小负数还小；浮点数的“下溢”指绝对值太小、接近 0。</li></ul>`;
+  out.push(['⑤ 溢出判断','只看规格化、舍入之后的阶码；正负看尾数符号。',s5]);
   $('steps').innerHTML=out.map(([h,w,b],i)=>`<div class="step on"><h3>${h}</h3><div class="who">${w}</div><div class="ans">${b}</div></div>`).join('');
   // first step (machine numbers) always visible
   const f=document.querySelector('.step .ans');if(f)f.classList.add('shown');

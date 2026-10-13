@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>溢出与符号判断</title>
+<style>
+/* Overflow and sign judgment: adder carries, ZF/SF/CF/OF, four overflow methods, compare, multiply, shift. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --tag:#c8553d; --idx:#4d6fa8; --off:#3f7d4f; --ctl:#d99a1e;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:14px var(--serif);font-weight:600;margin:12px 0 6px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number],select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:7.5em}
+select{font-family:var(--sans);width:auto}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink)}
+.btn,.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.chip{border-radius:999px;padding:2px 12px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:10px}
+.err{color:var(--mv);font-size:13px;min-height:1em;margin-top:6px}
+.bar{display:flex;width:100%;border-radius:5px;overflow:hidden;font:13px/1.3 var(--mono);color:#fff;min-height:54px}
+.bar div{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 4px;min-width:64px;text-align:center}
+.bar small{font-size:11px;opacity:.9;font-family:var(--sans)}
+.f-tag{background:var(--tag)}.f-idx{background:var(--idx)}.f-off{background:var(--off)}.f-ctl{background:var(--ctl);color:#1d1d1d}.f-data{background:var(--muted)}
+.scale{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--muted);margin-top:2px}
+.calc{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.calc code,.mono{font-family:var(--mono)}
+.big{font:20px var(--serif);font-weight:600;color:var(--green)}
+.ans{border-radius:3px;transition:filter .15s}
+body.closed .ans:not(.shown){filter:blur(6px);background:var(--hl);cursor:pointer;user-select:none}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;min-width:520px;width:100%}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--hl);font-weight:600}
+.bits{font:13px var(--mono);word-break:break-all;line-height:1.9}
+.bits span{padding:1px 2px;border-radius:2px}
+.b-tag{background:color-mix(in srgb,var(--tag) 28%,transparent)}.b-idx{background:color-mix(in srgb,var(--idx) 28%,transparent)}.b-off{background:color-mix(in srgb,var(--off) 28%,transparent)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+[hidden]{display:none!important}
+.mono{font-family:var(--mono)}
+.add{border-collapse:collapse;font:15px var(--mono);min-width:0;width:auto;margin:6px 0}
+.add td,.add th{border:none;padding:2px 5px;text-align:center;background:none}
+.add th{font:12px var(--sans);color:var(--muted);text-align:right;padding-right:10px}
+.add tr.sum td{border-top:2px solid var(--ink)}
+.add td.cy{font-size:12px;color:var(--muted)}
+.add td.cy.hot{color:var(--mv);font-weight:700;outline:2px solid var(--mv);outline-offset:-1px;border-radius:3px}
+.add td.sb{color:var(--mv);font-weight:700}
+.add td.gap{border:none!important;width:8px}
+.it{border-collapse:collapse;font-size:13px;min-width:0;width:auto;margin:6px 0}
+.it td,.it th{border:1px solid var(--line);padding:3px 8px}
+.it tr.hit td{background:var(--hl);font-weight:700}
+.flags{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:8px 0}
+.flag{border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg)}
+.flag b{font:20px var(--mono);color:var(--green);margin-right:6px}
+.flag .f{font:13px var(--mono);color:var(--muted)}
+.flag p{margin:3px 0 0;font-size:13px}
+.verdict{font-weight:700}
+.y{color:var(--mv)}
+.n{color:var(--done)}
+.meth{font-size:14px;margin:6px 0 0;padding-left:1.3em}
+.meth li{margin:4px 0}
+.where td:first-child{white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>溢出与符号判断</h1>
+    <p class="sub">同一个加法器、同一串机器数，按无符号数看和按有符号数看，溢出的判据和“结果是正是负”的判据都不一样。这页把 PPT 里分散在第二章、第四章、第七章、强化 1、强化 2 的讲法放到一起：输入两个数，看加法器的进位、四个标志位、四种溢出判断法、真实符号和大小比较；乘法和左移也能算。浮点数的溢出见 <a href="浮点数加减五步走.html">浮点数加减五步走</a> 第 ⑤ 步。</p>
+  </header>
+
+  <section class="panel">
+    <h2>PPT 里分别在哪讲</h2>
+    <div class="tw"><table class="where">
+      <thead><tr><th>位置</th><th>讲什么</th><th>判据</th></tr></thead>
+      <tbody>
+        <tr><td>第二章 p150–151</td><td>溢出的定义；选择题直接算真值</td><td>真值超出表示范围（8 位补码 −128～127）</td></tr>
+        <tr><td>第二章 p153–157</td><td>方法一：一位符号位</td><td>参加运算的两个数同号，结果与它们异号才溢出；异号相加不会溢出</td></tr>
+        <tr><td>第二章 p158–166</td><td>方法二：双符号位（变形补码）；双符号位怎么移位</td><td>两位符号位不同即溢出：01 正溢出、10 负溢出；高位符号位永远是真正的符号</td></tr>
+        <tr><td>第二章 p167–170</td><td>方法三：进位判断</td><td>符号位的进位 ⊕ 最高数值位的进位 = 1 即溢出</td></tr>
+        <tr><td>第二章 p171–178</td><td>无符号数加减，0～255 的环</td><td>CF = sub ⊕ Cout：加法有进位、减法没进位（即有借位）就溢出</td></tr>
+        <tr><td>第四章 p70–84</td><td>标志位 ZF、CF、OF、SF；4 位例题；大于小于怎么判断</td><td>OF = Cn ⊕ Cn+1，SF = 结果最高位；无符号看 CF，有符号看 SF 与 OF 是否相等</td></tr>
+        <tr><td>第七章 p109–111</td><td>带标志加法器的硬件</td><td>同上，标志位由加法器的进位直接生成</td></tr>
+        <tr><td>强化 1 p41</td><td>移位溢出</td><td>无符号逻辑左移移出 1 就溢出；补码左移移出的位与符号不同就溢出</td></tr>
+        <tr><td>强化 1 p44–58</td><td>有符号与无符号运算位级等价；乘法、加减法的溢出</td><td>低 n 位一样，只是解释不同；乘法看 2n 位乘积能不能放进 n 位</td></tr>
+        <tr><td>强化 2 p73</td><td>x86 的 cmp、jle</td><td>ZF = 1 或 SF ≠ OF 时跳（小于等于）</td></tr>
+        <tr><td>第二章 p286–289，强化 1 p72–75</td><td>浮点加减</td><td>尾数溢出不算，只看规格化后的阶码；见浮点页</td></tr>
+        <tr><td>第二章 p297</td><td>类型转换</td><td>int 转 unsigned 可能溢出；int 转 float 可能丢精度</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="panel">
+    <h2>输入</h2>
+    <div class="form">
+      <label>字长 n（位）<input id="n" type="number" min="2" max="16" value="8"></label>
+      <label>A<input id="a" type="text" value="64"></label>
+      <label>运算<select id="op"><option value="+">A + B</option><option value="-">A − B</option><option value="*">A × B</option><option value="<">A 左移 B 位</option></select></label>
+      <label>B<input id="b" type="text" value="64"></label>
+    </div>
+    <p class="tip">可以写十进制（−6、200）、十六进制（FEH 或 0xFE）、二进制（1010B）。负的十进制按补码存，大于有符号范围的十进制按无符号数存；最后都只看 n 位机器数。</p>
+    <div class="presets">预设：
+      <button class="chip" data-p="0">64 + 64（第二章 p155）</button>
+      <button class="chip" data-p="1">−64 + (−65)（p156）</button>
+      <button class="chip" data-p="2">−64 + 64（p169）</button>
+      <button class="chip" data-p="3">(−4) + (−7)（第四章 p72）</button>
+      <button class="chip" data-p="4">n = 10，n − 5（第四章 p76–79）</button>
+      <button class="chip" data-p="5">12 + 5（第四章 p80）</button>
+      <button class="chip" data-p="6">5 − 12（p80）</button>
+      <button class="chip" data-p="7">5 − (−6)（p82）</button>
+      <button class="chip" data-p="8">−6 + (−3)（p82）</button>
+      <button class="chip" data-p="9">F2H × 90H（2010-13）</button>
+      <button class="chip" data-p="10">80H × 07H（强化 1 p45）</button>
+      <button class="chip" data-p="11">1011 左移 1 位（第二章 p166）</button>
+    </div>
+    <p class="tip" id="presetNote"></p>
+    <div class="err" id="err"></div>
+    <p class="tip"><label class="chk" style="display:inline-flex;gap:6px"><input id="closed" type="checkbox"> 闭卷：遮住标志位和各个结论，自己判断完再点灰块对答案</label></p>
+  </section>
+
+  <section class="panel">
+    <h2>两个数</h2>
+    <div class="tw"><table class="it" id="ops"></table></div>
+  </section>
+
+  <section class="panel" id="secAdd">
+    <h2>① 加法器里发生了什么</h2>
+    <p id="addHow"></p>
+    <div class="tw"><table class="add" id="col"></table></div>
+    <p class="tip">进位行：每一位上方是“进到这一位的进位”，最左边是加法器向更高位的进位 Cout（第四章叫 Cn+1）。圈出来的两个是 Cn（进到符号位的进位）和 Cn+1。</p>
+    <h3>结果按两种方式解释</h3>
+    <div class="tw"><table class="it" id="interp"></table></div>
+    <h3>四个标志位</h3>
+    <div class="flags" id="flags"></div>
+  </section>
+
+  <section class="panel" id="secOvf">
+    <h2>② 溢出判断</h2>
+    <h3>按有符号数（补码）</h3>
+    <ol class="meth" id="sOvf"></ol>
+    <h3>按无符号数</h3>
+    <ol class="meth" id="uOvf"></ol>
+  </section>
+
+  <section class="panel" id="secSign">
+    <h2>③ 符号判断</h2>
+    <ol class="meth" id="sign"></ol>
+    <div id="cmpBox">
+      <h3>A − B 用来比大小（cmp）</h3>
+      <div class="two">
+        <div><p style="margin:4px 0;font-size:14px">有符号数（第四章 p84，强化 2 p73）</p><div class="tw"><table class="it" id="cmpS"></table></div></div>
+        <div><p style="margin:4px 0;font-size:14px">无符号数（第四章 p83）</p><div class="tw"><table class="it" id="cmpU"></table></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="secMul">
+    <h2>乘法</h2>
+    <div id="mul"></div>
+  </section>
+
+  <section class="panel" id="secShl">
+    <h2>左移</h2>
+    <div id="shl"></div>
+  </section>
+
+  <section class="panel">
+    <h2>容易混的几点</h2>
+    <ul class="meth">
+      <li><b>“上溢”“下溢”两套说法</b>：第二章 p150、p161 讲定点补码时，把“比最大正数还大”叫上溢、“比最小负数还小”叫下溢（双符号位 01、10）；讲浮点数时，“下溢”指绝对值太小、接近 0，按机器零处理。做题看上下文。</li>
+      <li><b>加法器不知道数是有符号还是无符号</b>（第四章 p70，强化 1 p44）：它只管机器数，四个标志位一次全算出来。题目说是无符号数，就看 CF；说是有符号数，就看 OF 和 SF。</li>
+      <li><b>“变号就溢出”只对加减法成立</b>：乘法“负 × 负 = 正”是正常结果；乘法溢出要看真实乘积能不能放进 n 位，截断后的符号碰巧对也可能已经溢出（2010-13 的 F2H × 90H）。</li>
+      <li><b>SF 是结果的最高位，不一定是真实符号</b>：溢出时 SF 恰好反了，真实符号 = SF ⊕ OF，也就是双符号位里的高位。</li>
+      <li><b>尾数溢出不是浮点溢出</b>（强化 1 p73，第二章 p287）：浮点只看规格化后的阶码。</li>
+    </ul>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const PRE=[
+ {n:8,a:'64',op:'+',b:'64',note:'第二章 p155、p159、p167：0,1000000 + 0,1000000 = 1,0000000，两个正数加出“负数”，三种方法都判溢出。'},
+ {n:8,a:'-64',op:'+',b:'-65',note:'第二章 p156、p160、p168：两个负数加出正数 127，真值 −129 超出 −128，溢出。'},
+ {n:8,a:'-64',op:'+',b:'64',note:'第二章 p169：异号相加，符号位进位 1、最高数值位进位 1，相同，不溢出。'},
+ {n:4,a:'-4',op:'+',b:'-7',note:'第四章 p72：4 位，(−4) + (−7) = −11 < −8，OF = 1，结果最高位 0，SF = 0。'},
+ {n:4,a:'10',op:'-',b:'5',note:'第四章 p76–79：unsigned n = 10，执行 if (n > 5) 时算 n − 5。PPT 结果：ZF = 0，CF = 0，OF = 1，SF = 0。按无符号数看 CF = 0、ZF = 0，所以 n > 5 成立。'},
+ {n:4,a:'12',op:'+',b:'5',note:'第四章 p80–81：4 位，A = 1100（无符号 12，有符号 −4），B = 0101，求 A + B 的 CF、OF。'},
+ {n:4,a:'5',op:'-',b:'12',note:'第四章 p80–81：同上，求 B − A。'},
+ {n:4,a:'5',op:'-',b:'-6',note:'第四章 p82：4 位有符号 A = 5，B = −6，求 A − B 的 CF、OF。'},
+ {n:4,a:'-6',op:'+',b:'-3',note:'第四章 p82：同上，B = −6，C = −3，求 B + C。'},
+ {n:8,a:'F2H',op:'*',b:'90H',note:'2010-13 选项 B：r2 × r3 = (−14) × (−112) = 1568，超出 127，溢出。截断后的 8 位是 0010 0000 = 32，符号还是正的，看符号判断不出来。'},
+ {n:8,a:'80H',op:'*',b:'07H',note:'强化 1 p45：x = ux = 1000 0000，y = uy = 0000 0111。两种解释的乘积低 8 位都是 1000 0000（有符号 −128，无符号 128），这就是位级等价。'},
+ {n:4,a:'1011B',op:'<',b:'1',note:'第二章 p163–166：11,011（−5）左移一位得 10,110，双符号位不同，负溢出。用 4 位单符号位就是 1011 左移得 0110。'}
+];
+const N=()=>+$('n').value;
+function parse(t,n){t=t.trim().replace('−','-');let v;
+  if(/^0x[0-9a-f]+$/i.test(t))v=parseInt(t,16);else if(/^[0-9a-f]+h$/i.test(t))v=parseInt(t.slice(0,-1),16);
+  else if(/^[01]+b$/i.test(t))v=parseInt(t.slice(0,-1),2);else if(/^[+-]?\d+$/.test(t))v=parseInt(t,10);else return {err:`看不懂“${t}”`};
+  if(v<-(2**(n-1))||v>=2**n)return {err:`${t} 超出 ${n} 位能存的范围（−${2**(n-1)}～${2**n-1}）`};
+  return {m:((v%2**n)+2**n)%2**n}}
+const bits=(x,w)=>(((x%2**w)+2**w)%2**w).toString(2).padStart(w,'0');
+const grp=s=>s.replace(/(.)(?=(.{4})+$)/g,'$1 ');
+const sgn=(m,n)=>m>=2**(n-1)?m-2**n:m;
+const nf=x=>String(x).replace('-','−');
+const yn=(b,yes,no)=>`<span class="verdict ${b?'y':'n'}">${b?yes:no}</span>`;
+const A=s=>`<span class="ans">${s}</span>`;
+function render(){
+  const n=N(),op=$('op').value;
+  if(!(n>=2&&n<=16&&Number.isInteger(n))){$('err').textContent='字长取 2～16。';return}
+  const pa=parse($('a').value,n),pb=parse($('b').value,n);
+  if(pa.err||pb.err){$('err').textContent=[pa.err,pb.err].filter(Boolean).join('；')+'。';return}
+  $('err').textContent='';
+  const a=pa.m,b=pb.m,sa=sgn(a,n),sb=sgn(b,n),smin=-(2**(n-1)),smax=2**(n-1)-1,umax=2**n-1;
+  $('ops').innerHTML=`<tr><th></th><th>${n} 位机器数</th><th>按无符号数</th><th>按有符号数（补码）</th></tr>`+
+    `<tr><td>A</td><td class="mono">${grp(bits(a,n))}</td><td>${a}</td><td>${nf(sa)}</td></tr><tr><td>B</td><td class="mono">${grp(bits(b,n))}</td><td>${b}</td><td>${nf(sb)}</td></tr>`+
+    `<tr><td colspan="4" class="tip">无符号范围 0～${umax}；有符号范围 ${nf(smin)}～${smax}。</td></tr>`;
+  const isAS=op==='+'||op==='-';
+  ['secAdd','secOvf','secSign'].forEach(i=>$(i).hidden=!isAS);$('secMul').hidden=op!=='*';$('secShl').hidden=op!=='<';
+  if(isAS)renderAS(n,op,a,b,sa,sb,smin,smax,umax);
+  if(op==='*')renderMul(n,a,b,sa,sb,smin,smax,umax);
+  if(op==='<')renderShl(n,a,b,sa,smin,smax);
+  document.querySelectorAll('.ans').forEach(e=>e.onclick=()=>e.classList.add('shown'));
+}
+function renderAS(n,op,a,b,sa,sb,smin,smax,umax){
+  const sub=op==='-'?1:0,y=sub?(~b)&umax:b;
+  const c=[sub];const s=[];for(let i=0;i<n;i++){const xi=(a>>i)&1,yi=(y>>i)&1;s[i]=xi^yi^c[i];c[i+1]=(xi&yi)|(xi&c[i])|(yi&c[i])}
+  const r=s.reduce((t,v,i)=>t+(v<<i),0),Cout=c[n],Cn=c[n-1],sr=sgn(r,n);
+  $('addHow').innerHTML=sub?`减法：加法器把 B 按位取反，再从最低位送进 1（sub = 1），实际算 A + ~B + 1。B = ${grp(bits(b,n))} 取反得 ${grp(bits(y,n))}（第四章 p70、p77）。`:'加法：A、B 的机器数直接送进加法器，最低位进位 0（sub = 0）。';
+  const row=(lab,arr,cls='')=>`<tr class="${cls}"><th>${lab}</th>${arr}</tr>`;
+  const bcells=(v,extra='')=>`<td class="gap"></td>`+bits(v,n).split('').map((ch,j)=>`<td class="${j===0?'sb':''}">${ch}</td>`).join('');
+  const cy=`<td class="cy hot ans">${Cout}</td>`+Array.from({length:n},(_,j)=>{const i=n-1-j;return `<td class="cy${i===n-1?' hot':''} ans">${c[i]}</td>`}).join('');
+  $('col').innerHTML=row('进位',cy)+row('A',bcells(a))+row(sub?'+ ~B':'+ B',bcells(y))+(sub?row('+ sub',`<td class="gap"></td>`+'<td></td>'.repeat(n-1)+'<td>1</td>'):'')+row('=',`<td class="ans">${Cout}</td>`+bits(r,n).split('').map((ch,j)=>`<td class="${j===0?'sb':''} ans">${ch}</td>`).join(''),'sum');
+  const ut=sub?a-b:a+b,st=sub?sa-sb:sa+sb;
+  const uo=ut<0||ut>umax,so=st<smin||st>smax;
+  $('interp').innerHTML=`<tr><th></th><th>真实结果</th><th>${n} 位结果 ${grp(bits(r,n))} 读出来</th><th>对不对</th></tr>`+
+    `<tr><td>无符号数</td><td>${a} ${sub?'−':'+'} ${b} = ${nf(ut)}</td><td>${r}</td><td>${A(yn(uo,'不对，溢出','对'))}</td></tr>`+
+    `<tr><td>有符号数</td><td>${nf(sa)} ${sub?'−':'+'} ${sb<0?'('+nf(sb)+')':sb} = ${nf(st)}</td><td>${nf(sr)}</td><td>${A(yn(so,'不对，溢出','对'))}</td></tr>`;
+  const ZF=r===0?1:0,SF=r>>(n-1)&1,CF=sub^Cout,OF=Cn^Cout;
+  const F=(k,v,f,t)=>`<div class="flag"><b>${k}</b>${A('<span class="mono">= '+v+'</span>')}<div class="f">${f}</div><p>${t}</p></div>`;
+  $('flags').innerHTML=F('ZF',ZF,'结果全 0 时为 1',ZF?'结果是 0。':'结果不是 0。')+F('SF',SF,'= 结果最高位',`结果最高位是 ${SF}。`)+
+    F('CF',CF,`= sub ⊕ Cout = ${sub} ⊕ ${Cout}`,'给无符号数用：1 表示溢出（加法进位或减法借位）。')+F('OF',OF,`= Cn ⊕ Cn+1 = ${Cn} ⊕ ${Cout}`,'给有符号数用：1 表示溢出。');
+  // signed overflow methods
+  const as=a>>(n-1)&1,ys=y>>(n-1)&1,rs=SF;
+  const ext=(v,sv)=>bits(sv,n+1);const bb=sub?-sb:sb;const dsum=sa+bb;const d=bits(dsum,n+1),d1=d[0],d2=d[1];
+  $('sOvf').innerHTML=[
+   `<b>真值法</b>（第二章 p151）：${nf(st)} ${so?'超出':'在'} ${nf(smin)}～${smax} ${so?'':'之内'}。${A(yn(so,'溢出','不溢出'))}`,
+   `<b>一位符号位</b>（p153–157）：加法器实际相加的两个数符号是 ${as} 和 ${ys}${sub?'（~B 的符号，相当于 −B 的符号）':''}，结果符号 ${rs}。${as===ys?`两数同号，结果符号${rs===as?'相同':'变了'}`:'两数异号，相加不会溢出'}。${A(yn(as===ys&&rs!==as,'溢出','不溢出'))}`,
+   `<b>双符号位</b>（p158–162）：把两个数写成 ${n+1} 位变形补码再算：${ext(a,sa).replace(/^(.)(.)/,'$1$2,')} ${sub?'+ [−B]':'+ [B]'} ${bits(bb,n+1).replace(/^(.)(.)/,'$1$2,')} = <span class="ans">${d1}${d2},${d.slice(2)}</span>。符号位 ${A(d1+d2)}：00 正、不溢出；01 正溢出；10 负溢出；11 负、不溢出。${A(yn(d1!==d2,d1==='0'?'正溢出':'负溢出','不溢出'))}`,
+   `<b>进位判断</b>（p167–170，第四章 p75）：进到符号位的进位 Cn = ${Cn}，符号位送出的进位 Cn+1 = ${Cout}，异或得 ${A(OF)}。这就是 OF。${A(yn(OF,'溢出','不溢出'))}`
+  ].map(x=>`<li>${x}</li>`).join('');
+  $('uOvf').innerHTML=[`<b>真值法</b>：${nf(ut)} ${uo?'超出':'在'} 0～${umax} ${uo?'':'之内'}。${A(yn(uo,'溢出','不溢出'))}`,
+   `<b>看 CF</b>（第二章 p178）：${sub?`减法 sub = 1，Cout = ${Cout}，${Cout?'有进位说明没借位':'没进位说明被减数小，借位了'}`:`加法 sub = 0，Cout = ${Cout}，${Cout?'最高位进位了':'没有进位'}`}，CF = ${A(CF)}。${A(yn(CF,'溢出','不溢出'))}`].map(x=>`<li>${x}</li>`).join('');
+  // sign
+  const tsign=SF^OF;
+  $('sign').innerHTML=[`<b>结果的最高位</b>就是 SF = ${A(SF)}。${A(OF?'但这次 OF = 1，SF 是反的。':'这次 OF = 0，SF 就是真实符号。')}`,
+   `<b>真实符号 = SF ⊕ OF</b> = ${SF} ⊕ ${OF} = ${A(tsign)}，真实结果${A(tsign?'为负':'为正或 0')}（有符号真值 ${nf(st)}）。也就是双符号位的<b>高位</b>：第二章 p161“不论是否溢出，高位符号位永远代表真正的符号”。`,
+   `<b>按无符号数</b>就没有符号可判：结果总读成 0～${umax}。“谁大谁小”看 CF（下表）。`].map(x=>`<li>${x}</li>`).join('');
+  $('cmpBox').hidden=!sub;
+  if(sub){const cmpS=[['ZF = 1','A = B',ZF===1],['ZF = 0，SF = OF','A > B',ZF===0&&SF===OF],['ZF = 0，SF ≠ OF','A < B',ZF===0&&SF!==OF]];
+    const det=OF?`（OF = 1：结果溢出了，SF 是反的，所以 SF ≠ OF 才是真的小于）`:'';
+    $('cmpS').innerHTML=`<tr><th>标志</th><th>结论</th></tr>`+cmpS.map(([f,c,h])=>`<tr class="${h&&!document.body.classList.contains('closed')?'hit':''}"><td class="mono">${f}</td><td>${c}</td></tr>`).join('')+`<tr><td colspan="2">${A(`这次 ZF = ${ZF}，SF = ${SF}，OF = ${OF}：${nf(sa)} ${sa>sb?'>':sa<sb?'<':'='} ${nf(sb)}${det}`)}</td></tr>`;
+    const cmpU=[['ZF = 1','A = B',ZF===1],['ZF = 0，CF = 0','A > B',ZF===0&&CF===0],['ZF = 0，CF = 1','A < B',ZF===0&&CF===1]];
+    $('cmpU').innerHTML=`<tr><th>标志</th><th>结论</th></tr>`+cmpU.map(([f,c,h])=>`<tr class="${h&&!document.body.classList.contains('closed')?'hit':''}"><td class="mono">${f}</td><td>${c}</td></tr>`).join('')+`<tr><td colspan="2">${A(`这次 ZF = ${ZF}，CF = ${CF}：${a} ${a>b?'>':a<b?'<':'='} ${b}`)}</td></tr>`;}
+}
+function renderMul(n,a,b,sa,sb,smin,smax,umax){
+  const P=sa*sb,U=a*b,pb=bits(P,2*n),ub=bits(U,2*n),low=pb.slice(n),hi=pb.slice(0,n+1);
+  const so=P<smin||P>smax,uo=U>umax,same=/^0+$|^1+$/.test(hi);
+  const show=(s)=>`<span class="mono"><span style="color:var(--mv);font-weight:700">${grp(s.slice(0,n))}</span> ${grp(s.slice(n))}</span>`;
+  $('mul').innerHTML=`<div class="tw"><table class="it"><tr><th></th><th>真实乘积</th><th>${2*n} 位乘积（红色是高 ${n} 位）</th><th>留下低 ${n} 位读出来</th><th>溢出吗</th></tr>`+
+   `<tr><td>有符号</td><td>${nf(sa)} × ${sb<0?'('+nf(sb)+')':sb} = ${nf(P)}</td><td>${show(pb)}</td><td>${nf(sgn(parseInt(low,2),n))}</td><td>${A(yn(so,'溢出','不溢出'))}</td></tr>`+
+   `<tr><td>无符号</td><td>${a} × ${b} = ${U}</td><td>${show(ub)}</td><td>${parseInt(ub.slice(n),2)}</td><td>${A(yn(uo,'溢出','不溢出'))}</td></tr></table></div>`+
+   `<ol class="meth"><li><b>真值法</b>：有符号乘积 ${nf(P)} ${so?'超出':'在'} ${nf(smin)}～${smax} ${so?'':'之内'}；无符号乘积 ${U} ${uo?'超出':'在'} 0～${umax} ${uo?'':'之内'}。</li>`+
+   `<li><b>看 ${2*n} 位乘积</b>：有符号时，高 ${n+1} 位 <span class="mono">${hi}</span> ${A(same?'全相同，不溢出':'不全相同，溢出')}（高 n 位只是低 n 位符号的扩展才行）；无符号时，高 ${n} 位 ${A(/^0+$/.test(ub.slice(0,n))?'全 0，不溢出':'不全为 0，溢出')}。</li>`+
+   `<li><b>位级等价</b>（强化 1 p44–46）：两种解释的低 ${n} 位都是 <span class="mono">${grp(low)}</span>，硬件留下的是同一串位；高 ${n} 位不同，所以溢出判据不同。</li>`+
+   `<li><b>别用“变号”判乘法</b>：${sa<0&&sb<0?'负 × 负 = 正是正常结果；':''}留下的 ${n} 位读成 ${nf(sgn(parseInt(low,2),n))}，${(sgn(parseInt(low,2),n)<0)===(P<0)?'符号和真实乘积一样，':'符号和真实乘积不一样，'}${so?'但已经溢出了。':'这次也没有溢出。'}</li></ol>`+
+   `<p class="tip">除法：整数除法只有“最小负数 ÷ (−1)”会溢出（结果 ${2**(n-1)} 超出 ${smax}），除数为 0 另报异常。这条按教材，PPT 里强化 1 p58 的乘除法判断是图片，文字没提取到。</p>`;
+}
+function renderShl(n,a,k,sa,smin,smax){
+  if(k>n){$('shl').innerHTML=`<p class="err">左移位数取 0～${n}。</p>`;return}
+  const all=bits(a,n),out=all.slice(0,k),r=bits(a*2**k,n),top=all.slice(0,k+1),so=!/^0+$|^1+$/.test(top),uo=/1/.test(out),t=sa*2**k;
+  const ds=bits(sa,n+1);
+  $('shl').innerHTML=`<div class="mach mono" style="font:15px/1.9 var(--mono);background:var(--bg);padding:6px 10px;border-radius:4px;white-space:pre;overflow-x:auto">${grp(all)}  左移 ${k} 位  →  ${A(grp(r))}    移出 ${k?out:'无'}</div>`+
+  `<ol class="meth"><li><b>无符号数（逻辑左移）</b>（强化 1 p41）：移出的位${uo?'里有 1':'全是 0'}，${A(yn(uo,'溢出','不溢出'))}。真实结果 ${a}×2${k===1?'':'^'+k} = ${a*2**k}，范围 0～${2**n-1}。</li>`+
+  `<li><b>补码（算术左移）</b>：原来的最高 ${k+1} 位 <span class="mono">${top}</span> ${so?'不全相同，移完符号会变或丢了有效位':'全相同，移出去的只是符号的重复'}，${A(yn(so,'溢出','不溢出'))}。真实结果 ${nf(sa)}×2${k===1?'':'^'+k} = ${nf(t)}，范围 ${nf(smin)}～${smax}。</li>`+
+  `<li><b>双符号位看</b>（第二章 p163–166）：${ds.replace(/^(.)(.)/,'$1$2,')} 左移 ${k} 位（高位符号位不动、低位符号位参与移位）${k===1?`得 ${A((ds[0]+ds.slice(2)+'0').replace(/^(..)/,'$1,'))}，两位符号位${ds[0]===ds[2]?'相同，不溢出':'不同，'+(ds[0]==='0'?'正溢出':'负溢出')}`:'，移 1 位看一次，任何一次两位符号位不同就溢出'}。</li></ol>`;
+}
+function load(p){for(const k of ['n','a','op','b'])$(k).value=p[k];$('presetNote').textContent=p.note;render()}
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>load(PRE[+b.dataset.p]));
+document.querySelectorAll('input,select').forEach(e=>{if(e.id!=='closed')e.addEventListener('input',()=>{$('presetNote').textContent='';render()})});
+$('closed').addEventListener('change',()=>{document.body.classList.toggle('closed',$('closed').checked);render()});
+load(PRE[0]);
+</script>
+</body>
+</html>
