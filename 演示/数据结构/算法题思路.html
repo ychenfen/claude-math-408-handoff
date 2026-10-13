@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>算法题思路动画</title>
+<style>
+/* One tab per 408 algorithm question: stem, three-sentence idea, then a stepper that moves pointers on SVG arrays / linked lists while the C line being executed lights up. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --pur:#7b4fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b48ee0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b48ee0; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:80ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:17px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:15px var(--serif);font-weight:600;margin:12px 0 4px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:6px;padding:5px 12px;cursor:pointer}
+.tab small{color:var(--muted);margin-right:4px;font:12px var(--mono)}
+.tab[aria-selected="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.tab[aria-selected="true"] small{color:inherit;opacity:.8}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.stem{font-size:14.5px;margin:0}
+.stem .req{color:var(--muted)}
+.src{font-size:12px;color:var(--muted);margin:4px 0 0}
+.ideas{margin:0;padding-left:1.4em;font-size:14.5px;display:grid;gap:3px}
+.ideas b{color:var(--mv)}
+.cx{font:14px var(--mono);margin:8px 0 0;display:flex;flex-wrap:wrap;gap:4px 18px}
+.cx b{color:var(--q)}
+.fix{font-size:13px;margin:8px 0 0;padding:6px 10px;border-left:3px solid var(--mv);background:color-mix(in srgb,var(--mv) 8%,transparent)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px;margin-top:10px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text]{font:15px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:min(17em,100%)}
+.form input.short{width:4.5em}
+.form select{font:14px var(--sans);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.q{font-size:14px;padding:8px 12px;border:1px dashed var(--line);border-radius:5px;margin-top:8px}
+.q .ans{color:var(--done);font-weight:600}
+details summary{cursor:pointer;color:var(--muted);font-size:13px}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.ctrl .muted{color:var(--muted)}
+.run{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;align-items:start;margin-top:10px}
+@media (max-width:900px){.run{grid-template-columns:minmax(0,1fr)}}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.2em}
+.note b{color:var(--done)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:7em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+.vars{display:flex;flex-wrap:wrap;gap:6px 8px;font:13px var(--mono);margin-top:8px}
+.vars span{border:1px solid var(--line);border-radius:4px;padding:0 8px;background:var(--bg)}
+.vars b{color:var(--q)}
+.vars span.chg{border-color:var(--cmp);background:color-mix(in srgb,var(--cmp) 18%,transparent)}
+.viz{overflow-x:auto;margin-top:8px}
+.viz svg{display:block;height:auto}
+.phase{font-size:13px;color:var(--muted);margin-top:8px}
+.phase b{color:var(--ink)}
+.code{overflow:auto;max-height:560px;font:12.5px/1.8 var(--mono);margin:0;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:6px 0}
+.code .ln{display:block;white-space:pre;padding:0 8px;border-left:3px solid transparent}
+.code .ln.on{background:color-mix(in srgb,var(--cmp) 22%,transparent);border-left-color:var(--cmp)}
+.code .no{display:inline-block;width:2.2em;color:var(--muted);user-select:none}
+.code .cm{color:var(--muted)}
+.code .kw{color:var(--q);font-weight:600}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.hidden{display:none}
+/* svg */
+.s-cell{fill:var(--bg);stroke:var(--line);stroke-width:1.2}
+.s-cell.cur{fill:var(--cmp);stroke:var(--cmp)}
+.s-cell.ok{fill:color-mix(in srgb,var(--done) 32%,var(--paper));stroke:var(--done)}
+.s-cell.bad{fill:var(--mv);stroke:var(--mv)}
+.s-cell.dim{fill:none;stroke-dasharray:3 3}
+.s-cell.keep{stroke:var(--q);stroke-width:2}
+.s-cell.ghost{fill:none;stroke:none}
+.s-val{font:600 14px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.s-val.cur{fill:#222}.s-val.bad{fill:#fff}.s-val.dim{fill:var(--muted);font-weight:400;text-decoration:line-through}
+.s-val.ghost{fill:var(--muted);font-weight:400;font-size:12px}
+.s-idx{font:10px var(--mono);fill:var(--muted);text-anchor:middle}
+.s-lab{font:13px var(--mono);fill:var(--muted);text-anchor:end;dominant-baseline:central}
+.s-ptr{stroke:var(--q);stroke-width:1.6;fill:none}
+.s-pn{font:600 12px var(--mono);fill:var(--q);text-anchor:middle}
+.s-link{stroke:var(--pur);stroke-width:1.6;fill:none;stroke-dasharray:4 3}
+.s-axis{stroke:var(--muted);stroke-width:1.2}
+.s-tick{font:10px var(--mono);fill:var(--muted);text-anchor:middle}
+.s-span{stroke:var(--mv);stroke-width:3}
+.s-txt{font:12px var(--mono);fill:var(--ink)}
+.s-txt.red{fill:var(--mv);font-weight:700}
+.s-dot{stroke:var(--paper);stroke-width:1.5}
+.l-box{fill:var(--paper);stroke:var(--ink);stroke-width:1.3}
+.l-box.cur{fill:color-mix(in srgb,var(--cmp) 55%,var(--paper));stroke:var(--cmp);stroke-width:2}
+.l-box.ok{fill:color-mix(in srgb,var(--done) 28%,var(--paper));stroke:var(--done)}
+.l-box.bad{fill:color-mix(in srgb,var(--mv) 30%,var(--paper));stroke:var(--mv);stroke-width:2}
+.l-box.head{fill:var(--bg)}
+.l-sep{stroke:var(--ink);stroke-width:1}
+.l-edge{stroke:var(--ink);stroke-width:1.4;fill:none}
+.l-edge.new{stroke:var(--mv);stroke-width:2}
+.l-nul{font:13px var(--mono);fill:var(--muted);text-anchor:middle;dominant-baseline:central}
+.l-lab{font:10px var(--mono);fill:var(--muted);text-anchor:middle}
+.mk-q{fill:var(--q)}.mk-i{fill:var(--ink)}.mk-r{fill:var(--mv)}.mk-p{fill:var(--pur)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <marker id="ahq" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-q" d="M0 0L10 5L0 10z"/></marker>
+  <marker id="ahi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-i" d="M0 0L10 5L0 10z"/></marker>
+  <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-r" d="M0 0L10 5L0 10z"/></marker>
+  <marker id="ahp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mk-p" d="M0 0L10 5L0 10z"/></marker>
+</defs></svg>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>算法题思路动画</h1>
+    <p class="sub">408 第 41/42 题算法设计，一题一个标签：完整题干、三句话设计思想、C 代码（执行到哪行亮哪行）、复杂度，下面的数组和链表跟着代码一步一步动。题目和解法取自《算法题讲义》：2011-42 中位数 p84–87，2013-41 主元素 p87–90，2018-41 最小正整数 p93–95，2020-41 三元组 p95–97，2009-42 倒数第 k 个 p112、p136–138，2019-41 链表重排 p143–146。</p>
+  </header>
+  <section class="panel">
+    <h2>六句话</h2>
+    <ol class="rules">
+      <li>答题分三段：<b>基本设计思想</b>（两三句说清用什么、指针怎么动）→ <b>C 代码加注释</b> → <b>时间、空间复杂度</b>。思想写对就拿大半分。</li>
+      <li>两个或三个<b>升序数组</b>，先想<b>多指针</b>：每次只后移“值最小的那个”指针（中位数、三元组都是这样）。</li>
+      <li>元素值落在 <b>0～n</b> 这样的小范围里，想<b>辅助数组计数/标记</b>，用 O(n) 空间换 O(n) 时间（最小正整数）。</li>
+      <li>“出现次数<b>超过一半</b>”想<b>摩尔投票</b>：相同加一、不同抵消，最后<b>再数一遍</b>确认。</li>
+      <li>单链表不能回头：倒数第 k 个用<b>前后指针</b>（先走 k 步再一起走），找中点用<b>快慢指针</b>，逆置用<b>头插法</b>。</li>
+      <li>想不出最优解先写<b>暴力解</b>保底，讲义的评分表里暴力解也有 10～12 分。</li>
+    </ol>
+  </section>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="题目"></nav>
+
+  <section class="panel">
+    <h2 id="pTitle"></h2>
+    <p class="stem" id="pStem"></p>
+    <p class="src" id="pSrc"></p>
+  </section>
+
+  <section class="panel">
+    <h2>设计思想（三句话）</h2>
+    <ol class="ideas" id="pIdeas"></ol>
+    <div class="cx" id="pCx"></div>
+    <div id="pFix"></div>
+  </section>
+
+  <section class="panel">
+    <div class="chips" id="presets">例子：</div>
+    <div class="form" id="form"></div>
+    <div class="err" id="err" role="alert"></div>
+    <div class="q" id="question"></div>
+    <div class="ctrl" style="margin-top:8px"><label class="muted"><input type="checkbox" id="guessMode" checked> 先猜再看（关键步骤先自己答）</label></div>
+  </section>
+
+  <section class="panel" id="stepper">
+    <div class="ctrl"><button class="btn" id="bReset" type="button">从头</button><button class="btn" id="bPrev" type="button">上一步</button><button class="btn primary" id="bNext" type="button">下一步</button><button class="btn" id="bAll" type="button">全部（跑到底）</button><span class="muted" id="prog"></span></div>
+    <div class="run">
+      <div style="min-width:0">
+        <div class="note" id="note" role="status" aria-live="polite"></div>
+        <div class="guess hidden" id="gbox"><span id="gq"></span><span id="gopts" class="ctrl"></span><input id="gin" type="text" autocomplete="off" spellcheck="false" aria-label="你的答案"><button class="btn" id="gcheck" type="button">对答案</button></div>
+        <div class="phase" id="phase"></div>
+        <div class="viz" id="viz"></div>
+        <div class="vars" id="vars"></div>
+        <p class="legend" id="legend"></p>
+      </div>
+      <div style="min-width:0">
+        <pre class="code" id="code" aria-label="C 代码"></pre>
+        <p class="legend">橙色那一行是这一步执行的代码。灰色是注释。</p>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtN=v=>v===null||v===undefined?'':String(v).replace(/^-/,'−');
+const norm=s=>String(s).trim().replace(/[−–—]/g,'-').replace(/\s+/g,'').replace(/，/g,',');
+
+/* ---------- C code: each line is "key|code". Keys tie a step to a line. ---------- */
+const CODE={
+cnt2011:`
+|int ans(int A[], int B[], int n)
+|{
+init|    int i = 0, j = 0, k;          // i 指 A，j 指 B
+for|    for (k = 1; k < n; k++)       // 只走 n-1 步
+lt|        if (A[i] < B[j]) i++;     // 小的那个出列，它的指针后移
+ge|        else j++;
+ret|    return A[i] < B[j] ? A[i] : B[j]; // 第 n 小：两者较小的
+|}`,
+half2011:`
+|void ans(int A[], int B[], int n)
+|{
+init|    int mid1, mid2, L1 = 0, L2 = 0, R1 = n - 1, R2 = n - 1;
+whl|    while (L1 < R1)                // A 只剩一个数就停
+|    {
+m1|        mid1 = (L1 + R1) / 2;
+m2|        mid2 = (L2 + R2) / 2;      // 取中间数，向下取整
+cmp|        if (A[mid1] < B[mid2]) {   // a < b
+lt1|            L1 = mid1;             // 舍 A 的小半
+lt2|            R2 = mid2;             // 舍 B 的大半
+lt3|            if (R1 - L1 != R2 - L2) // 偶数长：留下的不一样多
+lt4|                L1++;              // A 把 a 也舍掉
+|        }
+ge|        else {                     // a >= b
+ge1|            R1 = mid1;             // 舍 A 的大半
+ge2|            L2 = mid2;             // 舍 B 的小半
+ge3|            if (R1 - L1 != R2 - L2)
+ge4|                L2++;              // B 把 b 也舍掉，保证一样长
+|        }
+|    }
+out|    printf("%d", A[L1] < B[L2] ? A[L1] : B[L2]); // 较小者
+|}`,
+maj2013:`
+|int Majority(int A[], int n)
+|{
+init|    int i, c = A[0], count = 1;   // c 是候选，count 是它的票数
+for1|    for (i = 1; i < n; i++)
+eq|        if (A[i] == c) count++;           // 同一个数，票数加一
+dec|        else if (count > 0) count--;      // 不同，抵消一票
+chg|        else { c = A[i]; count = 1; }     // 票数为 0，换候选
+zero|    count = 0;
+for2|    for (i = 0; i < n; i++)               // 第二遍：数 c 出现几次
+cnt|        if (A[i] == c) count++;
+chk|    if (count > n / 2) return c;          // 超过一半才是主元素
+no|    else return -1;
+|}`,
+miss2018:`
+|int findMissMin(int A[], int n)
+|{
+init|    int i, *B = (int *)malloc(sizeof(int) * n); // B[0..n-1] 标记 1..n
+mem|    memset(B, 0, sizeof(int) * n);       // 全部置 0
+for1|    for (i = 0; i < n; i++)
+chk|        if (A[i] > 0 && A[i] <= n)       // 只有 1..n 会影响答案
+mark|            B[A[i] - 1] = 1;             // 数 A[i] 出现过
+for2|    for (i = 0; i < n; i++)
+scan|        if (B[i] == 0) break;            // 第一个没出现的数是 i+1
+free|    free(B);
+ret|    return i + 1;                        // 全出现过时 i = n，答案 n+1
+|}`,
+tri2020:`
+|int DD(int a, int b, int c)            // 三元组距离
+|{
+|    return abs(a - b) + abs(b - c) + abs(c - a);
+|}
+|int ans(int A[], int n, int B[], int m, int C[], int l)
+|{
+init|    int D_min = INT_MAX, D;            // D_min 初值为最大整数
+ijk|    int i = 0, j = 0, k = 0;           // A、B、C 的下标
+whl|    while (i < n && j < m && k < l)    // 有一个走到头就停
+|    {
+D|        D = DD(A[i], B[j], C[k]);
+upd|        if (D < D_min) D_min = D;      // 更新 D_min
+mi|        if (A[i] < B[j] && A[i] < C[k]) i++; // A[i] 最小，后移 i
+mj|        else if (B[j] < C[k]) j++;     // B[j] 最小，后移 j
+mk|        else k++;                      // C[k] 最小，后移 k
+|    }
+ret|    return D_min;
+|}`,
+re2019:`
+|typedef struct node {
+|    int data;
+|    struct node *next;
+|} NODE;
+|void change_list(NODE *h)
+|{
+|    NODE *p, *q, *r, *s;
+s1|    p = q = h;
+w1|    while (q->next != NULL) {     // ① 快慢指针找中间结点
+p1|        p = p->next;              // p 走一步
+q1|        q = q->next;
+q2|        if (q->next != NULL) q = q->next; // q 走两步
+|    }
+c1|    q = p->next;                  // q 指后半段第一个结点
+c2|    p->next = NULL;               // 从 p 后面断开
+w2|    while (q != NULL) {           // ② 后半段头插到 p 后面（逆置）
+r1|        r = q->next;              // r 先记住 q 的下一个
+h1|        q->next = p->next;
+h2|        p->next = q;              // q 插到 p 后面
+h3|        q = r;
+|    }
+m0|    s = h->next;                  // ③ s 指前半段第一个结点
+m1|    q = p->next;                  // q 指逆置后的后半段
+m2|    p->next = NULL;               // 前半段末尾置空
+w3|    while (q != NULL) {
+r2|        r = q->next;
+i1|        q->next = s->next;        // q 插到 s 后面
+i2|        s->next = q;
+i3|        s = q->next;              // s 跳到前半段的下一个
+i4|        q = r;
+|    }
+|}`,
+kth2009:`
+|typedef struct LNode {
+|    int data;
+|    struct LNode *link;
+|} node;
+|int ans(node *list, int k)
+|{
+init|    node *left = list, *right = list; // 都从头结点出发
+for|    for (int i = 0; i < k; i++)
+|    {
+rmv|        right = right->link;          // right 先走 k 步
+rnul|        if (right == NULL) return 0;  // 不到 k 个结点：失败
+|    }
+whl|    while (right != NULL)             // 一起走，间距一直是 k
+|    {
+lmv|        left = left->link;
+rmv2|        right = right->link;
+|    }
+out|    printf("%d\\n", left->data);       // left 就是倒数第 k 个
+ret|    return 1;
+|}`
+};
+function parseCode(src){return src.replace(/^\n/,'').split('\n').map(l=>{const b=l.indexOf('|');return {k:l.slice(0,b),t:l.slice(b+1)}})}
+const KW=/\b(int|void|if|else|for|while|return|break|typedef|struct|NULL|sizeof)\b/g;
+function codeHtml(lines,on){const set=new Set([].concat(on||[]));return lines.map((L,i)=>{const t=L.t;const c=t.indexOf('//');const body=c<0?t:t.slice(0,c),cm=c<0?'':t.slice(c);
+  return `<span class="ln${set.has(L.k)&&L.k?' on':''}"><span class="no">${i+1}</span>${esc(body).replace(KW,'<span class="kw">$1</span>')}${cm?`<span class="cm">${esc(cm)}</span>`:''}</span>`}).join('')}
+
+/* ---------- input parsing ---------- */
+function ints(s,name,{min=1,max=12,asc=false,lo=-999,hi=999}={}){
+  const t=String(s).replace(/[(){}（）\[\]]/g,' ').replace(/[，,、;；]/g,' ').replace(/[−–]/g,'-').trim();
+  if(!t)throw `${name} 不能空。`;const parts=t.split(/\s+/);
+  const a=parts.map(x=>{if(!/^-?\d+$/.test(x))throw `${name} 里的 “${x}” 不是整数。`;return +x});
+  if(a.length<min||a.length>max)throw `${name} 要 ${min}～${max} 个数，现在是 ${a.length} 个。`;
+  if(a.some(v=>v<lo||v>hi))throw `${name} 的数请在 ${lo}～${hi} 之间。`;
+  if(asc)for(let i=1;i<a.length;i++)if(a[i]<a[i-1])throw `${name} 要升序：第 ${i} 个 ${a[i-1]} 比第 ${i+1} 个 ${a[i]} 大。`;
+  return a}
+
+/* ---------- svg helpers ---------- */
+const CW=38,X0=58;
+/* rows: [{lab, vals, cls[], ptr:{idx:'name'}, base, idx:false, sub:[] }] ; links: [{from:[r,i], to:[r,i]}] */
+function arrSVG(rows,links=[],extraW=0){let y=4,h='',maxLen=0;const ys=[];
+  rows.forEach(r=>{const n=r.vals.length;maxLen=Math.max(maxLen,n+1);const yy=y+(r.idx===false?2:14);ys.push(yy);
+    h+=`<text class="s-lab" x="${X0-8}" y="${yy+15}">${esc(r.lab)}</text>`;
+    r.vals.forEach((v,i)=>{const x=X0+i*CW;const c=(r.cls&&r.cls[i])||'';
+      if(r.idx!==false)h+=`<text class="s-idx" x="${x+CW/2-1.5}" y="${yy-4}">${r.idxText?r.idxText(i):(r.base||0)+i}</text>`;
+      h+=`<rect class="s-cell ${c}" x="${x}" y="${yy}" width="${CW-4}" height="30" rx="3"/><text class="s-val ${c}" x="${x+CW/2-2}" y="${yy+15}">${esc(fmtN(v))}</text>`});
+    let ph=0;if(r.ptr){const by={};Object.entries(r.ptr).forEach(([nm,i])=>{if(i===null||i===undefined)return;(by[i]=by[i]||[]).push(nm)});
+      Object.entries(by).forEach(([i,nms])=>{const x=X0+ +i*CW+CW/2-2;ph=1;
+        h+=`<path class="s-ptr" d="M${x} ${yy+48} L${x} ${yy+34}" marker-end="url(#ahq)"/><text class="s-pn" x="${x}" y="${yy+61}">${esc(nms.join(','))}</text>`;
+        if(+i>=r.vals.length)h+=`<text class="s-val ghost" x="${x}" y="${yy+15}">尾</text>`})}
+    y=yy+30+(ph?36:10)});
+  links.forEach(L=>{const [r1,i1]=L.from,[r2,i2]=L.to;const x1=X0+i1*CW+CW/2-2,y1=ys[r1]+30,x2=X0+i2*CW+CW/2-2,y2=ys[r2]-2;
+    h+=`<path class="s-link" d="M${x1} ${y1+2} C${x1} ${(y1+y2)/2},${x2} ${(y1+y2)/2},${x2} ${y2}" marker-end="url(#ahp)"/>`});
+  const W=X0+maxLen*CW+8+extraW;return `<svg viewBox="0 0 ${W} ${y+4}" width="${W}" style="min-width:${W}px;max-width:100%" role="img">${h}</svg>`}
+
+/* linked list: L={vals:[data of a1..an], nx:{id:id|null} (0 = head), ptrs:{name:id|null}, cls:{id:cls}, headLab, newEdge:id} */
+function listSVG(L,order){const vis=new Set(),rows=[];const walk=st=>{const row=[];let c=st;while(c!==null&&c!==undefined&&!vis.has(c)){vis.add(c);row.push(c);c=L.nx[c]}return row};
+  rows.push(walk(0));(order||Object.keys(L.ptrs)).forEach(nm=>{const v=L.ptrs[nm];if(v!==null&&v!==undefined&&!vis.has(v))rows.push(walk(v))});
+  for(let id=0;id<=L.vals.length;id++)if(!vis.has(id))rows.push(walk(id));
+  const pos={};const SX=68,SY=100,OX=6,OY=34;rows.forEach((row,r)=>row.forEach((id,c)=>pos[id]={x:OX+c*SX,y:OY+r*SY,r,c}));
+  let h='',W=0;const BW=50,BH=28,DW=33;
+  for(const id in pos){const {x,y}=pos[id];W=Math.max(W,x+BW+30);const cls=(L.cls&&L.cls[id])||'';
+    h+=`<rect class="l-box ${id==0?'head':''} ${cls}" x="${x}" y="${y}" width="${BW}" height="${BH}" rx="3"/><line class="l-sep" x1="${x+DW}" y1="${y}" x2="${x+DW}" y2="${y+BH}"/>`;
+    h+=`<text class="s-val ${cls==='cur'?'cur':''}" x="${x+DW/2}" y="${y+BH/2}">${id==0?'':esc(fmtN(L.vals[id-1]))}</text>`;
+    h+=`<text class="l-lab" x="${x+BW/2}" y="${y+BH+13}">${id==0?(L.headLab||'头结点'):'a'+id}</text>`;
+    const nx=L.nx[id];if(nx===null||nx===undefined)h+=`<text class="l-nul" x="${x+DW+9}" y="${y+BH/2}">∧</text>`;
+    else{const t=pos[nx];const sx=x+DW+9,sy=y+BH/2;const cls2=L.newEdge!==undefined&&+L.newEdge===+id?'l-edge new':'l-edge',mk=cls2.includes('new')?'ahr':'ahi';let d;
+      if(t.r===pos[id].r&&t.c===pos[id].c+1)d=`M${sx} ${sy} L${t.x-1} ${t.y+BH/2}`;
+      else if(t.r===pos[id].r&&t.c>pos[id].c)d=`M${sx} ${y} C${sx+20} ${y-30},${t.x-10} ${t.y-30},${t.x+12} ${t.y-1}`;
+      else if(t.r===pos[id].r)d=`M${sx} ${y+BH} C${sx} ${y+BH+34},${t.x+DW/2} ${t.y+BH+34},${t.x+DW/2} ${t.y+BH+1}`;
+      else if(t.r>pos[id].r)d=`M${sx} ${y+BH} C${sx} ${y+BH+40},${t.x+DW/2} ${t.y-40},${t.x+DW/2} ${t.y-1}`;
+      else d=`M${sx} ${y} C${sx} ${y-40},${t.x+DW/2} ${t.y+BH+40},${t.x+DW/2} ${t.y+BH+1}`;
+      h+=`<path class="${cls2}" d="${d}" marker-end="url(#${mk})"/>`}}
+  const by={},nul=[];Object.entries(L.ptrs).forEach(([nm,v])=>{if(v===null)nul.push(nm);else if(v!==undefined)(by[v]=by[v]||[]).push(nm)});
+  Object.entries(by).forEach(([id,nms])=>{const {x,y}=pos[id];h+=`<text class="s-pn" x="${x+DW/2}" y="${y-8}">${esc(nms.join(','))}↓</text>`});
+  if(nul.length){const last=rows[0][rows[0].length-1],p=pos[last];h+=`<text class="s-pn" x="${p.x+BW+30}" y="${p.y+BH/2+4}" text-anchor="start">${esc(nul.join(','))} = NULL</text>`;W=Math.max(W,p.x+BW+40+nul.join(',').length*8+60)}
+  const H=OY+rows.length*SY-30;return `<svg viewBox="0 0 ${W} ${H}" width="${W}" style="min-width:${W}px;max-width:100%" role="img">${h}</svg>`}
+
+/* ---------- problems ---------- */
+const P={};
+const ord=['m2011','z2013','q2018','d2020','l2019','k2009'];
+
+/* ===== 2011-42 ===== */
+P.m2011={tab:'中位数',yr:'2011-42',title:'2011 年 42 题：两个等长升序序列的中位数（15 分）',
+ stem:'一个长度为 L（L ≥ 1）的升序序列 S，处在第 ⌈L/2⌉ 个位置的数称为 S 的中位数。例如，若序列 S1 = (11, 13, 15, 17, 19)，则 S1 的中位数是 15，两个序列的中位数是含它们所有元素的升序序列的中位数。例如，若 S2 = (2, 4, 6, 8, 20)，则 S1 和 S2 的中位数是 11。现在有两个等长升序序列 A 和 B，试设计一个在时间和空间两方面都尽可能高效的算法，找出两个序列 A 和 B 的中位数。<span class="req">要求：(1) 给出算法的基本设计思想。(2) 根据设计思想，采用 C、C++ 或 Java 语言描述算法，关键之处给出注释。(3) 说明你所设计算法的时间复杂度和空间复杂度。</span>',
+ src:'讲义 p84–87（L2394 起）。讲义给了 4 种解法：快排 O(nlogn)、归并到新数组 O(n)/O(n)、双指针只数不存 O(n)/O(1)、折半舍弃 O(logn)/O(1)。下面演示后两种。',
+ methods:[['cnt','双指针数到第 n 个（解法 2/3）'],['half','折半舍弃（解法 4）']],
+ ideas:{cnt:['两个序列都升序，像<b>归并</b>一样设 i、j 指向 A、B 的开头，每次比较 A[i] 和 B[j]，<b>小的那个出列</b>、指针后移。','合并后共 2n 个数，中位数是第 n 小，所以只要<b>数到第 n 个</b>就停，不必真的建新数组（解法 2 建数组 C，解法 3 只数不存）。','前 n−1 次只移指针，最后 A[i]、B[j] 中<b>较小者</b>就是第 n 小，即中位数。'],
+   half:['分别求 A、B 当前区间的中位数 a、b；<b>a = b</b> 时 a 就是答案（讲义把它并入 a ≥ b 的分支，结果一样）。','<b>a < b</b>：舍去 A 中较小的一半和 B 中较大的一半；<b>a > b</b>：舍去 A 中较大的一半和 B 中较小的一半；<b>两边舍去的个数必须相等</b>，中位数才不变。','区间长度为<b>奇数</b>时 a、b 正好在正中，各自保留；为<b>偶数</b>时 mid 向下取整偏左，要把 a（或 b）也舍掉才一样长。重复到两边各剩一个数，较小者即所求。']},
+ cx:{cnt:'时间 <b>O(n)</b>　空间 <b>O(1)</b>（解法 2 建数组 C 则为 O(n)）',half:'时间 <b>O(log₂n)</b>　空间 <b>O(1)</b>'},
+ fix:{cnt:'讲义解法 3 最后写的是 <code>min(A[i],B[j])</code>，C 语言标准库没有 min，这里写成条件表达式。讲义原题的“第「L/21 个”是扫描错字，应为第 ⌈L/2⌉ 个。',half:'讲义解法 4 也用了 <code>min</code>，这里写成条件表达式；其余和讲义一致，已用 2 万组随机数据（含重复值）和直接排序对拍过。讲义也提醒：这种解法细节多，考场上把解法 3 写对更稳。'},
+ form:[{id:'A',lab:'序列 A（升序）'},{id:'B',lab:'序列 B（升序，和 A 等长）'}],
+ presets:[
+  {t:'真题例子 · 折半',v:{A:'11 13 15 17 19',B:'2 4 6 8 20'},m:'half',q:'题干的例子：A = (11, 13, 15, 17, 19)，B = (2, 4, 6, 8, 20)，长度 5 是奇数。',a:'中位数 11。合并后 2 4 6 8 11 13 15 17 19 20，第 5 个是 11。折半：第 1 轮 a = 15 ≥ b = 6，舍 A 大半、B 小半；第 2 轮 a = 13 ≥ b = 8；第 3 轮长度 2 是偶数，a = 11 ≥ b = 8，B 要把 8 也舍掉；最后 min(11, 20) = 11。'},
+  {t:'偶数长度 · 折半',v:{A:'3 5 9 12 15 20',B:'1 7 10 14 18 22'},m:'half',q:'偶数长度的例子：A = (3, 5, 9, 12, 15, 20)，B = (1, 7, 10, 14, 18, 22)，各 6 个。看偶数长度时多舍的那一个。',a:'中位数 10。合并后 1 3 5 7 9 10 12 14 15 18 20 22，第 6 个是 10。'},
+  {t:'真题例子 · 双指针',v:{A:'11 13 15 17 19',B:'2 4 6 8 20'},m:'cnt',q:'题干的例子，用双指针从小到大数到第 5 个。',a:'中位数 11：依次出列 2、4、6、8，第 5 小是 min(11, 20) = 11。'},
+  {t:'偶数长度 · 双指针',v:{A:'3 5 9 12 15 20',B:'1 7 10 14 18 22'},m:'cnt',q:'同一组偶数长度的数据，用双指针数到第 6 个。',a:'中位数 10。'}],
+ parse(v){const A=ints(v.A,'A',{asc:true}),B=ints(v.B,'B',{asc:true});if(A.length!==B.length)throw `题目要求等长：A 有 ${A.length} 个，B 有 ${B.length} 个。`;return {A,B,n:A.length}},
+ answer(d){return [...d.A,...d.B].sort((x,y)=>x-y)[d.n-1]},
+ run(d,m){return m==='half'?runHalf(d):runCnt(d)}};
+function runCnt({A,B,n}){const F=[];let i=0,j=0;const taken=[];
+  const st=(o)=>Object.assign({i,j,taken:[...taken]},o);
+  F.push(st({k:'init',txt:`A、B 各 ${n} 个，合起来 ${2*n} 个，中位数是第 ${n} 小。i、j 都从 0 开始。`,vars:{n,i,j}}));
+  for(let k=1;k<n;k++){
+    F.push(st({k:'for',cmpI:true,txt:`k = ${k} < n = ${n}，继续：比较 A[${i}] = ${fmtN(A[i])} 和 B[${j}] = ${fmtN(B[j])}。`,vars:{k,i,j}}));
+    const fromA=A[i]<B[j];const v=fromA?A[i]:B[j];const pi=i,pj=j;
+    if(fromA){taken.push({v,s:'A',x:i});i++}else{taken.push({v,s:'B',x:j});j++}
+    F.push(st({k:fromA?'lt':'ge',pi,pj,txt:`${fromA?`A[${i-1}] < B[${j}]，A 的 ${fmtN(v)} 出列，i 后移到 ${i}`:`A[${i}] ≥ B[${j-1}]，B 的 ${fmtN(v)} 出列，j 后移到 ${j}`}。这是第 <b>${k}</b> 小的数。`,vars:{k,i,j},
+      ask:{q:`第 ${k} 小的数是几？（比较 A[i] 和 B[j]，小的出列）`,l:`第 ${k} 小 = `,a:fmtN(v),hint:x=>+norm(x)===Math.max(A[fromA?i-1:i],B[fromA?j:j-1])?'取的是较大的那个；归并每次都是较小的先出列。':''}}))}
+  F.push(st({k:'for',txt:`k = ${n}，不满足 k < n，循环结束。已经数掉 ${n-1} 个数。`,vars:{k:n,i,j}}));
+  const ans=Math.min(A[i],B[j]);taken.push({v:ans,s:A[i]<B[j]?'A':'B',x:A[i]<B[j]?i:j,last:true});
+  F.push(st({k:'ret',done:true,txt:`第 ${n} 小是 A[${i}] = ${fmtN(A[i])} 和 B[${j}] = ${fmtN(B[j])} 中较小的：中位数 = <b>${fmtN(ans)}</b>。`,vars:{i,j,'返回':ans},
+    ask:{q:`前 ${n-1} 小都数完了，中位数（第 ${n} 小）是几？`,l:'中位数 = ',a:fmtN(ans),hint:x=>+norm(x)===Math.max(A[i],B[j])?'要的是 A[i]、B[j] 里较小的那个。':''}}));
+  return F}
+function runHalf({A,B,n}){const F=[];let L1=0,L2=0,R1=n-1,R2=n-1,m1=null,m2=null;const st=o=>Object.assign({L1,R1,L2,R2,m1,m2},o);
+  F.push(st({k:'init',txt:`A 的区间 [L1, R1] = [0, ${n-1}]，B 的区间 [L2, R2] = [0, ${n-1}]。蓝框是还留着的部分。`,vars:{L1,R1,L2,R2}}));
+  let round=0;
+  while(L1<R1){round++;const len=R1-L1+1;
+    F.push(st({k:'whl',txt:`第 ${round} 轮：L1 = ${L1} < R1 = ${R1}，两边各剩 ${len} 个数，继续。`,vars:{L1,R1,L2,R2}}));
+    m1=Math.floor((L1+R1)/2);m2=Math.floor((L2+R2)/2);const a=A[m1],b=B[m2];
+    F.push(st({k:['m1','m2'],mid:true,txt:`mid1 = (${L1}+${R1})/2 = ${m1}，a = A[${m1}] = ${fmtN(a)}；mid2 = (${L2}+${R2})/2 = ${m2}，b = B[${m2}] = ${fmtN(b)}。`,vars:{L1,R1,L2,R2,mid1:m1,mid2:m2}}));
+    const lt=a<b;const ops=['舍 A 的小半、B 的大半','舍 A 的大半、B 的小半'];
+    F.push(st({k:'cmp',mid:true,txt:`a = ${fmtN(a)} ${lt?'<':'≥'} b = ${fmtN(b)}，${lt?'中位数不会在 A 的左边（太小）和 B 的右边（太大）：舍 A 的小半、B 的大半。':'中位数不会在 A 的右边和 B 的左边：舍 A 的大半、B 的小半。'}`,vars:{a,b},
+      ask:{q:`a = A[mid1] = ${fmtN(a)}，b = B[mid2] = ${fmtN(b)}。该舍哪两半？`,opts:ops,a:ops[lt?0:1],hint:()=>lt?'a 小，比 a 还小的那些（A 的左半）排不到中间；b 大，B 的右半也排不到中间。':'a 大，A 的右半太大；b 小，B 的左半太小。'}}));
+    if(lt){L1=m1;R2=m2;F.push(st({k:['lt1','lt2'],mid:true,txt:`L1 = mid1 = ${m1}，R2 = mid2 = ${m2}：A 舍掉 mid1 左边，B 舍掉右边。现在 A 留 ${R1-L1+1} 个，B 留 ${R2-L2+1} 个。`,vars:{L1,R1,L2,R2}}));
+      const eq=R1-L1===R2-L2;
+      F.push(st({k:'lt3',mid:true,txt:eq?`R1 − L1 = ${R1-L1} = R2 − L2：长度 ${len} 是<b>奇数</b>，a、b 都在正中间，两边各舍 ${(len-1)/2} 个，留下一样多，不用再舍。`:`R1 − L1 = ${R1-L1} ≠ R2 − L2 = ${R2-L2}：长度 ${len} 是<b>偶数</b>，mid 向下取整偏左，A 从 a 起留下 ${R1-L1+1} 个，B 到 b 为止只留 ${R2-L2+1} 个。`,vars:{'R1−L1':R1-L1,'R2−L2':R2-L2}}));
+      if(!eq){L1++;F.push(st({k:'lt4',txt:`L1++ → ${L1}：把 a = ${fmtN(a)} 也舍掉。a 前面只有 ${len/2-1} 个 A 的数，B 里比 a 小的也不超过 ${len/2-1} 个，a 在合并序列里最多排第 ${len-1}，到不了中位数的第 ${len} 位，舍掉安全。两边各舍 ${len/2} 个。`,vars:{L1,R1,L2,R2}}))}}
+    else{R1=m1;L2=m2;F.push(st({k:['ge','ge1','ge2'],mid:true,txt:`R1 = mid1 = ${m1}，L2 = mid2 = ${m2}：A 舍掉右边，B 舍掉左边。现在 A 留 ${R1-L1+1} 个，B 留 ${R2-L2+1} 个。`,vars:{L1,R1,L2,R2}}));
+      const eq=R1-L1===R2-L2;
+      F.push(st({k:'ge3',mid:true,txt:eq?`R1 − L1 = ${R1-L1} = R2 − L2：长度 ${len} 是<b>奇数</b>，a、b 都在正中间，两边各舍 ${(len-1)/2} 个，不用再舍。`:`R1 − L1 = ${R1-L1} ≠ R2 − L2 = ${R2-L2}：长度 ${len} 是<b>偶数</b>，A 到 a 为止留 ${R1-L1+1} 个，B 从 b 起留 ${R2-L2+1} 个，B 多一个。`,vars:{'R1−L1':R1-L1,'R2−L2':R2-L2}}));
+      if(!eq){L2++;F.push(st({k:'ge4',txt:`L2++ → ${L2}：把 b = ${fmtN(b)} 也舍掉。b ≤ a，b 在合并序列里最多排第 ${len-1}，到不了第 ${len} 位，舍掉安全。两边各舍 ${len/2} 个。`,vars:{L1,R1,L2,R2}}))}}
+    m1=m2=null}
+  const ans=Math.min(A[L1],B[L2]);
+  F.push(st({k:'whl',txt:`L1 = R1 = ${L1}，A 只剩一个数，循环结束。B 也只剩 B[${L2}]。`,vars:{L1,R1,L2,R2}}));
+  F.push(st({k:'out',done:true,txt:`两边各剩一个：A[${L1}] = ${fmtN(A[L1])}，B[${L2}] = ${fmtN(B[L2])}，较小者 <b>${fmtN(ans)}</b> 就是中位数。一共 ${round} 轮，每轮区间减半，O(log₂n)。`,vars:{'输出':ans},
+    ask:{q:`两边各剩一个数：A[${L1}] = ${fmtN(A[L1])}，B[${L2}] = ${fmtN(B[L2])}。中位数是几？`,l:'中位数 = ',a:fmtN(ans),hint:x=>+norm(x)===Math.max(A[L1],B[L2])?'剩两个数时，第 1 小（较小者）才是中位数。':''}}));
+  return F}
+P.m2011.draw=(f,d,m,pend)=>{const {A,B,n}=d;
+  if(m!=='half'){const sh=pend&&f.pi!==undefined;const pi=sh?f.pi:f.i,pj=sh?f.pj:f.j;const T=pend?f.taken.slice(0,-1):f.taken;const last=T[T.length-1];
+    const used=new Set(T.filter(t=>!t.last).map(t=>t.s+t.x));const hot=sh||f.cmpI||f.k==='ret';
+    const cl=(arr,s,p)=>arr.map((_,x)=>{if(f.done&&!pend&&last&&last.s===s&&last.x===x)return 'bad';if(used.has(s+x))return 'ok';if(hot&&x===p)return 'cur';return ''});
+    const rows=[{lab:'A',vals:A,cls:cl(A,'A',pi),ptr:{i:pi}},{lab:'B',vals:B,cls:cl(B,'B',pj),ptr:{j:pj}},
+      {lab:'已数',vals:T.length?T.map(t=>t.v):['—'],cls:T.map(t=>t.last?'bad':'ok'),idxText:x=>'第'+(x+1),idx:T.length?undefined:false}];
+    return arrSVG(rows)}
+  const dimA=x=>x<f.L1||x>f.R1,dimB=x=>x<f.L2||x>f.R2;
+  const ca=A.map((_,x)=>dimA(x)?'dim':(f.mid&&x===f.m1?'cur':(f.done&&!pend&&x===f.L1&&A[f.L1]<=B[f.L2]?'bad':'keep')));
+  const cb=B.map((_,x)=>dimB(x)?'dim':(f.mid&&x===f.m2?'cur':(f.done&&!pend&&x===f.L2&&B[f.L2]<A[f.L1]?'bad':'keep')));
+  const pa={L1:f.L1,R1:f.R1},pb={L2:f.L2,R2:f.R2};if(f.m1!==null&&f.mid){pa.mid1=f.m1;pb.mid2=f.m2}
+  return arrSVG([{lab:'A',vals:A,cls:ca,ptr:pa},{lab:'B',vals:B,cls:cb,ptr:pb}])};
+P.m2011.legend=m=>m==='half'?'蓝框是还在区间里的数，虚线删除线是已经舍掉的，橙色是这一轮的 a、b，红色是最后的答案。':'绿色是已经出列（数过）的，橙色是正在比较的 A[i]、B[j]，红色是第 n 小即中位数。“已数”一行就是解法 2 的数组 C。';
+
+/* ===== 2013-41 ===== */
+P.z2013={tab:'主元素',yr:'2013-41',title:'2013 年 41 题：找主元素（13 分）',
+ stem:'已知一个整数序列 A = (a<sub>0</sub>, a<sub>1</sub>, …, a<sub>n−1</sub>)，其中 0 ≤ a<sub>i</sub> &lt; n（0 ≤ i &lt; n）。若存在 a<sub>p1</sub> = a<sub>p2</sub> = … = a<sub>pm</sub> = x 且 m &gt; n/2（0 ≤ p<sub>k</sub> &lt; n，1 ≤ k ≤ m），则称 x 为 A 的主元素。例如 A = (0, 5, 5, 3, 5, 7, 5, 5)，则 5 为主元素；又如 A = (0, 5, 5, 3, 5, 1, 5, 7)，则 A 中没有主元素。假设 A 中的 n 个元素保存在一个一维数组中，请设计一个尽可能高效的算法，找出 A 的主元素。若存在主元素，则输出该元素；否则输出 −1。<span class="req">要求：(1) 给出算法的基本设计思想。(2) 根据设计思想，采用 C、C++ 或 Java 语言描述算法，关键之处给出注释。(3) 说明你所设计算法的时间复杂度和空间复杂度。</span>',
+ src:'讲义 p87–90（L2516 起，解法 4 摩尔投票 L2607，正确性证明 L2637）。讲义其他解法：枚举 O(n²)、快排 O(nlogn)、计数数组 O(n)/O(n)。',
+ ideas:['<b>摩尔投票（抵消法）</b>：用 c 记候选主元素、count 记它的票数，从 A[0] 开始扫描。','遇到和 c <b>相同</b>的数 count 加一，<b>不同</b>的数 count 减一（抵消一对）；count 已经是 0 时，把<b>当前数换成新候选</b>，count 置 1。','主元素超过一半，抵消不完，若存在一定留在 c 里；但 c 不一定是主元素，<b>要再扫一遍数 c 出现几次</b>，大于 n/2 输出 c，否则输出 −1。'],
+ cx:'时间 <b>O(n)</b>（扫两遍）　空间 <b>O(1)</b>',
+ fix:'讲义 p89 这段代码扫描时错乱（花括号不配对，只剩 “if(t&lt;0) j=A[i]; t=1;”）。它的意思是“不同就 t−−，减到负数就换候选 j、t 置 1”，和这里“count 为 0 时换候选”效果完全一样，这里按教材常见写法给出完整代码。',
+ form:[{id:'A',lab:'数组 A（整数，空格或逗号隔开）'}],
+ presets:[{t:'真题例 1：有主元素',v:{A:'0 5 5 3 5 7 5 5'},q:'题干例 1：A = (0, 5, 5, 3, 5, 7, 5, 5)，n = 8。',a:'输出 5。第一遍结束 c = 5、count = 2；第二遍 5 出现 5 次，5 > 8/2 = 4。'},
+  {t:'真题例 2：无主元素',v:{A:'0 5 5 3 5 1 5 7'},q:'题干例 2：A = (0, 5, 5, 3, 5, 1, 5, 7)，n = 8。',a:'输出 −1。第一遍结束 c = 5、count = 0；第二遍 5 只出现 4 次，4 > 4 不成立。这就是为什么必须再数一遍。'},
+  {t:'候选换了又换',v:{A:'1 2 3 3 3'},q:'自编：A = (1, 2, 3, 3, 3)，n = 5。看候选怎么从 1 换到 2 再换到 3。',a:'输出 3（出现 3 次 > 5/2）。'}],
+ parse(v){const A=ints(v.A,'A',{max:16,lo:-99,hi:99});return {A,n:A.length}},
+ answer(d){const m=new Map();d.A.forEach(x=>m.set(x,(m.get(x)||0)+1));for(const [x,c] of m)if(c>d.n/2)return x;return -1},
+ run({A,n}){const F=[];let c=A[0],cnt=1;const hist=[{c,cnt}];
+  F.push({k:'init',i:0,hist:[...hist],txt:`先把 A[0] = ${fmtN(c)} 当候选，c = ${fmtN(c)}，count = 1。`,vars:{c,count:cnt}});
+  for(let i=1;i<n;i++){const old=cnt,oc=c;let k,txt;
+    if(A[i]===c){cnt++;k='eq';txt=`A[${i}] = ${fmtN(A[i])} 和 c 相同，count 加一：${old} → <b>${cnt}</b>。`}
+    else if(cnt>0){cnt--;k=['eq','dec'];txt=`A[${i}] = ${fmtN(A[i])} 和 c = ${fmtN(c)} 不同，count > 0，抵消一票：${old} → <b>${cnt}</b>。`}
+    else{c=A[i];cnt=1;k=['eq','dec','chg'];txt=`A[${i}] = ${fmtN(A[i])} 和 c = ${fmtN(oc)} 不同，可 count 已经是 0，抵消不了：<b>换候选</b> c = ${fmtN(c)}，count = 1。`}
+    hist.push({c,cnt});
+    F.push({k,i,hist:[...hist],txt,vars:{i,c,count:cnt},ask:{q:`A[${i}] = ${fmtN(A[i])}，现在 c = ${fmtN(oc)}，count = ${old}。处理完这个数，count 变成几？`,l:'count = ',a:String(cnt),
+      hint:x=>{x=+norm(x);if(old===0&&A[i]!==oc&&x===-1)return 'count 为 0 时不再减，而是换候选，count 置 1。';if(A[i]!==oc&&old>0&&x===old+1)return '不同的数是抵消一票，要减一。';return ''}}})}
+  F.push({k:'zero',i:null,hist:[...hist],pass2:0,txt:`第一遍结束，候选 c = <b>${fmtN(c)}</b>（count = ${cnt}）。c 只是“可能的”主元素，count 清零，再数一遍。`,vars:{c,count:0}});
+  let m=0;for(let i=0;i<n;i++){if(A[i]===c)m++;
+    F.push({k:'cnt',i,hist:[...hist],pass2:i+1,m,txt:`A[${i}] = ${fmtN(A[i])}${A[i]===c?` 等于 c，count = ${m}`:` 不是 ${fmtN(c)}`}。`,vars:{i,c,count:m}})}
+  const ans=m>n/2?c:-1;
+  F.push({k:m>n/2?'chk':['chk','no'],i:null,hist:[...hist],pass2:n,m,done:true,txt:`${fmtN(c)} 一共出现 ${m} 次，n/2 = ${Math.floor(n/2)}（整数除法），${m} ${m>n/2?'>':'≤'} ${Math.floor(n/2)}，输出 <b>${fmtN(ans)}</b>。`,vars:{c,count:m,'返回':ans},
+    ask:{q:`${fmtN(c)} 一共出现 ${m} 次，n = ${n}。函数返回什么？`,l:'返回 ',a:fmtN(ans),hint:x=>+norm(x)===c&&ans===-1?`要严格大于 n/2：${m} 不大于 ${Math.floor(n/2)}，不是主元素。`:''}});
+  return F},
+ draw(f,{A,n},m,pend){const p2=f.pass2!==undefined;const hide=pend&&!p2;
+  const cls=A.map((x,i)=>p2?(i<f.pass2&&x===f.hist[f.hist.length-1].c?'ok':(i===f.pass2-1?'cur':'')):(i===f.i?'cur':(i<f.i?'ok':'')));
+  const H=f.hist.map((h,i)=>hide&&i===f.hist.length-1?'?':h);
+  const rows=[{lab:'A',vals:A,cls,ptr:{i:f.i===null?undefined:f.i}},
+    {lab:'c',idx:false,vals:A.map((_,i)=>i<H.length?(H[i]==='?'?'?':H[i].c):''),cls:A.map((_,i)=>i===H.length-1&&!p2?'cur':(i<H.length?'':'ghost'))},
+    {lab:'count',idx:false,vals:A.map((_,i)=>i<H.length?(H[i]==='?'?'?':H[i].cnt):''),cls:A.map((_,i)=>i===H.length-1&&!p2?'cur':(i<H.length?(H[i]!=='?'&&H[i].cnt===0?'bad':''):'ghost'))}];
+  if(p2){let m=0;rows.push({lab:'再数',idx:false,vals:A.map((x,i)=>i<f.pass2?(x===f.hist[f.hist.length-1].c?++m:'·'):''),cls:A.map((x,i)=>i<f.pass2&&x===f.hist[f.hist.length-1].c?'ok':'ghost')})}
+  return arrSVG(rows)},
+ legend:()=>'c、count 两行是“处理完这一列的数之后”的候选和票数，红色格是票数抵消到 0。第二遍里绿色是等于 c 的数，“再数”一行是累计次数。'};
+
+/* ===== 2018-41 ===== */
+P.q2018={tab:'最小正整数',yr:'2018-41',title:'2018 年 41 题：数组中未出现的最小正整数（13 分）',
+ stem:'给定一个含 n（n ≥ 1）个整数的数组，请设计一个在时间上尽可能高效的算法，找出数组中未出现的最小正整数。例如，数组 {−5, 3, 2, 3} 中未出现的最小正整数是 1；数组 {1, 2, 3} 中未出现的最小正整数是 4。<span class="req">要求：(1) 给出算法的基本设计思想。(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释。(3) 说明你所设计算法的时间复杂度和空间复杂度。</span>',
+ src:'讲义 p93–95（L2791 起，解法 3 散列表 L2867）。讲义其他解法：枚举 O(n²)、快排后扫描 O(nlogn)。',
+ ideas:['n 个数最多占满 1～n，所以<b>答案一定在 1～n+1 之间</b>（答案若是 t，1～t−1 都要出现，t−1 ≤ n）。','开一个长 n 的辅助数组 B 全置 0，扫描 A：只有 <b>1 ≤ A[i] ≤ n</b> 才标记 B[A[i]−1] = 1；负数、0 和大于 n 的数都不影响答案，直接跳过。','再从头扫 B，<b>第一个 B[i] = 0</b> 的位置答案就是 i+1；全被标记了答案就是 n+1。题目只要时间高效，用 O(n) 空间换时间。'],
+ cx:'时间 <b>O(n)</b>　空间 <b>O(n)</b>',
+ fix:'讲义解法 3 写的是 <code>int count[n+2]={0};</code>：C 语言的变长数组不能带初始化，这样写编译不过，应为 malloc 后 memset 清零（或开足够大的定长数组）。讲义用 count[1..n+1] 计数，这里用 B[0..n−1] 标记 1..n，思路相同。',
+ form:[{id:'A',lab:'数组 A（整数，可以有负数、重复）'}],
+ presets:[{t:'真题例 1：{−5,3,2,3}',v:{A:'-5 3 2 3'},q:'题干例 1：{−5, 3, 2, 3}，n = 4。',a:'答案 1。只标记了 2、3（3 标两次），B[0] = 0，所以 1 没出现。'},
+  {t:'真题例 2：{1,2,3}',v:{A:'1 2 3'},q:'题干例 2：{1, 2, 3}，n = 3。',a:'答案 4。B 全被标记，扫完 i = n = 3，返回 n+1 = 4。'},
+  {t:'有大于 n 的数',v:{A:'7 1 9 2 -1 3'},q:'自编：{7, 1, 9, 2, −1, 3}，n = 6。7、9 大于 n，不用标记。',a:'答案 4。'}],
+ parse(v){const A=ints(v.A,'A',{max:14,lo:-99,hi:99});return {A,n:A.length}},
+ answer(d){let t=1;while(d.A.includes(t))t++;return t},
+ run({A,n}){const F=[];const B=Array(n).fill(null);
+  F.push({k:'init',B:[...B],txt:`n = ${n}，答案只可能是 1～${n+1}。申请 B[0..${n-1}]，B[i] 表示数 i+1 有没有出现。`,vars:{n}});
+  B.fill(0);F.push({k:'mem',B:[...B],txt:'B 全部置 0：先当 1～n 都没出现。',vars:{n}});
+  for(let i=0;i<n;i++){const ok=A[i]>0&&A[i]<=n;const before=[...B];if(ok)B[A[i]-1]=1;
+    F.push({k:ok?['chk','mark']:'chk',i,B:[...B],Bpend:before,mark:ok?A[i]-1:null,txt:ok?`A[${i}] = ${A[i]} 在 1～${n} 里，B[${A[i]-1}] = 1，记下“${A[i]} 出现过”${before[A[i]-1]?'（之前已标过，重复不要紧）':''}。`:`A[${i}] = ${fmtN(A[i])} ${A[i]<=0?'不是正整数':`大于 n = ${n}`}，跳过（${A[i]<=0?'它本来就不算':`1～${n} 里一定还有空位，答案轮不到它`}）。`,vars:{i,'A[i]':A[i]},
+      ask:{q:`A[${i}] = ${fmtN(A[i])}。它会把 B 里代表哪个数的格子标记成 1？不标记填 0。`,l:'标记的数 = ',a:String(ok?A[i]:0),hint:x=>{x=+norm(x);if(!ok&&x===A[i])return A[i]<=0?'负数和 0 不是正整数，不标记。':`大于 n 的数不用标，B 只有 ${n} 格。`;return ''}}})}
+  let i=0;for(;i<n;i++){F.push({k:'scan',si:i,B:[...B],txt:'B['+i+'] = '+B[i]+'：'+(B[i]?(i+1)+' 出现过，往后看。':'<b>'+(i+1)+' 没出现</b>，break。'),vars:{i,'B[i]':B[i]}});if(!B[i])break}
+  if(i===n)F.push({k:'for2',si:n,B:[...B],txt:`i 走到 ${n}，B 全是 1：1～${n} 都出现了。`,vars:{i}});
+  F.push({k:['free','ret'],si:i,B:[...B],done:true,txt:`返回 i + 1 = <b>${i+1}</b>。`,vars:{i,'返回':i+1},ask:{q:'扫描 B 的结果出来了，函数返回几？',l:'返回 ',a:String(i+1),hint:x=>+norm(x)===i?'B 的下标从 0 开始，B[i] 代表的数是 i+1。':''}});
+  return F},
+ draw(f,{A,n},m,pend){const B=(pend&&f.Bpend)?f.Bpend:f.B;
+  const rows=[{lab:'A',vals:A,cls:A.map((x,i)=>i===f.i?'cur':((f.i!==undefined&&i<f.i)||f.si!==undefined?(x>0&&x<=n?'ok':'dim'):'')),ptr:{i:f.i}},
+    {lab:'B',vals:B.map(v=>v===null?'?':v),cls:B.map((v,x)=>f.done&&!pend&&x===f.si?'bad':(x===f.si?'cur':(!pend&&x===f.mark?'cur':(v===1?'ok':'')))),ptr:{i:f.si}},
+    {lab:'代表',idx:false,vals:B.map((_,x)=>x+1),cls:B.map(()=>'ghost')}];
+  const links=!pend&&f.mark!==null&&f.mark!==undefined?[{from:[0,f.i],to:[1,f.mark]}]:[];
+  return arrSVG(rows,links)},
+ legend:()=>'紫色虚线是“A[i] 标记到 B[A[i]−1]”。A 里划掉的数（负数、0、大于 n）不参与标记。B 下面一行写的是这格代表的数。红色是答案所在的格。'};
+
+/* ===== 2020-41 ===== */
+P.d2020={tab:'三元组',yr:'2020-41',title:'2020 年 41 题：三元组的最小距离（13 分）',
+ stem:'定义三元组 (a, b, c)（a, b, c 均为正数）的距离 D = |a − b| + |b − c| + |c − a|。给定 3 个非空整数集合 S1、S2 和 S3，按升序分别存储在 3 个数组中。请设计一个尽可能高效的算法，计算并输出所有可能的三元组 (a, b, c)（a ∈ S1，b ∈ S2，c ∈ S3）中的最小距离。例如 S1 = {−1, 0, 9}，S2 = {−25, −10, 10, 11}，S3 = {2, 9, 17, 30, 41}，则最小距离为 2，相应的三元组为 (9, 10, 9)。<span class="req">要求：(1) 给出算法的基本设计思想。(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释。(3) 说明你所设计算法的时间复杂度和空间复杂度。</span>',
+ src:'讲义 p95–97（L2890 起，解法 4 多指针 L2971）。讲义其他解法：三重枚举 O(nml)、两重枚举 + 指针 O(mn)、枚举 + 折半 O(nlogn)。题干写“均为正数”但例子有负数，算法对任意整数都成立。',
+ ideas:['画在数轴上看：D = |a−b| + |b−c| + |c−a| = <b>2 ×（最大值 − 最小值）</b>，三个数挤得越近 D 越小。','i、j、k 分别从 S1、S2、S3 开头出发，每次算 D、更新 D_min，然后<b>只后移三者中最小的那个</b>：动最大的或中间的只会把范围拉得更开，只有把最小的换大才可能让 D 变小。','某个数组走到头就停（剩下的组合最小值只会更大，不会更优），输出 D_min。'],
+ cx:'时间 <b>O(n + m + l)</b>　空间 <b>O(1)</b>',
+ fix:'讲义代码用了 <code>min(D_min, ...)</code>，这里写成 if 比较，顺便能记住取到最小值时的三元组。',
+ form:[{id:'S1',lab:'S1（升序）'},{id:'S2',lab:'S2（升序）'},{id:'S3',lab:'S3（升序）'}],
+ presets:[{t:'真题例子',v:{S1:'-1 0 9',S2:'-25 -10 10 11',S3:'2 9 17 30 41'},q:'题干的例子：S1 = {−1, 0, 9}，S2 = {−25, −10, 10, 11}，S3 = {2, 9, 17, 30, 41}。',a:'最小距离 2，三元组 (9, 10, 9)。指针一共算了 7 组：D 依次是 54、24、22、20、16、2、16，S1 走到头停。'},
+  {t:'自编：交错的三组',v:{S1:'10 20 30',S2:'12 25 40',S3:'15 22 33'},q:'自编：S1 = {10, 20, 30}，S2 = {12, 25, 40}，S3 = {15, 22, 33}。',a:'最小距离 10。指针法先遇到的是 (10, 12, 15)，后面的 (20, 25, 22) 也是 10，没有更小的，所以 D_min 不再变。'}],
+ parse(v){return {A:ints(v.S1,'S1',{max:8,asc:true}),B:ints(v.S2,'S2',{max:8,asc:true}),C:ints(v.S3,'S3',{max:8,asc:true})}},
+ answer(d){let best=null;for(const a of d.A)for(const b of d.B)for(const c of d.C){const D=Math.abs(a-b)+Math.abs(b-c)+Math.abs(c-a);if(best===null||D<best[0])best=[D,a,b,c]}return best},
+ run({A,B,C}){const F=[];let i=0,j=0,k=0,Dmin=Infinity,best=null;const n=A.length,m=B.length,l=C.length;const S=o=>Object.assign({i,j,kk:k,Dmin,best},o);
+  F.push(S({k:['init','ijk'],txt:'D_min 先设成最大整数，i、j、k 都从 0 开始。',vars:{i,j,k,D_min:'INT_MAX'}}));
+  while(i<n&&j<m&&k<l){const a=A[i],b=B[j],c=C[k];const D=Math.abs(a-b)+Math.abs(b-c)+Math.abs(c-a);const mx=Math.max(a,b,c),mn=Math.min(a,b,c);const old=Dmin;
+    F.push(S({k:'whl',txt:`i = ${i} < ${n}，j = ${j} < ${m}，k = ${k} < ${l}，三个都没走到头。`,vars:{i,j,k,D_min:Dmin===Infinity?'INT_MAX':Dmin}}));
+    if(D<Dmin){Dmin=D;best=[a,b,c]}
+    F.push(S({k:['D','upd'],line:true,D,txt:`(a, b, c) = (${fmtN(a)}, ${fmtN(b)}, ${fmtN(c)})，最大 ${fmtN(mx)}，最小 ${fmtN(mn)}，D = 2 × (${fmtN(mx)} − ${fmtN(mn)}) = <b>${D}</b>${D<old?`，比 D_min 小，D_min = ${D}`:`，不比 D_min = ${old} 小`}。`,vars:{i,j,k,D,D_min:Dmin},
+      ask:{q:`(a, b, c) = (${fmtN(a)}, ${fmtN(b)}, ${fmtN(c)})，D 是多少？`,l:'D = ',a:String(D),hint:x=>+norm(x)===mx-mn?'这是最大减最小，D 要再乘 2（三段绝对值里最大−最小算了两次）。':''}}));
+    let which,key;if(a<b&&a<c){which='i';key='mi'}else if(b<c){which='j';key=['mi','mj']}else{which='k';key=['mi','mj','mk']}
+    const opts=['后移 i（S1）','后移 j（S2）','后移 k（S3）'];const ai={i:0,j:1,k:2}[which];
+    const before={i,j,kk:k};if(which==='i')i++;else if(which==='j')j++;else k++;
+    F.push(S({k:key,line:true,D,mv:which,prev:before,txt:`最小的是 ${which==='i'?`S1 的 ${fmtN(a)}`:which==='j'?`S2 的 ${fmtN(b)}`:`S3 的 ${fmtN(c)}`}${(a===b||b===c||a===c)&&[a,b,c].filter(x=>x===mn).length>1?'（有相等的最小值，按代码的判断顺序选这个）':''}，<b>${which}++</b>。`,vars:{i,j,k,D_min:Dmin},
+      ask:{q:`现在 a = ${fmtN(a)}，b = ${fmtN(b)}，c = ${fmtN(c)}。该后移哪个指针？`,opts,a:opts[ai],hint:()=>'只有把最小的那个换成更大的，最大值与最小值的差才可能变小。'}}))}
+  F.push(S({k:'whl',txt:`${i>=n?'i':j>=m?'j':'k'} 走到头了，循环结束。`,vars:{i,j,k,D_min:Dmin}}));
+  F.push(S({k:'ret',done:true,txt:`返回 D_min = <b>${Dmin}</b>，对应三元组 (${best.map(fmtN).join(', ')})。`,vars:{D_min:Dmin}}));
+  return F},
+ draw(f,{A,B,C},m,pend){const sh=pend&&f.mv;const P3=sh?f.prev:{i:f.i,j:f.j,kk:f.kk};
+  const cl=(arr,p)=>arr.map((_,x)=>x<p?'dim':(x===p&&(f.line||f.done)?'cur':''));
+  const rows=[{lab:'S1',vals:A,cls:cl(A,P3.i),ptr:{i:P3.i}},{lab:'S2',vals:B,cls:cl(B,P3.j),ptr:{j:P3.j}},{lab:'S3',vals:C,cls:cl(C,P3.kk),ptr:{k:P3.kk}}];
+  let svg=arrSVG(rows);
+  const all=[...A,...B,...C];const lo=Math.min(...all),hi=Math.max(...all);const W=350;const sx=v=>30+(v-lo)/(hi-lo||1)*(W-60);
+  const pts=[['a',A[P3.i],'var(--q)'],['b',B[P3.j],'var(--pur)'],['c',C[P3.kk],'var(--done)']].filter(p=>p[1]!==undefined);
+  let h=`<line class="s-axis" x1="20" y1="44" x2="${W-20}" y2="44"/>`;
+  [lo,hi,...(lo<0&&hi>0?[0]:[])].forEach(v=>h+=`<line class="s-axis" x1="${sx(v)}" y1="40" x2="${sx(v)}" y2="48"/><text class="s-tick" x="${sx(v)}" y="62">${fmtN(v)}</text>`);
+  const hideD=pend&&f.line&&!f.mv;if(pts.length===3&&!hideD){const vs=pts.map(p=>p[1]);const mn=Math.min(...vs),mx=Math.max(...vs);h+=`<line class="s-span" x1="${sx(mn)}" y1="44" x2="${sx(mx)}" y2="44"/><text class="s-txt red" x="${(sx(mn)+sx(mx))/2}" y="84" text-anchor="middle">最大 − 最小 = ${mx-mn}，D = 2 × ${mx-mn} = ${2*(mx-mn)}</text>`}
+  let lastX=-99,lv=0;[...pts].sort((x,y)=>x[1]-y[1]).forEach(([nm,v,col])=>{const X=sx(v);lv=X-lastX<44?lv+1:0;lastX=X;const o=lv;h+=`<circle class="s-dot" cx="${sx(v)}" cy="44" r="6" style="fill:${col}"/><text class="s-pn" x="${sx(v)}" y="${32-o*13}" style="fill:${col}">${nm}=${fmtN(v)}</text>`});
+  if(f.best&&!hideD)h+=`<text class="s-txt" x="20" y="104">目前 D_min = ${f.Dmin}，三元组 (${f.best.map(fmtN).join(', ')})</text>`;
+  svg+=`<svg viewBox="0 -12 ${W} 124" width="${W}" style="min-width:${W}px;max-width:100%;margin-top:6px" role="img" aria-label="数轴">${h}</svg>`;
+  return svg},
+ legend:()=>'上面三行是三个数组，蓝箭头是 i、j、k，橙色是这一组 (a, b, c)，虚线删除线是已经走过、不会再用的数。下面的数轴：红线段是“最大 − 最小”，D 等于它的两倍。'};
+
+/* ===== 2019-41 ===== */
+P.l2019={tab:'链表重排',yr:'2019-41',title:'2019 年 41 题：链表重排成 a1, an, a2, an−1, …（13 分）',
+ stem:'设线性表采用带头结点的单链表保存，链表中的结点定义如下：<br><code>typedef struct node { int data; struct node* next; } NODE;</code><br>请设计一个空间复杂度为 O(1) 且时间上尽可能高效的算法，重新排列 L 中的各结点，得到线性表 L′ = (a<sub>1</sub>, a<sub>n</sub>, a<sub>2</sub>, a<sub>n−1</sub>, a<sub>3</sub>, a<sub>n−2</sub>, …)。<span class="req">要求：(1) 给出算法的基本设计思想。(2) 根据设计思想，采用 C 或 C++ 语言描述算法，关键之处给出注释。(3) 说明你所设计的算法的时间复杂度。</span>',
+ src:'讲义 p143–146（L4604 起，解法 2 逆置 + 多指针 L4664）。真题原文开头还写了 L = (a<sub>1</sub>, a<sub>2</sub>, …, a<sub>n</sub>)，讲义抄题时省略了。讲义另有暴力解：每个后半结点从头找插入位置 O(n²)。',
+ ideas:['<b>找中点</b>：慢指针 p 每次走一步、快指针 q 每次走两步，q 到尾时 p 正好在前半段末尾（前半 ⌈n/2⌉ 个结点）。','<b>后半段原地逆置</b>：从 p 后面断开，把后半段结点依次用<b>头插法</b>插到 p 后面，顺序就倒过来了：a<sub>n</sub>, a<sub>n−1</sub>, …。','<b>交替合并</b>：s 从前半段第一个结点出发，q 从逆置后的后半段出发，每次把 q 插到 s 后面，s 跳到前半段下一个结点，直到 q 为空。三步各扫一遍，不开新数组。'],
+ cx:'时间 <b>O(n)</b>　空间 <b>O(1)</b>',
+ fix:'讲义 p145 的代码扫描时错乱（while 循环没闭合、p1 没赋初值），并且为后半段 malloc 了一个新头结点 L2。这里按教材常见写法，直接用中间结点 p 当后半段的“头结点”做头插，思路和讲义的三步完全一样，空间仍是 O(1)。',
+ form:[{id:'L',lab:'链表结点的值 a1…an（1～9 个）'}],
+ presets:[{t:'6 个结点（偶数）',v:{L:'1 2 3 4 5 6'},q:'L = (1, 2, 3, 4, 5, 6)，n = 6。',a:'重排后 1, 6, 2, 5, 3, 4。中间结点是 a3，后半段 4 5 6 逆置成 6 5 4，再交替插入。'},
+  {t:'5 个结点（奇数）',v:{L:'1 2 3 4 5'},q:'L = (1, 2, 3, 4, 5)，n = 5。',a:'重排后 1, 5, 2, 4, 3。前半段 1 2 3（多一个），后半段 4 5 逆置成 5 4。'},
+  {t:'7 个结点',v:{L:'10 20 30 40 50 60 70'},q:'L = (10, 20, 30, 40, 50, 60, 70)，n = 7。',a:'重排后 10, 70, 20, 60, 30, 50, 40。'}],
+ parse(v){const L=ints(v.L,'链表',{max:9,lo:-99,hi:99});return {L,n:L.length}},
+ answer(d){const r=[];let i=0,j=d.n-1;while(i<=j){r.push(d.L[i]);if(i!==j)r.push(d.L[j]);i++;j--}return r},
+ run({L,n}){const F=[];const nx={};for(let i=0;i<=n;i++)nx[i]=i<n?i+1:null;let p=0,q=0,r,s;
+  const S=(o)=>Object.assign({nx:{...nx},ptrs:{p,q,r,s}},o);
+  const midAns=Math.ceil(n/2);
+  F.push(S({k:'s1',ph:1,txt:'p、q 都从头结点出发。q 是快指针，p 是慢指针。',ask:{q:`p 每次走一步、q 每次走两步，q 走到尾时 p 会停在第几个结点？（填 1～${n}）`,l:'p 停在 a',a:String(midAns),hint:x=>+norm(x)===Math.floor(n/2)&&n%2?'n 是奇数时前半段多一个，p 停在 ⌈n/2⌉。':''}}));
+  while(nx[q]!==null){p=nx[p];q=nx[q];let two=false;if(nx[q]!==null){q=nx[q];two=true}
+    F.push(S({k:['w1','p1','q1','q2'],ph:1,txt:`q->next 不空：p 走一步到 a${p}，q ${two?`走两步到 a${q}`:`走一步到 a${q}，q->next 为空，第二步不走`}。`}))}
+  F.push(S({k:'w1',ph:1,mid:p,txt:`q->next 为空，循环结束。p 停在 <b>a${p}</b>：前半段 a1～a${p} 共 ${p} 个，后半段 ${n-p} 个。`}));
+  q=nx[p];nx[p]=null;F.push(S({k:['c1','c2'],ph:2,mid:p,txt:`q = p->next = ${q===null?'NULL':'a'+q}，p->next = NULL：链表从 a${p} 后面断成两段。下一行是后半段。`,
+    ask:q===null?undefined:{q:'接下来要把后半段逐个头插到 p 后面。全部插完后，p 后面第一个结点的值是几？',l:'p->next->data = ',a:fmtN(L[n-1]),hint:x=>+norm(x)===L[p]?'头插法会把顺序倒过来，最后插进去的（原来的最后一个）排在最前。':''}}));
+  const rev=new Set();
+  while(q!==null){F.push(S({k:'w2',ph:2,mid:p,rev:[...rev],txt:`q = a${q} 不空，把它头插到 p 后面。`}));
+    r=nx[q];F.push(S({k:'r1',ph:2,mid:p,rev:[...rev],cur:q,txt:`r = q->next = ${r===null?'NULL':'a'+r}：先记住 q 的下一个，不然一改 q->next 就找不到后面了。`}));
+    nx[q]=nx[p];F.push(S({k:'h1',ph:2,mid:p,rev:[...rev],cur:q,newEdge:q,txt:`q->next = p->next = ${nx[q]===null?'NULL':'a'+nx[q]}：q 先指向 p 原来的后继。`}));
+    nx[p]=q;rev.add(q);F.push(S({k:'h2',ph:2,mid:p,rev:[...rev],cur:q,newEdge:p,txt:`p->next = q：a${q} 接到 p 后面，成为后半段新的第一个。`}));
+    q=r;F.push(S({k:'h3',ph:2,mid:p,rev:[...rev],txt:`q = r = ${q===null?'NULL':'a'+q}。`}))}
+    F.push(S({k:'w2',ph:2,mid:p,rev:[...rev],txt:`q 为空，后半段逆置完成：p 后面依次是 ${(()=>{let c=nx[p],o=[];while(c!==null){o.push('a'+c);c=nx[c]}return o.join(' → ')||'（空）'})()}。`}));
+  s=nx[0];q=nx[p];nx[p]=null;const done=new Set();
+  F.push(S({k:['m0','m1','m2'],ph:3,mid:p,rev:[...rev],txt:`s = h->next = a${s}，q = p->next = ${q===null?'NULL':'a'+q}，p->next = NULL：又断成两段，上面前半段，下面逆置后的后半段。`}));
+  while(q!==null){F.push(S({k:'w3',ph:3,done:[...done],txt:`q = a${q} 不空，把它插到 s = a${s} 后面。`}));
+    r=nx[q];const sv=s;nx[q]=nx[s];F.push(S({k:['r2','i1'],ph:3,done:[...done],cur:q,newEdge:q,txt:`r = q->next 先记住；q->next = s->next = ${nx[q]===null?'NULL':'a'+nx[q]}。`,
+      ask:{q:`q = a${q}（值 ${fmtN(L[q-1])}）要插到哪个结点后面？填那个结点的值。`,l:'插到值为 ',a:fmtN(L[sv-1]),hint:()=>'s 总是指前半段里“下一个该被插入的位置”。'}}));
+    nx[s]=q;done.add(s);done.add(q);F.push(S({k:'i2',ph:3,done:[...done],cur:q,newEdge:s,txt:`s->next = q：a${q} 接到 a${s} 后面。`}));
+    s=nx[q];q=r;F.push(S({k:['i3','i4'],ph:3,done:[...done],txt:`s = q->next = ${s===null?'NULL':'a'+s}（前半段的下一个），q = r = ${q===null?'NULL':'a'+q}。`}))}
+  const res=[];let c=nx[0];while(c!==null){res.push(fmtN(L[c-1]));c=nx[c]}
+  F.push(S({k:'w3',ph:3,done:Array.from({length:n},(_,i)=>i+1),fin:true,txt:`q 为空，结束。重排后：<b>${res.join(', ')}</b>。`}));
+  return F},
+ draw(f0,{L,n},m,pend,prev){const f=pend&&prev&&f0.k!=='s1'?prev:f0;const cls={};(f.rev||[]).forEach(id=>cls[id]='ok');(f.done||[]).forEach(id=>cls[id]='ok');if(f.mid&&f.ph<3)cls[f.mid]='cur';if(f.cur)cls[f.cur]='cur';
+  const ptrs={};Object.entries(f.ptrs).forEach(([k,v])=>{if(v!==undefined)ptrs[k]=v});
+  return listSVG({vals:L,nx:f.nx,ptrs,cls,headLab:'h',newEdge:f.newEdge},['q','r','s','p'])},
+ phase:f=>['','① 快慢指针找中点','② 后半段头插法逆置','③ 交替插入合并'][f.ph],
+ legend:()=>'方框左格是 data，右格是 next，∧ 表示 NULL。橙色是这一步在动的结点，绿色是已经处理好的，红箭头是这一步刚改的 next。断开后的另一段画在下一行。'};
+
+/* ===== 2009-42 ===== */
+P.k2009={tab:'倒数第 k 个',yr:'2009-42',title:'2009 年 42 题：查找链表倒数第 k 个结点（15 分）',
+ stem:'已知一个带有表头结点的单链表，结点结构为 <code>data | link</code>。假设该链表只给出了头指针 list。在不改变链表的前提下，请设计一个尽可能高效的算法，查找链表中倒数第 k 个位置上的结点（k 为正整数）。若查找成功，算法输出该结点的 data 域的值，并返回 1；否则，只返回 0。<span class="req">要求：(1) 描述算法的基本设计思想。(2) 描述算法的详细实现步骤。(3) 根据设计思想和实现步骤，采用程序设计语言描述算法（使用 C、C++ 或 Java 语言实现），关键之处请给出简要注释。</span>',
+ src:'讲义 p112（L3501 前后指针）、p136–138（L4270 起，解法 4 前后指针）。讲义其他解法：枚举 O(n²)、转存数组 O(n)/O(n)、先数长度再走 n−k+1 步 O(n)/O(1)。',
+ ideas:['单链表只能往后走，<b>设两个指针</b> left、right 都从头结点出发。','right <b>先走 k 步</b>；途中变成 NULL 说明结点不到 k 个，返回 0。','然后 left、right <b>同时后移</b>，间距一直是 k；right 走到 NULL 时，left 正好指着倒数第 k 个结点，输出它的 data，返回 1。只扫一遍。'],
+ cx:'时间 <b>O(n)</b>　空间 <b>O(1)</b>',
+ fix:'讲义 p138 解法 4 的文字写“若此过程中 left 指向了 NULL 则查找失败”，应为 right（代码里判断的就是 right）。',
+ form:[{id:'L',lab:'链表结点的值（1～9 个）'},{id:'k',lab:'k',cls:'short'}],
+ presets:[{t:'k = 2',v:{L:'23 8 15 42 4 16',k:'2'},q:'链表 23 → 8 → 15 → 42 → 4 → 16（6 个结点），k = 2。',a:'输出 4，返回 1。'},
+  {t:'k = n（第一个）',v:{L:'23 8 15 42 4 16',k:'6'},q:'同一个链表，k = 6，倒数第 6 个就是第一个结点。',a:'输出 23，返回 1。right 先走 6 步正好到尾结点，然后两人一起走 1 步。'},
+  {t:'k 太大：失败',v:{L:'23 8 15 42 4 16',k:'7'},q:'同一个链表，k = 7，比结点数多。',a:'返回 0。right 走到第 7 步变成 NULL。'}],
+ parse(v){const L=ints(v.L,'链表',{max:9,lo:-99,hi:99});const k=ints(v.k,'k',{max:1,lo:1,hi:20})[0];return {L,n:L.length,k}},
+ answer(d){return d.k<=d.n?[1,d.L[d.n-d.k]]:[0]},
+ run({L,n,k}){const F=[];const nx={};for(let i=0;i<=n;i++)nx[i]=i<n?i+1:null;let left=0,right=0;const S=o=>Object.assign({nx,ptrs:{left,right}},o);
+  F.push(S({k:'init',txt:`left、right 都指头结点。k = ${k}。`,vars:{k}}));
+  for(let i=0;i<k;i++){right=nx[right];
+    if(right===null){F.push(S({k:['for','rmv','rnul'],fail:true,txt:`第 ${i+1} 步：right 变成 NULL，链表只有 ${n} 个结点，不到 k = ${k} 个，<b>返回 0</b>。`,vars:{i,k,'返回':0},
+      ask:{q:`right 先走第 ${i+1} 步就成了 NULL。函数返回什么？`,l:'返回 ',a:'0'}}));return F}
+    F.push(S({k:['for','rmv'],txt:`i = ${i}：right 走一步到 a${right}（第 ${i+1} 步）。`,vars:{i,k}}))}
+  F.push(S({k:'whl',gap:true,txt:`right 先走完 ${k} 步，停在 a${right}，和 left 相隔 k = ${k} 步。right 不是 NULL，两人一起走。`,vars:{k,'间距':k},
+    ask:{q:`right 已经先走了 ${k} 步。两人一起走到 right 为 NULL 时，left 指的结点值是几？`,l:'left->data = ',a:fmtN(L[n-k]),hint:x=>+norm(x)===L[n-k+1]?'right 停在 NULL（尾结点后面），不是停在尾结点，left 要再往前一个。':+norm(x)===L[n-k-1]?'倒数第 1 个是尾结点，倒数第 k 个往前数 k−1 个就到。':''}}));
+  while(right!==null){left=nx[left];right=nx[right];F.push(S({k:['lmv','rmv2'],gap:true,txt:`left → a${left}，right → ${right===null?'NULL':'a'+right}，间距还是 ${k}。`,vars:{k}}))}
+  F.push(S({k:'whl',txt:'right == NULL，循环结束。',vars:{k}}));
+  F.push(S({k:['out','ret'],res:left,txt:`left 指 a${left}，是倒数第 ${k} 个（正数第 ${n-k+1} 个）：输出 <b>${fmtN(L[left-1])}</b>，返回 1。`,vars:{'输出':L[left-1],'返回':1}}));
+  return F},
+ draw(f,{L},m,pend){const cls={};const pt={...f.ptrs};if(f.res)cls[f.res]='bad';
+  if(pt.left)cls[pt.left]=cls[pt.left]||'cur';if(pt.right)cls[pt.right]='cur';
+  return listSVG({vals:L,nx:f.nx,ptrs:pt,cls,headLab:'list 头结点'},['left','right'])},
+ legend:()=>'方框左格 data、右格 link，∧ 是 NULL。蓝字是指针，橙色是两个指针所指的结点，红色是找到的倒数第 k 个。'};
+
+/* ---------- page wiring ---------- */
+let cur='m2011',D=null,meth='',frames=[],pos=0,done=new Set();
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+$('tabs').innerHTML=ord.map(id=>`<button class="tab" role="tab" type="button" data-t="${id}" aria-selected="false"><small>${P[id].yr}</small>${P[id].tab}</button>`).join('');
+function selTab(id,keepPreset){cur=id;const p=P[id];$('tabs').querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===id));store.set('algo-tab',id);
+  $('pTitle').textContent=p.title;$('pStem').innerHTML=p.stem;$('pSrc').innerHTML=p.src;
+  let f=p.form.map(x=>`<label>${x.lab}<input type="text" id="in_${x.id}" class="${x.cls||''}" spellcheck="false" autocomplete="off"></label>`).join('');
+  if(p.methods)f+=`<label>解法<select id="in_m">${p.methods.map(([v,t])=>`<option value="${v}">${t}</option>`).join('')}</select></label>`;
+  f+='<button class="btn primary" id="go" type="button">算</button>';$('form').innerHTML=f;
+  $('presets').innerHTML='例子：'+p.presets.map((x,i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${x.t}</button>`).join('');
+  $('go').onclick=()=>{$('presets').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed','false'));$('question').innerHTML='自己输入的数据。';load()};
+  $('form').querySelectorAll('input').forEach(i=>i.onkeydown=e=>{if(e.key==='Enter')$('go').click()});
+  if(p.methods)$('in_m').onchange=()=>{fillIdeas();load()};
+  pickPreset(0)}
+function fillIdeas(){const p=P[cur];const m=p.methods?$('in_m').value:'';const g=o=>o&&typeof o==='object'&&!Array.isArray(o)?o[m]:o;
+  $('pIdeas').innerHTML=g(p.ideas).map(s=>`<li>${s}</li>`).join('');$('pCx').innerHTML=g(p.cx);const fx=g(p.fix);$('pFix').innerHTML=fx?`<p class="fix">${fx}</p>`:'';
+  $('legend').innerHTML=p.legend(m)}
+function pickPreset(i){const p=P[cur],x=p.presets[i];for(const k in x.v)$('in_'+k).value=x.v[k];if(x.m)$('in_m').value=x.m;
+  $('presets').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p==i));
+  $('question').innerHTML=`${esc(x.q)}<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${esc(x.a)}</span></details>`;load()}
+$('tabs').onclick=e=>{const b=e.target.closest('[data-t]');if(b)selTab(b.dataset.t)};
+$('presets').onclick=e=>{const b=e.target.closest('[data-p]');if(b)pickPreset(+b.dataset.p)};
+function load(){const p=P[cur];const v={};p.form.forEach(x=>v[x.id]=$('in_'+x.id).value);meth=p.methods?$('in_m').value:'';
+  try{D=p.parse(v)}catch(e){$('err').textContent=typeof e==='string'?e:'输入有误。';return}
+  $('err').textContent='';fillIdeas();
+  frames=p.run(D,meth);pos=0;done=new Set();
+  const lines=parseCode(CODE[codeName()]);$('code').dataset.n=codeName();render()}
+function codeName(){return {m2011:meth==='half'?'half2011':'cnt2011',z2013:'maj2013',q2018:'miss2018',d2020:'tri2020',l2019:'re2019',k2009:'kth2009'}[cur]}
+const pending=()=>{const f=frames[pos];return $('guessMode').checked&&f&&f.ask&&!done.has(pos)};
+function render(msg){const p=P[cur],f=frames[pos];if(!f)return;const pend=pending();
+  $('note').innerHTML=msg||(pend?f.ask.q:f.txt);$('prog').textContent=`第 ${pos} / ${frames.length-1} 步`;
+  $('bPrev').disabled=pos===0;$('bNext').disabled=pos===frames.length-1&&!pend;
+  $('gbox').classList.toggle('hidden',!pend);
+  if(pend){$('gq').textContent=f.ask.opts?'':(f.ask.l||'');$('gin').classList.toggle('hidden',!!f.ask.opts);$('gcheck').classList.toggle('hidden',!!f.ask.opts);
+    $('gopts').innerHTML=f.ask.opts?f.ask.opts.map((o,i)=>`<button class="btn" type="button" data-o="${i}">${esc(o)}</button>`).join(''):'';if(!msg)$('gin').value=''}
+  $('phase').innerHTML=p.phase?`<b>${p.phase(f)}</b>`:'';
+  $('viz').innerHTML=p.draw(f,D,meth,pend,frames[pos-1]);
+  const prevV=pos>0?frames[pos-1].vars||{}:{};const vv=pend&&f.ask?(frames[pos-1]||{}).vars||{}:(f.vars||{});
+  let vh=Object.entries(vv).map(([k,v])=>`<span class="${!pend&&String(prevV[k])!==String(v)&&pos>0?'chg':''}">${esc(k)} = <b>${esc(fmtN(v===Infinity?'INT_MAX':v))}</b></span>`).join('');
+  if(f.ptrs&&!(pend&&f.ask)){vh=Object.entries(f.ptrs).filter(([,v])=>v!==undefined).map(([k,v])=>`<span>${k} → <b>${v===null?'NULL':v===0?'头结点':'a'+v}</b></span>`).join('')+vh}
+  $('vars').innerHTML=vh;
+  const lines=parseCode(CODE[codeName()]);$('code').innerHTML=codeHtml(lines,f.k);
+  const on=$('code').querySelector('.ln.on');if(on){const c=$('code');const t=on.offsetTop-c.offsetTop;if(t<c.scrollTop+20||t>c.scrollTop+c.clientHeight-40)c.scrollTop=Math.max(0,t-c.clientHeight/3)}}
+function check(val){const f=frames[pos];if(val===undefined)val=$('gin').value;if(String(val).trim()==='')return;done.add(pos);const ok=norm(val)===norm(f.ask.a);
+  render((ok?'<span class="ok">对了。</span> ':`<span class="bad">你答 ${esc(val)}，应为 ${esc(f.ask.a)}。</span>${f.ask.hint?f.ask.hint(val)||'':''} `)+f.txt)}
+$('gcheck').onclick=()=>check();$('gin').onkeydown=e=>{if(e.key==='Enter')check()};
+$('gopts').onclick=e=>{const b=e.target.closest('[data-o]');if(b)check(frames[pos].ask.opts[+b.dataset.o])};
+$('bNext').onclick=()=>{if(pending()){if(!frames[pos].ask.opts)$('gin').focus();return}if(pos<frames.length-1){pos++;render();if(pending()&&!frames[pos].ask.opts)$('gin').focus({preventScroll:true})}};
+$('bPrev').onclick=()=>{if(pos>0){pos--;render()}};
+$('bReset').onclick=()=>{pos=0;done=new Set();render()};
+$('bAll').onclick=()=>{frames.forEach((_,i)=>done.add(i));pos=frames.length-1;render()};
+$('guessMode').onchange=()=>render();
+const saved=store.get('algo-tab');selTab(P[saved]?saved:'m2011');
+</script>
+</body>
+</html>
