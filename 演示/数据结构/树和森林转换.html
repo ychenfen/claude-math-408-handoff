@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>树、森林与二叉树</title>
+<style>
+/* One SVG whose nodes glide between the forest layout and the binary-tree layout, step by step; below it the traversal correspondence, the child/sibling explanation for a clicked node, and live counts. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --pur:#7b4fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b48ee0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b48ee0; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:80ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:17px var(--serif);font-weight:600;margin:0 0 8px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px;margin-top:10px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],select{font:15px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;max-width:100%}
+.form input[type=text]{width:21em}
+.form input.num{width:6em}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;margin-top:8px}
+.ctrl .muted{color:var(--muted)}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.q{font-size:14px;padding:8px 12px;border:1px dashed var(--line);border-radius:5px;margin-top:8px}
+.q .ans{color:var(--done);font-weight:600}
+.q summary{cursor:pointer;color:var(--muted);font-size:13px}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.2em;margin-top:10px}
+.note b{color:var(--done)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:7em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+.fig{overflow-x:auto;margin-top:10px}
+svg{display:block;height:auto}
+.n-c{fill:var(--paper);stroke:var(--green);stroke-width:2}
+.n-c.cur{fill:color-mix(in srgb,var(--cmp) 40%,var(--paper));stroke:var(--cmp);stroke-width:3}
+.n-c.lc{stroke:var(--done);stroke-width:4}
+.n-c.rs{stroke:var(--cmp);stroke-width:4}
+.n-c.root{stroke-width:3}
+.n-t{font:600 15px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.e{fill:none;stroke-width:2}
+.e.tree{stroke:var(--muted)}
+.e.L{stroke:var(--done);stroke-width:2.6}
+.e.R{stroke:var(--cmp);stroke-width:2.6}
+.e.sib{stroke:var(--cmp);stroke-width:2.6;stroke-dasharray:6 4}
+.e.del{stroke:var(--mv);stroke-width:2;stroke-dasharray:3 4;opacity:.8}
+.e.new{stroke:var(--q);stroke-width:3}
+.lab{font:11px var(--sans);fill:var(--muted)}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.tw{overflow-x:auto;margin-top:8px}
+table.t{border-collapse:collapse;font-size:13px}
+table.t th,table.t td{border:1px solid var(--line);padding:4px 8px;text-align:left;white-space:nowrap}
+table.t th{color:var(--muted);font-weight:400;background:var(--bg)}
+table.t td.m{font-family:var(--mono);font-size:14px;letter-spacing:1px}
+table.t tr.hit td,table.t tr.hit th{background:color-mix(in srgb,var(--cmp) 26%,transparent);font-weight:600}
+.yes{color:var(--done);font-weight:700}.no{color:var(--mv);font-weight:700}
+.info{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg);font-size:14px;margin-top:8px}
+.info b.l{color:var(--done)}.info b.r{color:var(--cmp)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin-top:8px;font-size:13px}
+.stats div{border:1px solid var(--line);border-radius:4px;padding:4px 8px;background:var(--bg)}
+.stats b{font:600 16px var(--mono)}
+.check{font-size:14px;margin-top:8px;display:grid;gap:4px}
+.warn{border-left:3px solid var(--mv);padding:6px 10px;background:color-mix(in srgb,var(--mv) 8%,transparent);font-size:14px;margin-top:8px}
+.hidden{display:none}
+code{font-family:var(--mono);font-size:13px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:760px){.two{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="遍历建树与线索.html">遍历建树与线索树</a></div>
+  <header>
+    <h1>树、森林与二叉树</h1>
+    <p class="sub">树和森林都按“左孩子右兄弟”变成二叉树：二叉树里结点的左孩子是它在原树的第一个孩子，右孩子是它的下一个兄弟。动画按 ①兄弟连线 ②只留第一个孩子 ③旋转 一步步走，也能反过来断右链变回森林。例子来自罗素讲义第五章 树（下）p7–21、强化第二讲 p48–57。考过的年份：2009、2011、2014、2016、2019、2020、2021、2025。</p>
+  </header>
+
+  <section class="panel">
+    <h2>五句话</h2>
+    <ol class="rules">
+      <li><b>左孩子右兄弟</b>：二叉树中结点的<b>左孩子 = 原来的第一个孩子</b>，<b>右孩子 = 原来的下一个兄弟</b>。所以树转来的二叉树，根一定没有右孩子。</li>
+      <li><b>树 → 二叉树三步</b>：① 相邻兄弟之间连一条线；② 每个结点只保留和第一个孩子的连线，其余孩子的连线删掉；③ 以根为轴顺时针转 45°，竖线成左孩子，横线成右孩子。</li>
+      <li><b>森林 → 二叉树</b>：每棵树先各自转成二叉树，再把第二棵树的根作为第一棵根的右孩子，第三棵的根作为第二棵根的右孩子，依次连起来。</li>
+      <li><b>二叉树 → 森林</b>：反过来，先断开根一路向右的那条右链，有几个结点就有几棵树；每棵里右孩子都放回成兄弟，再让双亲连到所有孩子、删掉兄弟横线。</li>
+      <li><b>遍历对应</b>：树的先根 = 二叉树先序，树的后根 = 二叉树<b>中序</b>（不是后序）；森林的先序（先根）= 二叉树先序，森林的中序（后根）= 二叉树中序。</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <div class="chips" id="presets">例题：</div>
+    <div class="q" id="question"></div>
+    <div class="form">
+      <label>输入的是<select id="dir"><option value="f">树 / 森林（转成二叉树）</option><option value="b">二叉树（转回森林）</option></select></label>
+      <label><span id="inLab">树或森林</span><input id="src" type="text" spellcheck="false" autocomplete="off"></label>
+      <button class="btn primary" id="go" type="button">转换</button>
+    </div>
+    <p class="legend" id="fmt"></p>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+
+  <section class="panel">
+    <div class="ctrl"><button class="btn" id="reset" type="button">从头</button><button class="btn" id="prev" type="button">上一步</button><button class="btn primary" id="next" type="button">下一步</button><button class="btn" id="all" type="button">全部</button><label class="muted"><input type="checkbox" id="guessMode" checked> 先猜再看</label><span class="muted" id="prog"></span></div>
+    <div class="guess hidden" id="gbox"><span id="gq"></span><input id="gin" type="text" aria-label="你的答案" autocomplete="off"><button class="btn" id="gbtn" type="button">对答案</button></div>
+    <div class="note" id="note"></div>
+    <div class="fig" id="fig"></div>
+    <p class="legend">灰线是原来树里的父子边；<span style="color:var(--cmp)">橙色虚线</span>是新连的兄弟线；<span style="color:var(--mv)">红色点线</span>是这一步要删的边；二叉树里<span style="color:var(--done)">绿线</span>是左孩子（第一个孩子），<span style="color:var(--cmp)">橙线</span>是右孩子（下一个兄弟）；<span style="color:var(--q)">蓝线</span>是这一步新连上的。<b>点任一结点</b>看它的孩子、兄弟对应关系。</p>
+    <div class="info" id="info"></div>
+  </section>
+
+  <section class="panel">
+    <h2>遍历对照（随输入实时更新）</h2>
+    <div class="tw"><table class="t" id="trav"></table></div>
+    <div class="warn"><b>讲义 p20 此处有误</b>：右下角写“二叉树的后序遍历序列：DBEAFGCH”，这其实是<b>中序</b>序列，和左边森林的后根序列相同；这棵二叉树的后序是 <b>DEBGFHCA</b>。叫法上，讲义 p20 和王道、2020 真题说“森林的先根 / 后根”，讲义 p21 的表叫“森林的先序 / 中序”，指的是同一回事。</div>
+  </section>
+
+  <section class="panel">
+    <h2>转成二叉树后结点分 8 类（强化第二讲 p50–54）</h2>
+    <div class="tw"><table class="t" id="types"></table></div>
+    <p class="legend">按原来树里“有没有孩子、有没有左兄弟、有没有右兄弟”分。森林里各棵树的根也互为兄弟（转换后后一棵的根是前一棵根的右孩子）。点上面图里的结点，对应的行会高亮。</p>
+    <div class="stats" id="stats"></div>
+    <div class="check" id="checks"></div>
+    <div class="two" style="margin-top:10px">
+      <div>
+        <h2>2011 那道题的算法</h2>
+        <div class="form" style="margin-top:0"><label>树的结点数<input id="cn" class="num" type="text" inputmode="numeric" value="2011"></label><label>叶子数<input id="cl" class="num" type="text" inputmode="numeric" value="116"></label></div>
+        <p id="calc" style="font-size:14px;margin:6px 0 0"></p>
+      </div>
+      <div class="legend" style="font-size:13px">每个分支结点的<b>最后一个孩子</b>没有下一个兄弟，转过去没有右孩子；根也没有兄弟，没有右孩子。别的结点都有下一个兄弟。所以无右孩子的结点数 = 分支结点数 + 1 = 结点数 − 叶子数 + 1（强化第二讲 p48–49、p55 用 n₀ = n₂ + 1 推出同一个数）。</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>例子从哪来</h2>
+    <p class="sub" id="srcnote"></p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const PRESETS=[
+ {t:'讲义 p7–12 树转二叉树',dir:'f',src:'A(B(E,F),C,D(G,H,I))',q:'讲义第五章 树（下）p7–12、p18：把树 A{B{E, F}, C, D{G, H, I}} 转成二叉树，再转回来；并写出这棵树的先根、后根遍历序列。',ans:'二叉树：A 的左孩子 B；B 左 E 右 C；E 右 F；C 右 D；D 左 G；G 右 H；H 右 I。树的先根 ABEFCDGHI = 二叉树先序，后根 EFBCGHIDA = 二叉树中序（讲义 p18）。',note:'罗素《第五章 树（下）》p7–9（树转二叉树：讲义 p7 先删边、p8 再连兄弟，和这里 ①② 的顺序相反，结果一样），p10–12（转回来），p18（树的先根、后根遍历）。树形已对照原图。'},
+ {t:'讲义 p16–20 森林转二叉树',dir:'f',src:'A(B(D),E) C(F,G) H',q:'讲义第五章 树（下）p16–17、p20：把森林 A{B{D}, E}、C{F, G}、H 转成二叉树，对照森林和二叉树的遍历序列。',ans:'二叉树 A(B(D, E), C(F(·, G), H))。森林先根 ABDECFGH = 二叉树先序；森林后根 DBEAFGCH = 二叉树中序；二叉树后序是 DEBGFHCA。讲义 p20 右下角把 DBEAFGCH 写成了“二叉树的后序遍历序列”，应为中序。',note:'罗素《第五章 树（下）》p16–17（森林转二叉树）、p20（森林与二叉树的遍历对照）、p21（遍历对应表）。p20 的错误已用 Python 独立重算核实：DBEAFGCH 是这棵二叉树的中序，后序是 DEBGFHCA。'},
+ {t:'讲义 p13–15 二叉树转森林',dir:'b',src:'A(B(D,E),C(F,G))',q:'讲义第五章 树（下）p13–15、p19：把二叉树 A(B(D, E), C(F, G)) 转成森林，写出森林的先序和中序遍历。',ans:'森林三棵树：A{B{D}, E}、C{F}、G。森林先序 ABDECFG，中序 DBEAFCG（讲义 p19）。',note:'罗素《第五章 树（下）》p13–15（二叉树转森林：递归地删去根的右子树，再把右孩子连到双亲的双亲）、p19（森林的先序、中序遍历）。'},
+ {t:'强化 p48–55 例树 / 2011 统考',dir:'f',src:'1(2(5,6),3(7),4)',sel:'3',q:'【2011 统考真题】已知一棵有 2011 个结点的树，其叶结点的个数为 116，该树对应的二叉树中无右孩子的结点个数为（ ）。A. 115　B. 116　C. 1895　D. 1896',ans:'D。无右孩子 = 分支结点数 + 1 = (2011 − 116) + 1 = 1896。图里用强化讲义 p50–53 的小例树 1{2{5, 6}, 3{7}, 4} 验证：分支结点 1、2、3 共 3 个，无右孩子的结点 1、6、7、4 共 4 个。',note:'数据结构强化第二讲 PPT p48–49（2011 题和“最后一个孩子、根没有右孩子”的解释）、p50–54（8 类情形和例树 1{2{5, 6}, 3{7}, 4}）、p55（用 n₀ = n₂ + 1 推出 1896）；同题见王道第 5 章 5.4 选择题 16，答案 D。'},
+ {t:'强化 p56–57 二叉树转森林',dir:'b',src:'A(B(D,E(G,H(,J))),C(,F(I,)))',q:'【例题】已知二叉树 T 的层序遍历是 ABCDEFGHIJ，中序遍历为 DBGEHJACIF，请画出对应的二叉树，然后将其转化为森林，再写出森林的先序遍历和中序遍历。（建树过程见“遍历建树与线索树”页）',ans:'森林三棵树：A{B{D}, E{G}, H, J}、C、F{I}。森林先序 ABDEGHJCFI（= 二叉树先序），中序 DBGEHJACIF（= 二叉树中序，也就是题目给的中序）。',note:'数据结构强化第二讲 PPT p56（二叉树）和 p57（森林）。森林已对照 p57 原图：A 的孩子 B、E、H、J，B 下 D，E 下 G；C 单独一棵；F 下 I。'},
+ {t:'2021 统考 森林有几棵树',dir:'b',src:'a(b(,d),c(e(,g),f))',q:'【2021 统考真题】某森林 F 对应的二叉树为 T，若 T 的先序遍历序列是 a, b, d, c, e, g, f，中序遍历序列是 b, d, a, e, g, c, f，则 F 中树的棵数是（ ）。A. 1　B. 2　C. 3　D. 4',ans:'C。先由先序 + 中序建出 T = a(b(·, d), c(e(·, g), f))；根 a 一路向右是 a → c → f，右链上 3 个结点，森林就有 3 棵树：a{b, d}、c{e, g}、f。',note:'王道《数据结构》第 5 章 5.4 选择题 20（2021 统考），答案 C。T 的建树过程可以在“遍历建树与线索树”页输入先序 abdcegf、中序 bdaegcf 跑一遍。'},
+ {t:'2019 统考 后根对应哪种',dir:'f',src:'1(2(5,6,7),3,4)',q:'【2019 统考真题】若将一棵树 T 转化为对应的二叉树 BT，则下列对 BT 的遍历中，其遍历序列与 T 的后根遍历序列相同的是（ ）。A. 先序遍历　B. 中序遍历　C. 后序遍历　D. 按层遍历',ans:'B。拿王道解析里的树 1{2{5, 6, 7}, 3, 4} 试：树的后根 5,6,7,2,3,4,1，正好等于 BT 的中序；BT 的后序是 7,6,5,4,3,2,1，不一样。',note:'王道《数据结构》第 5 章 5.4 选择题 18（2019 统考），答案 B；例树取自王道该题解析。'},
+ {t:'2014 统考 森林叶子数',dir:'f',src:'A(B(D),E) C(F,G) H',q:'【2014 统考真题】将森林 F 转换为对应的二叉树 T，F 中叶结点的个数等于（ ）。A. T 中叶结点的个数　B. T 中度为 1 的结点数　C. T 中左孩子指针为空的结点数　D. T 中右孩子指针为空的结点数',ans:'C。森林里的叶子没有第一个孩子，转过去左指针为空；有孩子的结点左指针都不空。用讲义 p16 的森林看：叶子 D、E、F、G、H 共 5 个，T 中左指针为空的也正好是这 5 个；而 T 的叶子是 D、E、G、H 4 个，不相等。',note:'王道《数据结构》第 5 章 5.4 选择题 17（2014 统考），答案 C。下方“统计”一栏对任何输入都会实时核对这条结论。'}
+];
+/* ---------- parsing ---------- */
+function norm(s){return s.replace(/（/g,'(').replace(/）/g,')').replace(/，/g,',').replace(/；/g,';')}
+function parseForest(s0){const s=norm(s0).trim();let i=0;const seen={};const ws=()=>{while(i<s.length&&/[\s;]/.test(s[i]))i++};
+  function node(d){const c=s[i];if(!c||!/[A-Za-z0-9]/.test(c))throw `第 ${i+1} 个字符 “${c||'结尾'}” 这里应该是一个结点（字母或数字）。`;if(seen[c])throw `结点 ${c} 出现了两次。`;if(d>7)throw '树太深了，最多 8 层。';seen[c]=1;i++;const n={v:c,ch:[]};
+    if(s[i]==='('){i++;for(;;){n.ch.push(node(d+1));if(s[i]===','){i++;continue}if(s[i]===')'){i++;break}throw `结点 ${c} 的孩子之间用逗号分开，最后用右括号收尾（第 ${i+1} 个字符）。`}}return n}
+  const F=[];ws();while(i<s.length){F.push(node(0));ws()}if(!F.length)throw '先输入一棵树或一个森林。';if(Object.keys(seen).length>16)throw '最多 16 个结点。';return F}
+function parseBin(s0){const s=norm(s0).replace(/\s+/g,'');let i=0;const seen={};
+  function node(d){if(i>=s.length||s[i]===','||s[i]===')')return null;const c=s[i];if(!/[A-Za-z0-9]/.test(c))throw `第 ${i+1} 个字符 “${c}” 看不懂，结点用一个字母或数字。`;if(seen[c])throw `结点 ${c} 出现了两次。`;if(d>9)throw '树太深了。';seen[c]=1;i++;
+    const n={v:c,l:null,r:null};if(s[i]==='('){i++;n.l=node(d+1);if(s[i]!==',')throw `二叉树的结点 ${c} 括号里要正好一个逗号分开左右（第 ${i+1} 个字符）。`;i++;n.r=node(d+1);if(s[i]===',')throw `二叉树的结点 ${c} 最多两个孩子，括号里只能有一个逗号。树或森林请把上面切到“树 / 森林”。`;if(s[i]!==')')throw `结点 ${c} 的括号没有闭合（第 ${i+1} 个字符）。`;i++}return n}
+  if(!s)throw '先输入一棵二叉树。';const r=node(0);if(!r)throw '根不能是空的。';if(i!==s.length)throw `第 ${i+1} 个字符起多出来了：${s.slice(i)}。`;if(Object.keys(seen).length>16)throw '最多 16 个结点。';return r}
+function toBin(F){if(!F.length)return null;const [h,...rest]=F;return {v:h.v,l:toBin(h.ch),r:toBin(rest)}}
+function toForest(b){const out=[];while(b){out.push({v:b.v,ch:toForest(b.l)});b=b.r}return out}
+const fpre=F=>F.flatMap(t=>[t.v,...fpre(t.ch)]),fpost=F=>F.flatMap(t=>[...fpost(t.ch),t.v]);
+const bpre=t=>t?[t.v,...bpre(t.l),...bpre(t.r)]:[],bin=t=>t?[...bin(t.l),t.v,...bin(t.r)]:[],bpost=t=>t?[...bpost(t.l),...bpost(t.r),t.v]:[];
+const fstr=F=>F.map(t=>t.v+(t.ch.length?`{${fstr(t.ch)}}`:'')).join(', ');
+/* ---------- layouts ---------- */
+const SX=50,RH=66,TOP=36;
+function forestPos(F){const p={};let x=0;function w(t,d){if(!t.ch.length){p[t.v]=[x,d];x+=1.3;return}t.ch.forEach(c=>w(c,d+1));p[t.v]=[(p[t.ch[0].v][0]+p[t.ch[t.ch.length-1].v][0])/2,d]}F.forEach((t,k)=>{w(t,0);x+=0.5});return p}
+function binPosOf(b,x0){const p={};let k=0;(function w(t,d){if(!t)return;w(t.l,d+1);p[t.v]=[x0+k++,d];w(t.r,d+1)})(b,0);return [p,k]}
+function perTreeBin(F){let p={},x=0;F.forEach(t=>{const [q,k]=binPosOf(toBin([t]),x);Object.assign(p,q);x+=k+0.6});return p}
+function px(p){const o={};for(const k in p)o[k]=[24+SX*p[k][0]+SX/2,TOP+RH*p[k][1]];return o}
+/* ---------- edges ---------- */
+function treeEdges(F,cls='tree'){const e=[];(function w(L){L.forEach(t=>{t.ch.forEach(c=>e.push([t.v,c.v,cls]));w(t.ch)})})(F);return e}
+function sibEdges(F,cls='sib'){const e=[];(function w(L){L.forEach(t=>{t.ch.forEach((c,i)=>{if(i)e.push([t.ch[i-1].v,c.v,cls])});w(t.ch)})})(F);return e}
+function firstChildEdges(F,cls='L'){const e=[];(function w(L){L.forEach(t=>{if(t.ch.length)e.push([t.v,t.ch[0].v,cls]);w(t.ch)})})(F);return e}
+function otherChildEdges(F,cls='del'){const e=[];(function w(L){L.forEach(t=>{t.ch.forEach((c,i)=>{if(i)e.push([t.v,c.v,cls])});w(t.ch)})})(F);return e}
+function rootChain(F,cls){const e=[];F.forEach((t,i)=>{if(i)e.push([F[i-1].v,t.v,cls])});return e}
+/* ---------- state ---------- */
+let S={F:null,Bt:null,dir:'f',frames:[],pos:0,done:new Set(),sel:null,info:{}};
+function nodeInfo(F){const info={};(function w(L,par){L.forEach((t,i)=>{info[t.v]={par,first:t.ch[0]?t.ch[0].v:null,next:L[i+1]?L[i+1].v:null,prev:i?L[i-1].v:null,kids:t.ch.map(c=>c.v),isRoot:!par};w(t.ch,t.v)})})(F,null);return info}
+function buildFrames(){const F=S.F,k=F.length,fp=px(forestPos(F)),tp=px(perTreeBin(F)),bp=px(binPosOf(S.Bt,0)[0]);const out=[];
+  const allL=firstChildEdges(F,'L'),allR=[...sibEdges(F,'R'),...rootChain(F,'R')];
+  if(S.dir==='f'){
+    out.push({pos:fp,edges:treeEdges(F),txt:k>1?`森林有 ${k} 棵树：${fstr(F)}。先把每棵树各自转成二叉树，最后把根连起来。`:`原来的树：${fstr(F)}。按三步转成二叉树。`});
+    out.push({pos:fp,edges:[...treeEdges(F),...sibEdges(F)],txt:`① 兄弟之间连线：同一个双亲的相邻孩子之间连橙色虚线${sibEdges(F).length?`（${sibEdges(F).map(e=>e[0]+'—'+e[1]).join('、')}）`:'（这棵树没有兄弟）'}。${k>1?'各棵树的根先不连。':''}`});
+    const del=otherChildEdges(F);
+    out.push({pos:fp,edges:[...firstChildEdges(F,'L'),...del,...sibEdges(F,'R')],txt:`② 每个结点只保留和第一个孩子的连线（绿），其余孩子的连线删掉（红点线${del.length?`：${del.map(e=>e[0]+'—'+e[1]).join('、')}`:'：没有要删的'}）。这时每个结点最多向下一条绿线、向右一条橙线。`});
+    out.push({pos:tp,edges:[...firstChildEdges(F,'L'),...sibEdges(F,'R')],txt:`③ 以${k>1?'每棵树的':''}根为轴顺时针转 45°：向下的绿线变成左孩子，向右的橙线变成右孩子。${k>1?'每棵树转完，根都没有右孩子。':'根没有右孩子。'}`});
+    if(k>1)out.push({pos:bp,edges:[...firstChildEdges(F,'L'),...sibEdges(F,'R'),...rootChain(F,'new')],txt:`④ 森林：第 2 棵树的根 ${F[1].v} 作为第 1 棵根 ${F[0].v} 的右孩子${k>2?`，再往后依次挂成右孩子（${F.map(t=>t.v).join(' → ')}）`:''}，得到一棵二叉树。`});
+  }else{
+    out.push({pos:bp,edges:[...allL,...allR],txt:`二叉树：绿线是左孩子，橙线是右孩子。从根 ${S.Bt.v} 一路向右：${F.map(t=>t.v).join(' → ')}，这条右链上 ${k} 个结点，森林就有 <b>${k}</b> 棵树。`});
+    out.push({pos:tp,edges:[...allL,...sibEdges(F,'R'),...rootChain(F,'del')],txt:k>1?`① 断开根的右链（红点线 ${rootChain(F).map(e=>e[0]+'—'+e[1]).join('、')}），分成 ${k} 棵根没有右孩子的二叉树。`:`① 根 ${S.Bt.v} 没有右孩子，右链只有它自己，只有一棵树，不用断。`});
+    out.push({pos:fp,edges:[...firstChildEdges(F,'L'),...sibEdges(F,'R')],txt:'② 每棵逆时针转回去：左孩子放到下面（成第一个孩子），右孩子放平（成兄弟，橙线）。'});
+    const add=otherChildEdges(F,'new');
+    out.push({pos:fp,edges:[...firstChildEdges(F,'tree'),...add,...sibEdges(F,'del')],txt:`③ 双亲连到每一个孩子（蓝线${add.length?`：${add.map(e=>e[0]+'—'+e[1]).join('、')}`:'：没有要补的'}），兄弟横线删掉（红点线）。`});
+    out.push({pos:fp,edges:treeEdges(F),txt:`得到森林：${fstr(F)}。`});
+  }
+  const fin=out[out.length-1];const order=bpre(S.Bt);
+  order.forEach(v=>{const I=S.info[v];const L=I.first||'-',R=I.next||'-';
+    out.push({pos:fin.pos,edges:fin.edges,v,txt:`${v}：原来${I.first?`第一个孩子是 <b>${I.first}</b>`:'没有孩子'}，${I.next?`下一个兄弟是 <b>${I.next}</b>`:'没有下一个兄弟'}，所以二叉树里左孩子 ${I.first||'空'}、右孩子 ${I.next||'空'}。${I.isRoot&&I.next?`（${v} 和 ${I.next} 是森林里相邻两棵树的根，也算兄弟。）`:''}`,
+      ask:{l:`${v} 的左孩子,右孩子 =`,q:`<b>${v}</b>：它在二叉树里的左孩子和右孩子各是谁？（用原来的“第一个孩子、下一个兄弟”想，没有写 -，例如 <code>E,C</code> 或 <code>-,C</code>）`,a:L+','+R,
+        hint:(l,r)=>{if(I.kids.length>1&&l!==I.first&&I.kids.includes(l))return `左孩子只能是第一个孩子 ${I.first}，${l} 是后面的孩子。`;if(r===I.prev&&I.prev)return `${I.prev} 是它的上一个兄弟，右孩子要下一个兄弟。`;if(I.par&&r===I.par)return '双亲不会变成右孩子。';return ''}}})});
+  out.push({pos:fin.pos,edges:fin.edges,txt:'全部完成。对照下面的遍历表：二叉树先序 = 森林先根，二叉树中序 = 森林后根。'});
+  return out}
+/* ---------- drawing with animation ---------- */
+let cur=null,anim=null,BOX=null;
+function bounds(){let mx=0,my=0;S.frames.forEach(f=>Object.values(f.pos).forEach(([x,y])=>{mx=Math.max(mx,x);my=Math.max(my,y)}));return [mx+24+SX/2,my+40]}
+function draw(P){const f=S.frames[S.pos];const [W,H]=BOX;const sel=S.sel,I=sel?S.info[sel]:null;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" style="max-width:none" role="img" aria-label="转换图">`;
+  f.edges.forEach(([a,b,c])=>{const [x1,y1]=P[a],[x2,y2]=P[b];s+=`<line class="e ${c}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`});
+  const roots=new Set(S.F.map(t=>t.v));
+  Object.keys(P).forEach(v=>{const [x,y]=P[v];let c='n-c';if(f.v===v||sel===v)c+=' cur';else if(I&&I.first===v)c+=' lc';else if(I&&I.next===v)c+=' rs';
+    s+=`<g data-v="${esc(v)}" style="cursor:pointer"><circle class="${c}" cx="${x}" cy="${y}" r="17"/><text class="n-t" x="${x}" y="${y}">${esc(v)}</text></g>`});
+  $('fig').innerHTML=s+'</svg>';$('fig').querySelectorAll('[data-v]').forEach(g=>g.onclick=()=>{S.sel=g.dataset.v;draw(cur);showInfo()})}
+function goTo(P){if(anim)cancelAnimationFrame(anim);const from=cur||P;const t0=performance.now(),D=520;const same=Object.keys(P).every(k=>from[k]&&from[k][0]===P[k][0]&&from[k][1]===P[k][1]);
+  if(same||matchMedia('(prefers-reduced-motion: reduce)').matches){cur=P;draw(P);return}
+  const step=now=>{let u=Math.min(1,(now-t0)/D);u=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;const Q={};for(const k in P){const a=from[k]||P[k];Q[k]=[a[0]+(P[k][0]-a[0])*u,a[1]+(P[k][1]-a[1])*u]}cur=Q;draw(Q);if(u<1)anim=requestAnimationFrame(step);else{cur=P;anim=null}};anim=requestAnimationFrame(step)}
+function pending(){const f=S.frames[S.pos];return $('guessMode').checked&&f&&f.ask&&!S.done.has(S.pos)}
+function render(msg,instant){const f=S.frames[S.pos];if(instant){cur=f.pos;draw(cur)}else goTo(f.pos);
+  $('note').innerHTML=msg||(pending()?f.ask.q:f.txt);$('prog').textContent=`第 ${S.pos} / ${S.frames.length-1} 步`;
+  $('prev').disabled=S.pos===0;$('next').disabled=S.pos===S.frames.length-1&&!pending();
+  $('gbox').classList.toggle('hidden',!pending());if(pending()){$('gq').innerHTML=f.ask.l;if(!msg)$('gin').value=''}}
+function normAns(x){x=x.trim();if(/^(无|空|null|none|-|—)$/i.test(x)||x==='')return '-';return x}
+function check(){const f=S.frames[S.pos];const raw=$('gin').value.trim();if(!raw)return;const parts=raw.split(/[\s,，、/]+/);const l=normAns(parts[0]||''),r=normAns(parts[1]||'');
+  const [al,ar]=f.ask.a.split(',');const ok=l.toLowerCase()===al.toLowerCase()&&r.toLowerCase()===ar.toLowerCase();S.done.add(S.pos);
+  render((ok?'<span class="ok">对了。</span> ':`<span class="bad">你填 ${esc(l)},${esc(r)}，应为 ${al},${ar}。</span>${f.ask.hint(l,r)} `)+f.txt,true)}
+$('next').onclick=()=>{if(pending()){$('gin').focus();return}if(S.pos<S.frames.length-1){S.pos++;render();if(pending())$('gin').focus()}};
+$('prev').onclick=()=>{if(S.pos>0){S.pos--;render()}};$('reset').onclick=()=>{S.pos=0;S.done=new Set();render()};
+$('all').onclick=()=>{S.frames.forEach((_,i)=>S.done.add(i));S.pos=S.frames.length-1;render()};
+$('gbtn').onclick=check;$('gin').onkeydown=e=>{if(e.key==='Enter')check()};$('guessMode').onchange=()=>render(null,true);
+/* ---------- side panels ---------- */
+const TYPES=[['有孩子，没兄弟','只有左子树'],['有孩子，只有左兄弟','只有左子树'],['有孩子，只有右兄弟','双分支结点'],['有孩子，有左右兄弟','双分支结点'],['没有孩子，没有兄弟','叶子结点'],['没有孩子，只有左兄弟','叶子结点'],['没有孩子，只有右兄弟','只有右子树'],['没有孩子，有左右兄弟','只有右子树']];
+function typeOf(v){const I=S.info[v];return (I.first?0:4)+(I.prev&&I.next?3:I.next?2:I.prev?1:0)}
+function members(t){return Object.keys(S.info).filter(v=>typeOf(v)===t)}
+function showTypes(){const hit=S.sel?typeOf(S.sel):-1;$('types').innerHTML=`<tr><th>#</th><th>原来的树里</th><th>转成二叉树后</th><th>这组数据里的结点</th></tr>`+TYPES.map((r,i)=>`<tr class="${i===hit?'hit':''}"><th>${i+1}</th><td>${r[0]}</td><td>${r[1]}</td><td class="m">${members(i).join(' ')||'—'}</td></tr>`).join('')}
+function showInfo(){showTypes();if(!S.sel||!S.info[S.sel]){$('info').innerHTML='点图里的任一结点。';return}const v=S.sel,I=S.info[v];
+  $('info').innerHTML=`<b>${esc(v)}</b>：原来${I.par?`是 ${I.par} 的孩子`:'是一棵树的根'}，${I.kids.length?`孩子 ${I.kids.join('、')}`:'没有孩子'}；${I.prev?`上一个兄弟 ${I.prev}`:'没有上一个兄弟'}，${I.next?`下一个兄弟 ${I.next}`:'没有下一个兄弟'}${I.isRoot&&S.F.length>1?'（森林里相邻的根算兄弟）':''}。<br>二叉树里：左孩子 <b class="l">${I.first||'空'}</b> = 第一个孩子；右孩子 <b class="r">${I.next||'空'}</b> = 下一个兄弟。属于 8 类里的第 ${typeOf(v)+1} 类：${TYPES[typeOf(v)][0]} → ${TYPES[typeOf(v)][1]}。${I.kids.length>1?`其余孩子 ${I.kids.slice(1).join('、')} 不直接挂在 ${v} 下，而是顺着 ${I.first} 的右链排下去。`:''}`}
+function showTrav(){const F=S.F,B=S.Bt;const a=fpre(F).join(''),b=bpre(B).join(''),c=fpost(F).join(''),d=bin(B).join(''),e=bpost(B).join('');const one=F.length===1;
+  $('trav').innerHTML=`<tr><th>${one?'树':'森林'}</th><th>序列</th><th>二叉树</th><th>序列</th><th></th></tr>
+   <tr><td>${one?'先根遍历':'先序遍历（先根）'}</td><td class="m">${a}</td><td>先序遍历</td><td class="m">${b}</td><td class="${a===b?'yes':'no'}">${a===b?'相同':'不同'}</td></tr>
+   <tr><td>${one?'后根遍历':'中序遍历（后根）'}</td><td class="m">${c}</td><td>中序遍历</td><td class="m">${d}</td><td class="${c===d?'yes':'no'}">${c===d?'相同':'不同'}</td></tr>
+   <tr><td style="color:var(--muted)">没有对应</td><td></td><td>后序遍历</td><td class="m">${e}</td><td class="no">${e===c?'碰巧相同':'≠ 后根'}</td></tr>`}
+function showStats(){const B=S.Bt;let n0=0,nl=0,nr=0,n2=0,lnull=0,rnull=0;(function w(t){if(!t)return;const l=!!t.l,r=!!t.r;if(l&&r)n2++;else if(l)nl++;else if(r)nr++;else n0++;if(!l)lnull++;if(!r)rnull++;w(t.l);w(t.r)})(B);
+  const n=Object.keys(S.info).length,leaf=Object.values(S.info).filter(I=>!I.first).length,branch=n-leaf;
+  $('stats').innerHTML=`<div>结点 <b>${n}</b>，${S.F.length} 棵树</div><div>原森林叶子 <b>${leaf}</b>，分支 <b>${branch}</b></div><div>二叉树叶子 n₀ <b>${n0}</b></div><div>只有左子树 <b>${nl}</b></div><div>只有右子树 <b>${nr}</b></div><div>双分支 n₂ <b>${n2}</b></div><div>左指针空 <b>${lnull}</b></div><div>右指针空（无右孩子）<b>${rnull}</b></div>`;
+  $('checks').innerHTML=`<div>2014：森林叶子数 ${leaf} ${leaf===lnull?'=':'≠'} 二叉树左指针为空的结点数 ${lnull} <span class="${leaf===lnull?'yes':'no'}">${leaf===lnull?'✓':'✗'}</span>；二叉树叶子数是 ${n0}，${n0===leaf?'这组碰巧相等':'不一定相等'}。</div><div>2011：无右孩子的结点数 ${rnull} ${rnull===branch+1?'=':'≠'} 分支结点数 ${branch} + 1 <span class="${rnull===branch+1?'yes':'no'}">${rnull===branch+1?'✓':'✗'}</span>。</div><div>强化 p55：叶子 + 只有右子树 = ${n0} + ${nr} = ${n0+nr}，等于原来的叶子数 ${leaf}；n₀ = n₂ + 1：${n0} = ${n2} + 1 <span class="${n0===n2+1?'yes':'no'}">${n0===n2+1?'✓':'✗'}</span>。</div>`}
+function calc(){const n=+$('cn').value,l=+$('cl').value;if(!Number.isInteger(n)||!Number.isInteger(l)||n<1||l<1||l>n||(n>1&&l===n)){$('calc').innerHTML='<span class="bad">结点数、叶子数要是正整数；结点多于 1 个时叶子数要小于结点数。</span>';return}
+  $('calc').innerHTML=n===1?'只有一个根：无右孩子的结点数 1。':`分支结点 ${n} − ${l} = ${n-l}，无右孩子的结点数 = ${n-l} + 1 = <b>${n-l+1}</b>。`}
+$('cn').oninput=calc;$('cl').oninput=calc;
+/* ---------- load ---------- */
+function setFmt(){const f=$('dir').value==='f';$('inLab').textContent=f?'树或森林':'二叉树';$('fmt').innerHTML=f?'写法：<code>A(B(E,F),C,D(G,H,I))</code>，括号里是全部孩子，用逗号隔开；森林的几棵树用空格或分号隔开，如 <code>A(B(D),E) C(F,G) H</code>。':'写法：<code>A(B(D,E),C(,F))</code>，括号里逗号左边是左子树，右边是右子树，空着就是没有。'}
+$('dir').onchange=setFmt;
+function load(sel){const dir=$('dir').value;try{if(dir==='f'){S.F=parseForest($('src').value);S.Bt=toBin(S.F)}else{S.Bt=parseBin($('src').value);S.F=toForest(S.Bt)}}catch(e){$('err').textContent=e;return}
+  $('err').textContent='';S.dir=dir;S.info=nodeInfo(S.F);S.sel=sel||null;S.frames=buildFrames();BOX=bounds();S.pos=0;S.done=new Set();cur=null;render(null,true);showInfo();showTrav();showStats()}
+$('go').onclick=()=>{$('presets').querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed','false'));$('question').innerHTML='自己输入的数据。';$('srcnote').textContent='自己输入的数据。';load()};
+$('src').onkeydown=e=>{if(e.key==='Enter')$('go').click()};
+$('presets').insertAdjacentHTML('beforeend',PRESETS.map((p,i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p.t}</button>`).join(''));
+$('presets').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const p=PRESETS[+b.dataset.p];$('dir').value=p.dir;setFmt();$('src').value=p.src;
+  $('presets').querySelectorAll('[data-p]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  $('question').innerHTML=`${esc(p.q)}<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${esc(p.ans)}</span></details>`;$('srcnote').textContent=p.note;load(p.sel)};
+calc();$('presets').querySelector('[data-p="0"]').click();
+</script>
+</body>
+</html>
