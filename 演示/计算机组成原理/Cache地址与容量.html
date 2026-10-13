@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cache 地址与容量</title>
+<style>
+/* Cache calculator: split a main-memory address into tag / index / offset for direct, set-associative and fully associative mapping, add the per-line control bits, and total the capacity. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --tag:#c8553d; --idx:#4d6fa8; --off:#3f7d4f; --ctl:#d99a1e;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --tag:#ef7a5f; --idx:#86a8e6; --off:#5fbf7a; --ctl:#e8b13d; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:14px var(--serif);font-weight:600;margin:12px 0 6px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],.form input[type=number],select{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:7.5em}
+select{font-family:var(--sans);width:auto}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink)}
+.btn,.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.chip{border-radius:999px;padding:2px 12px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:10px}
+.err{color:var(--mv);font-size:13px;min-height:1em;margin-top:6px}
+.bar{display:flex;width:100%;border-radius:5px;overflow:hidden;font:13px/1.3 var(--mono);color:#fff;min-height:54px}
+.bar div{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:6px 4px;min-width:64px;text-align:center}
+.bar small{font-size:11px;opacity:.9;font-family:var(--sans)}
+.f-tag{background:var(--tag)}.f-idx{background:var(--idx)}.f-off{background:var(--off)}.f-ctl{background:var(--ctl);color:#1d1d1d}.f-data{background:var(--muted)}
+.scale{display:flex;justify-content:space-between;font:11px var(--mono);color:var(--muted);margin-top:2px}
+.calc{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.calc code,.mono{font-family:var(--mono)}
+.big{font:20px var(--serif);font-weight:600;color:var(--green)}
+.ans{border-radius:3px;transition:filter .15s}
+body.closed .ans:not(.shown){filter:blur(6px);background:var(--hl);cursor:pointer;user-select:none}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;min-width:520px;width:100%}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--hl);font-weight:600}
+.bits{font:13px var(--mono);word-break:break-all;line-height:1.9}
+.bits span{padding:1px 2px;border-radius:2px}
+.b-tag{background:color-mix(in srgb,var(--tag) 28%,transparent)}.b-idx{background:color-mix(in srgb,var(--idx) 28%,transparent)}.b-off{background:color-mix(in srgb,var(--off) 28%,transparent)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>Cache 地址与容量</h1>
+    <p class="sub">主存地址怎么拆成“标记 | 行号或组号 | 块内地址”，每行要加哪些控制位（有效位、脏位、LRU 位），总容量怎么算，数组元素落在哪一行。对应 2010-44 第 (1)(2) 问。改任何一个条件，下面的拆分和算式都会跟着变。</p>
+  </header>
+
+  <section class="panel">
+    <h2>这一类怎么做</h2>
+    <ol class="rules">
+      <li><b>地址位数</b> = log₂(主存容量 ÷ 编址单位)。按字节编址，256MB = 2²⁸B，就是 28 位。</li>
+      <li><b>块内地址</b> = log₂(块大小 ÷ 编址单位)。</li>
+      <li><b>行数</b> = Cache 数据区 ÷ 块大小；<b>组数</b> = 行数 ÷ 路数。直接映射是 1 路（组数 = 行数），全相联只有 1 组。</li>
+      <li><b>中间字段</b> = log₂(组数)：直接映射叫行号，组相联叫组号，全相联没有这一段。</li>
+      <li><b>标记</b> = 地址位数 − 中间字段 − 块内地址。</li>
+      <li><b>每行控制位</b>：有效位 1 位一定有；脏位 1 位只在<b>回写</b>时有；LRU 位只在用 LRU 时有，位数 = log₂(每组行数)。题目说“不考虑一致性维护和替换算法的控制位”，就只算有效位。</li>
+      <li><b>总容量</b> = 行数 × (控制位 + 标记 + 块大小×8)，单位是<b>位</b>。不含数据的那部分叫标记阵列。</li>
+      <li><b>元素在哪行</b>：地址 = 首地址 + 下标 × 元素大小 → 块号 = ⌊地址 ÷ 块大小⌋ → 组号 = 块号 mod 组数（直接映射就是行号）。</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <h2>条件</h2>
+    <div class="form">
+      <label>主存容量<input id="mem" type="text" value="256MB"></label>
+      <label>编址单位<select id="unit"><option value="1">按字节</option><option value="2">按字（2B）</option><option value="4">按字（4B）</option><option value="8">按字（8B）</option></select></label>
+      <label>Cache 数据区<input id="cache" type="text" value="512B"></label>
+      <label>块（行）大小<input id="blk" type="text" value="64B"></label>
+      <label>映射方式<select id="map"><option value="d">直接映射</option><option value="s">组相联</option><option value="f">全相联</option></select></label>
+      <label id="wayBox">每组几行（路数）<input id="ways" type="number" min="1" value="2"></label>
+      <label>写策略<select id="wp"><option value="wb">回写（有脏位）</option><option value="wt">全写（无脏位）</option></select></label>
+      <label>替换算法<select id="rp"><option value="none">随机／不考虑（无替换位）</option><option value="lru">LRU（log₂ 路数 位）</option></select></label>
+      <label class="chk"><input id="noCtl" type="checkbox"> 题目说不考虑一致性和替换控制位</label>
+    </div>
+    <div class="presets" id="presets">例题：</div>
+    <div class="err" id="err" role="alert"></div>
+    <p class="tip"><label class="chk" style="display:inline-flex;gap:6px"><input id="closed" type="checkbox"> 闭卷：先遮住结果，自己算完再点灰块对答案</label></p>
+  </section>
+
+  <section class="panel">
+    <h2>① 主存地址怎么拆</h2>
+    <div class="bar" id="addrBar"></div>
+    <div class="scale" id="addrScale"></div>
+    <ol class="calc" id="addrCalc" style="margin-top:10px"></ol>
+    <h3>代一个具体地址</h3>
+    <div class="form"><label>地址（十六进制加 H，或十进制）<input id="addr" type="text" value="0123456H" style="width:11em"></label></div>
+    <div class="bits" id="addrBits"></div>
+  </section>
+
+  <section class="panel">
+    <h2>② 一行 Cache 里存什么</h2>
+    <div class="bar" id="lineBar"></div>
+    <ol class="calc" id="lineCalc" style="margin-top:10px"></ol>
+  </section>
+
+  <section class="panel">
+    <h2>③ 总容量</h2>
+    <ol class="calc" id="totCalc"></ol>
+  </section>
+
+  <section class="panel">
+    <h2>④ 数组元素落在哪一行</h2>
+    <div class="form">
+      <label>首地址（十进制，或带 H）<input id="base" type="text" value="320"></label>
+      <label>元素大小（B）<input id="esz" type="number" min="1" value="4"></label>
+      <label>每行元素数（列数）<input id="cols" type="number" min="1" value="256"></label>
+      <label>下标（i,j；一维只写 i）<input id="subs" type="text" value="0,31; 1,1" style="width:12em"></label>
+    </div>
+    <ol class="calc" id="elemCalc" style="margin-top:10px"></ol>
+    <p class="tip">按行顺序遍历、数组按块对齐时：每块装 块大小 ÷ 元素大小 个元素，只有每块的第一个缺失，命中率 = 1 − 元素大小 ÷ 块大小（2010-44 程序 A：1 − 4/64 = 15/16）。按列遍历时相邻两次访问相隔一整行，若 Cache 装不下这么多块，就每次都缺失。</p>
+  </section>
+
+  <section class="panel two">
+    <div>
+      <h2>三种映射对比</h2>
+      <div class="tw"><table>
+        <tr><th></th><th>直接映射</th><th>k 路组相联</th><th>全相联</th></tr>
+        <tr><td>地址字段</td><td>标记｜行号｜块内</td><td>标记｜组号｜块内</td><td>标记｜块内</td></tr>
+        <tr><td>主存块放哪</td><td>块号 mod 行数，唯一一行</td><td>块号 mod 组数，组内任一行</td><td>任一行</td></tr>
+        <tr><td>查找时比较几个标记</td><td>1 个</td><td>k 个</td><td>全部行</td></tr>
+        <tr><td>LRU 位</td><td>不需要（没得选）</td><td>log₂k 位</td><td>log₂(行数) 位</td></tr>
+        <tr><td>标记长度</td><td>最短</td><td>中间</td><td>最长</td></tr>
+        <tr><td>冲突缺失</td><td>最多</td><td>中间</td><td>最少</td></tr>
+      </table></div>
+    </div>
+    <div>
+      <h2>每行控制位</h2>
+      <div class="tw"><table>
+        <tr><th>位</th><th>几位</th><th>什么时候有</th><th>作用</th></tr>
+        <tr><td>有效位 V</td><td>1</td><td>一定有</td><td>这行装没装有效数据</td></tr>
+        <tr><td>标记 Tag</td><td>见 ①</td><td>一定有</td><td>这行装的是主存哪一块</td></tr>
+        <tr><td>脏位 D</td><td>1</td><td>只有回写法</td><td>这行改过没有，换出时要不要写回主存</td></tr>
+        <tr><td>LRU 位</td><td>log₂(每组行数)</td><td>只有 LRU</td><td>记录组内各行的访问先后</td></tr>
+      </table></div>
+      <p class="tip">依据：王道 27 版第 3 章“标记信息”一节：有效位和标记位所有 Cache 都有，脏位仅回写时有，LRU 位仅用 LRU 时有，位数取决于组内行数（2 路 1 位、4 路 2 位）。其他替换算法要不要控制位、几位，按题目说明。</p>
+    </div>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const PRESETS=[
+  {name:'2010-44',mem:'256MB',unit:'1',cache:'512B',blk:'64B',map:'d',ways:1,wp:'wb',rp:'none',noCtl:true,addr:'0123456H',base:'320',esz:4,cols:256,subs:'0,31; 1,1',
+   note:'8 行 × 64B，直接映射；题目说不考虑一致性维护和替换控制位，所以每行只加有效位。'},
+  {name:'王道例 3.3 改 2 路',mem:'256MB',unit:'1',cache:'512B',blk:'64B',map:'s',ways:2,wp:'wt',rp:'none',noCtl:true,addr:'3200',base:'0',esz:1,cols:1,subs:'3200',
+   note:'同样 8 行改成 2 路组相联：4 组，组号 2 位。地址 3200 在第 50 块，50 mod 4 = 2，可放第 4 或 5 行。'},
+  {name:'王道 3 章综合 01',mem:'4GB',unit:'1',cache:'8KB',blk:'64B',map:'s',ways:4,wp:'wb',rp:'none',noCtl:false,addr:'',base:'0',esz:4,cols:1,subs:'0',
+   note:'32 位地址，128 块，4 路组相联，随机替换（无替换位），回写（每行 1 位脏位）。'},
+  {name:'王道 3 章综合 02（回写）',mem:'4GB',unit:'1',cache:'64KB',blk:'128B',map:'s',ways:4,wp:'wb',rp:'lru',noCtl:false,addr:'',base:'0',esz:4,cols:1,subs:'0',
+   note:'64KB、行长 128B、4 路组相联、LRU（2 位），回写。把写策略改成全写，看标记阵列少多少。'},
+  {name:'全相联',mem:'4GB',unit:'1',cache:'16KB',blk:'32B',map:'f',ways:1,wp:'wb',rp:'lru',noCtl:false,addr:'',base:'0',esz:4,cols:1,subs:'0',
+   note:'全相联没有行号／组号，标记最长；LRU 位要在全部行里排先后。（练习数据）'}
+];
+const UNIT={B:1,KB:2**10,MB:2**20,GB:2**30,TB:2**40,K:2**10,M:2**20,G:2**30,T:2**40};
+function parseSize(s){const m=String(s).trim().toUpperCase().replace(/\s+/g,'').match(/^(\d+(?:\.\d+)?)(TB|GB|MB|KB|B|T|G|M|K)?$/);if(!m)return NaN;return Number(m[1])*(UNIT[m[2]||'B'])}
+function lg(x){const l=Math.log2(x);return Number.isInteger(l)?l:NaN}
+function fmtSize(b){for(const [u,v] of [['GB',2**30],['MB',2**20],['KB',2**10]])if(b>=v&&b%v===0)return (b/v)+u;return b+'B'}
+function pw(n){return '2'+String(n).split('').map(c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]).join('')}
+function parseNum(s){s=String(s).trim().toUpperCase();if(!s)return null;try{if(/^0X[0-9A-F]+$/.test(s))return BigInt(s);if(/^[0-9A-F]+H$/.test(s))return BigInt('0x'+s.slice(0,-1));if(/^\d+$/.test(s))return BigInt(s)}catch(e){}return NaN}
+const A=(x,cls='')=>`<span class="ans ${cls}">${x}</span>`;
+function kbits(b){return b%1024===0?`${b} 位 = ${b/1024}K 位`:`${b} 位`}
+
+function compute(){
+  const err=[];const mem=parseSize($('mem').value),unit=+$('unit').value,cache=parseSize($('cache').value),blk=parseSize($('blk').value);
+  const map=$('map').value;let ways=map==='d'?1:Math.max(1,+$('ways').value||1);
+  $('wayBox').hidden=map!=='s';
+  const aBits=lg(mem/unit),off=lg(blk/unit),lines=cache/blk;
+  if(isNaN(mem)||isNaN(aBits))err.push('主存容量 ÷ 编址单位要是 2 的整数次幂，例如 256MB、4GB。');
+  if(isNaN(blk)||isNaN(off)||blk<unit)err.push('块大小要是 2 的整数次幂，且不小于编址单位。');
+  if(isNaN(cache)||!Number.isInteger(lines)||isNaN(lg(lines)))err.push('Cache 数据区 ÷ 块大小要是 2 的整数次幂。');
+  if(map==='f')ways=lines;
+  if(map==='s'&&(isNaN(lg(ways))||ways>lines))err.push('路数要是 2 的整数次幂，且不超过行数。');
+  $('err').textContent=err.join(' ');if(err.length)return null;
+  const sets=lines/ways,idx=lg(sets),tag=aBits-idx-off;
+  if(tag<0){$('err').textContent='Cache 比主存还大，检查单位。';return null}
+  const noCtl=$('noCtl').checked;
+  const D=(!noCtl&&$('wp').value==='wb')?1:0;
+  const R=(!noCtl&&$('rp').value==='lru')?lg(ways):0;
+  return {mem,unit,cache,blk,map,ways,aBits,off,lines,sets,idx,tag,V:1,D,R,data:blk*8,noCtl};
+}
+
+function render(){
+  const c=compute();if(!c){['addrBar','addrScale','addrCalc','addrBits','lineBar','lineCalc','totCalc','elemCalc'].forEach(i=>$(i).innerHTML='');return}
+  const midName=c.map==='d'?'行号':c.map==='s'?'组号':'';
+  const unitName=c.unit===1?'B':`字（${c.unit}B）`;
+  // ① address bar
+  const segs=[['f-tag','标记 Tag',c.tag]];if(c.idx>0)segs.push(['f-idx',midName,c.idx]);segs.push(['f-off','块内地址',c.off]);
+  $('addrBar').innerHTML=segs.map(([cl,n,b])=>`<div class="${cl}" style="flex:${Math.max(b,3)}"><small>${n}</small>${A(b+' 位')}</div>`).join('');
+  $('addrScale').innerHTML=`<span>第 ${c.aBits-1} 位</span><span>共 ${A(c.aBits)} 位</span><span>第 0 位</span>`;
+  const L=[];
+  L.push(`地址位数：${fmtSize(c.mem)} ÷ ${c.unit}B = ${pw(c.aBits)} 个${c.unit===1?'字节':'字'}，所以 ${A(c.aBits+' 位')}。`);
+  L.push(`块内地址：${fmtSize(c.blk)} ÷ ${c.unit}B = ${pw(c.off)}，所以 ${A(c.off+' 位')}。`);
+  L.push(`行数：${fmtSize(c.cache)} ÷ ${fmtSize(c.blk)} = ${A(c.lines+' 行')}。`+(c.map==='d'?'直接映射，一行就是一组。':c.map==='s'?`${c.ways} 路组相联，组数 = ${c.lines} ÷ ${c.ways} = ${A(c.sets+' 组')}。`:'全相联，所有行算 1 组。'));
+  L.push(c.map==='f'?'全相联没有行号／组号字段。':`${midName}：log₂${c.sets} = ${A(c.idx+' 位')}。`);
+  L.push(`标记：${c.aBits} − ${c.idx} − ${c.off} = ${A(c.tag+' 位')}。`);
+  $('addrCalc').innerHTML=L.map(x=>`<li>${x}</li>`).join('');
+  // concrete address
+  const a=parseNum($('addr').value);
+  if(a===null)$('addrBits').innerHTML='';
+  else if(Number.isNaN(a)||a<0n||a>=(1n<<BigInt(c.aBits)))$('addrBits').innerHTML=`<span style="color:var(--mv)">地址不在 0～2^${c.aBits}−1 内，或写法不对。</span>`;
+  else{const bin=a.toString(2).padStart(c.aBits,'0');const t=bin.slice(0,c.tag),i=bin.slice(c.tag,c.tag+c.idx),o=bin.slice(c.tag+c.idx);
+    const blockNo=a>>BigInt(c.off);
+    $('addrBits').innerHTML=`<span class="b-tag">${t||'∅'}</span> <span class="b-idx">${i}</span> <span class="b-off">${o}</span><br>`+
+      `标记 = ${A(t?BigInt('0b'+t).toString(16).toUpperCase()+'H':'0')}，`+(c.idx?`${midName} = ${A(parseInt(i,2))}，`:'')+`块内地址 = ${A(parseInt(o,2))}；主存块号 = 地址 ÷ 块大小 = ${A(blockNo.toString())}`+(c.idx?`，${blockNo} mod ${c.sets} = ${A((blockNo%BigInt(c.sets)).toString())}`:'')+'。'}
+  // ② line
+  const lsegs=[['f-ctl','有效位',c.V]];if(c.D)lsegs.push(['f-ctl','脏位',c.D]);if(c.R)lsegs.push(['f-ctl','LRU',c.R]);lsegs.push(['f-tag','标记',c.tag],['f-data','数据',c.data]);
+  $('lineBar').innerHTML=lsegs.map(([cl,n,b])=>`<div class="${cl}" style="flex:${n==='数据'?8:Math.max(b,2)}"><small>${n}</small>${A(b+' 位')}</div>`).join('');
+  const per=c.V+c.D+c.R+c.tag+c.data,tagArr=c.V+c.D+c.R+c.tag;
+  const LL=[`有效位 1 位：所有 Cache 都有。`,
+    c.noCtl?`题目说不考虑一致性维护和替换控制位：脏位、LRU 位都不算。`:($('wp').value==='wb'?`回写：每行加 ${A('1 位')}脏位。`:`全写：不需要脏位。`),
+    c.noCtl?'':($('rp').value==='lru'?(c.map==='d'?`直接映射每组只有 1 行，没得选，LRU 位为 ${A('0')}。`:`LRU：log₂${c.ways} = ${A(c.R+' 位')}。`):'随机替换或题目未提：不加替换位。'),
+    `标记 ${c.tag} 位，数据 ${fmtSize(c.blk)} × 8 = ${c.data} 位。`,
+    `每行 = ${[c.V,c.D,c.R].filter(x=>x).join(' + ')} + ${c.tag} + ${c.data} = ${A(per+' 位')}。`].filter(x=>x);
+  $('lineCalc').innerHTML=LL.map(x=>`<li>${x}</li>`).join('');
+  // ③ total
+  const tot=per*c.lines;
+  $('totCalc').innerHTML=[`总容量 = 行数 × 每行 = ${c.lines} × ${A(per)} = <span class="big">${A(kbits(tot))}</span>`,
+    `其中数据区 ${c.lines} × ${c.data} = ${kbits(c.lines*c.data)}（= ${fmtSize(c.cache)}）；标记阵列 ${c.lines} × ${A(tagArr)} = ${A(kbits(c.lines*tagArr))}。`,
+    `常见错：只算数据区 ${fmtSize(c.cache)}；单位混用字节和位；忘了回写要脏位；直接映射也去加 LRU 位。`].map(x=>`<li>${x}</li>`).join('');
+  // ④ elements
+  const base=parseNum($('base').value),esz=+$('esz').value,cols=+$('cols').value;const out=[];
+  if(Number.isNaN(base)||base===null||!(esz>0)||!(cols>0))out.push('首地址、元素大小、列数要填数字。');
+  else for(const part of $('subs').value.split(/[;；]/)){const s=part.trim();if(!s)continue;const nums=s.split(/[,，\s]+/).map(Number);
+    if(nums.some(n=>!Number.isInteger(n)||n<0)){out.push(`“${s}”写法不对。`);continue}
+    const [i,j]=nums.length>1?nums:[nums[0],null];const k=j===null?i:i*cols+j;
+    const ad=Number(base)+k*esz*1;const bytesPerUnit=c.unit;const unitAddr=Math.floor(ad/bytesPerUnit);const blockNo=Math.floor(unitAddr/(c.blk/c.unit));
+    const nm=j===null?`a[${i}]`:`a[${i}][${j}]`;const pos=j===null?`${i}`:`(${i}×${cols}+${j})`;
+    let where;if(c.map==='d')where=`行号 = ${blockNo} mod ${c.lines} = ${A(blockNo%c.lines)}`;
+    else if(c.map==='s'){const g=blockNo%c.sets;where=`组号 = ${blockNo} mod ${c.sets} = ${A(g)}，可放第 ${A(g*c.ways+'～'+(g*c.ways+c.ways-1))} 行`}
+    else where='全相联，可放任一行';
+    out.push(`${nm}：地址 = ${Number(base)} + ${pos}×${esz} = ${A(ad)}${c.unit>1?`（按字编址先 ÷${c.unit}）`:''}；块号 = ⌊${c.unit>1?unitAddr:ad} ÷ ${c.blk/c.unit}⌋ = ${A(blockNo)}；${where}。`)}
+  $('elemCalc').innerHTML=out.map(x=>`<li>${x}</li>`).join('');
+  bindAns();
+}
+function bindAns(){document.querySelectorAll('.ans').forEach(e=>e.onclick=()=>e.classList.add('shown'))}
+function load(p){for(const k of ['mem','unit','cache','blk','map','ways','wp','rp','addr','base','esz','cols','subs'])$(k).value=p[k];$('noCtl').checked=p.noCtl;$('err').textContent='';render();$('err').textContent='';const n=$('presetNote');n.textContent=p.note}
+$('presets').innerHTML+=PRESETS.map((p,i)=>`<button class="chip" type="button" data-i="${i}">${p.name}</button>`).join(' ')+'<span id="presetNote" style="flex-basis:100%"></span>';
+$('presets').addEventListener('click',e=>{const b=e.target.closest('button');if(b)load(PRESETS[+b.dataset.i])});
+document.querySelectorAll('input,select').forEach(e=>{if(e.id!=='closed')e.addEventListener('input',render)});
+$('closed').addEventListener('change',()=>{document.body.classList.toggle('closed',$('closed').checked);document.querySelectorAll('.ans').forEach(e=>e.classList.remove('shown'))});
+load(PRESETS[0]);
+</script>
+</body>
+</html>
