@@ -74,11 +74,15 @@ th{background:var(--hl);font-weight:600}
 .it{border-collapse:collapse;font-size:13px;min-width:0;width:auto;margin:6px 0}
 .it td,.it th{border:1px solid var(--line);padding:3px 8px}
 .it tr.hit td{background:var(--hl);font-weight:700}
-.flags{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:8px 0}
+.flags{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0}
+@media (max-width:700px){.flags{grid-template-columns:minmax(0,1fr)}}
 .flag{border:1px solid var(--line);border-radius:5px;padding:6px 10px;background:var(--bg)}
 .flag b{font:20px var(--mono);color:var(--green);margin-right:6px}
 .flag .f{font:13px var(--mono);color:var(--muted)}
-.flag p{margin:3px 0 0;font-size:13px}
+.flag p{margin:2px 0 0;font-size:13px;line-height:1.6}
+.flag h4{margin:8px 0 0;font-size:12px;color:var(--green)}
+.flag .nm{font-size:13px;color:var(--muted);margin-right:8px}
+.flag .big{font-size:18px}
 .verdict{font-weight:700}
 .y{color:var(--mv)}
 .n{color:var(--done)}
@@ -261,9 +265,28 @@ function renderAS(n,op,a,b,sa,sb,smin,smax,umax){
     `<tr><td>无符号数</td><td>${a} ${sub?'−':'+'} ${b} = ${nf(ut)}</td><td>${r}</td><td>${A(yn(uo,'不对，溢出','对'))}</td></tr>`+
     `<tr><td>有符号数</td><td>${nf(sa)} ${sub?'−':'+'} ${sb<0?'('+nf(sb)+')':sb} = ${nf(st)}</td><td>${nf(sr)}</td><td>${A(yn(so,'不对，溢出','对'))}</td></tr>`;
   const ZF=r===0?1:0,SF=r>>(n-1)&1,CF=sub^Cout,OF=Cn^Cout;
-  const F=(k,v,f,t)=>`<div class="flag"><b>${k}</b>${A('<span class="mono">= '+v+'</span>')}<div class="f">${f}</div><p>${t}</p></div>`;
-  $('flags').innerHTML=F('ZF',ZF,'结果全 0 时为 1',ZF?'结果是 0。':'结果不是 0。')+F('SF',SF,'= 结果最高位',`结果最高位是 ${SF}。`)+
-    F('CF',CF,`= sub ⊕ Cout = ${sub} ⊕ ${Cout}`,'给无符号数用：1 表示溢出（加法进位或减法借位）。')+F('OF',OF,`= Cn ⊕ Cn+1 = ${Cn} ⊕ ${Cout}`,'给有符号数用：1 表示溢出。');
+  const F=(k,name,v,f,secs)=>`<div class="flag"><div><b>${k}</b><span class="nm">${name}</span>${A('<span class="mono big">= '+v+'</span>')}</div><div class="f">${f}</div>${secs.map(([h,t])=>`<h4>${h}</h4><p>${t}</p>`).join('')}</div>`;
+  const rb=grp(bits(r,n)),xs=a>>(n-1)&1,y2=y>>(n-1)&1,raw=a+y+sub;
+  const ovCase=xs===y2?(xs===0?`两个送进加法器的数都是正的（符号位都是 0），符号位相加 0 + 0 永远不会再向外进位，所以 Cn+1 一定是 0；这时只要数值位向符号位进了位（Cn = 1），符号位就被“冲”成 1，正 + 正得出负数，溢出。`:`两个送进加法器的数都是负的（符号位都是 1），符号位 1 + 1 一定向外进位，所以 Cn+1 一定是 1；这时如果数值位没向符号位进位（Cn = 0），符号位就变成 0，负 + 负得出正数，溢出。`):`送进加法器的两个数一正一负（符号位一个 0、一个 1），符号位相加时 Cn+1 和 Cn 一定相同（Cn = 1 时 0+1+1 进位，Cn = 0 时 0+1+0 不进位），所以 OF 恒为 0。异号相加不会溢出。`;
+  $('flags').innerHTML=
+   F('ZF','零标志',ZF,`= ¬(r${n-1} ∨ … ∨ r0)，结果各位或起来再取反`,[
+    ['从哪来',`加法器出来的 ${n} 位结果 <span class="mono">${rb}</span> 各位做“或”，再取反。只要有一位是 1，ZF 就是 0（第四章 p71，第七章 p109）。`],
+    ['这次',`${A(ZF?`结果 ${n} 位全 0，ZF = 1。`:`结果里有 1，ZF = 0，两数${sub?'不相等':'之和不是 0'}。`)}${ZF&&Cout?A('注意：真实的和是 '+raw+'，只是低 '+n+' 位全 0；ZF 只看留下的 '+n+' 位，不管有没有进位。'):''}`],
+    ['做题怎么用','有符号、无符号都一样用。cmp A, B 之后 ZF = 1 就是 A = B（je / jz 跳）；判断大于、小于时先要 ZF = 0。']])+
+   F('SF','符号标志',SF,`= r${n-1}，结果的最高位`,[
+    ['从哪来',`直接把结果最高位接出来，不做任何运算（第七章 p109）。这次结果 <span class="mono">${rb}</span> 最高位是 ${SF}。`],
+    ['这次',A(OF?`按有符号数读，结果是 ${nf(sr)}，SF = ${SF} 说它${SF?'是负的':'不是负的'}；但 OF = 1，真实结果 ${nf(st)} ${st<0?'是负的':'是正的'}，SF 正好说反了。真实符号 = SF ⊕ OF = ${SF^OF}。`:`按有符号数读，结果是 ${nf(sr)}，没有溢出，SF = ${SF} 就是真实符号（${SF?'负':'正或 0'}）。`)],
+    ['做题怎么用',`只对有符号数有意义。按无符号数看，最高位是 1 只说明数大（≥ ${2**(n-1)}），不说明是负数。有符号比大小不能只看 SF，要看 SF 和 OF 是否相等（第四章 p84）。`]])+
+   F('CF','进位/借位标志',CF,`= sub ⊕ Cout = ${sub} ⊕ ${Cout}`,[
+    ['从哪来',`Cout 是加法器最高位送出去的进位（第四章叫 Cn+1）。这次加法器算的是 ${a} + ${y}${sub?' + 1':''} = ${raw}，${raw>umax?`超过 ${umax}，最高位向外进位，Cout = 1`:`不超过 ${umax}，没有向外进位，Cout = 0`}。sub 是减法信号，加法 0、减法 1。`],
+    ['为什么要异或 sub',sub?`减法时加法器实际算 A + (2${'ⁿ'} − B)，即 ${a} + ${2**n-b}。A ≥ B 时这个和 ≥ 2${'ⁿ'}，会进位；A &lt; B 时不进位，说明不够减、借了位。所以减法里“没进位”才是出事，要把 Cout 反过来：CF = 1 ⊕ Cout（第二章 p178）。`:`加法时 x + y ≥ 2${'ⁿ'} 就放不下，正好对应最高位向外进位，所以 CF = 0 ⊕ Cout = Cout（第二章 p178）。`],
+    ['这次',A(`按无符号数，真实结果 ${a} ${sub?'−':'+'} ${b} = ${ut}，${uo?`超出 0～${umax}，CF = 1，无符号溢出${sub?'（借位）':'（进位）'}`:`在 0～${umax} 内，CF = 0，无符号不溢出`}。`)],
+    ['做题怎么用',`只对无符号数有意义。选择题快法（第四章 p80）：把两个机器数都按无符号数读，直接算，看在不在 0～${umax}。cmp A, B 之后，无符号数 CF = 1 就是 A &lt; B，CF = 0 且 ZF = 0 就是 A &gt; B（第四章 p83）。有符号数不看 CF，比如 −64 + 64 的 CF = 1，但有符号结果 0 完全正确。`]])+
+   F('OF','溢出标志',OF,`= Cn ⊕ Cn+1 = ${Cn} ⊕ ${Cout}`,[
+    ['从哪来',`Cn 是数值部分最高位送进符号位的进位（上面圈出的第二个），Cn+1 是符号位再送出去的进位（圈出的第一个）。两者异或（第二章 p167–170，第四章 p75）。`],
+    ['为什么这样算',ovCase],
+    ['这次',A(`送进加法器的两个数符号位是 ${xs} 和 ${y2}${sub?'（第二个是 ~B 的符号，B 取反了）':''}，Cn = ${Cn}，Cn+1 = ${Cout}，OF = ${OF}。按有符号数，真实结果 ${nf(st)}，${so?`超出 ${nf(smin)}～${smax}，溢出`:`在 ${nf(smin)}～${smax} 内，不溢出`}。`)],
+    ['做题怎么用',`只对有符号数有意义。选择题快法（第四章 p80）：把两个机器数都按补码读，直接算，看在不在 ${nf(smin)}～${smax}。手算时也可用“同号相加、结果变号”（第二章 p157），和 OF 是同一回事。cmp 之后，SF = OF 是大于、SF ≠ OF 是小于（第四章 p84）。`]]);
   // signed overflow methods
   const as=a>>(n-1)&1,ys=y>>(n-1)&1,rs=SF;
   const ext=(v,sv)=>bits(sv,n+1);const bb=sub?-sb:sb;const dsum=sa+bb;const d=bits(dsum,n+1),d1=d[0],d2=d[1];
