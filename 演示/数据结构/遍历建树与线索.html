@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>遍历建树与线索树</title>
+<style>
+/* Part 1: rebuild a binary tree from two traversals, with the inorder array aligned under the growing tree. Part 2: threaded trees with dashed thread arrows and the predecessor/successor rule that fires for a clicked node. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8; --pur:#7b4fa8;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b48ee0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b48ee0; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:80ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:17px var(--serif);font-weight:600;margin:0 0 8px}
+h3{font:15px var(--serif);font-weight:600;margin:12px 0 6px}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600}
+.btn:disabled{opacity:.45;cursor:default}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px;margin-top:10px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=text],select{font:15px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;max-width:100%}
+.form input[type=text]{width:15em}
+.form input.wide{width:20em}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;margin-top:8px}
+.ctrl .muted{color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:var(--bg);color:var(--ink);padding:4px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--green);color:var(--bg);font-weight:600}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.q{font-size:14px;padding:8px 12px;border:1px dashed var(--line);border-radius:5px;margin-top:8px}
+.q .ans{color:var(--done);font-weight:600}
+.q summary{cursor:pointer;color:var(--muted);font-size:13px}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.2em;margin-top:10px}
+.note b{color:var(--done)}
+.guess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;margin-top:8px}
+.guess input{font:14px var(--mono);width:9em;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.ok{color:var(--done);font-weight:600}.bad{color:var(--mv);font-weight:600}
+.fig{overflow-x:auto;margin-top:10px}
+svg{display:block;height:auto}
+.n-c{fill:var(--paper);stroke:var(--green);stroke-width:2}
+.n-c.cur{fill:color-mix(in srgb,var(--cmp) 40%,var(--paper));stroke:var(--cmp);stroke-width:3}
+.n-c.done{stroke:var(--done)}
+.n-c.ghost{fill:none;stroke:var(--cmp);stroke-dasharray:4 3}
+.n-c.pred{stroke:var(--q);stroke-width:4}
+.n-c.succ{stroke:var(--pur);stroke-width:4}
+.n-c.bad{stroke:var(--mv);stroke-width:3}
+.n-t{font:600 15px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.e{stroke:var(--muted);stroke-width:1.8;fill:none}
+.e.new{stroke:var(--cmp);stroke-width:3}
+.e.ghost{stroke:var(--cmp);stroke-dasharray:4 3}
+.th{fill:none;stroke-width:1.8;stroke-dasharray:5 4}
+.th.p{stroke:var(--q)}.th.s{stroke:var(--pur)}.th.nul{stroke:var(--mv)}
+.th.hot{stroke-width:3.2}
+.tag{font:11px var(--mono);text-anchor:middle;dominant-baseline:central}
+.tag.t1{fill:var(--mv);font-weight:700}.tag.t0{fill:var(--muted)}
+.nul{font:11px var(--mono);fill:var(--mv)}
+.c-r{fill:var(--bg);stroke:var(--line)}
+.c-r.rng{fill:color-mix(in srgb,var(--cmp) 14%,var(--paper))}
+.c-r.L{fill:color-mix(in srgb,var(--q) 25%,var(--paper));stroke:var(--q)}
+.c-r.R{fill:color-mix(in srgb,var(--pur) 22%,var(--paper));stroke:var(--pur)}
+.c-r.root{fill:var(--cmp);stroke:var(--cmp)}
+.c-r.used{fill:color-mix(in srgb,var(--done) 22%,var(--paper))}
+.c-r.cand{fill:color-mix(in srgb,var(--cmp) 14%,var(--paper));stroke:var(--cmp)}
+.c-t{font:600 14px var(--mono);fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.c-l{font:12px var(--sans);fill:var(--muted);dominant-baseline:central}
+.c-i{font:10px var(--mono);fill:var(--muted);text-anchor:middle}
+.brk{stroke-width:2;fill:none}
+.brk.L{stroke:var(--q)}.brk.R{stroke:var(--pur)}
+.bl{font:11px var(--sans);text-anchor:middle}
+.bl.L{fill:var(--q)}.bl.R{fill:var(--pur)}
+.legend{font-size:12px;color:var(--muted);margin-top:6px}
+.res{font:14px var(--mono);margin-top:8px;display:grid;gap:2px}
+.res b{color:var(--mv)}
+.gal{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.gal .card{border:1px solid var(--line);border-radius:5px;padding:6px;background:var(--bg);font:12px var(--mono);text-align:center}
+.gal .card.hit{border-color:var(--mv)}
+.tw{overflow-x:auto;margin-top:8px}
+table.t{border-collapse:collapse;font-size:13px}
+table.t th,table.t td{border:1px solid var(--line);padding:4px 8px;text-align:center}
+table.t th{color:var(--muted);font-weight:400;background:var(--bg)}
+table.t td.no{color:var(--mv);font-weight:700}table.t td.yes{color:var(--done);font-weight:700}
+.find{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:10px}
+@media (max-width:760px){.find{grid-template-columns:minmax(0,1fr)}}
+.find .box{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg);font-size:14px}
+.find ol{margin:4px 0;padding-left:1.4em;display:grid;gap:2px}
+.find li.hit{background:color-mix(in srgb,var(--cmp) 26%,transparent);font-weight:600;border-radius:3px}
+.find li.stack::after{content:"  要找双亲";color:var(--mv);font-size:12px}
+.find .r{font:15px var(--mono);margin-top:4px}
+.opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+@media (max-width:640px){.opts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.opts figure{margin:0;border:1px solid var(--line);border-radius:5px;padding:4px;text-align:center;font-size:13px;background:var(--bg)}
+.opts svg{width:100%}
+.hidden{display:none}
+code{font-family:var(--mono);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="树和森林转换.html">树、森林与二叉树</a></div>
+  <header>
+    <h1>由遍历建树、线索二叉树</h1>
+    <p class="sub">上半页：给两个遍历序列，在中序数组上切出根和左右子树区间，树一层一层长出来（讲义第五章 树（上）p53–54，强化第二讲 p56）。下半页：先序、中序、后序线索化，虚线画线索，点结点看找前驱、后继走的是哪条规则（第五章 树（下）p23–38，强化第二讲 p25–32）。考过的年份：遍历序列 2011、2012、2020，线索 2010、2013、2014。</p>
+  </header>
+
+  <section class="panel">
+    <h2>建树四句话</h2>
+    <ol class="rules">
+      <li><b>中序负责切左右</b>：根在中序里的位置，左边全是左子树，右边全是右子树。所以想唯一确定一棵二叉树，<b>必须有中序</b>。</li>
+      <li><b>先序看第一个，后序看最后一个</b>：一棵子树在先序（后序）里是连续的一段，这一段的第一个（最后一个）就是这棵子树的根。左子树有几个结点，就从这一段里切几个给左边。</li>
+      <li><b>层序+中序每一步重新定位</b>：层序里子树不是连续的一段。对当前中序区间，在层序里从前往后扫，<b>第一个落在这个区间里的</b>才是它的根，不在区间里的直接跳过。</li>
+      <li><b>先序+后序不能唯一确定</b>：它们只能告诉你谁是谁的祖先；某个结点只有一个孩子时，分不清是左孩子还是右孩子。</li>
+    </ol>
+  </section>
+
+  <section class="panel" id="secBuild">
+    <h2>① 由两个遍历序列建树</h2>
+    <div class="chips" id="bPresets">例题：</div>
+    <div class="q" id="bQ"></div>
+    <div class="form">
+      <label>给的是<select id="bMode"><option value="pi">先序 + 中序</option><option value="qi">后序 + 中序</option><option value="li">层序 + 中序</option><option value="pq">先序 + 后序（看有几棵）</option></select></label>
+      <label><span id="bLabA">先序</span><input id="bA" type="text" spellcheck="false" autocomplete="off"></label>
+      <label><span id="bLabB">中序</span><input id="bB" type="text" spellcheck="false" autocomplete="off"></label>
+      <button class="btn primary" id="bGo" type="button">建树</button>
+    </div>
+    <p class="legend">每个结点用一个字母或数字，可以写成 <code>ABCDEF</code>，也可以用逗号或空格隔开。</p>
+    <div class="err" id="bErr" role="alert"></div>
+    <div id="bStepUI">
+      <div class="ctrl"><button class="btn" id="bReset" type="button">从头</button><button class="btn" id="bPrev" type="button">上一步</button><button class="btn primary" id="bNext" type="button">下一步</button><button class="btn" id="bAll" type="button">全部</button><label class="muted"><input type="checkbox" id="bGuess" checked> 先猜再看</label><span class="muted" id="bProg"></span></div>
+      <div class="guess hidden" id="bGbox"><span id="bGq"></span><input id="bGin" type="text" aria-label="你的答案" autocomplete="off"><button class="btn" id="bGbtn" type="button">对答案</button></div>
+      <div class="note" id="bNote"></div>
+      <div class="fig" id="bFig"></div>
+      <p class="legend">结点的横坐标就是它在中序里的位置，所以树正下方的中序数组和结点一一对齐。<span style="color:var(--cmp)">橙色</span>是这一步找到的根，<span style="color:var(--q)">蓝色</span>是左子树区间，<span style="color:var(--pur)">紫色</span>是右子树区间，绿色底是已经放进树里的结点。</p>
+      <div class="res" id="bRes"></div>
+    </div>
+    <div id="bPQ" class="hidden">
+      <div class="note" id="bPQnote"></div>
+      <div class="gal" id="bGal"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>线索二叉树四句话</h2>
+    <ol class="rules">
+      <li><b>只有空指针才变线索</b>：左孩子空，ltag = 1，lchild 指向<b>前驱</b>；右孩子空，rtag = 1，rchild 指向<b>后继</b>。有孩子的那一边 tag = 0，照常指孩子。</li>
+      <li><b>前驱、后继看哪种遍历</b>：先序线索树按先序序列，中序按中序，后序按后序。序列第一个结点的左线索、最后一个结点的右线索没有可指的，<b>仍是 NULL</b>（悬空）。</li>
+      <li><b>中序线索树两头都好找</b>：前驱是左子树最右下，后继是右子树最左下，往下走就行。</li>
+      <li><b>先序找前驱、后序找后继要找双亲</b>：答案在结点上面，线索和孩子指针都指不到，<b>还得用栈（重新遍历）或三叉链表（带双亲指针）</b>。</li>
+    </ol>
+  </section>
+
+  <section class="panel" id="secThr">
+    <h2>② 线索化，点结点找前驱和后继</h2>
+    <div class="chips" id="tPresets">例题：</div>
+    <div class="q" id="tQ"></div>
+    <div class="form">
+      <label>二叉树（括号写法）<input id="tIn" class="wide" type="text" spellcheck="false" autocomplete="off"></label>
+      <button class="btn primary" id="tGo" type="button">画树</button>
+    </div>
+    <p class="legend">写法：<code>A(B(D,),C(,F))</code>，括号里逗号左边是左子树，右边是右子树，空着就是没有。叶子不用写括号。</p>
+    <div class="err" id="tErr" role="alert"></div>
+    <div class="ctrl"><span class="muted">线索化方式</span><span class="seg" id="tOrd"><button type="button" data-o="pre">先序</button><button type="button" data-o="in">中序</button><button type="button" data-o="post">后序</button></span></div>
+    <div class="ctrl"><button class="btn" id="tReset" type="button">从头</button><button class="btn" id="tPrev" type="button">上一步</button><button class="btn primary" id="tNext" type="button">下一步</button><button class="btn" id="tAll" type="button">全部</button><label class="muted"><input type="checkbox" id="tGuess" checked> 先猜再看</label><span class="muted" id="tProg"></span></div>
+    <div class="guess hidden" id="tGbox"><span id="tGq"></span><input id="tGin" type="text" aria-label="你的答案" autocomplete="off"><button class="btn" id="tGbtn" type="button">对答案</button></div>
+    <div class="note" id="tNote"></div>
+    <div class="fig" id="tFig"></div>
+    <p class="legend">实线是孩子指针。<span style="color:var(--q)">蓝虚线</span>是左线索（指前驱），<span style="color:var(--pur)">紫虚线</span>是右线索（指后继），<span style="color:var(--mv)">红虚线到 NULL</span> 是线索化后仍然悬空的指针。结点左右两侧的小数字是 ltag、rtag，红色 1 表示这一边是线索。<b>点任一结点</b>看找前驱、后继。</p>
+    <div class="find" id="tFind"></div>
+    <h3>结论表：只靠线索和孩子指针能不能找到</h3>
+    <div class="tw"><table class="t"><tr><th></th><th>先序线索树</th><th>中序线索树</th><th>后序线索树</th></tr>
+      <tr><th>找前驱</th><td class="no">× 要双亲</td><td class="yes">√</td><td class="yes">√</td></tr>
+      <tr><th>找后继</th><td class="yes">√</td><td class="yes">√</td><td class="no">× 要双亲</td></tr></table></div>
+    <p class="legend">× 的两种：先序线索树找有左孩子的结点的前驱、后序线索树找有右孩子的结点的后继，答案在双亲那边，仍需栈或三叉链表（讲义 树（下）p38，强化第二讲 p32）。</p>
+  </section>
+
+  <section class="panel">
+    <h2>例子从哪来</h2>
+    <p class="sub"><b>建树：</b><span id="bSrc">点例题后这里写出处。</span></p>
+    <p class="sub" style="margin-top:6px"><b>线索：</b><span id="tSrc">点例题后这里写出处。</span></p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const MODEN={pi:['先序','中序'],qi:['后序','中序'],li:['层序','中序'],pq:['先序','后序']};
+/* ================= ① build ================= */
+const BP=[
+ {t:'讲义 p53 先序+中序求后序',m:'pi',a:'ABCDEF',b:'CBAEDF',q:'【例题】已知一棵二叉树的先序遍历序列为 ABCDEF，中序遍历序列为 CBAEDF，则后序遍历为（ ）。A. CBEFDA　B. FEDCBA　C. DEABC　D. 无法确定',ans:'A。树是 A(B(C, ·), D(E, F))，后序 CBEFDA。',end:'post',src:'罗素《第五章 树（上）》p53 例题，讲义标答 A，图中树 A 的左孩子 B、B 的左孩子 C，A 的右孩子 D，D 的孩子 E、F。'},
+ {t:'讲义 p54 哪组不能唯一确定',m:'pq',a:'ABCDEF',b:'CBEFDA',q:'【例题】下列组合无法唯一的确定一棵二叉树的是（ ）。A. 层序遍历序列+中序遍历序列　B. 先序遍历序列+中序遍历序列　C. 后序遍历序列+中序遍历序列　D. 先序遍历序列+后序遍历序列',ans:'D。中序 + 任意一种遍历可唯一确定；先序 + 后序不行。这里拿上一题的树试：先序 ABCDEF + 后序 CBEFDA 对得上两棵树，B 只有一个孩子 C，C 放左放右都行。',src:'罗素《第五章 树（上）》p54 例题，标答 D。下面的两棵树是用 p53 那棵树的先序、后序反推出来的，用来说明 D 为什么不行。'},
+ {t:'强化 p56 层序+中序',m:'li',a:'ABCDEFGHIJ',b:'DBGEHJACIF',q:'【例题】已知二叉树 T 的层序遍历是 ABCDEFGHIJ，中序遍历为 DBGEHJACIF，请画出对应的二叉树，然后将其转化为森林，再写出森林的先序遍历和中序遍历。',ans:'二叉树 A(B(D, E(G, H(·, J))), C(·, F(I, ·)))，和讲义 p56 原图一致。转森林和森林的遍历见“树、森林与二叉树”页（森林先序 ABDEGHJCFI，中序 DBGEHJACIF）。',end:'pre',src:'数据结构强化第二讲 PPT p56–57。树形已对照 p56 原图：A 左 B 右 C，B 左 D 右 E，E 左 G 右 H，H 只有右孩子 J，C 只有右孩子 F，F 只有左孩子 I。'},
+ {t:'2011 统考 先序+后序',m:'pq',a:'1234',b:'4321',q:'【2011 统考真题】一棵二叉树的先序遍历序列和后序遍历序列分别为 1,2,3,4 和 4,3,2,1，该二叉树的中序遍历序列不会是（ ）。A. 1,2,3,4　B. 2,3,4,1　C. 3,2,4,1　D. 4,3,2,1',ans:'C。先序和后序正好相反，每个结点最多一个孩子，树是一条链，共 2³ = 8 棵；1 和 2 在中序里都只能在所在段的头或尾，3,2,4,1 里 2 夹在中间，不可能。',hit:'3241',src:'王道《数据结构》第 5 章 5.3 选择题 34（2011 统考），答案 C。下面把 8 棵树全画出来，选项 A、B、D 都能在里面找到。'},
+ {t:'2012 统考 先序+后序',m:'pq',a:'aebdc',b:'bcdea',q:'【2012 统考真题】若一棵二叉树的先序遍历序列为 a, e, b, d, c，后序遍历序列为 b, c, d, e, a，则根结点的孩子结点（ ）。A. 只有 e　B. 有 e, b　C. 有 e, c　D. 无法确定',ans:'A。a 是根；先序 a 后面紧跟 e，后序 e 紧挨在 a 前面，说明 e 下面挂着 b、d、c，a 的另一边是空的。下面 4 棵树形状不同，但根的孩子都只有 e。',src:'王道《数据结构》第 5 章 5.3 选择题 35（2012 统考），答案 A。'},
+ {t:'2020 统考 森林转来的二叉树',m:'pi',a:'abcdef',b:'badfec',q:'【2020 统考真题】已知森林 F 及与之对应的二叉树 T，若 F 的先根遍历序列是 a, b, c, d, e, f，后根遍历序列是 b, a, d, f, e, c，则 T 的后序遍历序列是（ ）。A. b, a, d, f, e, c　B. b, d, f, e, c, a　C. b, f, e, d, c, a　D. f, e, d, c, b, a',ans:'C。森林先根 = T 的先序，森林后根 = T 的中序，所以就是先序 abcdef + 中序 badfec 建树，T = a(b, c(d(·, e(f, ·)), ·))，后序 bfedca。',end:'post',src:'王道《数据结构》第 5 章 5.4 选择题 19（2020 统考），答案 C。把森林换成二叉树的对应关系见“树、森林与二叉树”页。'}
+];
+let B={mode:'pi',A:[],I:[],frames:[],pos:0,done:new Set(),tree:null,end:null};
+function splitSeq(s){s=s.trim();if(!s)return [];return /[\s,，、]/.test(s)?s.split(/[\s,，、]+/).filter(Boolean):[...s]}
+function checkSeqs(A,I,na,nb){if(!A.length||!I.length)throw '两个序列都要填。';if(A.length!==I.length)throw `${na}有 ${A.length} 个结点，${nb}有 ${I.length} 个，个数要一样。`;
+  if(A.length>16)throw '最多 16 个结点。';const dup=x=>x.find((v,i)=>x.indexOf(v)!==i);if(dup(A))throw `${na}里 ${dup(A)} 出现了两次，结点要各不相同。`;if(dup(I))throw `${nb}里 ${dup(I)} 出现了两次。`;
+  const miss=A.find(v=>!I.includes(v));if(miss)throw `${na}里有 ${miss}，${nb}里没有。`}
+function pre(t){return t?[t.v,...pre(t.l),...pre(t.r)]:[]}
+function ino(t){return t?[...ino(t.l),t.v,...ino(t.r)]:[]}
+function post(t){return t?[...post(t.l),...post(t.r),t.v]:[]}
+function lev(t){const q=[t],o=[];while(q.length){const x=q.shift();if(x){o.push(x.v);q.push(x.l,x.r)}}return o}
+function bracket(t){if(!t)return '';return t.v+(t.l||t.r?`(${bracket(t.l)}, ${bracket(t.r)})`:'')}
+function bracketPretty(t){if(!t)return '·';return t.v+(t.l||t.r?`(${bracketPretty(t.l)}, ${bracketPretty(t.r)})`:'')}
+function buildFrames(){const {mode,A,I}=B;const n=I.length,M=MODEN[mode];
+  const F=[{k:'start',placed:[],txt:mode==='li'?`中序 ${I.join('')} 整个区间是整棵树。每一步取一个待定区间（按层从上往下），在层序里从前往后找第一个落在这个区间里的结点，它就是这个区间的根。`:`中序 ${I.join('')} 整个区间是整棵树，对应${M[0]}的整段。每一步取一个待定区间（按层从上往下），在${M[0]}对应段里找${mode==='pi'?'第一个':'最后一个'}作根，再用中序切出左右。`}];
+  const q=[{l:0,r:n-1,sl:0,sr:n-1,par:null,side:null,d:0}];const placed=[];const nodes={};let root=null;
+  while(q.length){const t=q.shift();const rangeSet=I.slice(t.l,t.r+1);let rv,why;
+    if(mode==='li'){const cand=A.filter(v=>rangeSet.includes(v));rv=cand[0];const skipped=A.slice(0,A.indexOf(rv)).filter(v=>!rangeSet.includes(v));
+      why=`在层序里从前往后扫，${skipped.length?`${skipped.join('、')} 不在这个区间（已经放进树，或属于别的子树），跳过；`:''}第一个落在区间 {${rangeSet.join(' ')}} 里的是 <b>${rv}</b>，它就是根。`}
+    else{const seg=A.slice(t.sl,t.sr+1);if([...seg].sort().join()!==[...rangeSet].sort().join())throw `两个序列对不上：中序区间 ${rangeSet.join('')} 在${M[0]}里对应的段是 ${seg.join('')}，结点不一样，没有这样的二叉树。`;
+      rv=mode==='pi'?seg[0]:seg[seg.length-1];why=`${M[0]}里对应的一段是 ${seg.join('')}，${mode==='pi'?'第一个':'最后一个'}是 <b>${rv}</b>，它就是根。`}
+    const k=I.indexOf(rv);const L=k-t.l,R=t.r-k;
+    const node={v:rv,l:null,r:null,d:t.d,i:k,par:t.par,side:t.side};nodes[rv]=node;if(t.par)nodes[t.par][t.side==='L'?'l':'r']=node;else root=node;
+    const lt=L?I.slice(t.l,k).join(''):'',rt=R?I.slice(k+1,t.r+1).join(''):'';
+    F.push({k:'node',t,v:rv,ki:k,placed:[...placed],
+      txt:`${t.par?`${t.par} 的${t.side==='L'?'左':'右'}子树`:'整棵树'}，中序区间 ${rangeSet.join('')}。${why}${rv} 在中序第 ${k+1} 位：${L?`左边 ${lt} 是左子树（${L} 个）`:'左边没有，左子树空'}；${R?`右边 ${rt} 是右子树（${R} 个）`:'右边没有，右子树空'}。`,
+      ask:{l:`这一段的根是`,q:`${t.par?`${t.par} 的${t.side==='L'?'左':'右'}子树`:'整棵树'}：中序区间是 <b>${rangeSet.join(' ')}</b>（橙色框）。${mode==='li'?'在层序里找第一个落在这个区间里的结点。':`在${M[0]}对应段（橙色框）里找根。`}根是哪个？`,a:rv,
+        hint:v=>{if(!I.includes(v))return '序列里没有这个结点。';if(!rangeSet.includes(v))return mode==='li'?'它在层序里确实靠前，但不在这个子树的中序区间里，要跳过它，接着往后找。':'这个结点不在当前中序区间里，不属于这棵子树。';
+          if(mode==='pi'&&v===A[t.sr])return '这是这一段的最后一个，那是后序的规则；先序里根在最前面。';if(mode==='qi'&&v===A[t.sl])return '这是这一段的第一个，那是先序的规则；后序里根在最后面。';return mode==='li'?'在层序里它前面还有落在这个区间里的结点。':''}}});
+    placed.push(rv);
+    if(L)q.push({l:t.l,r:k-1,sl:mode==='pi'?t.sl+1:t.sl,sr:mode==='pi'?t.sl+L:t.sl+L-1,par:rv,side:'L',d:t.d+1});
+    if(R)q.push({l:k+1,r:t.r,sl:mode==='pi'?t.sl+L+1:t.sl+L,sr:mode==='pi'?t.sr:t.sr-1,par:rv,side:'R',d:t.d+1})}
+  const fn={pi:pre,qi:post,li:lev}[mode];if(fn(root).join()!==A.join())throw `按${M[0]}和中序拼出的树，${M[0]}应该是 ${fn(root).join('')}，和给的 ${A.join('')} 不一样，两个序列对不上，没有这样的二叉树。`;
+  B.tree=root;const want=B.end||(mode==='qi'?'pre':'post');const wname={pre:'先序',post:'后序'}[want];const wseq=(want==='pre'?pre:post)(root).join('');
+  F.push({k:'end',placed:[...placed],txt:`树建好了：${bracketPretty(root)}。${wname}序列是 <b>${wseq}</b>。`,ask:{l:`${wname}序列是`,q:`树建好了。照着树写出它的<b>${wname}</b>序列。`,a:wseq,hint:v=>{const p=pre(root).join(''),q2=post(root).join(''),l=lev(root).join('');return v.toLowerCase()===p.toLowerCase()?'这是先序。':v.toLowerCase()===q2.toLowerCase()?'这是后序。':v.toLowerCase()===l.toLowerCase()?'这是层序。':''}}});
+  return F}
+const BCW=46,BRH=62;
+function drawBuild(){const f=B.frames[B.pos],pend=bPending();const I=B.I,A=B.A,n=I.length,M=MODEN[B.mode];
+  const shown=new Set(f.placed);if(f.k==='node'&&!pend)shown.add(f.v);if(f.k==='end')B.frames.forEach(g=>g.v&&shown.add(g.v));
+  const all={};(function walk(t){if(!t)return;all[t.v]=t;walk(t.l);walk(t.r)})(B.tree);
+  const depth=Math.max(0,...Object.values(all).map(t=>t.d));const ox=56,W=ox+n*BCW+16;
+  const yA=22,yTree=80,yI=yTree+depth*BRH+60,H=yI+48;const X=i=>ox+i*BCW+BCW/2,Y=d=>yTree+d*BRH;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" style="max-width:none" role="img" aria-label="建树过程">`;
+  /* given sequence row */
+  const segL=f.k==='node'?f.t.sl:-1,segR=f.k==='node'?f.t.sr:-2;const rng=f.k==='node'?I.slice(f.t.l,f.t.r+1):[];
+  s+=`<text class="c-l" x="4" y="${yA+14}">${M[0]}</text>`;
+  A.forEach((v,j)=>{let c='c-r';const isRoot=f.k==='node'&&!pend&&v===f.v;
+    if(B.mode==='li'){if(shown.has(v)&&!isRoot)c+=' used';else if(isRoot)c+=' root';else if(rng.includes(v))c+=' cand'}
+    else{if(isRoot)c+=' root';else if(j>=segL&&j<=segR)c+=' cand';else if(shown.has(v))c+=' used'}
+    s+=`<rect class="${c}" x="${ox+j*BCW+3}" y="${yA}" width="${BCW-6}" height="28" rx="3"/><text class="c-t" x="${X(j)}" y="${yA+14}">${esc(v)}</text>`});
+  /* edges & nodes */
+  Object.values(all).forEach(t=>{if(!shown.has(t.v)||!t.par||!shown.has(t.par))return;const p=all[t.par];const nw=f.k==='node'&&!pend&&t.v===f.v;s+=`<line class="e${nw?' new':''}" x1="${X(p.i)}" y1="${Y(p.d)}" x2="${X(t.i)}" y2="${Y(t.d)}"/>`});
+  if(f.k==='node'&&pend){const cx=(X(f.t.l)+X(f.t.r))/2,cy=Y(f.t.d);if(f.t.par){const p=all[f.t.par];s+=`<line class="e ghost" x1="${X(p.i)}" y1="${Y(p.d)}" x2="${cx}" y2="${cy}"/>`}s+=`<circle class="n-c ghost" cx="${cx}" cy="${cy}" r="17"/><text class="n-t" x="${cx}" y="${cy}">?</text>`}
+  Object.values(all).forEach(t=>{if(!shown.has(t.v))return;const cur=f.k==='node'&&!pend&&t.v===f.v;s+=`<circle class="n-c${cur?' cur':f.k==='end'?' done':''}" cx="${X(t.i)}" cy="${Y(t.d)}" r="17"/><text class="n-t" x="${X(t.i)}" y="${Y(t.d)}">${esc(t.v)}</text>`});
+  /* inorder row */
+  s+=`<text class="c-l" x="4" y="${yI+14}">中序</text>`;
+  I.forEach((v,j)=>{let c='c-r';if(f.k==='node'&&j>=f.t.l&&j<=f.t.r){if(pend)c+=' rng';else c+=j<f.ki?' L':j>f.ki?' R':' root'}else if(shown.has(v))c+=' used';
+    s+=`<rect class="${c}" x="${ox+j*BCW+3}" y="${yI}" width="${BCW-6}" height="28" rx="3"/><text class="c-t" x="${X(j)}" y="${yI+14}">${esc(v)}</text><text class="c-i" x="${X(j)}" y="${yI+42}">${j+1}</text>`});
+  if(f.k==='node'){const x1=ox+f.t.l*BCW+2,x2=ox+(f.t.r+1)*BCW-2;s+=`<rect x="${x1}" y="${yI-4}" width="${x2-x1}" height="36" rx="5" fill="none" stroke="var(--cmp)" stroke-width="2"/>`;
+    if(B.mode!=='li'){const a1=ox+f.t.sl*BCW+2,a2=ox+(f.t.sr+1)*BCW-2;s+=`<rect x="${a1}" y="${yA-4}" width="${a2-a1}" height="36" rx="5" fill="none" stroke="var(--cmp)" stroke-width="2"/>`}
+    if(!pend){if(f.ki>f.t.l)s+=`<text class="bl L" x="${(ox+f.t.l*BCW+ox+f.ki*BCW)/2}" y="${yI-10}">左子树</text>`;if(f.ki<f.t.r)s+=`<text class="bl R" x="${(ox+(f.ki+1)*BCW+ox+(f.t.r+1)*BCW)/2}" y="${yI-10}">右子树</text>`}}
+  $('bFig').innerHTML=s+'</svg>';
+  const done=B.pos===B.frames.length-1&&!pend;const t=B.tree;
+  $('bRes').innerHTML=done?`<div>先序 <b>${pre(t).join(' ')}</b></div><div>中序 <b>${ino(t).join(' ')}</b></div><div>后序 <b>${post(t).join(' ')}</b></div><div>层序 <b>${lev(t).join(' ')}</b></div>`:''}
+function bPending(){const f=B.frames[B.pos];return $('bGuess').checked&&f&&f.ask&&!B.done.has(B.pos)}
+function bRender(msg){const f=B.frames[B.pos];drawBuild();$('bNote').innerHTML=msg||(bPending()?f.ask.q:f.txt);
+  $('bProg').textContent=`第 ${B.pos} / ${B.frames.length-1} 步`;$('bPrev').disabled=B.pos===0;$('bNext').disabled=B.pos===B.frames.length-1&&!bPending();
+  $('bGbox').classList.toggle('hidden',!bPending());if(bPending()){$('bGq').innerHTML=f.ask.l;if(!msg)$('bGin').value=''}}
+function bCheck(){const f=B.frames[B.pos];const v=$('bGin').value.trim().replace(/[\s,，、]/g,'');if(!v)return;const ok=v.toLowerCase()===f.ask.a.toLowerCase();B.done.add(B.pos);
+  bRender((ok?'<span class="ok">对了。</span> ':`<span class="bad">你填 ${esc(v)}，应为 ${esc(f.ask.a)}。</span>${f.ask.hint?f.ask.hint(v):''} `)+f.txt)}
+$('bNext').onclick=()=>{if(bPending()){$('bGin').focus();return}if(B.pos<B.frames.length-1){B.pos++;bRender();if(bPending())$('bGin').focus()}};
+$('bPrev').onclick=()=>{if(B.pos>0){B.pos--;bRender()}};$('bReset').onclick=()=>{B.pos=0;B.done=new Set();bRender()};
+$('bAll').onclick=()=>{B.frames.forEach((_,i)=>B.done.add(i));B.pos=B.frames.length-1;bRender()};
+$('bGbtn').onclick=bCheck;$('bGin').onkeydown=e=>{if(e.key==='Enter')bCheck()};$('bGuess').onchange=()=>bRender();
+/* pre + post: enumerate every tree */
+function allPP(P,Q){if(!P.length)return [null];if(P[0]!==Q[Q.length-1])return [];if(P.length===1)return [{v:P[0],l:null,r:null}];const out=[];const n=P.length-1;
+  for(let k=0;k<=n;k++){const lp=P.slice(1,1+k),rp=P.slice(1+k),lq=Q.slice(0,k),rq=Q.slice(k,-1);if([...lp].sort().join()!==[...lq].sort().join())continue;
+    for(const L of allPP(lp,lq))for(const R of allPP(rp,rq))out.push({v:P[0],l:L,r:R})}return out}
+function miniSVG(t,hl){const ns=[];(function w(x,d){if(!x)return;w(x.l,d+1);ns.push({x,d,i:ns.length});w(x.r,d+1)})(t,0);const pos=new Map(ns.map(o=>[o.x,o]));
+  const cw=30,rh=40,W=ns.length*cw+10,H=(Math.max(...ns.map(o=>o.d))+1)*rh+6;const X=o=>8+o.i*cw+cw/2-3,Y=o=>18+o.d*rh;let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}">`;
+  ns.forEach(o=>{[o.x.l,o.x.r].forEach(c=>{if(c){const p=pos.get(c);s+=`<line class="e" x1="${X(o)}" y1="${Y(o)}" x2="${X(p)}" y2="${Y(p)}"/>`}})});
+  ns.forEach(o=>{s+=`<circle class="n-c${hl?' bad':''}" cx="${X(o)}" cy="${Y(o)}" r="12"/><text class="n-t" style="font-size:12px" x="${X(o)}" y="${Y(o)}">${esc(o.x.v)}</text>`});return s+'</svg>'}
+function showPQ(hit){const P=B.A,Q=B.I;const ts=allPP(P,Q);
+  if(!ts.length){$('bPQnote').innerHTML=`没有一棵二叉树的先序是 ${P.join('')}、后序是 ${Q.join('')}。先序第一个和后序最后一个都得是根，${P[0]===Q[Q.length-1]?'而且每棵子树的结点在两个序列里要能切成相同的两段。':`这里一个是 ${P[0]}，一个是 ${Q[Q.length-1]}。`}`;$('bGal').innerHTML='';return}
+  const ins=ts.map(t=>ino(t).join(''));const kids=ts.map(t=>[t.l,t.r].filter(Boolean).map(c=>c.v).join('、'));
+  $('bPQnote').innerHTML=`先序 ${P.join('')}、后序 ${Q.join('')}：根都是 <b>${P[0]}</b>。对得上的二叉树一共 <b>${ts.length}</b> 棵${ts.length>1?'，所以先序 + 后序<b>不能唯一确定</b>二叉树。差别都出在“只有一个孩子”的结点上：先序里父亲后面紧跟它、后序里它紧挨父亲前面，但看不出它在左边还是右边':'（这组碰巧唯一：没有只有一个孩子的结点）'}。${hit?`选项里的中序 ${hit} ${ins.includes(hit)?'出现了':'<b>一棵也没有</b>'}。`:''}`;
+  $('bGal').innerHTML=ts.slice(0,32).map((t,i)=>`<div class="card${hit&&ins[i]===hit?' hit':''}">${miniSVG(t)}<div>中序 ${ins[i]}</div><div style="color:var(--muted)">根的孩子：${kids[i]||'无'}</div></div>`).join('')+(ts.length>32?`<div class="legend">只画前 32 棵。</div>`:'')}
+function bLoad(p){const mode=$('bMode').value;B.mode=mode;B.end=p?p.end||null:null;$('bLabA').textContent=MODEN[mode][0];$('bLabB').textContent=MODEN[mode][1];
+  const A=splitSeq($('bA').value),I=splitSeq($('bB').value);
+  try{checkSeqs(A,I,MODEN[mode][0],MODEN[mode][1])}catch(e){$('bErr').textContent=e;return}
+  B.A=A;B.I=I;$('bErr').textContent='';const pq=mode==='pq';$('bStepUI').classList.toggle('hidden',pq);$('bPQ').classList.toggle('hidden',!pq);
+  if(pq){showPQ(p&&p.hit);return}
+  try{B.frames=buildFrames()}catch(e){$('bErr').textContent=e;B.frames=[];$('bFig').innerHTML='';$('bNote').innerHTML='';$('bRes').innerHTML='';return}
+  B.pos=0;B.done=new Set();bRender()}
+$('bMode').onchange=()=>{$('bLabA').textContent=MODEN[$('bMode').value][0];$('bLabB').textContent=MODEN[$('bMode').value][1]};
+$('bGo').onclick=()=>{$('bPresets').querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed','false'));$('bQ').innerHTML='自己输入的序列。';bLoad(null)};
+['bA','bB'].forEach(id=>$(id).onkeydown=e=>{if(e.key==='Enter')$('bGo').click()});
+$('bPresets').insertAdjacentHTML('beforeend',BP.map((p,i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p.t}</button>`).join(''));
+$('bPresets').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const p=BP[+b.dataset.p];$('bMode').value=p.m;$('bA').value=p.a;$('bB').value=p.b;
+  $('bPresets').querySelectorAll('[data-p]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  $('bQ').innerHTML=`${esc(p.q)}<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${esc(p.ans)}</span></details>`;$('bSrc').textContent=p.src;bLoad(p)};
+
+/* ================= ② threads ================= */
+const TP=[
+ {t:'讲义 p23–25 满二叉树',tree:'A(B(D,E),C(F,G))',o:'pre',q:'讲义第五章 树（下）p23–25：同一棵树 A(B(D, E), C(F, G)) 分别做先序、中序、后序线索化（Pre: ABDECFG，mid: DBEAFCG，post: DEBFGCA）。切换上面的三种方式对照。',ans:'先序：D→(B, E)，E→(D, C)，F→(C, G)，G→(F, NULL)；中序：D 左线索 NULL，G 右线索 NULL；后序：D 左线索 NULL，其余线索都有指向。',src:'罗素《第五章 树（下）》p23–25 的示例树，三张图各画一种线索。'},
+ {t:'讲义 p27–32 找前驱后继',tree:'A(B(D,),C(,F))',o:'pre',sel:'C',q:'讲义第五章 树（下）p27–32：树 A(B(D, ·), C(·, F))，先序 ABDCF，中序 DBACF。先序线索树里哪些结点能借线索找到前驱？点 D、C、B、A 对照。',ans:'叶子 D、F 和只有右孩子的 C 左边是线索，可以直接找到前驱（p27–28）；只有左孩子的 B、左右都有的 A 左指针被孩子占了，找不到前驱（p29），要回到双亲。先序找后继、中序找前驱后继都能找到（p30–32）。',src:'罗素《第五章 树（下）》p27–32 的示例树，按原图 B 只有左孩子 D，C 只有右孩子 F。'},
+ {t:'讲义 p33–37 后序找后继',tree:'A(B(D,E),C(F,))',o:'post',sel:'B',q:'讲义第五章 树（下）p33–37：树 A(B(D, E), C(F, ·))，后序 DEBFCA。后序线索树怎么找后继？点 A（根）、B（双亲有右子树的左孩子）、C（右孩子）、E 对照。',ans:'根没有后继；结点是右孩子，或是左孩子但双亲没有右子树，后继是双亲；是左孩子且双亲有右子树，后继是双亲右子树后序的第一个结点（B 的后继是 F）。这几种都要先找到双亲。',src:'罗素《第五章 树（下）》p33–37 的示例树。'},
+ {t:'讲义 p26 / 2010 统考 选后序线索树',tree:'a(b(,d),c)',o:'post',opts:true,q:'【例题 / 2010 统考真题】下列线索二叉树中（用虚线表示线索），符合后序线索树定义的是（ ）。四个选项是同一棵树 a(b(·, d), c) 画了不同的线索，见下方四个小图。',ans:'D。后序序列 d b c a：d 的左线索为 NULL（没有前驱）、右线索指后继 b；b 没有左孩子，左线索指前驱 d；c 左线索指前驱 b、右线索指后继 a。B 是中序线索，C 是先序线索，A 哪种都不是。',src:'罗素《第五章 树（下）》p26 例题，讲义标答 D；同一道题是王道第 5 章 5.3 选择题 33（2010 统考）。四个选项按讲义原图重画，箭头的起止和原图一致。'},
+ {t:'强化 p25 哪种还要栈',tree:'A(B(D,),C(,F))',o:'pre',sel:'B',q:'【例题】下列关于线索二叉树的遍历，依旧需要借助栈完成的是（ ）。A. 中序线索二叉树找前驱　B. 先序线索二叉树找前驱　C. 先序线索二叉树找后继　D. 后序线索二叉树找前驱',ans:'B。先序线索树里有左孩子的结点（如 B），左指针指孩子，前驱却在双亲那边（B 的前驱是 A），只能回溯双亲。后序线索树找后继是另一个要栈的情况，但不在选项里。',src:'数据结构强化第二讲 PPT p25 例题，标答 B；p26–31 逐条列了六种查找的规则，p32 是结论表。'},
+ {t:'2013 统考 后序右线索',tree:'A(B(D,E),C(F,))',o:'post',sel:'E',q:'【2013 统考真题】若 X 是后序线索二叉树中的叶结点，且 X 存在左兄弟结点 Y，则 X 的右线索指向的是（ ）。A. X 的父结点　B. 以 Y 为根的子树的最左下结点　C. X 的左兄弟结点 Y　D. 以 Y 为根的子树的最右下结点',ans:'A。X 有左兄弟，所以 X 是右孩子；后序里右孩子之后紧跟着就是父结点。这里拿 E（左兄弟 D）验证：E 的右线索指向 B。',src:'王道《数据结构》第 5 章 5.3 选择题 36（2013 统考），答案 A。题目没有图，这里借讲义 p33 那棵树里的 E 当 X、D 当 Y。'},
+ {t:'2014 统考 中序线索 X',tree:'a(b(d(,e),X),c)',o:'in',sel:'X',q:'【2014 统考真题】若对右图所示的二叉树进行中序线索化，则结点 X 的左右线索指向的结点分别是（ ）。A. e, c　B. e, a　C. d, c　D. b, a',ans:'D。中序序列 d e b X a c，X 前面是 b、后面是 a。',src:'王道《数据结构》第 5 章 5.3 选择题 37（2014 统考），答案 D。资料里没有原图，树形按王道解析给的中序序列 debxac 还原为 a(b(d(·, e), X), c)，这也是常见的原题图形。'}
+];
+const OPTS={/* arrows exactly as drawn in the lecture figure: [from, to]; 'N' = Null */
+ A:[['b','a'],['c','b'],['c','d'],['d','c'],['d','N']],B:[['b','N'],['d','b'],['d','a'],['c','a'],['c','N']],C:[['b','a'],['d','b'],['d','c'],['c','d'],['c','N']],D:[['b','d'],['d','N'],['d','b'],['c','b'],['c','a']]};
+const OPTN={A:'哪种都不对：像先序但 d 的左线索该指 b 却画成 Null，c 还多指了 b。',B:'中序线索（序列 b d a c）。',C:'先序线索（序列 a b d c）。',D:'后序线索（序列 d b c a），选它。'};
+let T={root:null,nodes:{},order:'pre',frames:[],pos:0,done:new Set(),sel:null,opts:false};
+function parseBin(s){s=s.replace(/（/g,'(').replace(/）/g,')').replace(/，/g,',').replace(/\s+/g,'');let i=0;const seen={};
+  function node(d){if(i>=s.length||s[i]===','||s[i]===')')return null;const c=s[i];if(!/[A-Za-z0-9]/.test(c))throw `第 ${i+1} 个字符 “${c}” 看不懂，结点用一个字母或数字。`;if(seen[c])throw `结点 ${c} 出现了两次。`;if(d>7)throw '树太深了，最多 8 层。';seen[c]=1;i++;
+    const n={v:c,l:null,r:null};if(s[i]==='('){i++;n.l=node(d+1);if(s[i]!==',')throw `结点 ${c} 的括号里要有一个逗号分开左右（第 ${i+1} 个字符）。`;i++;n.r=node(d+1);if(s[i]!==')')throw `结点 ${c} 的括号没有闭合（第 ${i+1} 个字符）。`;i++}return n}
+  if(!s)throw '先写一棵树。';const r=node(0);if(!r)throw '根不能是空的。';if(i!==s.length)throw `第 ${i+1} 个字符起多出来了：${s.slice(i)}。多棵树请用“树、森林与二叉树”页。`;if(Object.keys(seen).length>15)throw '最多 15 个结点。';return r}
+function layoutBin(root){const nodes={};let k=0;(function w(t,d,p,side){if(!t)return;w(t.l,d+1,t,'L');nodes[t.v]=t;t.d=d;t.i=k++;t.par=p;t.side=side;w(t.r,d+1,t,'R')})(root,0,null,null);return nodes}
+function seqOf(o,r){return ({pre,in:ino,post})[o](r)}
+function threadsOf(o){const seq=seqOf(o,T.root);const th={};seq.forEach((v,i)=>{const x=T.nodes[v];th[v]={L:x.l?null:(i>0?seq[i-1]:'NULL'),R:x.r?null:(i<seq.length-1?seq[i+1]:'NULL')}});return {seq,th}}
+const ONAME={pre:'先序',in:'中序',post:'后序'};
+function tFrames(){const {seq,th}=threadsOf(T.order);const F=[{k:'start',txt:`${ONAME[T.order]}序列：<b>${seq.join(' ')}</b>。按这个顺序走一遍，遇到空的左指针就填前驱，空的右指针就填后继。`,set:[]}];const set=[];
+  seq.forEach((v,i)=>{['L','R'].forEach(side=>{const to=th[v][side];if(to===null)return;const pv=i>0?seq[i-1]:null,nx=i<seq.length-1?seq[i+1]:null;
+    F.push({k:'th',v,side,to,set:[...set],txt:`${v} 没有${side==='L'?'左':'右'}孩子，${side==='L'?'ltag':'rtag'} = 1，${side==='L'?`lchild 指向${ONAME[T.order]}前驱`:`rchild 指向${ONAME[T.order]}后继`}：${to==='NULL'?`${v} 是序列${side==='L'?'第一个':'最后一个'}，没有${side==='L'?'前驱':'后继'}，<b>仍为 NULL</b>`:`<b>${to}</b>`}。`,
+      ask:{l:`${v} 的${side==='L'?'左':'右'}线索指向`,q:`${v} 的${side==='L'?'左':'右'}孩子是空的，${side==='L'?'ltag':'rtag'} = 1。它在${ONAME[T.order]}序列里的${side==='L'?'前驱':'后继'}是谁？（没有就填 NULL）`,a:to,
+        hint:x=>{if(side==='L'&&x===nx)return '那是后继，左线索指前驱。';if(side==='R'&&x===pv)return '那是前驱，右线索指后继。';const o2=['pre','in','post'].filter(o=>o!==T.order).find(o=>threadsOf(o).th[v][side]===x);return o2?`这是按${ONAME[o2]}序列找的，这里是${ONAME[T.order]}线索树。`:''}}});set.push(v+side)})});
+  F.push({k:'end',set:[...set],txt:`线索化完成。${seq.length} 个结点共 ${seq.length+1} 个空指针，${set.length} 个变成线索，其中仍为 NULL 的有 ${Object.values(th).reduce((s,o)=>s+(o.L==='NULL')+(o.R==='NULL'),0)} 个。点任一结点看怎么找前驱、后继。`});return F}
+function tPending(){const f=T.frames[T.pos];return $('tGuess').checked&&f&&f.ask&&!T.done.has(T.pos)}
+function thrPath(a,b,side,cls,X,Y){/* curve from node a to node b (or NULL) */const x1=X(a),y1=Y(a);if(b==='NULL'){const dx=side==='L'?-1:1;const sx=x1+dx*10,sy=y1+17,ex=x1+dx*30,ey=y1+50;
+    return `<path class="th nul ${cls}" d="M${sx},${sy} L${ex},${ey}" marker-end="url(#ahN)"/><text class="nul" x="${ex}" y="${ey+12}" text-anchor="middle">NULL</text>`}
+  const x2=X(b),y2=Y(b);const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy)||1;const r=19;const sx=x1+(side==='L'?-9:9),sy=y1+16,ex=x2-dx/len*(r+2),ey=y2-dy/len*(r+2);
+  const bend=(side==='L'?-1:1)*Math.min(46,len*.28)*(dx>=0?1:-1)*(dy<=0?1:-1);const mx=(sx+ex)/2-dy/len*bend,my=(sy+ey)/2+dx/len*bend+(Math.abs(dy)<4?26:0);
+  return `<path class="th ${side==='L'?'p':'s'} ${cls}" d="M${sx},${sy} Q${mx},${my} ${ex},${ey}" marker-end="url(#ah${side})"/>`}
+function tDraw(){const f=T.frames[T.pos],pend=tPending();const ns=Object.values(T.nodes);const n=ns.length;const dep=Math.max(...ns.map(x=>x.d));
+  const cw=70,rh=78,ox=60,W=ox*2+n*cw,H=dep*rh+160;const X=v=>ox+T.nodes[v].i*cw+cw/2,Y=v=>40+T.nodes[v].d*rh;
+  const {seq,th}=threadsOf(T.order);const set=new Set(f.set);if(f.k==='th'&&!pend)set.add(f.v+f.side);if(f.k==='end')ns.forEach(x=>{set.add(x.v+'L');set.add(x.v+'R')});
+  const fd=T.sel?findInfo(T.sel):null;
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" style="max-width:none" role="img" aria-label="线索二叉树"><defs>${['L','R','N'].map(k=>`<marker id="ah${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="${k==='L'?'var(--q)':k==='R'?'var(--pur)':'var(--mv)'}"/></marker>`).join('')}</defs>`;
+  ns.forEach(x=>{[x.l,x.r].forEach(c=>{if(c)s+=`<line class="e" x1="${X(x.v)}" y1="${Y(x.v)}" x2="${X(c.v)}" y2="${Y(c.v)}"/>`})});
+  ns.forEach(x=>{['L','R'].forEach(side=>{const to=th[x.v][side];if(to===null||!set.has(x.v+side))return;const hot=(f.k==='th'&&f.v===x.v&&f.side===side)||(fd&&fd.hot&&fd.hot.includes(x.v+side));s+=thrPath(x.v,to,side,hot?'hot':'',X,Y)})});
+  ns.forEach(x=>{let c='n-c';if(f.k==='th'&&f.v===x.v)c+=' cur';else if(T.sel===x.v)c+=' cur';else if(fd&&fd.pred===x.v)c+=' pred';else if(fd&&fd.succ===x.v)c+=' succ';
+    const showTag=f.k==='end'||ns.length&&[...set].some(k=>k.startsWith(x.v));const lt=x.l?0:1,rt=x.r?0:1;
+    s+=`<g data-v="${esc(x.v)}" style="cursor:pointer"><circle class="${c}" cx="${X(x.v)}" cy="${Y(x.v)}" r="19"/><text class="n-t" x="${X(x.v)}" y="${Y(x.v)}">${esc(x.v)}</text></g>`;
+    if(f.k!=='start'){const lk=set.has(x.v+'L')||x.l,rk=set.has(x.v+'R')||x.r;if(lk)s+=`<text class="tag t${lt}" x="${X(x.v)-27}" y="${Y(x.v)-4}">${lt}</text>`;if(rk)s+=`<text class="tag t${rt}" x="${X(x.v)+27}" y="${Y(x.v)-4}">${rt}</text>`}});
+  /* sequence row */
+  const sy=H-34;s+=`<text class="c-l" x="6" y="${sy+13}">${ONAME[T.order]}</text>`;const sw=34;seq.forEach((v,j)=>{const cur=f.k==='th'&&f.v===v;s+=`<rect class="c-r${cur?' cand':''}${fd&&fd.pred===v?' L':''}${fd&&fd.succ===v?' R':''}" x="${ox+j*sw}" y="${sy}" width="${sw-4}" height="26" rx="3"/><text class="c-t" x="${ox+j*sw+(sw-4)/2}" y="${sy+13}">${esc(v)}</text>`});
+  $('tFig').innerHTML=s+'</svg>';
+  $('tFig').querySelectorAll('[data-v]').forEach(g=>g.onclick=()=>{T.sel=g.dataset.v;tRender()})}
+function leftmost(x){while(x.l)x=x.l;return x}function rightmost(x){while(x.r)x=x.r;return x}
+function lastPre(x){while(x.l||x.r)x=x.r||x.l;return x}
+function firstPost(x){while(x.l||x.r)x=x.l||x.r;return x}
+function findInfo(v){const x=T.nodes[v],o=T.order,p=x.par;const {seq,th}=threadsOf(o);const i=seq.indexOf(v);const truePred=i>0?seq[i-1]:null,trueSucc=i<seq.length-1?seq[i+1]:null;
+  let PR,SU;/* each: {rules:[text,stack?], hit, res, how} */
+  const thr=(side)=>th[v][side]==='NULL'?null:th[v][side];
+  if(o==='pre'){
+    PR={rules:[['ltag = 1：前驱就是 lchild（线索）',0],['ltag = 0，p 是双亲的左孩子：前驱是双亲',1],['ltag = 0，p 是右孩子，双亲没有左子树：前驱是双亲',1],['ltag = 0，p 是右孩子，双亲有左子树：前驱是双亲左子树先序的最后一个结点',1],['根结点没有前驱',0]]};
+    if(!x.l){PR.hit=0;PR.res=thr('L')}else if(!p){PR.hit=4;PR.res=null}else if(x.side==='L'){PR.hit=1;PR.res=p.v}else if(!p.l){PR.hit=2;PR.res=p.v}else{PR.hit=3;PR.res=lastPre(p.l).v}
+    SU={rules:[['rtag = 1：后继就是 rchild（线索）',0],['rtag = 0 且有左孩子（ltag = 0）：后继是左孩子',0],['rtag = 0 且没有左孩子：后继是右孩子',0]]};
+    if(!x.r){SU.hit=0;SU.res=thr('R')}else if(x.l){SU.hit=1;SU.res=x.l.v}else{SU.hit=2;SU.res=x.r.v}}
+  else if(o==='in'){
+    PR={rules:[['ltag = 1：前驱就是 lchild（线索）',0],['ltag = 0：前驱是左子树中序的最后一个（左子树最右下）',0]]};if(!x.l){PR.hit=0;PR.res=thr('L')}else{PR.hit=1;PR.res=rightmost(x.l).v}
+    SU={rules:[['rtag = 1：后继就是 rchild（线索）',0],['rtag = 0：后继是右子树中序的第一个（右子树最左下）',0]]};if(!x.r){SU.hit=0;SU.res=thr('R')}else{SU.hit=1;SU.res=leftmost(x.r).v}}
+  else{
+    PR={rules:[['ltag = 1：前驱就是 lchild（线索）',0],['ltag = 0 且有右孩子（rtag = 0）：前驱是右孩子',0],['ltag = 0 且没有右孩子：前驱是左孩子',0]]};
+    if(!x.l){PR.hit=0;PR.res=thr('L')}else if(x.r){PR.hit=1;PR.res=x.r.v}else{PR.hit=2;PR.res=x.l.v}
+    SU={rules:[['rtag = 1：后继就是 rchild（线索）',0],['rtag = 0，p 是双亲的右孩子：后继是双亲',1],['rtag = 0，p 是左孩子，双亲没有右子树：后继是双亲',1],['rtag = 0，p 是左孩子，双亲有右子树：后继是双亲右子树后序的第一个结点',1],['根结点没有后继',0]]};
+    if(!x.r){SU.hit=0;SU.res=thr('R')}else if(!p){SU.hit=4;SU.res=null}else if(x.side==='R'){SU.hit=1;SU.res=p.v}else if(!p.r){SU.hit=2;SU.res=p.v}else{SU.hit=3;SU.res=firstPost(p.r).v}}
+  if(PR.res!==truePred||SU.res!==trueSucc)console.error('rule mismatch',v,o,PR.res,truePred,SU.res,trueSucc);
+  const hot=[];if(PR.hit===0)hot.push(v+'L');if(SU.hit===0)hot.push(v+'R');
+  return {PR,SU,pred:PR.res,succ:SU.res,hot}}
+function tFindHTML(){if(!T.sel||!T.nodes[T.sel])return `<div class="box" style="grid-column:1/-1;color:var(--muted)">点树上的结点，这里列出${ONAME[T.order]}线索树里找它的前驱、后继的规则，命中的那条高亮。</div>`;
+  const v=T.sel,{PR,SU}=findInfo(v);const x=T.nodes[v];
+  const box=(nm,R,col)=>{const need=R.rules[R.hit][1];return `<div class="box"><b style="color:${col}">找 ${esc(v)} 的${nm}</b>（${esc(v)}：${x.l?'有':'无'}左孩子，${x.r?'有':'无'}右孩子${x.par?`，是 ${x.par.v} 的${x.side==='L'?'左':'右'}孩子`:'，是根'}）<ol>${R.rules.map((r,i)=>`<li class="${i===R.hit?'hit':''}${r[1]?' stack':''}">${r[0]}</li>`).join('')}</ol><div class="r">${nm} = <b style="color:${col}">${R.res===null?'无（NULL）':esc(R.res)}</b>${need?'　<span class="bad">要先知道双亲，只靠线索找不到，需要栈或三叉链表。</span>':R.hit===0?'　直接沿线索一步到。':'　沿孩子指针往下走就能找到。'}</div></div>`};
+  return box('前驱',PR,'var(--q)')+box('后继',SU,'var(--pur)')}
+function tRender(msg){const f=T.frames[T.pos];tDraw();$('tNote').innerHTML=msg||(tPending()?f.ask.q:f.txt);$('tFind').innerHTML=tFindHTML();
+  $('tProg').textContent=`第 ${T.pos} / ${T.frames.length-1} 步`;$('tPrev').disabled=T.pos===0;$('tNext').disabled=T.pos===T.frames.length-1&&!tPending();
+  $('tGbox').classList.toggle('hidden',!tPending());if(tPending()){$('tGq').innerHTML=f.ask.l;if(!msg)$('tGin').value=''}
+  $('tOrd').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.o===T.order))}
+function tCheck(){const f=T.frames[T.pos];let v=$('tGin').value.trim();if(!v)return;if(/^(null|空|-|无|nil)$/i.test(v))v='NULL';const ok=v.toLowerCase()===f.ask.a.toLowerCase();T.done.add(T.pos);
+  tRender((ok?'<span class="ok">对了。</span> ':`<span class="bad">你填 ${esc(v)}，应为 ${esc(f.ask.a)}。</span>${f.ask.hint(v)} `)+f.txt)}
+$('tNext').onclick=()=>{if(tPending()){$('tGin').focus();return}if(T.pos<T.frames.length-1){T.pos++;tRender();if(tPending())$('tGin').focus()}};
+$('tPrev').onclick=()=>{if(T.pos>0){T.pos--;tRender()}};$('tReset').onclick=()=>{T.pos=0;T.done=new Set();tRender()};
+$('tAll').onclick=()=>{T.frames.forEach((_,i)=>T.done.add(i));T.pos=T.frames.length-1;tRender()};
+$('tGbtn').onclick=tCheck;$('tGin').onkeydown=e=>{if(e.key==='Enter')tCheck()};$('tGuess').onchange=()=>tRender();
+$('tOrd').onclick=e=>{const b=e.target.closest('[data-o]');if(!b||!T.root)return;T.order=b.dataset.o;T.frames=tFrames();T.pos=0;T.done=new Set();tRender()};
+function tLoad(order,sel){let r;try{r=parseBin($('tIn').value)}catch(e){$('tErr').textContent=e;return false}$('tErr').textContent='';T.root=r;T.nodes=layoutBin(r);T.order=order||T.order;T.sel=sel||null;T.frames=tFrames();T.pos=0;T.done=new Set();tRender();return true}
+$('tGo').onclick=()=>{$('tPresets').querySelectorAll('[data-p]').forEach(b=>b.setAttribute('aria-pressed','false'));$('tQ').innerHTML='自己输入的树。';tLoad()};
+$('tIn').onkeydown=e=>{if(e.key==='Enter')$('tGo').click()};
+function optSVG(k){const P={a:[60,22],b:[28,62],c:[92,62],d:[54,106]};let s=`<svg viewBox="0 0 120 130" role="img" aria-label="选项 ${k}"><defs><marker id="oa${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--mv)"/></marker></defs>`;
+  [['a','b'],['a','c'],['b','d']].forEach(([u,w])=>s+=`<line class="e" x1="${P[u][0]}" y1="${P[u][1]}" x2="${P[w][0]}" y2="${P[w][1]}"/>`);
+  OPTS[k].forEach(([u,w],i)=>{const [x1,y1]=P[u];if(w==='N'){const dx=u==='c'?1:-1;s+=`<path d="M${x1+dx*11},${y1+4} L${x1+dx*30},${y1+8}" stroke="var(--mv)" stroke-dasharray="3 3" fill="none" marker-end="url(#oa${k})"/><text class="nul" x="${x1+dx*32}" y="${y1+20}" text-anchor="middle">Null</text>`;return}
+    const [x2,y2]=P[w];const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);const bend=(OPTS[k].some(([a,b])=>a===w&&b===u)?(u<w?16:-16):12);const mx=(x1+x2)/2-dy/len*bend,my=(y1+y2)/2+dx/len*bend;
+    s+=`<path d="M${x1+dx/len*11},${y1+dy/len*11} Q${mx},${my} ${x2-dx/len*13},${y2-dy/len*13}" stroke="var(--mv)" stroke-dasharray="3 3" fill="none" marker-end="url(#oa${k})"/>`});
+  Object.entries(P).forEach(([v,[x,y]])=>s+=`<circle class="n-c" cx="${x}" cy="${y}" r="10"/><text class="n-t" style="font-size:12px;font-style:italic" x="${x}" y="${y}">${v}</text>`);return s+'</svg>'}
+$('tPresets').insertAdjacentHTML('beforeend',TP.map((p,i)=>`<button type="button" class="chip" data-p="${i}" aria-pressed="false">${p.t}</button>`).join(''));
+$('tPresets').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const p=TP[+b.dataset.p];$('tIn').value=p.tree;
+  $('tPresets').querySelectorAll('[data-p]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  $('tQ').innerHTML=esc(p.q)+(p.opts?`<div class="opts">${'ABCD'.split('').map(k=>`<figure>${optSVG(k)}<figcaption>${k}.</figcaption></figure>`).join('')}</div><p class="legend">四个图按讲义原图重画：红虚线是线索，箭头起止和原图相同。</p><div class="ctrl" id="optPick">你选：${'ABCD'.split('').map(k=>`<button class="btn" type="button" data-k="${k}">${k}</button>`).join('')}<span id="optRes"></span></div>`:'')+`<details style="margin-top:4px"><summary>看答案</summary><span class="ans">${esc(p.ans)}</span>${p.opts?`<br>${'ABCD'.split('').map(k=>`${k}：${OPTN[k]}`).join('<br>')}`:''}</details>`;
+  if(p.opts)$('optPick').onclick=ev=>{const k=ev.target.dataset&&ev.target.dataset.k;if(!k)return;$('optRes').innerHTML=k==='D'?'<span class="ok">对了。</span>'+OPTN.D:`<span class="bad">不对。</span>${OPTN[k]}切到“后序”跑一遍再比。`};
+  $('tSrc').textContent=p.src;tLoad(p.o,p.sel)};
+$('bPresets').querySelector('[data-p="0"]').click();$('tPresets').querySelector('[data-p="0"]').click();
+</script>
+</body>
+</html>
