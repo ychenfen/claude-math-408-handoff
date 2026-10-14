@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build:cloud && python3 scripts/build_site.py && python3 scripts/build_text.py && python3 scripts/stage_pages.py"
+  publish = "_site"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

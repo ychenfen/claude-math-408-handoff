@@ -85,7 +85,34 @@
       img.before(button);button.append(img);button.onclick=()=>zoom(img.src,img.alt||'图解');
     });
   }
-  function mountDrill({docs,subject,container,renderMarkdown,get,put,download}) {
+  function mountSubmission({container,subject,card,input,today,isRevealed}) {
+    const button=create('button','secondary submit-answer','复制本题作答，请助手核对');button.type='button';
+    const fallback=create('textarea','submission-copy');fallback.readOnly=true;fallback.rows=8;fallback.hidden=true;
+    fallback.setAttribute('aria-label','手动复制本题核对内容');
+    const status=create('p','submission-status');status.setAttribute('role','status');
+    button.onclick=async()=>{
+      const text=StudyPlan.submission({subject,question:card.question,context:card.context,note:input.value,path:card.path,today,revealed:isRevealed()});
+      try{await navigator.clipboard.writeText(text);status.textContent='已复制。发给本科助手核对；网站不会自动上传作答或改变状态。';}
+      catch{fallback.value=text;fallback.hidden=false;fallback.focus();fallback.select();status.textContent='请复制下方内容，发给本科助手核对。';}
+    };
+    container.append(button,status,fallback);
+  }
+  function mountPractice({group,subject,container,renderMarkdown,get,put,today}) {
+    const card={question:group.title,context:StudyPlan.contextOf(group),path:group.path};
+    const back=create('a','practice-back','← 返回今日任务');back.href='#all';container.append(back);
+    container.append(create('div','eyebrow','闭卷检验 · '+subject.name+' · 题面来源 '+group.date),renderMarkdown('### '+card.question,card.path));
+    container.append(renderMarkdown(card.context,card.path));
+    const label=create('label','','我的作答（也可以随后附手写照片）');label.htmlFor='practice-answer';
+    const input=create('textarea','recall-answer');input.id='practice-answer';input.rows=8;
+    input.placeholder='先闭卷写出过程、单位、边界或代码，再交给助手核对。';
+    const key=`study-v1:${subject.id}:practice:${group.id}`;input.value=get(key);
+    input.oninput=()=>put(key,input.value);container.append(label,input);
+    container.append(create('p','practice-done','完成标准：留下作答，由助手核对并记录通过／未通过及依据。仅看过讲解或口头自评不算通过。'));
+    const tools=create('div','submission-tools');container.append(tools);
+    mountSubmission({container:tools,subject,card,input,today,isRevealed:()=>false});
+    const source=create('a','practice-source','回看问答来源（含讲解）');source.href=`#${subject.id}/${group.date}/records`;container.append(source);
+  }
+  function mountDrill({docs,subject,container,renderMarkdown,get,put,download,today}) {
     const cards=cardsOf(docs),prefix=`study-drill-v1:${subject.id}:`;
     function read(card) {try {const v=JSON.parse(get(prefix+card.id)||'{}');return v&&typeof v==='object'?v:{};}catch{return {};}}
     function save(card,patch) {put(prefix+card.id,JSON.stringify({...read(card),...patch}));}
@@ -104,7 +131,7 @@
       })].join('\n');download(text,subject.name+'-闭卷自测记录.md');
     };
     exportButton.disabled=!cards.length;toolbar.append(exportButton);settings.append(toolbar);
-    settings.append(create('small','','安排和回想只存当前浏览器，不跨设备；关闭网页不推送通知。重新打开会列出到期题。内容修订后按新题重新测；旧记录仍留在浏览器，但此处只导出当前版本。'));
+    settings.append(create('small','','未登录时安排和回想只存当前浏览器；私有同步入口登录后跨设备同步。关闭网页不推送通知。重新打开会列出到期题。内容修订后按新题重新测；旧记录仍留在浏览器，但此处只导出当前版本。'));
     const stage=create('div','drill-stage');container.append(stage);
     updateStats();
     if (!cards.length) {stage.append(create('p','empty','本科还没有复习卡：复盘里还没有自测题。说“总结今天”让本科助手根据真实问答写，不自动编造。'));return;}
@@ -128,6 +155,9 @@
       const input=create('textarea','recall-answer');input.id='recall-answer';input.rows=4;input.placeholder='先写自己的解释、公式条件或步骤，再看参考要点。';input.value=state.note||'';input.oninput=()=>save(card,{note:input.value});stage.append(label,input);
       const reveal=create('button','primary','我已回想，查看参考要点');reveal.type='button';
       const answer=create('div','drill-answer');answer.hidden=true;answer.append(renderMarkdown(card.answer,card.path));
+      const submit=create('div','submission-tools');
+      mountSubmission({container:submit,subject,card,input,today,isRevealed:()=>!answer.hidden});
+      stage.append(submit);
       answer.append(renderMarkdown(`[回看来源复盘](${card.path.split('/').map(encodeURIComponent).join('/')})`,'index.html'));
       const rates=create('div','drill-rate');rates.hidden=true;rates.append(create('span','','与参考要点对照后：'));
       ['不会','模糊','会了'].forEach(rating=>{
@@ -151,5 +181,5 @@
     const read=c=>{try{const v=JSON.parse(get(prefix+c.id)||'{}');return v&&typeof v==='object'?v:{};}catch{return {};}};
     return {...StudySpacing.summary(cards,read),total:cards.length};
   }
-  window.StudyReview={cardsOf,dueOf,svgData,enhanceFigures,mountDrill};
+  window.StudyReview={cardsOf,dueOf,svgData,enhanceFigures,mountDrill,mountPractice};
 })();
