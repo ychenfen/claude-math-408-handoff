@@ -156,9 +156,6 @@ select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);c
     <div class="err" id="err" role="alert"></div>
   </section>
   <section class="panel">
-    <div class="flow" id="flow"></div>
-    <div class="view" id="view"></div>
-    <div class="note" id="note" role="status" aria-live="polite"></div>
     <div class="ctrl">
       <button class="btn" id="first" type="button">⏮ 重来</button>
       <button class="btn" id="prev" type="button">◀ 上一步</button>
@@ -168,6 +165,9 @@ select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);c
       <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
       <span class="count" id="count"></span>
     </div>
+    <div class="flow" id="flow"></div>
+    <div class="view" id="view"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
 
     <p class="tip">“先猜再看”开着时，关键一步之前先停下来问你，自己算完再点下一步对答案。键盘 ← → 单步，空格播放／暂停。</p>
   </section>

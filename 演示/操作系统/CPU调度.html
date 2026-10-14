@@ -124,9 +124,6 @@ select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);c
     <div class="err" id="err" role="alert"></div>
   </section>
   <section class="panel">
-    <div class="queue" id="queue"></div>
-    <div class="view gantt" id="view"></div>
-    <div class="note" id="note" role="status" aria-live="polite"></div>
     <div class="ctrl">
       <button class="btn" id="first" type="button">⏮ 重来</button>
       <button class="btn" id="prev" type="button">◀ 上一步</button>
@@ -136,6 +133,9 @@ select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);c
       <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
       <span class="count" id="count"></span>
     </div>
+    <div class="queue" id="queue"></div>
+    <div class="view gantt" id="view"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
 
     <p class="tip">“先猜再看”开着时，每个调度时刻先停一步问你。键盘 ← → 单步，空格播放／暂停。</p>
   </section>

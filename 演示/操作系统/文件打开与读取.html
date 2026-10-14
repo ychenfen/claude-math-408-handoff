@@ -102,14 +102,6 @@ details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);pad
 
   <section class="panel">
     <h2>一、open → lseek → read → close</h2>
-    <pre class="code" id="code"></pre>
-    <div class="opts"><label><input id="rootRes" type="checkbox"> 根目录 inode 常驻内存（很多题这样假设）</label><label><input id="guess" type="checkbox" checked> 先猜再看</label></div>
-    <div class="grid3">
-      <div class="box tree"><h3>目录树（一个磁盘块放两个目录项）</h3><div id="tree"></div></div>
-      <div class="box"><h3>磁盘</h3><div class="tip" style="margin:0">磁盘 inode 表</div><div class="itab" id="itab"></div><div class="tip" style="margin:0 0 3px">刚读进来的目录块</div><div id="dblk"></div><div class="io" id="io"></div></div>
-      <div class="box"><h3>内存（内核空间）</h3><div id="mem"></div></div>
-    </div>
-    <div class="note" id="note" role="status" aria-live="polite"></div>
     <div class="ctrl">
       <button class="btn" id="first" type="button">⏮ 重来</button>
       <button class="btn" id="prev" type="button">◀ 上一步</button>
@@ -119,6 +111,14 @@ details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);pad
       <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
       <span class="count" id="count"></span>
     </div>
+    <pre class="code" id="code"></pre>
+    <div class="opts"><label><input id="rootRes" type="checkbox"> 根目录 inode 常驻内存（很多题这样假设）</label><label><input id="guess" type="checkbox" checked> 先猜再看</label></div>
+    <div class="grid3">
+      <div class="box tree"><h3>目录树（一个磁盘块放两个目录项）</h3><div id="tree"></div></div>
+      <div class="box"><h3>磁盘</h3><div class="tip" style="margin:0">磁盘 inode 表</div><div class="itab" id="itab"></div><div class="tip" style="margin:0 0 3px">刚读进来的目录块</div><div id="dblk"></div><div class="io" id="io"></div></div>
+      <div class="box"><h3>内存（内核空间）</h3><div id="mem"></div></div>
+    </div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
     <p class="tip">键盘 ← → 单步，空格播放／暂停。“磁盘 I/O”按 PPT 的画法计：每读一个 inode、每读一个目录块各算一次。</p>
   </section>
 

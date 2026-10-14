@@ -175,6 +175,15 @@ details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);pad
   <!-- ===== 2 ===== -->
   <section class="panel">
     <h2>二、单缓冲和双缓冲：T 输入、M 传送、C 处理</h2>
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="3"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+    </div>
     <ol class="rules">
       <li>T：数据从 I/O 设备输入到缓冲区；M：从缓冲区传送到工作区；C：CPU 在工作区处理。<span class="tip">（五章 p17–18）</span></li>
       <li><b>同一个部件的使用必须互斥</b>：缓冲区在 T 和 M 时都被占着，工作区在 M 和 C 时都被占着。这是算时间的唯一规则。<span class="tip">（五章 p18 “计算缓冲时间的注意事项”）</span></li>
@@ -193,15 +202,6 @@ details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);pad
     <div class="view" id="tl2"></div>
     <div class="legend"><span><i class="lg-T"></i>T 输入</span><span><i class="lg-M"></i>M 传送（同时占缓冲区和工作区）</span><span><i class="lg-C"></i>C 处理</span><span>行的画法照 PPT p30–31：T 画在 I/O 设备行，M 画在它取数的缓冲区行，C 画在工作区行。</span></div>
     <div class="note" id="note2" role="status" aria-live="polite"></div>
-    <div class="ctrl">
-      <button class="btn" id="first" type="button">⏮ 重来</button>
-      <button class="btn" id="prev" type="button">◀ 上一步</button>
-      <button class="btn primary" id="play" type="button">播放</button>
-      <button class="btn" id="next" type="button">下一步 ▶</button>
-      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="3"> <span id="spdv"></span></label>
-      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
-      <span class="count" id="count"></span>
-    </div>
     <p class="tip">每一步停在某个 T／M／C 开始或结束的时刻。“先猜再看”开着时，前 3 块的 T、M 开始前先问你它在等什么。键盘 ← → 单步，空格播放／暂停。</p>
     <div class="sumgrid" id="sum2"></div>
   </section>

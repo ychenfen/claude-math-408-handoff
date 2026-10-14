@@ -156,8 +156,6 @@ details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);pad
     <div class="opts"><span class="grp" id="sopt"></span><label><input id="guess" type="checkbox" checked> 先猜再看</label></div>
   </section>
   <section class="panel play">
-    <div class="stage" id="stage"><div id="left" style="min-width:0"></div><div class="cards" id="right"></div></div>
-    <div class="note" id="note" role="status" aria-live="polite"></div>
     <div class="ctrl">
       <button class="btn" id="first" type="button">⏮ 重来</button>
       <button class="btn" id="prev" type="button">◀ 上一步</button>
@@ -167,6 +165,8 @@ details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);pad
       <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
       <span class="count" id="count"></span>
     </div>
+    <div class="stage" id="stage"><div id="left" style="min-width:0"></div><div class="cards" id="right"></div></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
     <p class="tip">“先猜再看”开着时，关键步骤先停一步问你，下一步再给答案。键盘 ← → 单步，空格播放／暂停。上方的小按钮可以换打印机型号、换“哪一级忙”。</p>
   </section>
 

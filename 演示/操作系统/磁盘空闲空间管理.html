@@ -115,8 +115,6 @@ details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);pad
   <section class="panel"><div class="flow" id="flow"></div>
     <div class="opts" style="margin-top:8px"><label><input id="guess" type="checkbox" checked> 先猜再看</label></div></section>
   <section class="panel">
-    <div class="stage"><div class="view" id="view"></div><div class="card" id="card"></div></div>
-    <div class="note" id="note" role="status" aria-live="polite"></div>
     <div class="ctrl">
       <button class="btn" id="first" type="button">⏮ 重来</button>
       <button class="btn" id="prev" type="button">◀ 上一步</button>
@@ -126,6 +124,8 @@ details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);pad
       <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
       <span class="count" id="count"></span>
     </div>
+    <div class="stage"><div class="view" id="view"></div><div class="card" id="card"></div></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
     <p class="tip">上方阶段可以点，直接跳到那一段。键盘 ← → 单步，空格播放／暂停。图例：绿色是空闲块，灰色是已占用，红色是刚分出去的，橙色是刚回收的；蓝色块是成组链接法里的索引块。</p>
   </section>
 

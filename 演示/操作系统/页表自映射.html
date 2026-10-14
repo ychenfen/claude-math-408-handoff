@@ -134,8 +134,6 @@ svg text{font-family:var(--mono)}
     <div class="err" id="err" role="alert"></div>
   </section>
   <section class="panel">
-    <div class="view map" id="view"></div>
-    <div class="note" id="note" role="status" aria-live="polite"></div>
     <div class="ctrl">
       <button class="btn" id="first" type="button">⏮ 重来</button>
       <button class="btn" id="prev" type="button">◀ 上一步</button>
@@ -145,6 +143,8 @@ svg text{font-family:var(--mono)}
       <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
       <span class="count" id="count"></span>
     </div>
+    <div class="view map" id="view"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
 
     <p class="tip">“先猜再看”开着时，每一小问先停一步问你，自己算完再点下一步。键盘 ← → 单步，空格播放／暂停。</p>
   </section>
