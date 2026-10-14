@@ -93,6 +93,7 @@ svg text{font-family:var(--mono)}
 .chip.bug{border-color:var(--mv);color:var(--mv)}
 .chip.bug[aria-pressed="true"]{background:var(--mv);border-color:var(--mv);color:var(--paper)}
 .quiz b{color:var(--q)}
+.quiz .skip{display:block;margin-top:6px;color:var(--muted)}
 .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .opts button,.mode button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
 .opts button.right{border-color:var(--done);background:color-mix(in srgb,var(--done) 22%,transparent);font-weight:600}
@@ -124,8 +125,6 @@ svg text{font-family:var(--mono)}
   <div class="main" id="mainArea">
     <section class="panel">
       <pre class="code" id="code"></pre>
-      <div class="note" id="note" role="status" aria-live="polite"></div>
-      <div class="why" id="why" hidden></div>
       <div class="ctrl">
         <button id="first" type="button">⏮ 重来</button>
         <button id="prev" type="button">◀ 上一步</button>
@@ -139,7 +138,9 @@ svg text{font-family:var(--mono)}
         <label><input type="checkbox" id="guess" checked> 先猜再看（关键步骤先停下来让你选）</label>
         <button id="dictBtn" type="button">默写自测</button>
       </div>
-      <p class="tip">键盘：← → 单步，空格播放／暂停。带下划虚线的行有“为什么这样写”的说明，执行到时显示在上面。每个模板后面标红的是“错法”，把常见写错的版本跑给你看。</p>
+      <div class="note" id="note" role="status" aria-live="polite"></div>
+      <div class="why" id="why" hidden></div>
+      <p class="tip">键盘：← → 单步，空格播放／暂停。带下划虚线的行有“为什么这样写”的说明，执行到时显示在按钮下面。每个模板后面标红的是“错法”，把常见写错的版本跑给你看。</p>
     </section>
     <section class="panel state" id="state"></section>
   </div>
@@ -934,13 +935,13 @@ function draw(){if(!frames.length)return;if(dict){drawDict();return}const f=fram
   $('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':(at===frames.length-1?'重播':'播放');
   const on=$('code').querySelector('.on');if(on&&on.scrollIntoView&&timer)on.scrollIntoView({block:'nearest',inline:'nearest'})}
 function drawQuiz(){const q=frames[asking].quiz;
-  $('note').innerHTML=`<div class="quiz"><b>先猜：</b>${esc(q.q)}<div class="opts">${q.opts.map((o,k)=>`<button type="button" data-o="${k}">${esc(o)}</button>`).join('')}</div><div id="fb"></div></div>`}
+  $('note').innerHTML=`<div class="quiz"><b>先猜：</b>${esc(q.q)}<div class="opts">${q.opts.map((o,k)=>`<button type="button" data-o="${k}">${esc(o)}</button>`).join('')}</div><div id="fb"></div><small class="skip">不想猜也可以直接点“下一步”。</small></div>`}
 $('note').onclick=e=>{const b=e.target.closest('[data-o]');if(b&&asking!==null){const q=frames[asking].quiz,k=+b.dataset.o,ok=k===q.ans;
    $('note').querySelectorAll('[data-o]').forEach(x=>{x.disabled=true;if(+x.dataset.o===q.ans)x.classList.add('right');else if(x===b)x.classList.add('wrong')});
-   $('fb').innerHTML=`<p class="${ok?'ok':'bad'}">${ok?'对了。':'不对，正确答案是“'+esc(q.opts[q.ans])+'”。'}${esc(q.exp)}</p><button type="button" class="go" data-go="1">看它执行 ▶</button>`;answered.add(asking);$('fb').querySelector('[data-go]').focus();return}
+   $('fb').innerHTML=`<p class="${ok?'ok':'bad'}">${ok?'对了。':'不对，正确答案是“'+esc(q.opts[q.ans])+'”。'}${esc(q.exp)}</p><button type="button" class="go" data-go="1">看它执行 ▶</button>`;answered.add(asking);$('fb').querySelector('[data-go]').focus({preventScroll:true});return}
   if(e.target.closest('[data-go]')){at=asking;asking=null;draw();if(resume){resume=false;timer=setTimeout(tick,delay());draw()}}};
 /* step forward; returns false when it stopped (end or a question) */
-function fwd(fromPlay){if(asking!==null)return false;if(at>=frames.length-1)return false;const nx=at+1;
+function fwd(fromPlay){if(asking!==null){if(fromPlay)return false;answered.add(asking);at=asking;asking=null;resume=false;draw();return true}if(at>=frames.length-1)return false;const nx=at+1;
   if(guess()&&frames[nx].quiz&&!answered.has(nx)){asking=nx;resume=!!fromPlay||!!timer;stop();draw();return false}
   at=nx;draw();return true}
 const SPD=[3000,2000,1400,1000,700,450,250];const delay=()=>SPD[+$('speed').value];
