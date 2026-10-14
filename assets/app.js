@@ -114,7 +114,7 @@
     if(!all.length)box.insertAdjacentHTML('beforeend','<p class="muted">还没有写过漏洞或检验的问答。</p>');
     return box;
   }
-  function nextAction(text) { const body=section(text||'','下次先做');const m=body&&body.match(/^- \[ \] (.+)$/m);return m?m[1].trim():''; }
+  function nextAction(text) { const body=section(text||'','下次先做');const m=body&&body.match(/^- \[ \] (.+)$/m);return m?m[1].trim().replace(/!?\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/\*\*|__/g,''):''; }
   const escape = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const encodePath = p => p.split('/').map(encodeURIComponent).join('/');
   const localDate = () => new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
@@ -209,7 +209,7 @@
     // Pending summaries: without them tonight's review has no new cards.
     const pending=data.subjects.map(s=>({s,days:unsummarized(s)})).filter(x=>x.days.length);
     if(pending.length){const box=document.createElement('div');box.className='rt-pending';
-      box.innerHTML='<b>还没总结的问答</b><span>不总结就不会生成新的复习卡。点一下复制提示词，发到该科项目里说“总结今天”。</span>'+pending.map(({s,days})=>`<button type="button" data-s="${s.id}" data-d="${days[days.length-1]}">${escape(s.name)} <small>${days.map(d=>d.slice(5)).join('、')}</small></button>`).join('');
+      box.innerHTML='<b>还没总结的问答</b><span>不总结就不会生成新的复习卡。点一下复制提示词，发到该科项目里说“总结今天”。</span>'+pending.map(({s,days})=>`<button type="button" data-s="${s.id}" data-d="${days[days.length-1]}">${escape(s.name)} <small>${days.length>2?`${days.length} 天 · 到 ${days[days.length-1].slice(5)}`:days.map(d=>d.slice(5)).join('、')}</small></button>`).join('');
       box.querySelectorAll('button').forEach(b=>b.onclick=async()=>{const s=data.subjects.find(x=>x.id===b.dataset.s);const text=promptFor(s,b.dataset.d);try{await navigator.clipboard.writeText(text);notify(`已复制${s.name} ${b.dataset.d} 的总结提示词`);}catch{select(s.id,b.dataset.d,'handoff');}});
       today_.append(box);}
     // Daytime algorithm: the data-structures plan says which template to hand-write today; night only recalls it.
@@ -253,7 +253,7 @@
       const row=document.createElement('button');row.className='all-row';row.dataset.subject=s.id;
       const bar=n?`<div class="stack" role="img" aria-label="${escape(s.name)}共${n}题：${STATUSES.map((st,i)=>count[i]?st+count[i]:'').filter(Boolean).join('，')}">${STATUSES.map((st,i)=>count[i]?`<span class="seg s${i}" style="flex:${count[i]}" data-tip="${st} ${count[i]}题"></span>`:'').join('')}</div><div class="stack-text">${n}题 · ${STATUSES.map((st,i)=>count[i]?`${st} ${count[i]}`:'').filter(Boolean).join(' · ')}</div>`:`<div class="stack empty-stack"></div><div class="stack-text muted">${s.summaries.length?'复盘还没有题目状态表':'还没有复盘'}</div>`;
       const strip=`<div class="strip" aria-label="最近14天记录">${span.map(d=>{const lv=reviews.has(d)?2:days.has(d)?1:0;return `<i class="day d${lv}" data-tip="${d.slice(5)} ${['无记录','有问答','有问答和复盘'][lv]}"></i>`;}).join('')}</div><div class="strip-cap"><span>${span[0].slice(5)}</span><span>近14天</span><span>${span[13].slice(5)}</span></div>`;
-      row.innerHTML=`<div class="all-name"><b>${escape(s.name)}</b><span>${last?`最近记录 ${last.slice(5)} · ${daysBetween(last,today)===0?'今天':daysBetween(last,today)+'天前'}`:'暂无记录'}</span></div><div class="all-bar">${bar}</div><div class="all-days">${strip}</div><div class="all-next">${next?`<b>下次先做 · ${latestReview.date.slice(5)} 复盘</b>${escape(next)}${unsummarized(s).length?`<em class="stale">之后 ${unsummarized(s).map(d=>d.slice(5)).join('、')} 有新问答未总结，可能已做过</em>`:''}`:'<span class="muted">—</span>'}</div>`;
+      row.innerHTML=`<div class="all-name"><b>${escape(s.name)}</b><span>${last?`最近记录 ${last.slice(5)} · ${daysBetween(last,today)===0?'今天':daysBetween(last,today)+'天前'}`:'暂无记录'}</span></div><div class="all-bar">${bar}</div><div class="all-days">${strip}</div><div class="all-next">${next?`<b>下次先做 · ${latestReview.date.slice(5)} 复盘</b>${escape(next)}${unsummarized(s).length?`<em class="stale">之后 ${unsummarized(s).length} 天问答未总结（到 ${unsummarized(s).slice(-1)[0].slice(5)}），可能已做过</em>`:''}`:'<span class="muted">—</span>'}</div>`;
       row.onclick=()=>select(s.id,null,n?'ledger':'daily');pane.append(row);
     });
     const foot=document.createElement('p');foot.className='all-foot';foot.textContent=`数据：随站点发布的快照，加上本次已检查过GitHub的科目。14天按北京时间，截止 ${today}。`;pane.append(foot);

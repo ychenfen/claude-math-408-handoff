@@ -14,7 +14,7 @@ async (page) => {
     const osRow=page.locator('.all-row[data-subject="os"]');
     assert((await osRow.locator('.seg').count())===3,'OS status segments');
     assert((await osRow.textContent()).includes('11题')&&(await osRow.textContent()).includes('下次先做'),'OS overview text');
-    assert((await page.locator('.all-row[data-subject="co"]').textContent()).includes('还没有复盘'),'Empty subject honest');
+    // Every subject has a review by now; the honest empty state is covered by browser_review.js with a fixture.
     await osRow.locator('.seg').first().hover();assert(!(await page.locator('.chart-tip').isHidden()),'Bar tooltip');
     await page.setViewportSize({width:390,height:844});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile overview overflow');
     await page.screenshot({path:'/tmp/study-overview-mobile.png',fullPage:true});await page.setViewportSize({width:1440,height:1000});
@@ -46,7 +46,8 @@ async (page) => {
     await page.locator('#date').fill('2026-10-05');await page.locator('#date').dispatchEvent('change');
     await page.getByRole('tab',{name:'每日复盘'}).click();
     assert(await page.locator('details.selftest').count()===3,'DS summary missing');
-    await page.getByRole('tab',{name:'题目追踪'}).click();await page.locator('.ledger-empty').waitFor();
+    // The 10-05 DS review has no status table: it must be reported, never invented (later reviews may add rows).
+    await page.getByRole('tab',{name:'题目追踪'}).click();await page.locator('.ledger-missing').waitFor();
     assert((await page.locator('.ledger-missing').textContent()).includes('2026-10-05'),'Missing table should be reported');
     await page.getByRole('tab',{name:'每日复盘'}).click();
     assert(await page.locator('.katex').count()>0,'Math not rendered');

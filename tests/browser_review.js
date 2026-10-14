@@ -59,7 +59,10 @@ async (browserPage) => {
     assert(await page.locator('details.selftest .answer').first().isHidden(),'Daily answer content hidden');
     await page.locator('[data-subject="linear"]').click();await page.getByRole('tab',{name:'闭卷自测',exact:true}).click();
     await page.locator('.recall-answer').waitFor();
-    assert((await page.locator('.drill-stage .eyebrow').textContent()).startsWith('1 / 5'),'Linear algebra recall cards come from its review, not from Q&A redo');
+    const linTotal=Number((await page.locator('.drill-stage .eyebrow').textContent()).match(/^1 \/ (\d+)/)[1]);
+    const lin=snapshot.subjects.find(s=>s.id==='linear');
+    const linExpected=[...lin.summaries,...(lin.examCards||[])].reduce((n,d)=>n+(d.text.match(/^### 自测：/gm)||[]).length,0);
+    assert(linTotal===linExpected,`Linear algebra cards come only from its reviews and exams, not from Q&A redo: ${linTotal} vs ${linExpected}`);
     // Formulas: Markdown must not eat TeX backslashes (matrix rows, braces, spaces).
     await page.goto(BASE+'/#linear/2026-10-05/daily');await page.waitForLoadState('networkidle');
     const tex=await page.evaluate(()=>[...document.querySelectorAll('#content annotation')].map(a=>a.textContent));
