@@ -3813,6 +3813,9 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 
 **可视化**：[开机到用户进程](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%BC%80%E6%9C%BA%E5%88%B0%E7%94%A8%E6%88%B7%E8%BF%9B%E7%A8%8B.html) 创建进程阶段 PCB 的 PTR 指向页表；[地址转换](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2.html) 查页表时从页表基址寄存器取页表地址。
 
+**追问（20:13）**：页表基址寄存器是 PTBR 吗？
+- 是，PTBR = Page Table Base Register，存当前进程页表的起始物理地址。王道叫“页表寄存器 PTR”，放页表始址和页表长度（先比页号与长度判越界，再用始址 + 页号 × 页表项长度找页表项）。强化1 p40 的 PTR 指 PCB 里记页表地址的字段：不运行时存在 PCB，切换上 CPU 时装进寄存器。x86 的 CR3、RISC-V 的 satp 是同类寄存器（课外，不考）。
+
 
 ---
 
