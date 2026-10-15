@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>计时题与 BGP 动画</title>
+<style>
+/* Mode tabs, the lecture's key cautions, inputs and presets, then a step player drawing a timeline, a Gantt, a route table or a small topology. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --f1:#cfe0f3; --f2:#f3d9bf; --nav:#e3f0d8; --gray:#e4e4de;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --f1:#24384f; --f2:#4a3624; --nav:#26371f; --gray:#2c322d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --f1:#24384f; --f2:#4a3624; --nav:#26371f; --gray:#2c322d; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=number],.form input[type=text]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6.5em}
+.form textarea{font:13px/1.6 var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:4px 6px;width:min(40em,86vw);min-height:6.5em}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink)}
+select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.view{overflow-x:auto;margin-top:10px}
+.view svg{display:block;width:100%;min-width:640px;height:auto}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:8px}
+.note .ask{color:var(--q);font-weight:600}
+.note b{color:var(--done)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.src{font-size:12px;color:var(--muted)}
+svg text{font-family:var(--sans);fill:var(--ink)}
+svg .m{fill:var(--muted)}
+svg .g{fill:var(--done)}
+svg .r{fill:var(--mv)}
+svg .b{fill:var(--q)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>计时题与 BGP 动画</h1>
+    <p class="sub">2024 年计网丢分的几处：36 题 NAV、38 题 TCP 总时间、40 题 HTTP 的 RTT 数、47 题 BGP 通告与选路。每一步先问你，再画出来。上面一栏是讲解里强调的注意点。可以改数字，用来核对自己的迁移题答案。</p>
+  </header>
+  <div class="modes" id="modes" role="group" aria-label="演示"></div>
+  <section class="panel"><h2>讲解里的注意点</h2><ol class="rules" id="rules"></ol></section>
+  <section class="panel">
+    <div class="form" id="form"></div>
+    <div class="presets" id="presets"></div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="2"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+      <label class="chk" style="font-size:13px;display:flex;gap:6px;align-items:center"><input id="guess" type="checkbox" checked> 先猜再看</label>
+    </div>
+    <div class="view" id="view"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <p class="tip">“先猜再看”开着时，关键一步之前先停下来问你。键盘 ← → 单步，空格播放／暂停。</p>
+  </section>
+  <p class="src">来源：湖科大教书匠 B 站“计算机网络408考研2024年真题解析”（BV1VE411A7Ak p16），用户 2026-10-15 上传的转写稿；王道《计算机网络》第 4.4 节。BGP 选路四条规则以讲解为准（王道只写了 AS 路径最短和热土豆）；“BGP 标识符”预设里的数值是示意。对应问答：<a href="../../问答记录/计算机网络/2026-10-15.md">计算机网络 2026-10-15</a>。</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=x=>Number.isFinite(x)?(Math.round(x*1000)/1000).toString():'?';
+const T=(x,y,s,a='')=>`<text x="${x}" y="${y}" ${a}>${s}</text>`;
+const R=(x,y,w,h,fill,a='')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="var(--muted)" ${a}/>`;
+const ARW=`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker><marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--mv)"/></marker></defs>`;
+const svg=(w,h,body)=>`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="当前步骤示意">${ARW}${body}</svg>`;
+const num=id=>{const v=$(id).value.trim();return v===''?NaN:+v};
+
+/* ---------------- NAV ---------------- */
+const NAV={
+  name:'36 题 NAV',
+  rules:[
+    '某帧里的 NAV = <b>这一帧发完以后，一直到 ACK 发完</b>。不含这一帧自己，也不含开头的 DIFS。',
+    'RTS 里的 NAV 给 A 周围的站（如 C），CTS 里的 NAV 给 AP 周围、听不到 A 的<b>隐蔽站</b>（如 B），数据帧里的 NAV 给前两帧都没听到的站。',
+    'SIFS 用来分隔一次对话里的各帧，让站点从发送切到接收。DIFS 比 SIFS 长很多：别的站要等 DIFS，就插不进 ACK 之前的那个 SIFS。',
+    '题目说的“传输时延”就是发送时延；局域网的传播时延忽略不计。帧长记住：RTS 20B，CTS 14B，ACK 14B。',
+    'RTS/CTS 预约是<b>可选</b>的，数据帧长时才用。CSMA/CA 也不能彻底避免碰撞，两个站同时发 RTS 也会撞。',
+    '必须退避的三种情况：发送前检测到信道忙；成功发完一帧后要连续发下一帧；重传一帧。',
+    '802.11 有确认：FCS 出错的帧直接丢弃、不回 ACK，发送方超时重传，所以对上层是可靠的（以太网和 PPP 不可靠）。'],
+  form:`<label>SIFS（μs）<input id="n_sifs" type="number" min="0" step="any"></label>
+    <label>DIFS（μs）<input id="n_difs" type="number" min="0" step="any"></label>
+    <label>RTS 发送时延（μs）<input id="n_rts" type="number" min="0" step="any" placeholder="可空"></label>
+    <label>CTS 发送时延（μs）<input id="n_cts" type="number" min="0" step="any" placeholder="可空"></label>
+    <label>ACK 发送时延（μs）<input id="n_ack" type="number" min="0" step="any"></label>
+    <label>数据帧（B）<input id="n_len" type="number" min="1" step="any"></label>
+    <label>速率（Mb/s）<input id="n_rate" type="number" min="0.001" step="any"></label>
+    <button class="btn" type="button" data-run>按这组数据重新演示</button>`,
+  presets:[['2024-36（题里给的 SIFS 28、ACK 2，1998B，54Mb/s；RTS、CTS 留空）',{n_sifs:28,n_difs:128,n_rts:'',n_cts:'',n_ack:2,n_len:1998,n_rate:54}],
+           ['自己填（空白）',{n_sifs:'',n_difs:'',n_rts:'',n_cts:'',n_ack:'',n_len:'',n_rate:''}]],
+  build(){
+    const p={sifs:num('n_sifs'),difs:num('n_difs'),rts:num('n_rts'),cts:num('n_cts'),ack:num('n_ack'),len:num('n_len'),rate:num('n_rate')};
+    if(!(p.len>0&&p.rate>0))return '请填数据帧长度和速率。';
+    p.data=p.len*8/p.rate;
+    const navR=p.sifs+p.cts+p.sifs+p.data+p.sifs+p.ack,navC=p.sifs+p.data+p.sifs+p.ack,navD=p.sifs+p.ack;
+    const segs=[['DIFS',70,0],['RTS',60,1],['SIFS',34,0],['CTS',56,2],['SIFS',34,0],['DATA',250,1],['SIFS',34,0],['ACK',56,2]];
+    const val={DIFS:p.difs,RTS:p.rts,SIFS:p.sifs,CTS:p.cts,DATA:p.data,ACK:p.ack};
+    const draw=k=>{let x=150,o='';const pos=[];
+      o+=T(16,96,'A（发送）','font-weight="600"')+T(16,156,'AP','font-weight="600"')+`<path d="M150 110H820M150 170H820" stroke="var(--line)"/>`;
+      segs.forEach(([n,w,who],i)=>{pos.push([x,x+w]);if(i<=k){
+        if(who){const y=who===1?78:138;o+=R(x,y,w,32,who===1?'var(--f1)':'var(--f2)')+T(x+w/2,y+21,n,'text-anchor="middle" font-weight="600"')+T(x+w/2,y-6,fmt(val[n])+'μs','text-anchor="middle" class="m" font-size="11"');}
+        else{o+=`<rect x="${x}" y="70" width="${w}" height="110" fill="var(--hl)" opacity=".7"/>`+T(x+w/2,64,n,'text-anchor="middle" class="m" font-size="12"');}
+      }x+=w});
+      const end=pos[7][1];const bars=[[1,'C 等 A 的邻站（听到 RTS）',navR,'SIFS+CTS+SIFS+DATA+SIFS+ACK'],[3,'隐蔽站 B（听到 CTS）',navC,'SIFS+DATA+SIFS+ACK'],[5,'没听到前两帧的站',navD,'SIFS+ACK']];
+      let y=222;bars.forEach(([at,who,v,f])=>{if(k>=at){const s=pos[at][1],wide=end-s>300;o+=`<rect x="${s}" y="${y-14}" width="${end-s}" height="22" fill="var(--nav)" stroke="var(--done)"/>`+(wide?T((s+end)/2,y+2,`NAV = ${f} = ${fmt(v)}μs`,'text-anchor="middle" font-size="12" class="g"')+T(s-6,y+2,who,'text-anchor="end" font-size="12"'):T(s-6,y+2,`${who}：<tspan class="g">NAV = ${f} = ${fmt(v)}μs</tspan>`,'text-anchor="end" font-size="12"'))}y+=40});
+      if(k>=0){const cur=pos[Math.min(k,7)][1];o+=`<path d="M${cur} 60V300" stroke="var(--q)" stroke-width="2" stroke-dasharray="4 3"/>`}
+      return svg(860,320,o)};
+    const S=[];
+    S.push({s:draw(-1),t:'A 有数据要发给 AP，先监听信道。下面一步一步看各帧和三条 NAV。'});
+    S.push({s:draw(0),t:`信道空闲满 DIFS（${fmt(p.difs)}μs）后 A 才发 RTS。<b>DIFS 不算进任何一个 NAV。</b>`});
+    S.push({q:'RTS 发完后，听到 RTS 的站 C 要静默多久？从哪一刻算到哪一刻？',s:draw(1),t:`C 的 NAV 从 RTS 发完算到 ACK 发完：SIFS + CTS + SIFS + DATA + SIFS + ACK = <b>${fmt(navR)}μs</b>${Number.isFinite(p.cts)?'':'（题里没给 CTS 的发送时延，这一条算不出数字）'}。`});
+    S.push({s:draw(2),t:`隔一个 SIFS（${fmt(p.sifs)}μs），AP 从接收切换到发送。`});
+    S.push({q:'B 听不到 A，它什么时候才知道信道被占？NAV 设多少？',s:draw(3),t:`B 是隐蔽站，靠 AP 发的 CTS 才知道。CTS 里的 NAV = SIFS + DATA + SIFS + ACK = ${fmt(p.sifs)} + ${fmt(p.data)} + ${fmt(p.sifs)} + ${fmt(p.ack)} = <b>${fmt(navC)}μs</b>。DATA = ${fmt(p.len)}B × 8 ÷ ${fmt(p.rate)}Mb/s = ${fmt(p.data)}μs。`});
+    S.push({s:draw(4),t:'又一个 SIFS，A 开始发数据帧。'});
+    S.push({q:'数据帧首部里的 NAV 写多少？',s:draw(5),t:`数据帧发完后只剩 SIFS + ACK = <b>${fmt(navD)}μs</b>。这是给前两帧都没听到的站用的。`});
+    S.push({s:draw(6),t:'最后一个 SIFS，AP 准备回 ACK。'});
+    S.push({s:draw(7),t:'ACK 发完时，三条 NAV <b>同时到期</b>（右端对齐）。这就是“从本帧结束算到 ACK 结束”。之后各站再等 DIFS 去争用信道。'});
+    return S;}
+};
+
+/* ---------------- TCP ---------------- */
+const TCP={
+  name:'38 题 TCP 总时间',
+  rules:[
+    '先圈<b>起点和终点</b>：起点是“H 请求建立连接”，终点是“H 进入 CLOSED”。终点是 H，所以要加 H 的 TIME_WAIT（2MSL）。',
+    'MSS 是 TCP 报文段<b>数据部分</b>的最大长度，不含首部。',
+    '第三次握手可以带数据。不带也不多花 RTT（忽略发送时延时两种一样）。“时间最多”时也<b>不能脑补成等 S 回 ACK 再发数据</b>，那等于四次握手，不存在。',
+    '“时间最少”暗含：不考虑慢开始门限、三个重复确认，也没有丢包重传。没给流量控制时，发送窗口 = cwnd，从 1 开始。',
+    'S 没有数据要发时，S 收到 FIN 后把 FIN 和 ACK 合在一起发，四次挥手变成<b>三段</b>。',
+    'FIN 报文段可以带数据，但不是标准做法，题目不这样算。',
+    'S 收到最后的 ACK 就进入 CLOSED；H 发完最后的 ACK 要再等 2MSL。'],
+  form:`<label>要发的数据（B）<input id="t_d" type="number" min="1" step="any"></label>
+    <label>MSS（B）<input id="t_m" type="number" min="1" step="any"></label>
+    <label>RTT（ms）<input id="t_r" type="number" min="0" step="any"></label>
+    <label>MSL（s）<input id="t_l" type="number" min="0" step="any"></label>
+    <label class="chk"><input id="t_c" type="checkbox" checked> 第三次握手带数据</label>
+    <button class="btn" type="button" data-run>按这组数据重新演示</button>`,
+  presets:[['2024-38（3000B，MSS 1000B，RTT 10ms，MSL 30s）',{t_d:3000,t_m:1000,t_r:10,t_l:30,t_c:true}],
+           ['自己填（空白）',{t_d:'',t_m:'',t_r:'',t_l:'',t_c:true}]],
+  build(){
+    const D=num('t_d'),M=num('t_m'),rtt=num('t_r'),msl=num('t_l'),carry=$('t_c').checked;
+    if(!(D>0&&M>0))return '请填数据长度和 MSS。';
+    const n=Math.ceil(D/M);const rounds=[];let cw=1,sent=0;while(sent<n){const k=Math.min(cw,n-sent);rounds.push([cw,sent+1,sent+k]);sent+=k;cw*=2}
+    const msgs=[['SYN',0,'建连']];msgs.push(['SYN + ACK',1,'建连']);
+    rounds.forEach(([c,a,b],i)=>{const lab=a===b?`数据 ${a}`:`数据 ${a}～${b}`;
+      msgs.push([i===0&&carry?`ACK + ${lab}（cwnd = ${c}）`:`${lab}（cwnd = ${c}）`,0,'数据',b-a+1,i===0&&!carry]);msgs.push(['ACK',1,'数据'])});
+    msgs.push(['FIN',0,'释放']);msgs.push(['FIN + ACK',1,'释放']);msgs.push(['ACK',0,'释放']);
+    const H=230,Sx=600,dy=44,top=60,Ht=top+msgs.length*dy+150;
+    const totalR=2+rounds.length;
+    const draw=(k,tw,closed)=>{let o=T(H,34,'主机 H','text-anchor="middle" font-weight="600"')+T(Sx,34,'服务器 S','text-anchor="middle" font-weight="600"')+`<path d="M${H} 44V${Ht-40}M${Sx} 44V${top+msgs.length*dy+20}" stroke="var(--muted)"/>`;
+      msgs.forEach(([lab,dir,ph,w,extra],i)=>{if(i>k)return;const y=top+i*dy;const a=dir?Sx:H,b=dir?H:Sx;
+        if(extra){o+=`<path d="M${H} ${y}L${Sx} ${y+dy}" stroke="var(--ink)" marker-end="url(#ah)"/>`+T((H+Sx)/2-60,y+14,'ACK','font-size="12"');
+          o+=`<path d="M${H} ${y+8}L${Sx} ${y+dy+8}" stroke="var(--q)" stroke-width="${w>1?3:1.4}" marker-end="url(#ah)"/>`+T((H+Sx)/2+40,y+34,lab,'font-size="12" class="b"');}
+        else o+=`<path d="M${a} ${y}L${b} ${y+dy}" stroke="${ph==='数据'&&!dir?'var(--q)':'var(--ink)'}" stroke-width="${w>1?3:1.4}" marker-end="url(#ah)"/>`+T((H+Sx)/2,y+dy/2-4,lab,`text-anchor="middle" font-size="12" ${ph==='数据'&&!dir?'class="b"':''}`);
+      });
+      for(let r=0;r<totalR;r++){const a=top+r*2*dy,b=a+2*dy;if(k>=r*2+1)o+=`<path d="M${H-22} ${a}H${H-32}V${b}H${H-22}" stroke="var(--done)" fill="none"/>`+T(H-38,(a+b)/2+4,`RTT ${r+1}${r===0?' 建连':r===totalR-1?' 释放':' 数据'}`,'text-anchor="end" class="g" font-size="12"')}
+      if(tw){const y=top+(msgs.length-1)*dy;o+=`<rect x="${H-8}" y="${y}" width="16" height="110" fill="var(--f2)" stroke="var(--cmp)"/>`+T(H+16,y+60,'TIME_WAIT = 2MSL','font-size="12"')+T(Sx+10,y+dy+4,'S 收到 ACK → CLOSED','font-size="12" class="m"')}
+      if(closed){const y=top+(msgs.length-1)*dy+128;o+=T(H+16,y,`H → CLOSED：${totalR}RTT + 2MSL = ${totalR} × ${fmt(rtt)}ms + 2 × ${fmt(msl)}s = ${fmt(totalR*rtt/1000+2*msl)}s`,'font-weight="600" class="g"')}
+      return svg(860,Ht,o)};
+    const S=[{s:draw(-1),t:`${fmt(D)}B ÷ MSS ${fmt(M)}B = ${n} 个报文段。从 H 发 SYN 开始计时。`}];
+    msgs.forEach((m,i)=>{const st={s:draw(i)};
+      if(i===0)st.t='H 发 SYN（第一次握手），不带数据。';
+      else if(i===1)st.t='S 回 SYN + ACK。到这里过了 1 个 RTT。';
+      else if(m[0]==='FIN'){st.t='数据全部确认后，H 发 FIN 请求释放。'}
+      else if(m[0]==='FIN + ACK'){st.q='S 没有数据要发，挥手要几段？';st.t='S 把对 FIN 的 ACK 和自己的 FIN <b>合成一段</b>发回，四次挥手变三段。到这里释放用了 1 个 RTT。'}
+      else if(i===msgs.length-1){st.t='H 回最后一个 ACK，并进入 TIME_WAIT。'}
+      else if(m[2]==='数据'&&m[1]===0){const r=Math.floor((i-2)/2);if(r===0)st.q='第一轮能发几个报文段？要不要先等握手完全结束？';
+        st.t=r===0?(carry?'第三次握手直接带上第 1 个报文段（cwnd = 1）。':'第三次握手只发 ACK，紧接着发第 1 个报文段。忽略发送时延时，和“带数据”用时一样，<b>不会多一个 RTT</b>。'):`收到上一轮的确认，cwnd 翻倍到 ${rounds[r][0]}，这一轮发 ${rounds[r][2]-rounds[r][1]+1} 个。`}
+      else st.t=`S 确认这一轮的数据，又过了 1 个 RTT。`;
+      S.push(st)});
+    S.push({q:'H 发完最后的 ACK 能立刻 CLOSED 吗？',s:draw(msgs.length-1,true),t:'不能。H 是主动关闭方，要在 TIME_WAIT 等 <b>2MSL</b>；S 收到 ACK 就先进入 CLOSED。'});
+    S.push({s:draw(msgs.length-1,true,true),t:`合计 = 建连 1 RTT + 数据 ${rounds.length} RTT + 释放 1 RTT + 2MSL = <b>${totalR}RTT + 2MSL = ${fmt(totalR*rtt/1000+2*msl)}s</b>。`});
+    return S;}
+};
+
+/* ---------------- HTTP ---------------- */
+const MODES_H=[['np','HTTP/1.0 非持续、不并行'],['pp','HTTP/1.0 非持续、并行'],['k','HTTP/1.1 持续、非流水'],['kp','HTTP/1.1 持续、流水']];
+const HTTP={
+  name:'40 题 HTTP 的 RTT 数',
+  rules:[
+    '先圈起点和终点：一般从“为取网页建立 TCP 连接”算到“收完所有对象”。题目要算 DNS 时再加查询的 RTT（DNS 一般用 UDP；主机到本地域名服务器递归，其余迭代；注意有没有缓存）。',
+    '第三次握手可以带 HTTP 请求。忽略发送时延时，带不带用时一样，<b>不要脑补成四次握手</b>。',
+    '<b>非持续</b>：每个对象都要新建一条 TCP 连接，每个对象 2 RTT。下一条连接<b>不用等上一条释放完</b>（不等 2MSL），这仍然叫“不并行”。',
+    '<b>并行</b>：取到网页后同时开 n 条连接，但多条并行的速率之和受线路带宽限制，实际省得没那么多。',
+    '<b>持续</b>（HTTP/1.1 默认）：一条连接取完所有对象。非流水是收到一个响应再发下一个请求；流水是请求连着发，响应连着回。',
+    '题目给了 MSS 等拥塞控制条件，才考虑 cwnd 分几轮；没给就<b>不要无中生有</b>。'],
+  form:`<label>网页引用的图片数 n<input id="h_n" type="number" min="1" max="12" step="1"></label>
+    <label>方式<select id="h_m">${MODES_H.map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+    <button class="btn" type="button" data-run>按这组数据重新演示</button>`,
+  presets:[['2024-40（7 张图，非持续、不并行）',{h_n:7,h_m:'np'}],['讲解例：3 张图，非持续、不并行',{h_n:3,h_m:'np'}],['讲解例：3 张图，非持续、并行',{h_n:3,h_m:'pp'}],['讲解例：3 张图，持续、非流水',{h_n:3,h_m:'k'}],['讲解例：3 张图，持续、流水',{h_n:3,h_m:'kp'}]],
+  build(){
+    const n=Math.round(num('h_n')),m=$('h_m').value;if(!(n>=1&&n<=12))return '图片数请填 1～12。';
+    const cols=[];const add=(cells,t,q)=>cols.push({cells,t,q});
+    add([['建','g']],'三次握手建连接：SYN 去、SYN + ACK 回，1 个 RTT。第三段 ACK 顺带捎上取网页的请求。');
+    add([['页','b']],'服务器回网页，1 个 RTT。浏览器解析网页，发现引用了 '+n+' 张图。');
+    if(m==='np'){for(let i=1;i<=n;i++){add([['建','g']],i===1?'非持续：取图 1 要<b>新建一条连接</b>。上一条连接在后台释放，不用等它释放完。':`取图 ${i} 又要新建连接。`,i===1?'取第 1 张图要新建 TCP 连接吗？要不要等上一条连接释放完？':'');add([['图'+i,'b']],`请求并收到图 ${i}。`)}}
+    if(m==='pp'){add(Array.from({length:n},()=>['建','g']),`并行：同时建 ${n} 条连接，一共只花 1 个 RTT。`,`${n} 张图同时取，建连接花几个 RTT？`);add(Array.from({length:n},(_,i)=>['图'+(i+1),'b']),`${n} 条连接同时请求、同时收到，再花 1 个 RTT（不考虑带宽限制）。`)}
+    if(m==='k'){for(let i=1;i<=n;i++)add([['图'+i,'b']],i===1?'持续：<b>沿用同一条连接</b>，不再建连。非流水：发一个请求，等响应回来再发下一个，每张图 1 个 RTT。':`图 ${i}：又 1 个 RTT。`,i===1?'持续连接下取图 1，还要不要先建连接？':'')}
+    if(m==='kp'){add(Array.from({length:n},(_,i)=>['图'+(i+1),'b']),`流水：${n} 个请求连着发出去，响应连着回来，合起来只占 <b>1 个 RTT</b>。`,'流水方式下，'+n+' 张图一共要几个 RTT？')}
+    const total=cols.length;const formula={np:`2 × (n + 1) = 2 × ${n+1}`,pp:'2 + 2',k:`2 + n = 2 + ${n}`,kp:'1 + 1 + 1'}[m];
+    const U=Math.min(56,640/Math.max(total,6)),X0=150,rows=Math.max(...cols.map(c=>c.cells.length)),H=60+rows*34+70;
+    const draw=k=>{let o=T(16,24,MODES_H.find(x=>x[0]===m)[1],'font-weight="600"')+T(16,44,'每格 1 个 RTT（灰：建 TCP 连接；蓝：HTTP 请求 + 响应）','font-size="12" class="m"');
+      cols.forEach((c,i)=>{const x=X0+i*U;o+=T(x+U/2,56,i+1,'text-anchor="middle" font-size="11" class="m"');if(i>k)return;
+        c.cells.forEach(([lab,kind],j)=>{o+=R(x,64+j*34,U,30,kind==='g'?'var(--gray)':'var(--f1)')+T(x+U/2,84+j*34,lab,'text-anchor="middle" font-size="12"')})});
+      if(k>=cols.length-1)o+=T(16,64+rows*34+40,`合计 ${formula} = ${total} 个 RTT`,'font-weight="600" class="g"');
+      return svg(Math.max(860,X0+total*U+40),H,o)};
+    const S=[{s:draw(-1),t:`1 个网页 + ${n} 张同一服务器上的小图，忽略发送时延。`}];
+    cols.forEach((c,i)=>S.push({q:c.q||'',s:draw(i),t:c.t}));
+    S.push({s:draw(cols.length-1),t:`合计 <b>${formula} = ${total} 个 RTT</b>。四种方式对比（n 张图）：非持续不并行 2(n + 1)，非持续并行 4，持续非流水 n + 2，持续流水 3。`});
+    return S;}
+};
+
+/* ---------------- BGP 选路 ---------------- */
+const RULES=[['本地偏好','local preference 值高的优先（管理员设，经 iBGP 告诉 AS 内所有路由器）','lp','max'],['AS 跳数','AS 路径经过的 AS 少的优先','as','min'],['热土豆','在 AS 内离出口近的优先（由 IGP 决定，RIP 看跳数）','hop','min'],['BGP 标识符','BGP ID 数值小的优先','id','min']];
+const ipv=s=>{const p=String(s).trim().split('.');if(p.length!==4||p.some(x=>x===''||isNaN(+x)))return NaN;return p.reduce((a,x)=>a*256+(+x),0)};
+const SEL={
+  name:'47(5) BGP 选路',
+  rules:[
+    '按顺序比，前一条分出胜负就停：① <b>本地偏好</b>高 → ② <b>AS 跳数</b>少 → ③ <b>热土豆</b>（AS 内离出口近）→ ④ <b>BGP 标识符</b>小。',
+    '题目说“无策略约束”，就是本地偏好都一样，直接从 ② 开始。2024-47(5) 用的是 ② 和 ③。',
+    '本地偏好由管理员设，经 iBGP 告诉 AS 内所有路由器。缺点：就算那条链路很忙，BGP 也没法把流量挪到另一条。',
+    'AS 跳数只数经过几个 AS，不管那个 AS 有多大、里面要转发多少次。',
+    '热土豆依赖 IGP：AS 里<b>每台路由器自己算</b>离哪个出口近，所以不同路由器可能选不同的出口。',
+    'BGP 标识符是 32 位，写成 IP 地址的样子，取路由器各接口 IP 中最大的那个，在 OPEN 报文里交换。'],
+  form:`<label>候选路由，每行一条：名称, 本地偏好, AS 路径, AS 内到出口的跳数, BGP ID（不知道的项留空）<textarea id="b_t"></textarea></label>
+    <button class="btn" type="button" data-run>按这组数据重新演示</button>`,
+  presets:[
+    ['2024-47(5) 中 R14 的选择',{b_t:'经 R11, , AS2 AS8 AS19, 1, \n经 R12, , AS3 AS7 AS11 AS19, , \n经 R13, , AS4 AS10 AS19, 2, '}],
+    ['讲解例：本地偏好',{b_t:'经 R1 → AS2, 300, AS2 AS4, , \n经 R2 → AS3, 200, AS3 AS4, , '}],
+    ['讲解例：AS 跳数',{b_t:'上面一条, , AS2, , \n下面一条, , AS3 AS5 AS4, , '}],
+    ['讲解例：热土豆（R3 看）',{b_t:'路由 1 经 R1, 100, AS2 AS4, 1, \n路由 2 经 R2, 100, AS3 AS4, 2, '}],
+    ['讲解例：BGP 标识符（R5 看，ID 为示意）',{b_t:'路由 1 经 R1, 100, AS2 AS4, 2, 192.168.1.1\n路由 2 经 R2, 100, AS3 AS4, 2, 10.0.0.1'}]],
+  build(){
+    const rows=$('b_t').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const c=l.split(/[,，]/).map(x=>x.trim());
+      const as=(c[2]||'').split(/\s+/).filter(Boolean);return {name:c[0]||'?',lp:c[1]===''||c[1]==null?NaN:+c[1],asp:c[2]||'',as:as.length||NaN,hop:c[3]===''||c[3]==null?NaN:+c[3],id:ipv(c[4]||''),ids:c[4]||'',out:-1}});
+    if(rows.length<2)return '至少要两条候选路由。';
+    const draw=(k,why)=>{const W=860,y0=50,rh=40;let o='';const hs=['路由','本地偏好','AS 路径（跳数）','AS 内跳数','BGP ID'],xs=[16,190,300,560,670];
+      hs.forEach((h,i)=>{o+=T(xs[i],36,h,`font-weight="600" ${k>=0&&i===k+1?'class="b"':''}`)});
+      rows.forEach((r,j)=>{const y=y0+j*rh;const dead=r.out>=0&&r.out<=k;
+        o+=`<rect x="8" y="${y}" width="${W-16}" height="${rh-6}" fill="${dead?'var(--bg)':'var(--paper)'}" stroke="${dead?'var(--line)':'var(--muted)'}"/>`;
+        const cells=[r.name,Number.isFinite(r.lp)?r.lp:'—',r.asp?`${r.asp}（${r.as}）`:'—',Number.isFinite(r.hop)?r.hop:'—',r.ids||'—'];
+        cells.forEach((c,i)=>{o+=T(xs[i],y+22,esc(c),`font-size="13" ${dead?'class="m"':''} ${k>=0&&i===k+1&&!dead?'font-weight="600"':''}`)});
+        if(dead)o+=`<path d="M12 ${y+17}H${W-12}" stroke="var(--mv)" stroke-width="1.5"/>`+T(W-20,y+22,'第'+'①②③④'[r.out]+'条淘汰','text-anchor="end" font-size="12" class="r"');});
+      const y=y0+rows.length*rh+24;
+      RULES.forEach((ru,i)=>{const x=16+i*210;o+=`<rect x="${x}" y="${y}" width="196" height="30" rx="15" fill="${i===k?'var(--q)':i<k?'var(--hl)':'var(--paper)'}" stroke="var(--muted)"/>`+T(x+98,y+20,'①②③④'[i]+' '+ru[0],`text-anchor="middle" font-size="13" ${i===k?'style="fill:var(--bg);font-weight:600"':''}`)+(i<3?`<path d="M${x+197} ${y+15}H${x+209}" stroke="var(--muted)" marker-end="url(#ah)"/>`:'')});
+      if(why)o+=T(16,y+58,why,'font-size="13" class="g"');
+      return svg(W,y+72,o)};
+    const S=[{s:draw(-1),t:'同一个目的网络有 '+rows.length+' 条候选路由。按 ① → ④ 的顺序比，分出胜负就停。'}];
+    let alive=rows.slice(),lastK=-1;
+    for(let k=0;k<4&&alive.length>1;k++){const [nm,desc,key,dir]=RULES[k];
+      const vals=alive.map(r=>r[key]);let msg;lastK=k;
+      if(vals.some(v=>!Number.isFinite(v))&&vals.every(v=>!Number.isFinite(v))){msg=k===0?'没给本地偏好（无策略约束），视为相同，打平。':`都没给${nm}的数据，这一条比不了。`}
+      else if(vals.some(v=>!Number.isFinite(v))){msg=`有的路由缺${nm}数据，请补齐再比。`}
+      else{const best=dir==='max'?Math.max(...vals):Math.min(...vals);const lose=alive.filter(r=>r[key]!==best);lose.forEach(r=>r.out=k);alive=alive.filter(r=>r[key]===best);
+        msg=lose.length?`${desc}：淘汰 ${lose.map(r=>r.name).join('、')}。`:`${nm}都一样（${best}），打平，看下一条。`}
+      S.push({q:`按第${'①②③④'[k]}条“${nm}”比，谁被淘汰？`,s:draw(k,msg),t:`<b>第${'①②③④'[k]}条 ${nm}</b>：${msg}`});
+    }
+    S.push({s:draw(lastK,alive.length===1?`选中：${alive[0].name}`:'还剩多条，数据不够分出胜负。'),t:alive.length===1?`最后选 <b>${esc(alive[0].name)}</b>。下一跳就是这条路由的出口路由器。`:'几条规则用完仍有多条，检查数据是否填全。'});
+    return S;}
+};
+
+/* ---------------- BGP 通告 ---------------- */
+const ADV={
+  name:'47(4) BGP 通告',
+  rules:[
+    '不同 AS 的边界路由器之间是 <b>eBGP</b>，同一 AS 内的 BGP 路由器之间是 <b>iBGP</b>。两者报文格式、属性都一样，<b>只有通告规则不同</b>。',
+    'BGP 基于 TCP（端口 179）。先建 TCP 连接、再建 BGP 会话（OPEN），路由用 <b>UPDATE</b> 报文通告。',
+    '规则 1：从 eBGP 收到的路由，可以经 iBGP 告诉本 AS 内的对等端。',
+    '规则 2：从 iBGP 收到的路由，可以经 eBGP 告诉别的 AS 的对等端。',
+    '规则 3：从 iBGP 收到的路由，<b>不能</b>再告诉本 AS 内别的 iBGP 对等端。所以 AS 内任意两台 BGP 路由器之间都要建 iBGP 会话（全连接，不要求物理直连）。',
+    '边界路由器按本 AS 的策略先过滤，只把符合策略的路由经 iBGP 发出去。',
+    '2024-47(4) 答：R44 → R13 走 eBGP，用 UPDATE 报文；R13 → R14、R15 走 iBGP。'],
+  form:'<span class="src">这一页用讲解里的例子（AS1 内 R1、R3、R5、R7，AS1 内跑 RIP），不需要输入。</span>',
+  presets:[],
+  build(){
+    const P={R2:[70,170],R1:[230,170],R3:[380,80],R5:[380,260],R7:[530,170],R8:[700,170]};
+    const phys=[['R2','R1'],['R1','R3'],['R1','R5'],['R3','R7'],['R5','R7'],['R7','R8']];
+    const mesh=[['R1','R3'],['R1','R5'],['R1','R7'],['R3','R5'],['R3','R7'],['R5','R7']];
+    const draw=(st)=>{let o=`<ellipse cx="380" cy="170" rx="210" ry="140" fill="var(--hl)" stroke="var(--muted)"/>`+T(380,330,'AS1（内部 RIP）','text-anchor="middle" font-size="12" class="m"')+
+      `<ellipse cx="70" cy="170" rx="56" ry="56" fill="var(--paper)" stroke="var(--muted)"/>`+T(70,240,'AS2','text-anchor="middle" font-size="12" class="m"')+
+      `<ellipse cx="700" cy="170" rx="56" ry="56" fill="var(--paper)" stroke="var(--muted)"/>`+T(700,240,'AS3','text-anchor="middle" font-size="12" class="m"');
+      phys.forEach(([a,b])=>{o+=`<path d="M${P[a][0]} ${P[a][1]}L${P[b][0]} ${P[b][1]}" stroke="var(--muted)" stroke-width="2.5" opacity=".5"/>`});
+      if(st.mesh)mesh.forEach(([a,b])=>{o+=`<path d="M${P[a][0]} ${P[a][1]}L${P[b][0]} ${P[b][1]}" stroke="var(--q)" stroke-dasharray="5 4" fill="none"/>`});
+      (st.msgs||[]).forEach(([a,b,ok,lab])=>{const [x1,y1]=P[a],[x2,y2]=P[b];const dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;
+        o+=`<path d="M${x1+ux*22} ${y1+uy*22}L${x2-ux*24} ${y2-uy*24}" stroke="${ok?'var(--done)':'var(--mv)'}" stroke-width="3" marker-end="url(#${ok?'ah':'ahr'})"/>`;
+        if(lab)o+=T((x1+x2)/2,(y1+y2)/2-10,lab,`text-anchor="middle" font-size="12" class="${ok?'g':'r'}"`);
+        if(!ok)o+=T((x1+x2)/2+14,(y1+y2)/2+6,'✗','font-size="20" class="r"')});
+      Object.entries(P).forEach(([k,[x,y]])=>{const on=(st.know||[]).includes(k);o+=`<circle cx="${x}" cy="${y}" r="20" fill="${on?'var(--nav)':'var(--paper)'}" stroke="${on?'var(--done)':'var(--muted)'}" stroke-width="2"/>`+T(x,y+5,k,'text-anchor="middle" font-size="13" font-weight="600"')});
+      o+=T(16,356,'实线：物理链路　蓝虚线：iBGP 会话（全连接）　绿色：知道“到 N2 经 AS2”的路由器','font-size="12" class="m"');
+      return svg(780,370,o)};
+    return [
+      {s:draw({}),t:'AS2 的 R2 知道一条到网络 N2 的路由。AS1 内有 4 台 BGP 路由器，R1、R7 是边界路由器。'},
+      {s:draw({mesh:1}),t:'AS1 内 4 台路由器两两建 iBGP 会话：4 × 3 ÷ 2 = <b>6 条</b>。R3 和 R5 之间没有直连线路也要建，会话走的是 TCP，由 RIP 把报文送到。'},
+      {q:'R2 把路由告诉 R1，用哪类会话、哪种报文？',s:draw({mesh:1,know:['R2','R1'],msgs:[['R2','R1',1,'eBGP · UPDATE']]}),t:'不同 AS 之间：<b>eBGP</b> 会话，用 <b>UPDATE</b> 报文，内容是“到 N2，AS 路径 AS2，下一跳 R2”。R1 先按本 AS 的策略过滤。'},
+      {q:'R1 怎么让 R3、R5、R7 都知道？',s:draw({mesh:1,know:['R2','R1','R3','R5','R7'],msgs:[['R2','R1',1,''],['R1','R3',1,'iBGP'],['R1','R5',1,'iBGP'],['R1','R7',1,'iBGP']]}),t:'规则 1：从 eBGP 收到的，经 iBGP 发给本 AS 内的对等端。R1 和每台都有 iBGP 会话，<b>直接一跳发到</b>。'},
+      {q:'R3 能把这条路由再转告给 R5 吗？',s:draw({mesh:1,know:['R2','R1','R3','R5','R7'],msgs:[['R3','R5',0,'iBGP → iBGP 不允许']]}),t:'规则 3：从 iBGP 收到的<b>不能</b>再告诉别的 iBGP 对等端。R5 也不需要，它已经直接从 R1 收到了。全连接就是为这条规则准备的。'},
+      {q:'R7 能把这条路由告诉 AS3 的 R8 吗？',s:draw({mesh:1,know:['R2','R1','R3','R5','R7','R8'],msgs:[['R7','R8',1,'eBGP · UPDATE']]}),t:'规则 2：从 iBGP 收到的，<b>可以</b>经 eBGP 告诉别的 AS。R7 发给 R8 时，AS 路径前面加上自己的 AS1，变成 AS1 AS2。'},
+      {s:draw({mesh:1,know:['R2','R1','R3','R5','R7','R8']}),t:'对照 2024-47(4)：R44 → R13 是 eBGP + UPDATE；R13 → R14、R15 是 iBGP。'}];}
+};
+
+/* ---------------- player ---------------- */
+const MODES={nav:NAV,tcp:TCP,http:HTTP,sel:SEL,adv:ADV};let mode='nav',frames=[],at=0,timer=null;
+const SPD=[3200,2400,1700,1200,800,500,300];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].q)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+function render(){const f=frames[at];if(!f)return;$('view').innerHTML=f.s;$('note').innerHTML=f.q?`<span class="ask">先想：${esc(f.q)}</span>`:f.t;
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':'播放'}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());render()}else{timer=null;render()}}
+function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+function run(){stop();const r=MODES[mode].build();if(typeof r==='string'){$('err').textContent=r;return}$('err').textContent='';
+  frames=[];r.forEach(st=>{if(st.q){const prev=frames.length?frames[frames.length-1].s:st.s;frames.push({s:prev,q:st.q});}frames.push({s:st.s,t:st.t})});at=0;render()}
+function applyPreset(v){for(const [k,x] of Object.entries(v)){const el=$(k);if(!el)continue;if(el.type==='checkbox')el.checked=!!x;else el.value=x}run()}
+function setMode(m){mode=m;try{localStorage.setItem('cn-anim-mode',m)}catch(e){}
+  $('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
+  const M=MODES[m];$('rules').innerHTML=M.rules.map(x=>`<li>${x}</li>`).join('');$('form').innerHTML=M.form;
+  $('presets').innerHTML=M.presets.length?'预设：'+M.presets.map(([n],i)=>`<button class="btn" type="button" data-p="${i}">${esc(n)}</button>`).join(''):'';
+  $('presets').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>applyPreset(M.presets[+b.dataset.p][1]));
+  const rb=$('form').querySelector('[data-run]');if(rb)rb.onclick=run;
+  if(M.presets.length)applyPreset(M.presets[0][1]);else run()}
+$('modes').innerHTML=Object.entries(MODES).map(([k,v])=>`<button class="chip" type="button" data-m="${k}">${v.name}</button>`).join('');
+$('modes').querySelectorAll('.chip').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+$('first').onclick=()=>{stop();at=0;render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};$('next').onclick=()=>{stop();at=nextIdx(at);render()};
+$('play').onclick=play;$('scrub').oninput=e=>{stop();at=+e.target.value;render()};$('speed').oninput=showSpd;$('guess').onchange=()=>{if(frames[at]&&frames[at].q&&!$('guess').checked){at=nextIdx(at-1);render()}};
+document.addEventListener('keydown',e=>{const t=e.target.tagName;if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA'||(t==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+showSpd();let saved='nav';try{saved=localStorage.getItem('cn-anim-mode')||'nav'}catch(e){}setMode(MODES[saved]?saved:'nav');
+</script>
+</body>
+</html>
