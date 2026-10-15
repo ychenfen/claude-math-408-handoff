@@ -93,6 +93,12 @@ svg{display:block;height:auto;max-width:100%}
 .r-arrow-f{stroke:var(--q);stroke-width:2}.r-arrow-r{stroke:var(--mv);stroke-width:2}
 .r-center{font:13px var(--sans);fill:var(--muted);text-anchor:middle;dominant-baseline:central}
 .r-center b{fill:var(--ink)}
+.ptab{border-collapse:collapse;font:14px var(--mono);margin-top:10px;width:100%}
+.ptab th{font:12px var(--sans);color:var(--muted);text-align:left;font-weight:400;padding:3px 8px;border-bottom:1px solid var(--line)}
+.ptab td{padding:4px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.ptab tr.cur td{background:var(--hl)}
+.ptab td.new{color:var(--done);font-weight:700}
+.ptabw{overflow-x:auto}
 .stats{display:flex;flex-wrap:wrap;gap:6px 18px;font:14px var(--mono);margin-top:8px}
 .stats b{color:var(--mv)}
 .formula{font:13px var(--mono);display:grid;gap:3px;margin-top:8px}
@@ -201,6 +207,15 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px}
       <div class="viz"><div data-r="stack"></div><div class="strips" data-r="strips"></div></div>
       <div class="stats" data-r="stats"></div>
       <p class="legend">上面一行是表达式，橙色是正在扫的字符。栈里橙色是这一步新进来的；虚线框是 “(”。</p>
+    </section>
+    <section class="panel" id="sec2d">
+      <h2>加括号法：不用栈，直接写出后缀和前缀（王道标注 2024 考点）</h2>
+      <div class="ctrl"><button class="btn" data-a="reset" type="button">从头</button><button class="btn" data-a="prev" type="button">上一步</button><button class="btn primary" data-a="next" type="button">下一步</button><button class="btn" data-a="all" type="button">跑到底</button><span class="muted" data-r="prog"></span></div>
+      <div class="guess hidden" data-r="gbox"></div>
+      <div class="note" data-r="note"></div>
+      <div class="strips" data-r="strips" style="margin-top:10px"></div>
+      <div class="ptabw" data-r="tab"></div>
+      <p class="legend">三步：① 按计算顺序给每次运算编号（同级从左往右，括号里先算）；② 每次运算套一对括号；③ 从最里层起，后缀把运算符挪到右括号后面（左 右 op），前缀挪到左括号前面（op 左 右）。三种写法里操作数的先后顺序都不变。只能求结果；问转换过程中栈里有什么（2012、2014）还得用上面的栈。</p>
     </section>
     <section class="panel" id="sec2b">
       <h2>后缀求值：一个栈 OP</h2>
@@ -398,7 +413,7 @@ const PRE2=[
  {t:'强化p52–61：(2+3)*2−3*(8/4)+5−2',ex:'(2+3)*2-3*(8/4)+5-2',kind:'in',q:'强化第一讲 p52–59：如何将 (2+3)*2-3*(8/4)+5-2 转换为逆波兰表达式？p60–61 计算后缀表达式 23+2*384/*-5+2- 的值。',a:'后缀 23+2*384/*-5+2-（讲义 p59 写的就是这个），值 7（讲义没写出值：10 − 6 + 5 − 2 = 7）。扫到 “+”（5 前面）时 temp 是 − *，* 更高、− 同级，两个都弹（p57–58）。'},
  {t:'2012 统考：栈里最多几个',ex:'a+b-a*((c+d)/e-f)+g',kind:'in',q:'【2012 统考真题】已知操作符包括 “+” “−” “*” “/” “(” 和 “)”。将中缀表达式 a+b−a*((c+d)/e−f)+g 转换为等价的后缀表达式 ab+acd+e/f−*−g+ 时，用栈来存放暂时还不能确定运算次序的操作符。栈初始时为空，转换过程中同时保存在栈中的操作符的最大个数是（ ）。A. 5　B. 7　C. 8　D. 11',a:'A。扫到 c 后面的 + 时，temp 从底到顶是 − * ( ( +，共 5 个（这题把括号也算操作符）。看下面的“temp 最多同时”。'},
  {t:'2014 统考：扫到 f 时',ex:'a/b+(c*d-e*f)/g',kind:'in',q:'【2014 统考真题】假设栈初始为空，将中缀表达式 a/b+(c*d−e*f)/g 转换为等价的后缀表达式的过程中，当扫描到 f 时，栈中的元素依次是（ ）。A. +(*−　B. +(−*　C. /+(*−*　D. /+−*',a:'B。一步步走到扫 f 那一步，看 temp 从底到顶：+ ( − *。/ 在 + 来时就被弹了（同级以上都弹），c*d 的 * 在 − 来时被弹了。'},
- {t:'2024 统考：选后缀',ex:'x+y*(z-u)/v',kind:'in',q:'【2024 统考真题】与表达式 x+y*(z−u)/v 等价的后缀表达式是（ ）。A. xyzu−*v/+　B. xyzu−v/*+　C. +x/*y−zuv　D. +x*y/−zuv',a:'A。扫到 / 时栈顶 * 和 / 同级，* 先弹出，所以是 …u−* 再 v/。'},
+ {t:'2024 统考：选后缀',ex:'x+y*(z-u)/v',kind:'in',q:'【2024 统考真题】与表达式 x+y*(z−u)/v 等价的后缀表达式是（ ）。A. xyzu−*v/+　B. xyzu−v/*+　C. +x/*y−zuv　D. +x*y/−zuv',a:'A。扫到 / 时栈顶 * 和 / 同级，* 先弹出，所以是 …u−* 再 v/。也可以用最下面的加括号法直接写：全加括号 (x + ((y * (z − u)) / v))，后缀 x y z u − * v / +；同一棵式子的前缀 + x / * y − z u v 正是干扰项 C，D 是选项 B 那种错误运算顺序的前缀。'},
  {t:'2018 统考：b op a',ex:'5 8 3 2 + - *',kind:'post',q:'【2018 统考真题】若栈 S1 中保存整数，栈 S2 中保存运算符，函数 F() 依次执行下述各步操作：1）从 S1 中依次弹出两个操作数 a 和 b；2）从 S2 中弹出一个运算符 op；3）执行相应的运算 b op a；4）将运算结果压入 S1 中。假定 S1 中的操作数依次是 5, 8, 3, 2（2 在栈顶），S2 中的运算符依次是 *、−、+（+ 在栈顶）。调用 3 次 F() 后，S1 栈顶保存的值是（ ）。A. −15　B. 15　C. −20　D. 20',a:'B。三次 F() 依次用 +、−、*，等价于后缀 5 8 3 2 + − *：3+2 = 5，8−5 = 3，5*3 = 15。顺序弄反（a op b）就会算出 −15 之类。'}
 ];
 const prec=t=>t==='+'||t==='-'?1:t==='*'||t==='/'?2:0;
@@ -477,10 +492,46 @@ const S2c=Stepper('sec2c',directFrames,(F,pos,pd,r)=>{const f=F[pos];const s=pd&
   const mk=(arr,n,fn)=>arr.map((x,k)=>({t:fn(x),c:x==='('?'par':(!pd&&k>=arr.length-n?'cur':'')}));
   r('stack').innerHTML=stackSVG([{name:'result',items:mk(s.res,f.nr||0,show)},{name:'temp',items:mk(s.tmp,f.nt||0,x=>x)}],rows);
   r('strips').innerHTML=cellRow('表达式',EX.T.map((tk,k)=>({t:tk.t,c:k===f.ti?'cmp':k<f.ti?'ok':''})))});
+/* ---------- 加括号法 ---------- */
+const DS=t=>t==='-'?'−':t;const CIR=k=>k<=20?String.fromCharCode(0x245F+k):'('+k+')';
+function parenFrames(){const T=EX.T;const out=[],ops=[];
+  const red=()=>{const op=ops.pop(),r=out.pop(),l=out.pop();out.push({op,l,r})};
+  T.forEach(tk=>{if(tk.k==='num'||tk.k==='var')out.push({s:tk.t});else if(tk.t==='(')ops.push('(');
+    else if(tk.t===')'){while(ops[ops.length-1]!=='(')red();ops.pop()}
+    else{while(ops.length&&ops[ops.length-1]!=='('&&prec(ops[ops.length-1])>=prec(tk.t))red();ops.push(tk.t)}});
+  while(ops.length)red();const root=out[0];const steps=[];
+  (function po(n){if(n.s)return;po(n.l);po(n.r);n.k=steps.length+1;steps.push(n)})(root);
+  const nm=n=>n.s?n.s:CIR(n.k);
+  const full=n=>n.s?n.s:`(${full(n.l)} ${DS(n.op)} ${full(n.r)})`;
+  const post=n=>n.s?n.s:`${post(n.l)} ${post(n.r)} ${DS(n.op)}`;
+  const pre=n=>n.s?n.s:`${DS(n.op)} ${pre(n.l)} ${pre(n.r)}`;
+  const ftok=[];(function ft(n,own){if(n.s){ftok.push({t:n.s,own});return}const o=own.concat(n.k);ftok.push({t:'(',own:o});ft(n.l,o);ftok.push({t:DS(n.op),own:o,op:n.k});ft(n.r,o);ftok.push({t:')',own:o})})(root,[]);
+  steps.forEach(n=>{n.what=`${nm(n.l)} ${DS(n.op)} ${nm(n.r)}`;n.full=full(n);n.post=post(n);n.pre=pre(n)});
+  const F=[];const P={steps,ftok};const fr=x=>Object.assign({P},x);
+  if(!steps.length){F.push(fr({ph:0,k:0,txt:'只有一个操作数，前缀、中缀、后缀都是它自己。'}));return F}
+  F.push(fr({ph:0,k:0,txt:`表达式 ${esc(EX.src.replace(/-/g,'−'))}。第 1 步：按计算顺序给每次运算编号。括号里的先算，* / 比 + − 先算，同级从左往右。`}));
+  steps.forEach((n,i)=>F.push(fr({ph:1,k:i+1,hl:n.k,txt:`${CIR(n.k)} 算 <b>${esc(n.what)}</b>。套上括号就是 ${esc(n.full)}。`+(i===steps.length-1?' 这是最后一步，最外层的括号就是它。':''),
+    ask:i===0&&steps.length>1?{l:'最先算哪一步？',choices:[...new Set(steps.slice(0,3).map(m=>m.what).concat([steps[steps.length-1].what]))],a:n.what,q:'整个表达式里最先算的是哪一次运算？'}:undefined})));
+  F.push(fr({ph:2,k:0,txt:`第 2 步：全加括号是 <b>${esc(full(root))}</b>。每对括号里都是“左 运算符 右”。第 3 步先求后缀：从 ${CIR(1)} 开始，一对括号一对括号地改写。`,
+    ask:{l:'求后缀时运算符挪到哪？',choices:['右括号后面','左括号前面'],a:'右括号后面',q:'求<b>后缀</b>时，每对括号里的运算符挪到哪？'}}));
+  steps.forEach((n,i)=>F.push(fr({ph:2,k:i+1,hl:n.k,txt:`${CIR(n.k)} (${esc(n.what)}) → 运算符放最后：<b>${esc(n.post)}</b>。`+(i===steps.length-1?`<br>后缀表达式：<b>${esc(post(root))}</b>`:'')})));
+  F.push(fr({ph:3,k:0,txt:'再求前缀：还是从最里层开始，这回运算符挪到左括号前面。',
+    ask:{l:'求前缀时运算符挪到哪？',choices:['右括号后面','左括号前面'],a:'左括号前面',q:'求<b>前缀</b>时，每对括号里的运算符挪到哪？'}}));
+  steps.forEach((n,i)=>F.push(fr({ph:3,k:i+1,hl:n.k,txt:`${CIR(n.k)} (${esc(n.what)}) → 运算符放最前：<b>${esc(n.pre)}</b>。`+(i===steps.length-1?`<br>前缀表达式：<b>${esc(pre(root))}</b>`:'')})));
+  const opnd=T.filter(t=>t.k==='num'||t.k==='var').map(t=>t.t).join(' ');
+  F.push(fr({ph:4,k:steps.length,end:true,txt:`后缀 <b>${esc(post(root))}</b>，前缀 <b>${esc(pre(root))}</b>。三种写法里操作数都是 ${esc(opnd)} 这个顺序，只有运算符的位置变了。和上面用栈求出的后缀一致。`}));
+  return F}
+const S2d=Stepper('sec2d',parenFrames,(F,pos,pd,r)=>{const f=F[pos];const s=pd&&pos>0?F[pos-1]:f;const P=f.P;
+  r('strips').innerHTML=cellRow('表达式',EX.T.map(tk=>({t:DS(tk.t)})))+(s.ph>=2||s.ph===1&&s.k===P.steps.length?cellRow('全加括号',P.ftok.map(x=>({t:x.t,c:s.hl&&x.own.includes(s.hl)?(x.op===s.hl?'cmp':'ok'):''}))):'');
+  if(!P.steps.length){r('tab').innerHTML='';return}
+  const rows=P.steps.map((n,i)=>{const sh1=s.ph>1||s.ph===1&&i<s.k,sh2=s.ph>2||s.ph===2&&i<s.k,sh3=s.ph>3||s.ph===3&&i<s.k;if(!sh1)return '';
+    const cur=s.hl===n.k&&!s.end;const nw=c=>cur&&s.ph===c?' class="new"':'';
+    return `<tr${cur?' class="cur"':''}><td>${CIR(n.k)}</td><td${nw(1)}>${esc(n.what)}</td><td>${esc(n.full)}</td><td${nw(2)}>${sh2?esc(n.post):''}</td><td${nw(3)}>${sh3?esc(n.pre):''}</td></tr>`}).join('');
+  r('tab').innerHTML=rows?`<table class="ptab"><thead><tr><th>编号</th><th>这一步算</th><th>套上括号</th><th>后缀（左 右 op）</th><th>前缀（op 左 右）</th></tr></thead><tbody>${rows}</tbody></table>`:''});
 function load2(){$('err2').textContent='';try{const src=$('ex2').value.trim();const kind=$('kind2').value;const T=kind==='in'?tokInfix(src):tokPost(src);
     EX={src,kind,T};
-    $('sec2a').classList.toggle('hidden',kind!=='in');$('sec2c').classList.toggle('hidden',kind!=='in');
-    if(kind==='in'){S2a.load();S2c.load()}S2b.load()}catch(e){$('err2').textContent=typeof e==='string'?e:'输入有误：'+e.message}}
+    $('sec2a').classList.toggle('hidden',kind!=='in');$('sec2c').classList.toggle('hidden',kind!=='in');$('sec2d').classList.toggle('hidden',kind!=='in');
+    if(kind==='in'){S2a.load();S2c.load();S2d.load()}S2b.load()}catch(e){$('err2').textContent=typeof e==='string'?e:'输入有误：'+e.message}}
 $('go2').onclick=()=>{press('pre2',null);$('q2').innerHTML='自己输入的表达式。';load2()};$('ex2').onkeydown=e=>{if(e.key==='Enter')$('go2').click()};
 
 /* ================= TAB 3: circular queue ================= */
