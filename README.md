@@ -2,7 +2,7 @@
 
 ## 网页工作台
 
-**[打开「温故」六科学习工作台](https://ychenfen.github.io/claude-math-408-handoff/)**
+**[打开「温故」六科学习工作台](https://wengu-408.pages.dev/)**
 
 首页「六科总览」用条形图显示各科题目状态分布、最近14天记录和下次先做；每科「题目追踪」按逐次作答证据显示每道题的最新状态（只检查证据是否齐全，不判断答案对错）。六科独立查看每天的问答、知识点总结、闭卷自测与历史交接。选择日期后可查看原文、下载Markdown，或复制本科提示词给负责的助手。个人复盘标记和草稿仅保存在当前浏览器，不会自动上传或跨设备同步。
 
@@ -44,11 +44,10 @@
 - [30个主题的公开脱敏原文](原文/)
 - [12张学习截图](截图/)
 - [直接读取全部文字：ALL_TEXT.md](ALL_TEXT.md)
-- [下载公开版ZIP](https://github.com/ychenfen/claude-math-408-handoff/archive/refs/heads/main.zip)
 
-若向不能浏览GitHub的助手提供背景，可下载ZIP后上传科目Markdown；若支持网页读取，优先提供下方Raw地址：
+仓库本身是私有的。若向没有仓库权限的助手提供背景：支持网页读取的，给下方全文地址；不支持的，下载后上传科目 Markdown。
 
-https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/ALL_TEXT.md
+https://wengu-408.pages.dev/ALL_TEXT.md
 
 ## 公开范围
 

@@ -27,12 +27,12 @@
 
 | 科目 | 最近有正文支持的重点 | 不能据此认定 |
 |---|---|---|
-| [高等数学](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/01_%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6.md) | 不等式；积分中值点与二重积分极限；880错题及重做记录 | 旧错题现在仍错，或所有题已重做 |
-| [线性代数](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/02_%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0.md) | 10月2日确认基础篇做到相似矩阵填空；当晚复盘九讲，880没做 | 线代课程全完／相似与二次型已掌握 |
-| [数据结构](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/03_%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.md) | 关键路径自报有漏洞；算法题方法、白纸手写、Code59 | Code59全会，或会59题就能保底得分 |
-| [计算机组成原理](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/04_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86.md) | 回做存储和指令有收获；CPU资料选择；三四章及第五章进度 | 章节学完等于所有大题正确 |
-| [操作系统](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/05_%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F.md) | 系统调用／中断、重定位、线程；PV旧反馈与重做建议 | PV17–22等计划题已经做完 |
-| [计算机网络](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/06_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C.md) | 选择做过、看湖科大，大题未做的历史自述；后续计划 | 已有完整逐题答疑档案或大题已经收口 |
+| [高等数学](https://wengu-408.pages.dev/01_%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6.md) | 不等式；积分中值点与二重积分极限；880错题及重做记录 | 旧错题现在仍错，或所有题已重做 |
+| [线性代数](https://wengu-408.pages.dev/02_%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0.md) | 10月2日确认基础篇做到相似矩阵填空；当晚复盘九讲，880没做 | 线代课程全完／相似与二次型已掌握 |
+| [数据结构](https://wengu-408.pages.dev/03_%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.md) | 关键路径自报有漏洞；算法题方法、白纸手写、Code59 | Code59全会，或会59题就能保底得分 |
+| [计算机组成原理](https://wengu-408.pages.dev/04_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86.md) | 回做存储和指令有收获；CPU资料选择；三四章及第五章进度 | 章节学完等于所有大题正确 |
+| [操作系统](https://wengu-408.pages.dev/05_%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F.md) | 系统调用／中断、重定位、线程；PV旧反馈与重做建议 | PV17–22等计划题已经做完 |
+| [计算机网络](https://wengu-408.pages.dev/06_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C.md) | 选择做过、看湖科大，大题未做的历史自述；后续计划 | 已有完整逐题答疑档案或大题已经收口 |
 
 ## 新助手怎么接续
 
@@ -47,7 +47,7 @@
 
 包内有30个主题记录，含学习方法、进度及具体答疑，并非30道独立习题。原文保留日期、会话ID、原始行号及完全相同副本的来源；不同回答不会只因标题相同而合并。M06里的跨会话重贴和重试单独保留，因为回答不同。
 
-只有链接／标题的网页对话没有被补写。尤其数学网页版的部分问答、PV最初的作答照片和逐题批改仍缺；已知网页线索在[缺失与纠错说明](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/07_%E7%BC%BA%E5%A4%B1%E4%B8%8E%E7%BA%A0%E9%94%99%E8%AF%B4%E6%98%8E.md)。未把ChatGPT里的矩阵问答冒充Claude原文。
+只有链接／标题的网页对话没有被补写。尤其数学网页版的部分问答、PV最初的作答照片和逐题批改仍缺；已知网页线索在[缺失与纠错说明](https://wengu-408.pages.dev/07_%E7%BC%BA%E5%A4%B1%E4%B8%8E%E7%BA%A0%E9%94%99%E8%AF%B4%E6%98%8E.md)。未把ChatGPT里的矩阵问答冒充Claude原文。
 
 已恢复原记录没有被修改。本包是经本人授权发布的公开脱敏版；本地完整版和全量恢复仓库仍为私有。公开版边界见README。
 
@@ -116,14 +116,14 @@ $$f\in C[-1,1],\qquad\lim_{h\to0^+}\int_{-1}^{1}\frac{h}{h^2+x^2}f(x)\,\mathrm d
 
 ## 原文入口
 
-- [M01｜一战数学自评](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/M01.md)
-- [M02｜880与1000题取舍及本人定案](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/M02.md)
-- [M03｜先做880综合还是先看强化课](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/M03.md)
-- [M04｜arctan不等式的红色步骤](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/M04.md)
-- [M05｜二重积分极限与中值点；18讲例题定位纠错](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/M05.md)
-- [M06｜880基础篇前五章原始错题清单](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/M06.md)
-- [M07｜第一章基础与综合分开重做；计数及小问格式](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/M07.md)
-- [M08｜10月2日数学重心及真题使用](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/M08.md)
+- [M01｜一战数学自评](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/M01.md)
+- [M02｜880与1000题取舍及本人定案](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/M02.md)
+- [M03｜先做880综合还是先看强化课](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/M03.md)
+- [M04｜arctan不等式的红色步骤](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/M04.md)
+- [M05｜二重积分极限与中值点；18讲例题定位纠错](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/M05.md)
+- [M06｜880基础篇前五章原始错题清单](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/M06.md)
+- [M07｜第一章基础与综合分开重做；计数及小问格式](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/M07.md)
+- [M08｜10月2日数学重心及真题使用](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/M08.md)
 
 
 ---
@@ -170,13 +170,13 @@ $$f\in C[-1,1],\qquad\lim_{h\to0^+}\int_{-1}^{1}\frac{h}{h^2+x^2}f(x)\,\mathrm d
 
 ## 原文入口
 
-- [L01｜7月矩阵课与向量组的自报进度](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/L01.md)
-- [L02｜两倍速看课仍耗时](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/L02.md)
-- [L03｜9月880做到相似矩阵填空](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/L03.md)
-- [L04｜9月28日强化线代刚开始](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/L04.md)
-- [L05｜矩阵的秩与当日计划](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/L05.md)
-- [L06｜先看课再做880吗；用户纠正已做基础篇](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/L06.md)
-- [L07｜10月2日实际复盘而未做880](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/L07.md)
+- [L01｜7月矩阵课与向量组的自报进度](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/L01.md)
+- [L02｜两倍速看课仍耗时](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/L02.md)
+- [L03｜9月880做到相似矩阵填空](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/L03.md)
+- [L04｜9月28日强化线代刚开始](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/L04.md)
+- [L05｜矩阵的秩与当日计划](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/L05.md)
+- [L06｜先看课再做880吗；用户纠正已做基础篇](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/L06.md)
+- [L07｜10月2日实际复盘而未做880](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/L07.md)
 
 
 ---
@@ -215,11 +215,11 @@ $$f\in C[-1,1],\qquad\lim_{h\to0^+}\int_{-1}^{1}\frac{h}{h^2+x^2}f(x)\,\mathrm d
 
 ## 原文入口
 
-- [D01｜代码59题能否覆盖算法题；用户限定范围](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D01.md)
-- [D02｜关键路径漏洞与四科自述](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D02.md)
-- [D03｜错题多；先数据结构还是OS](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D03.md)
-- [D04｜代码与OS优先，每天二三十张卡](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D04.md)
-- [O06｜粘贴的PV旧答疑反馈和后续安排](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/O06.md)
+- [D01｜代码59题能否覆盖算法题；用户限定范围](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D01.md)
+- [D02｜关键路径漏洞与四科自述](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D02.md)
+- [D03｜错题多；先数据结构还是OS](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D03.md)
+- [D04｜代码与OS优先，每天二三十张卡](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D04.md)
+- [O06｜粘贴的PV旧答疑反馈和后续安排](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/O06.md)
 
 
 ---
@@ -260,13 +260,13 @@ $$f\in C[-1,1],\qquad\lim_{h\to0^+}\int_{-1}^{1}\frac{h}{h^2+x^2}f(x)\,\mathrm d
 
 ## 原文入口
 
-- [D02｜关键路径漏洞与四科自述](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D02.md)
-- [C01｜二战计组直接强化](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/C01.md)
-- [C02｜数据运算章节是否都要看](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/C02.md)
-- [C03｜CPU要不要看袁书](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/C03.md)
-- [C04｜回做存储和指令大题有收获](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/C04.md)
-- [C05｜9月15日计组与OS章节进度](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/C05.md)
-- [O02｜系统调用完毕vs指令执行完毕；Q30现场恢复](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/O02.md)
+- [D02｜关键路径漏洞与四科自述](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D02.md)
+- [C01｜二战计组直接强化](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/C01.md)
+- [C02｜数据运算章节是否都要看](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/C02.md)
+- [C03｜CPU要不要看袁书](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/C03.md)
+- [C04｜回做存储和指令大题有收获](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/C04.md)
+- [C05｜9月15日计组与OS章节进度](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/C05.md)
+- [O02｜系统调用完毕vs指令执行完毕；Q30现场恢复](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/O02.md)
 
 
 ---
@@ -329,16 +329,16 @@ $$f\in C[-1,1],\qquad\lim_{h\to0^+}\int_{-1}^{1}\frac{h}{h^2+x^2}f(x)\,\mathrm d
 
 ## 原文入口
 
-- [D02｜关键路径漏洞与四科自述](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D02.md)
-- [D03｜错题多；先数据结构还是OS](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D03.md)
-- [D04｜代码与OS优先，每天二三十张卡](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D04.md)
-- [C05｜9月15日计组与OS章节进度](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/C05.md)
-- [O01｜Relax1000强化适用性与选题](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/O01.md)
-- [O02｜系统调用完毕vs指令执行完毕；Q30现场恢复](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/O02.md)
-- [O03｜Q37动态重定位、Q38静态重定位](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/O03.md)
-- [O04｜用户级线程与内核级线程选择题](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/O04.md)
-- [O05｜10月1日继续PV的明确要求](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/O05.md)
-- [O06｜粘贴的PV旧答疑反馈和后续安排](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/O06.md)
+- [D02｜关键路径漏洞与四科自述](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D02.md)
+- [D03｜错题多；先数据结构还是OS](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D03.md)
+- [D04｜代码与OS优先，每天二三十张卡](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D04.md)
+- [C05｜9月15日计组与OS章节进度](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/C05.md)
+- [O01｜Relax1000强化适用性与选题](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/O01.md)
+- [O02｜系统调用完毕vs指令执行完毕；Q30现场恢复](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/O02.md)
+- [O03｜Q37动态重定位、Q38静态重定位](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/O03.md)
+- [O04｜用户级线程与内核级线程选择题](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/O04.md)
+- [O05｜10月1日继续PV的明确要求](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/O05.md)
+- [O06｜粘贴的PV旧答疑反馈和后续安排](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/O06.md)
 
 
 ---
@@ -370,9 +370,9 @@ $$f\in C[-1,1],\qquad\lim_{h\to0^+}\int_{-1}^{1}\frac{h}{h^2+x^2}f(x)\,\mathrm d
 
 ## 原文入口
 
-- [D02｜关键路径漏洞与四科自述](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D02.md)
-- [D03｜错题多；先数据结构还是OS](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/D03.md)
-- [O06｜粘贴的PV旧答疑反馈和后续安排](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%8E%9F%E6%96%87/O06.md)
+- [D02｜关键路径漏洞与四科自述](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D02.md)
+- [D03｜错题多；先数据结构还是OS](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/D03.md)
+- [O06｜粘贴的PV旧答疑反馈和后续安排](https://wengu-408.pages.dev/%E5%8E%9F%E6%96%87/O06.md)
 
 
 ---
@@ -489,7 +489,7 @@ PV最初七道题的完整题干、手写作答与逐题批改没有附在转贴
 这几个都要看吗
 
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/C02_03f317ca_L1361_0.png)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/C02_03f317ca_L1361_0.png)
 
 ### Claude 历史回答｜L1367｜2026-09-05 16:49
 
@@ -563,9 +563,9 @@ PV最初七道题的完整题干、手写作答与逐题批改没有附在转贴
 cpu要看他的吗
 
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/C03_03f317ca_L1391_0.png)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/C03_03f317ca_L1391_0.png)
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/C03_03f317ca_L1391_1.png)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/C03_03f317ca_L1391_1.png)
 
 ### Claude 历史回答｜L1396｜2026-09-05 16:59
 
@@ -727,17 +727,17 @@ CPU 不一样。**408 有自己一套"模型机"传统**——真题大题的固
 （本条仅发送图片，没有文字。）
 
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_0.jpg)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_0.jpg)
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_1.jpg)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_1.jpg)
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_2.jpg)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_2.jpg)
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_3.jpg)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_3.jpg)
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_4.jpg)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_4.jpg)
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_5.jpg)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/D01_2b6fabf5_L1867_5.jpg)
 
 ### Claude 历史回答｜L1874｜2026-08-21 21:26
 
@@ -1851,7 +1851,7 @@ ok880为主吧那就
 （本条仅发送图片，没有文字。）
 
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/M04_31e93cbb_L6187_0.png)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/M04_31e93cbb_L6187_0.png)
 
 ### Claude 历史回答｜L6197｜2026-09-03 08:31
 
@@ -2383,7 +2383,7 @@ Try again
 高数1 函数极限连续	2 3 6 9 10 11 12 13 ；；4 5 6；；2: 2 3 4  3:3  4 5	17	1 4 5 8 9 10 12 13 15 16 17 18；；2 7 8 9 11 12 13；；1 3:1  4 7 8 9 11 14 15 16	27	分为基础重做和综合重做，
 
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/M07_2a5919dc_L5159_0.webp)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/M07_2a5919dc_L5159_0.webp)
 
 ### 助手回答
 
@@ -2897,7 +2897,7 @@ D 说"恢复通用寄存器的内容在返回用户态前由硬件完成"——�
 讲讲这个题
 
 
-![历史问题附件](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%88%AA%E5%9B%BE/O04_0a3f8cc2_L462_0.webp)
+![历史问题附件](https://wengu-408.pages.dev/%E6%88%AA%E5%9B%BE/O04_0a3f8cc2_L462_0.webp)
 
 ### Claude 历史回答｜L467｜2026-09-09 17:01
 
@@ -3221,7 +3221,7 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 
 **作答**：独立整卷作答，用户自己对答案判错。所选选项见考试记录里的答题卡原图（2026-10-13 起公开）。
 
-**待做**：对照真题册补每题考点和错因，再写回[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)的「逐题丢分」表。
+**待做**：对照真题册补每题考点和错因，再写回[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)的「逐题丢分」表。
 
 来源：16:51 用户在项目对话上传的 2009 年 408 答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；估分按 2009 官方评分标准凭记忆，未对答案册逐条核。
 
@@ -3326,11 +3326,11 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 
 **答**：
 
-![2009-26 分区分配先比界地址再加基址](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-26%E7%95%8C%E5%9C%B0%E5%9D%80%E4%BF%9D%E6%8A%A4.svg)
+![2009-26 分区分配先比界地址再加基址](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-26%E7%95%8C%E5%9C%B0%E5%9D%80%E4%BF%9D%E6%8A%A4.svg)
 
 26：CPU 给出逻辑地址 L，先和界地址寄存器（分区长度）比较，越界就产生中断交给操作系统；不越界再加基址寄存器得到物理地址。两个寄存器只能用特权指令修改。图中的 346、14000、3000 是讲解用的示例数。
 
-![2009-30 访问控制信息放在 FCB 里](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-30%E6%96%87%E4%BB%B6%E6%8E%A7%E5%88%B6%E5%9D%97%E4%B8%8E%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6.svg)
+![2009-30 访问控制信息放在 FCB 里](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-30%E6%96%87%E4%BB%B6%E6%8E%A7%E5%88%B6%E5%9D%97%E4%B8%8E%E8%AE%BF%E9%97%AE%E6%8E%A7%E5%88%B6.svg)
 
 30：目录项指向文件的 FCB（Unix 中叫 inode），FCB 里有类型、大小、物理位置、存取控制信息（rwx）和时间等。open 时先查目录、再读 FCB、按存取控制信息检查权限。FAT 只记录盘块链接，不存权限。
 
@@ -3387,7 +3387,7 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 
 **答**：
 
-![2009-31 两个计数器：i1 归 F1/F3，i2 归软链接 F2](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-31%E8%BD%AF%E7%A1%AC%E9%93%BE%E6%8E%A5%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0.svg)
+![2009-31 两个计数器：i1 归 F1/F3，i2 归软链接 F2](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-31%E8%BD%AF%E7%A1%AC%E9%93%BE%E6%8E%A5%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0.svg)
 
 每个 inode 有自己的计数，只数指向它的目录项。绿色 i1 只受指向它的 F1、F3 影响；蓝色 i2 是软链接新建的 inode，出生计数就是 1。“按名字找 F1”不是目录项，不计数。判断方法：看这个目录项的箭头指向哪个 inode，计数就记在那个 inode 上。
 
@@ -3424,11 +3424,11 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 
 **答**：在线程里做了可以逐步点击或自动播放的动画。静态链接 3 步：编译时把库复制进每个可执行文件 → 装入程序1（连同库副本）→ 装入程序2（内存里再多一份库副本），结果磁盘 2 份库、内存 2 份库。运行时动态链接 5 步：可执行文件只记调用记录，磁盘只有 1 份共享库 → 装入程序1 只装主函数 → 执行到调用时发现库不在内存，调入并让 P1 页表一项指向它 → 程序2 执行到调用时库已在内存，P2 页表一项直接指向同一批页框 → 小结：磁盘、内存各 1 份库，代价是首次调用时查找和链接的时间。仓库只存了三张关键帧：
 
-![静态链接：两个程序各带一份库](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E6%96%B9%E5%BC%8F-%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E8%A3%85%E5%85%A5%E4%B8%A4%E7%A8%8B%E5%BA%8F.svg)
+![静态链接：两个程序各带一份库](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E6%96%B9%E5%BC%8F-%E9%9D%99%E6%80%81%E9%93%BE%E6%8E%A5%E8%A3%85%E5%85%A5%E4%B8%A4%E7%A8%8B%E5%BA%8F.svg)
 
-![运行时动态链接：首次调用时调入共享库](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E6%96%B9%E5%BC%8F-%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E9%A6%96%E6%AC%A1%E8%B0%83%E7%94%A8.svg)
+![运行时动态链接：首次调用时调入共享库](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E6%96%B9%E5%BC%8F-%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E9%A6%96%E6%AC%A1%E8%B0%83%E7%94%A8.svg)
 
-![运行时动态链接：P1、P2 共享同一份库](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E6%96%B9%E5%BC%8F-%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%85%B1%E4%BA%AB%E5%BA%93.svg)
+![运行时动态链接：P1、P2 共享同一份库](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E6%96%B9%E5%BC%8F-%E8%BF%90%E8%A1%8C%E6%97%B6%E5%8A%A8%E6%80%81%E9%93%BE%E6%8E%A5%E5%85%B1%E4%BA%AB%E5%BA%93.svg)
 
 **核实**：图和讲解由本助手给出。
 
@@ -3467,11 +3467,11 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 
 易混：动态链接的“动态”指库何时接入；动态重定位的“动态”指地址何时转换。
 
-![三种链接与三种装入对比](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E4%B8%8E%E8%A3%85%E5%85%A5%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94.svg)
+![三种链接与三种装入对比](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E4%B8%8E%E8%A3%85%E5%85%A5%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94.svg)
 
 完善后的总图：源程序 →编译→ 目标模块 →链接→ 装入模块 →装入→ 内存中的进程 →执行；执行时有地址转换（重定位寄存器、页表、TLB，接 `408-2009-46`）、保护（界地址寄存器 `408-2009-26`、页表项权限位；文件层面 FCB 存取控制 `408-2009-30`）、共享（页表项／段表项指向同一物理内存，可重入代码）、请求调页与置换（缺页、LRU，局部性）。跨章类比：硬链接 ≈ 页表项指向同一页框，软链接 ≈ 动态链接的调用记录（`408-2009-31`）。主线：越晚确定越灵活、越省空间，代价是运行时间和硬件支持。
 
-![从源程序到运行总图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E4%BB%8E%E6%BA%90%E7%A8%8B%E5%BA%8F%E5%88%B0%E8%BF%90%E8%A1%8C%E6%80%BB%E5%9B%BE.svg)
+![从源程序到运行总图](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E4%BB%8E%E6%BA%90%E7%A8%8B%E5%BA%8F%E5%88%B0%E8%BF%90%E8%A1%8C%E6%80%BB%E5%9B%BE.svg)
 
 **核实**：讲解和图由本助手给出，示例数字为讲解用。
 
@@ -3487,7 +3487,7 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 
 **检验**（迁移题，不重做原题）：(a) 页大小 4KB，页表项 4B，逻辑地址空间 2²⁰ 页，二级页表的页目录有几项？(b) 索引结点有 10 个直接地址、1 个一级间接、1 个二级间接，块 1KB、地址项 4B，单个文件最大多大？
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 ## 17:52　`408-2010-45`　位示图、磁盘访问时间与 Flash 调度
 
@@ -3501,11 +3501,11 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 
 **漏洞**：访问时间只算了寻道和传输，漏了旋转延迟；转一圈的时间和读一个扇区的时间混了。和 2009-46 漏访存是同一类：时间题没有按流程逐项列。
 
-**补法**：时间题先写公式“寻道 + 旋转 + 传输”，每项旁边写单次时间和次数，再相加。见[跨科串联表](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 12 条。
+**补法**：时间题先写公式“寻道 + 旋转 + 传输”，每项旁边写单次时间和次数，再相加。见[跨科串联表](https://wengu-408.pages.dev/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 12 条。
 
 **检验**（迁移题，不重做原题）：转速 7200r/min，每道 200 扇区，相邻磁道移动 0.5ms。磁头在 50 号、向增大方向，请求 70、20、90、40 号磁道各读 1 个随机扇区，CSCAN（回扫距离也算）共需多少时间？换成 Flash 用什么调度？
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 ## 17:52　`408-2010-46`　FIFO 与 CLOCK 置换后的物理地址
 
@@ -3523,7 +3523,7 @@ wan = min(m, n-1) 保证不会 n 个人各拿一根筷子死锁。卷面要写�
 
 **检验**（迁移题，不重做原题）：同上题，但装入时刻改为 230、130、200、160（页 0～3），CLOCK 仍从 2 号页框开始、访问位都是 1。访问逻辑地址 1BCDH，分别用 FIFO 和 CLOCK 求物理地址。
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 ## 19:57　`408-2010-26`　降低进程优先级的合理时机
 
@@ -3579,9 +3579,9 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 
 仓库存了两张关键帧：
 
-![Peterson：争抢时互斥](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Peterson-%E4%BA%89%E6%8A%A2%E6%97%B6%E4%BA%92%E6%96%A5.svg)
+![Peterson：争抢时互斥](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Peterson-%E4%BA%89%E6%8A%A2%E6%97%B6%E4%BA%92%E6%96%A5.svg)
 
-![Peterson：连续申请不饥饿](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Peterson-%E8%BF%9E%E7%BB%AD%E7%94%B3%E8%AF%B7%E4%B8%8D%E9%A5%A5%E9%A5%BF.svg)
+![Peterson：连续申请不饥饿](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Peterson-%E8%BF%9E%E7%BB%AD%E7%94%B3%E8%AF%B7%E4%B8%8D%E9%A5%A5%E9%A5%BF.svg)
 
 **核实**：动画和讲解由本助手给出，代码待对照真题册。
 
@@ -3622,7 +3622,7 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 
 **检验**（迁移题，不重做原题）：(a) 时间片 4ms，8 个进程，P 在队尾、需要 18ms，其余都至少 20ms，求 P 的周转时间。(b) 磁道 0～199，磁头在 100 号向增大方向，CSCAN，请求 150、30、199、0、60、120，共移动多少？
 
-来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:15　`408-2024-45`、`408-2024-46`　二级页表地址转换；同步加互斥
 
@@ -3638,7 +3638,7 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 
 **检验**（迁移题，不重做原题）：P1 执行 A1、A2，P2 执行 B1、B2；A1 完成后 B1 才能开始；A2、B2 访问同一缓冲区须互斥。写出信号量和两个进程的代码。
 
-来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:24　408-2024 选择拿不准但做对（24、25、28）
 
@@ -3655,7 +3655,7 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 
 **检验**（迁移题，不重做原题）：同一进程的两个线程，下列哪些共享：全局变量、局部变量、堆上 malloc 的空间、PC、打开的 socket？
 
-来源：2026-10-12 20:24 用户在项目对话说明“选择我标横线或者圈起来的也是拿不准的”；题号由助手看试卷照片识别（划线：5、11、15、18、22、24、28、33、40；圈：14、16、21、25、30、38）。正确要点由助手给出，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:24 用户在项目对话说明“选择我标横线或者圈起来的也是拿不准的”；题号由助手看试卷照片识别（划线：5、11、15、18、22、24、28、33、40；圈：14、16、21、25、30、38）。正确要点由助手给出，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 
 ---
@@ -3676,9 +3676,9 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 - 新做（按错题排序）：地址转换、CPU 调度甘特图、磁盘调度轨迹、PV 执行器（信号量值和阻塞队列，演示 P 顺序写反、先 signal 后 wait）、进程切换时间线。
 
 **已做**（放在 `演示/操作系统/`，已登记到可视化目录）：
-- [地址转换演示台](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2.html)：多级页表切地址（2010-29 → 页目录 128 项）；一次访存全流程，2009-46 算出 210ns、100000220ns、110ns，1565H → 101565H；2010-46 FIFO → 1FCAH，CLOCK → 0BCAH，和批改记录一致。
-- [CPU 调度甘特图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CPU%E8%B0%83%E5%BA%A6.html)：七种算法；2024-30 型数据（10 个进程、q=5、P 需 25ms）算出 P 周转 250ms。其余 9 个进程的时间是假设值，原题只说更长。
-- [磁盘调度轨迹](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6.html)：六种算法；2010-45 按记录（C-LOOK、回跳计入）距离 170、访问时间 190.4ms。2010-45 的磁道范围原题没给，页里设为 0～199。
+- [地址转换演示台](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2.html)：多级页表切地址（2010-29 → 页目录 128 项）；一次访存全流程，2009-46 算出 210ns、100000220ns、110ns，1565H → 101565H；2010-46 FIFO → 1FCAH，CLOCK → 0BCAH，和批改记录一致。
+- [CPU 调度甘特图](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CPU%E8%B0%83%E5%BA%A6.html)：七种算法；2024-30 型数据（10 个进程、q=5、P 需 25ms）算出 P 周转 250ms。其余 9 个进程的时间是假设值，原题只说更长。
+- [磁盘调度轨迹](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6.html)：六种算法；2010-45 按记录（C-LOOK、回跳计入）距离 170、访问时间 190.4ms。2010-45 的磁道范围原题没给，页里设为 0～199。
 
 ## 14:57　`408-2024-45`　单独做一个 2024-45 的可视化模块
 
@@ -3688,7 +3688,7 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 
 **核对**：原题和答案对照王道 2026 第 3.2 节综合题 21（原件已核）：32 位地址、页 4MB、页表项 4B，**一级页表**，页号 10 位、偏移 22 位。答案：页表项虚拟地址 B8C0 0120H、物理地址 6540 0120H、页框号 2EAH；页表所在页页号 2E3H，其页表项虚拟地址 B8C0 0B8CH，页框号 195H。10-12 记录小节标题里写的“二级页表”不对，同日后来的讲解已更正为一级。
 
-**新做**：[页表项的两个地址（2024-45）](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%A1%B5%E8%A1%A8%E8%87%AA%E6%98%A0%E5%B0%84.html)。新点在于页表本身也在虚拟地址空间里：同一个页表项有两个地址，页表所在页由指向自己页框的那一项来映射。页面分“查表用的地址／最终访问的地址”两栏，正好对应 10-12 写的补法。另有两组自拟数据可以当检验题。
+**新做**：[页表项的两个地址（2024-45）](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%A1%B5%E8%A1%A8%E8%87%AA%E6%98%A0%E5%B0%84.html)。新点在于页表本身也在虚拟地址空间里：同一个页表项有两个地址，页表所在页由指向自己页框的那一项来映射。页面分“查表用的地址／最终访问的地址”两栏，正好对应 10-12 写的补法。另有两组自拟数据可以当检验题。
 
 ## 16:45　`强化PPT可视化`　看强化和基础 PPT，挑出值得串起来做成可视化的内容并做出来
 
@@ -3699,9 +3699,9 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 **看了什么**：强化1–4 和七份基础章节 PPT 全文提取逐页核对；格式化与引导（强化1 p2–30、一章 p110–117）、文件系统布局（强化4 p78–88）、RAID（强化4 p181–186）、打开文件（强化4 p7–23）、创建进程（强化1 p31–48）这些图片页逐页看了图。
 
 **新做**（`演示/操作系统/`，已登记到可视化目录）：
-- [I/O 全链路](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E5%85%A8%E9%93%BE%E8%B7%AF.html)：同一套“层次 + CPU + 进程队列 + 数据位置 + 内核栈”画面走三条链：scanf 读键盘（强化1 场景 3）、read 读文件经 DMA（强化4 p24–39、p71–77，强化3 p99–105）、缺页换入（强化3 p90–111）。中断屏蔽字按强化1 p117 的答案核过（I1 行 1001、I2 行 1111、I3 行 1011、I4 行 0001）。
-- [从空白磁盘到第一个用户进程](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%BC%80%E6%9C%BA%E5%88%B0%E7%94%A8%E6%88%B7%E8%BF%9B%E7%A8%8B.html)：格式化与安装 → BIOS／MBR／PBR 引导 → 初始化 → 创建进程。超级块计算器默认数据按 PPT 核对：3840、98304、inode 326 在 4 号块第 70 个。
-- [文件打开与读取](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%96%87%E4%BB%B6%E6%89%93%E5%BC%80%E4%B8%8E%E8%AF%BB%E5%8F%96.html)：open 共读 inode 4 次、目录块 4 次（根 inode 常驻时 7 次）；分配方式默认数据与 PPT 一致：读块 50 连续 1、链接 51、FAT 1、混合索引 2；改块 50 为 2、52、2、3（混合索引改 3 次是按同样规则推的，PPT 只给了读 2 次）；索引块 101 块 → 1、528 块 → 4。
+- [I/O 全链路](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E5%85%A8%E9%93%BE%E8%B7%AF.html)：同一套“层次 + CPU + 进程队列 + 数据位置 + 内核栈”画面走三条链：scanf 读键盘（强化1 场景 3）、read 读文件经 DMA（强化4 p24–39、p71–77，强化3 p99–105）、缺页换入（强化3 p90–111）。中断屏蔽字按强化1 p117 的答案核过（I1 行 1001、I2 行 1111、I3 行 1011、I4 行 0001）。
+- [从空白磁盘到第一个用户进程](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%BC%80%E6%9C%BA%E5%88%B0%E7%94%A8%E6%88%B7%E8%BF%9B%E7%A8%8B.html)：格式化与安装 → BIOS／MBR／PBR 引导 → 初始化 → 创建进程。超级块计算器默认数据按 PPT 核对：3840、98304、inode 326 在 4 号块第 70 个。
+- [文件打开与读取](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%96%87%E4%BB%B6%E6%89%93%E5%BC%80%E4%B8%8E%E8%AF%BB%E5%8F%96.html)：open 共读 inode 4 次、目录块 4 次（根 inode 常驻时 7 次）；分配方式默认数据与 PPT 一致：读块 50 连续 1、链接 51、FAT 1、混合索引 2；改块 50 为 2、52、2、3（混合索引改 3 次是按同样规则推的，PPT 只给了读 2 次）；索引块 101 块 → 1、528 块 → 4。
 
 **PPT 要注意的地方**：
 - 强化4 p38–39 读完后文件指针写成 51586，是把 51548 抄成 51458 的笔误，应为 51548 + 128 = **51676**。
@@ -3715,7 +3715,7 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 
 **作答方式**：未注明（需求，不是做题）。核对结果：未核对。
 
-**改了什么**（[开机到用户进程](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%BC%80%E6%9C%BA%E5%88%B0%E7%94%A8%E6%88%B7%E8%BF%9B%E7%A8%8B.html)）：
+**改了什么**（[开机到用户进程](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%BC%80%E6%9C%BA%E5%88%B0%E7%94%A8%E6%88%B7%E8%BF%9B%E7%A8%8B.html)）：
 - 按强化1 p14 重画分区：三个分区各有自己的 PBR（PBR1～3），分区表里 1 和 3 都是系统分区；MBR 那一步补了“有两个系统分区时选哪个”（活动分区、开机菜单是本页补充，PPT 没讲）。
 - 物理格式化那一步放大一个扇区画出 ID／GAP／DATA；安装那一步画出安装介质把 os.img 写进分区 1。
 - 初始化阶段内核在内存里分成五格（向量表、页表、就绪队列、超级块、设备表），做完一项填一格；文件系统初始化的箭头是磁盘 → 内存，对应问题 7。
@@ -3739,10 +3739,10 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 **看了什么**：四章 p130–166（外存布局、四种空闲空间管理、成组链接整套动画）、p188–202（磁盘结构与访问时间）；五章 p4–48（I/O 软件层次、打印机驱动、设备分配数据结构）、p14–34（单／双缓冲、缓冲池）、p49–74（控制方式）、p75–101（SPOOLing、SSD）；强化4 p89–110（成组链接）、p155–186（SPOOLing、真题、RAID）。动画页都渲染成图逐页看过。
 
 **新做**（`演示/操作系统/`，已登记到可视化目录）：
-- [磁盘空闲空间管理](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B2%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86.html)：空闲表、空闲链、位图、成组链接四法一页对比。成组链接逐帧与 PPT 对上：依次分配 9、6、30，N=1 时读入块 18 得到 N=4、33 11 7 5；N=5 时回收 128，把栈写进块 128。位图换算器可切字长、编号起点和 0／1 含义。
-- [I/O 控制方式与缓冲](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E6%8E%A7%E5%88%B6%E6%96%B9%E5%BC%8F%E4%B8%8E%E7%BC%93%E5%86%B2.html)：轮询、中断、DMA 时间线和 CPU 占比（计时模型和默认数值是本页设定，PPT 没给数）；单／双缓冲甘特图，五章 p29 例题 T=100、M=50、C=10、10 块：单缓冲 1510、双缓冲 1060，n 块公式 T+(n−1)[max(T,C)+M]+M+C 和 T+(n−1)·max(T,M+C)+M+C；缓冲池和循环缓冲区。
-- [设备分配与 SPOOLing](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%AE%BE%E5%A4%87%E5%88%86%E9%85%8D%E4%B8%8ESPOOLing.html)：print 经设备独立性软件和驱动到打印机控制器；LUT→SDT→DCT→COCT→CHCT 分配，四种“哪一级忙”情况；SPOOLing 输出、输入逐帧（五章 p78–96 与强化4 p156–174 内容相同）。
-- [磁盘结构、RAID 与固态硬盘](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84%E4%B8%8ESSD.html)：磁盘部件和读一个扇区的三段时间；(柱面, 盘面, 扇区) 与簇号互换，强化4 p178 真题数据：600000 个扇区，100530 簇 → (100, 5, 60)；RAID 0/1/5/6/10 坏盘恢复；SSD 写页、垃圾回收、磨损均衡模拟。
+- [磁盘空闲空间管理](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B2%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86.html)：空闲表、空闲链、位图、成组链接四法一页对比。成组链接逐帧与 PPT 对上：依次分配 9、6、30，N=1 时读入块 18 得到 N=4、33 11 7 5；N=5 时回收 128，把栈写进块 128。位图换算器可切字长、编号起点和 0／1 含义。
+- [I/O 控制方式与缓冲](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E6%8E%A7%E5%88%B6%E6%96%B9%E5%BC%8F%E4%B8%8E%E7%BC%93%E5%86%B2.html)：轮询、中断、DMA 时间线和 CPU 占比（计时模型和默认数值是本页设定，PPT 没给数）；单／双缓冲甘特图，五章 p29 例题 T=100、M=50、C=10、10 块：单缓冲 1510、双缓冲 1060，n 块公式 T+(n−1)[max(T,C)+M]+M+C 和 T+(n−1)·max(T,M+C)+M+C；缓冲池和循环缓冲区。
+- [设备分配与 SPOOLing](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%AE%BE%E5%A4%87%E5%88%86%E9%85%8D%E4%B8%8ESPOOLing.html)：print 经设备独立性软件和驱动到打印机控制器；LUT→SDT→DCT→COCT→CHCT 分配，四种“哪一级忙”情况；SPOOLing 输出、输入逐帧（五章 p78–96 与强化4 p156–174 内容相同）。
+- [磁盘结构、RAID 与固态硬盘](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84%E4%B8%8ESSD.html)：磁盘部件和读一个扇区的三段时间；(柱面, 盘面, 扇区) 与簇号互换，强化4 p178 真题数据：600000 个扇区，100530 簇 → (100, 5, 60)；RAID 0/1/5/6/10 坏盘恢复；SSD 写页、垃圾回收、磨损均衡模拟。
 
 **PPT 要注意的地方**：
 - 强化4 p180 写 u = i*j+k，应为 u = i×2000 + j×200 + k（每柱面 10 道 × 200 扇区）。
@@ -3779,7 +3779,7 @@ P0: flag[0]=TRUE; turn=1;          P1: flag[1]=TRUE; turn=0;
 
 **对应错题**：没有新错题；这次只是让已有的地址转换、CPU 调度、磁盘调度、I/O 等演示更容易看清每一步。
 
-**检验**（迁移题，闭卷）：磁道 0～199，磁头在 60、向磁道号增大方向移动，请求依次到达 20、150、90、10、180。分别用 C-LOOK 和 C-SCAN 写出服务顺序和磁头移动总距离（回跳那段计入），再说出两者的距离差出在哪几段。做完后可在[磁盘调度轨迹](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6.html)里填这组数据核对（页面没有做成预设）。
+**检验**（迁移题，闭卷）：磁道 0～199，磁头在 60、向磁道号增大方向移动，请求依次到达 20、150、90、10、180。分别用 C-LOOK 和 C-SCAN 写出服务顺序和磁头移动总距离（回跳那段计入），再说出两者的距离差出在哪几段。做完后可在[磁盘调度轨迹](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6.html)里填这组数据核对（页面没有做成预设）。
 
 
 ---
@@ -3890,7 +3890,7 @@ A. LRN　B. NRL　C. RLN　D. RNL
 
 **作答**：独立整卷作答，用户自己对答案判错。所选选项见考试记录里的答题卡原图（2026-10-13 起公开）。
 
-**待做**：对照真题册补每题考点和错因，再写回[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)的「逐题丢分」表。
+**待做**：对照真题册补每题考点和错因，再写回[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)的「逐题丢分」表。
 
 来源：16:51 用户在项目对话上传的 2009 年 408 答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；估分按 2009 官方评分标准凭记忆，未对答案册逐条核。
 
@@ -4122,7 +4122,7 @@ A. 只有Ⅱ　B. Ⅰ和Ⅱ　C. Ⅰ和Ⅲ　D. Ⅰ、Ⅱ和Ⅲ
 
 **问**：算法题
 
-**答**：按 10/8 复盘「下次先做」，今天闭卷重写 `408-2009-42`（题目全文见 [10/8 16:51 小节](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)）：不看答案和书，限时 15 分钟手写设计思想、实现步骤、C 代码（结构体 link 为指针；两遍循环；失败 return 0，成功输出 data 后 return 1）和复杂度，拍照发来，本助手核原图并用 gcc 测 k>表长、空表。本次作答方式将记为「看答案后」（10/8 22:09 已看过解法）。
+**答**：按 10/8 复盘「下次先做」，今天闭卷重写 `408-2009-42`（题目全文见 [10/8 16:51 小节](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)）：不看答案和书，限时 15 分钟手写设计思想、实现步骤、C 代码（结构体 link 为指针；两遍循环；失败 return 0，成功输出 data 后 return 1）和复杂度，拍照发来，本助手核原图并用 gcc 测 k>表长、空表。本次作答方式将记为「看答案后」（10/8 22:09 已看过解法）。
 
 若指逐日表的算法：10/9 为 D9，第 6 章 6.1 快速排序，看图手推 A = 4 7 2 9 1 6。
 
@@ -4195,7 +4195,7 @@ int Search_k(LinkList list, int k){
 
 **检验**（迁移题，不重做原题）：(a) 一棵度为 3 的树有 5 个度为 3 的结点、4 个度为 2 的结点，其余是叶子，叶子有几个？(b) 长度 20 的有序表折半查找，失败最多比较几次？(c) 对 (5, 1, 4, 2, 8) 写出冒泡前两趟的结果。
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 ## 17:52　`408-2010-41`　线性探测散列表与两个 ASL
 
@@ -4213,7 +4213,7 @@ int Search_k(LinkList list, int k){
 
 **检验**（迁移题，不重做原题）：关键字 (5, 12, 19, 3, 10)，H(key) = key mod 7，表长 8（0～7），线性探测。画表，求查找成功和失败的 ASL。
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 ## 17:52　`408-2010-42`　数组循环左移 p 位
 
@@ -4231,7 +4231,7 @@ int Search_k(LinkList list, int k){
 
 **检验**（迁移题，不重做原题）：把数组循环**右移** k 位（0<k<n），用三次逆置实现，写出逆置函数和三次调用的下标，并用 n=6、k=2 验证。
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 
 ---
@@ -4361,7 +4361,7 @@ int Search_k(LinkList list, int k){
 
 **问**：这几种排序讲讲，最好是可视化的方式帮我回忆。（未指明哪几种，默认 408 九种内部排序）
 
-**答**：做了交互演示页（逐步动画、每趟结果、稳定性反例、对比表），网站版见 [408 排序演示台](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%8E%92%E5%BA%8F%E6%BC%94%E7%A4%BA.html)。用默认序列 49 38 65 97 76 13 27 49* 跑出的每趟结果（已用脚本核对最终有序）：
+**答**：做了交互演示页（逐步动画、每趟结果、稳定性反例、对比表），网站版见 [408 排序演示台](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%8E%92%E5%BA%8F%E6%BC%94%E7%A4%BA.html)。用默认序列 49 38 65 97 76 13 27 49* 跑出的每趟结果（已用脚本核对最终有序）：
 - 直接插入：第 4 趟 38 49 65 76 97 13 27 49*；第 7 趟有序。
 - 希尔（d=4,2,1）：d=4 → 49 13 27 49* 76 38 65 97；d=2 → 27 13 49 38 65 49* 76 97；d=1 有序。
 - 冒泡（从后往前）：第 1 趟 13 49 38 65 97 76 27 49*；第 2 趟 13 27 49 38 65 97 76 49*。
@@ -4415,7 +4415,7 @@ int Search_k(LinkList list, int k){
 
 **问**：放在我的网站上；单独建一个各科的可视化网页用来放可视化的内容。
 
-**答**：新建 [可视化](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/index.html) 入口页（六科分栏，读 `演示/目录.json`），网站侧栏加「可视化」链接；排序演示台放在 `演示/数据结构/排序演示.html`，随 GitHub Pages 发布。
+**答**：新建 [可视化](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/index.html) 入口页（六科分栏，读 `演示/目录.json`），网站侧栏加「可视化」链接；排序演示台放在 `演示/数据结构/排序演示.html`，随 GitHub Pages 发布。
 
 
 ---
@@ -4438,7 +4438,7 @@ int Search_k(LinkList list, int k){
 
 **检验**（迁移题，不重做原题）：模式串 "abaabc"，写出 next、nextval，并求失配时模式串右滑的最大距离。
 
-来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:15　`408-2024-41`　判断拓扑序列是否唯一
 
@@ -4456,7 +4456,7 @@ int Search_k(LinkList list, int k){
 
 **检验**（迁移题，不重做原题）：写 int hasTopo(MGraph G)，判断 G 是否存在拓扑序列（无环）；再说要改成判断唯一，在哪里加一行。
 
-来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:15　`408-2024-42`　平方探测散列表
 
@@ -4464,7 +4464,7 @@ int Search_k(LinkList list, int k){
 
 **批改**：估 10/10，全对。
 
-来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:24　408-2024 选择拿不准但做对（5）
 
@@ -4478,7 +4478,7 @@ int Search_k(LinkList list, int k){
 
 **检验**（迁移题，不重做原题）：有序顺序表、有序单链表、按关键字建好的二叉排序树、散列表，哪些能用折半查找？哪些能以 O(log n) 查找？
 
-来源：2026-10-12 20:24 用户在项目对话说明“选择我标横线或者圈起来的也是拿不准的”；题号由助手看试卷照片识别（划线：5、11、15、18、22、24、28、33、40；圈：14、16、21、25、30、38）。正确要点由助手给出，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:24 用户在项目对话说明“选择我标横线或者圈起来的也是拿不准的”；题号由助手看试卷照片识别（划线：5、11、15、18、22、24、28、33、40；圈：14、16、21、25、30、38）。正确要点由助手给出，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:27　`手册-图10-矩阵拓扑`　邻接矩阵拓扑排序默写（补 `408-2024-41`）
 
@@ -4511,7 +4511,7 @@ typedef struct{
 
 **问**：你之前做的那种可视化是不是也可以帮助我理解代码然后我背诵，代码59题和手册的t1到11你建议我学哪个背哪个。
 
-**答**：可视化帮理解，背还得手写。做了 [拓扑排序代码走读](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB.html)：手册图 10 的 TopoCount 逐行高亮执行，同步显示入度数组、队列 front/rear、图与矩阵，可点矩阵改图；三个例子的输出与 gcc 运行手册代码一致（唯一 0 1 2 3／不唯一 0 1 2 3／有环 count=1）。
+**答**：可视化帮理解，背还得手写。做了 [拓扑排序代码走读](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB.html)：手册图 10 的 TopoCount 逐行高亮执行，同步显示入度数组、队列 front/rear、图与矩阵，可点矩阵改图；三个例子的输出与 gcc 运行手册代码一致（唯一 0 1 2 3／不唯一 0 1 2 3／有环 count=1）。
 分工：T1–T11 是骨架（背），59 题是骨架套出的题（练，不逐字背）。P0 闭卷零错：T1–T9、快排/二分/归并、第 4 章基础结构体；P1 之后补：T10、T11。每背熟一个骨架，从手册“对应题目”里挑 2～3 道 59 题自己套。
 建议本周顺序（待 Chen 确认）：10/13 T6+T9（图 10、图 4）；10/14 T4（链 9、10）；10/15 T5+T8（树 1、2）；10/16 T1+T2（顺 2、4）；10/17 T3+T7（顺 9、链 7）；10/18 快排/二分/归并（排 2）；10/19 九骨架各默一遍。10/20 起回逐日表阶段②。
 
@@ -4528,13 +4528,13 @@ typedef struct{
 
 **问**：把我写的文档里框架之类的要背的页放进去。
 
-**答**：把《408代码题暴力解作战手册v4》要背的页原样转成图片（第 6–31 页：第 3 章基本功、第 4 章结构体、第 5 章 T1–T11、第 6 章快排二分归并；第 91–94 页：第 12 章速查表），做成 [代码骨架背诵页](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E4%BB%A3%E7%A0%81%E9%AA%A8%E6%9E%B6%E8%83%8C%E8%AF%B5%E9%A1%B5.html)，按章节筛选；“闭卷”模式遮住页面只留标题，先默写再点开对照。已登记到可视化目录。
+**答**：把《408代码题暴力解作战手册v4》要背的页原样转成图片（第 6–31 页：第 3 章基本功、第 4 章结构体、第 5 章 T1–T11、第 6 章快排二分归并；第 91–94 页：第 12 章速查表），做成 [代码骨架背诵页](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E4%BB%A3%E7%A0%81%E9%AA%A8%E6%9E%B6%E8%83%8C%E8%AF%B5%E9%A1%B5.html)，按章节筛选；“闭卷”模式遮住页面只留标题，先默写再点开对照。已登记到可视化目录。
 
 ## 07:49　代码骨架做成动态走读
 
 **问**：要可视化呢，帮助我理解的动态的你看看哪些要有。
 
-**答**：做成和拓扑排序那页一样逐行执行的 [代码骨架走读](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB.html)，一页切换，网址后加 `#t4`、`#qs` 这类可直接跳到某个例子。代码和例子取自手册第 5、6 章，每个例子的结果都用 gcc 跑手册原代码核对过：
+**答**：做成和拓扑排序那页一样逐行执行的 [代码骨架走读](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB.html)，一页切换，网址后加 `#t4`、`#qs` 这类可直接跳到某个例子。代码和例子取自手册第 5、6 章，每个例子的结果都用 gcc 跑手册原代码核对过：
 
 | 模板 | 走读例子 | 核对结果 |
 |---|---|---|
@@ -4543,7 +4543,7 @@ typedef struct{
 | T3 有序合并 | 1 4 7 与 2 3 9 | 1 2 3 4 7 9 |
 | T4 链表转数组 | 10 20 30 40 50 求长度、存指针、取倒数第 2 个 | 40 |
 | T5 二叉树递归 | WPL 先序带深度（2014）；树高后序返回值 | 21；3 |
-| T6 邻接矩阵 | 沿用 [拓扑排序代码走读](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB.html) | — |
+| T6 邻接矩阵 | 沿用 [拓扑排序代码走读](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB.html) | — |
 | T7 增删 | 顺序表插入；删后继；头插逆置（链 1）；尾插建表 | 1 3 5 6 8；1 3；3 2 1；1 2 3 |
 | T8 层序 | 层序求树高（树 7，last 指针） | 3 |
 | T9 DFS 拓扑 | 邻接表 DFS；邻接表 TopoCount | 0 1 3 4 2；count = 5 |
@@ -4559,7 +4559,7 @@ typedef struct{
 
 **问**：要能够教会我，现在是否有这个自信，不够的话补一下。
 
-**答**：原来的走读只能“看它跑”，不够。补了四样，都在 [代码骨架走读](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB.html) 里：
+**答**：原来的走读只能“看它跑”，不够。补了四样，都在 [代码骨架走读](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E4%BB%A3%E7%A0%81%E8%B5%B0%E8%AF%BB.html) 里：
 
 1. **先懂思路**：每个例子在代码上面先给三句话，讲清这个骨架在干什么、为什么这么做。
 2. **这一行为什么这样写**：关键行执行到时显示说明，内容取自手册各模板的“考场丢分点”（如 malloc 后先清零、p->adjvex 不是 p、先动 j 再动 i、L < R 配 R = mid）。
@@ -4635,9 +4635,9 @@ typedef struct{
 
 **问**：10 年好像应用题考了那个成功和失败，这个我说实话我还挺迷糊。文档里面应该还有其他的这种要算成功失败的你看看。
 
-**作答**：本条不是新作答。10-10 那次的作答和批改见 [2026-10-10](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) 的 `408-2010-41`，迁移检验题仍未作答。
+**作答**：本条不是新作答。10-10 那次的作答和批改见 [2026-10-10](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) 的 `408-2010-41`，迁移检验题仍未作答。
 
-**答**：做了 [查找成功与失败](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%A3%E5%88%97%E8%A1%A8ASL.html) 演示页，五类逐步数比较次数，开着“先猜再看”时每数一个先停下来问。核心三句：
+**答**：做了 [查找成功与失败](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%95%A3%E5%88%97%E8%A1%A8ASL.html) 演示页，五类逐步数比较次数，开着“先猜再看”时每数一个先停下来问。核心三句：
 
 1. 成功：每个关键字比较几次，加起来 ÷ 关键字个数 n。
 2. 失败：从散列函数能算出的每个地址（mod 7 就是 0～6）出发，往后比到空位为止，和空位那次也算；加起来 ÷ 7。不是 ÷ 表长 10，也不是 ÷ 7 个关键字。
@@ -4718,7 +4718,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：常考。选择题 2016、2017、2018、2020、2021、2023 年共 6 次，2011 年 41 题还放进了应用题。做了 [矩阵压缩存储](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%9F%A9%E9%98%B5%E5%8E%8B%E7%BC%A9%E5%AD%98%E5%82%A8.html) 演示页：点矩阵任一格，标出按存储顺序排在它前面的格子，逐行或逐列数个数，再一格格放进一维数组；可切对称、三角、三对角、普通二维数组，上下三角，含不含对角线，行优先或列优先，矩阵和数组下标从 0 还是从 1。核心一句：**下标 = 前面存了几个 + 数组起始下标**，不背公式，数前面几个。对称矩阵问到没存的那一半，先交换 i、j。题目没说时，矩阵下标从 1 开始，C 语言数组从 0 开始。另做了“从一维数组还原邻接矩阵”的板块（2011-41 和打卡表 4.5 的 8 顶点图），以及三元组表为什么要另存行数和列数。
+**答**：常考。选择题 2016、2017、2018、2020、2021、2023 年共 6 次，2011 年 41 题还放进了应用题。做了 [矩阵压缩存储](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%9F%A9%E9%98%B5%E5%8E%8B%E7%BC%A9%E5%AD%98%E5%82%A8.html) 演示页：点矩阵任一格，标出按存储顺序排在它前面的格子，逐行或逐列数个数，再一格格放进一维数组；可切对称、三角、三对角、普通二维数组，上下三角，含不含对角线，行优先或列优先，矩阵和数组下标从 0 还是从 1。核心一句：**下标 = 前面存了几个 + 数组起始下标**，不背公式，数前面几个。对称矩阵问到没存的那一半，先交换 i、j。题目没说时，矩阵下标从 1 开始，C 语言数组从 0 开始。另做了“从一维数组还原邻接矩阵”的板块（2011-41 和打卡表 4.5 的 8 顶点图），以及三元组表为什么要另存行数和列数。
 
 **核对结果**：页面预设得到 2016 → 87，2018 → 50，2020 → 22，2021 → 300，2011-41 a[2][4] → 10（值 3），打卡表 4.5 a[1][6] → 13（值 5），Relax1000 第 2280 行那题（10 阶对称下三角行优先，B 从 1 开始，A[8][5]）→ 33。
 
@@ -4734,7 +4734,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：原来只在每次定位后显示当前那一种的公式和代入过程。现在在 [矩阵压缩存储](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%9F%A9%E9%98%B5%E5%8E%8B%E7%BC%A9%E5%AD%98%E5%82%A8.html) 页加了“公式速查”表，约定矩阵下标从 1、数组从 0：
+**答**：原来只在每次定位后显示当前那一种的公式和代入过程。现在在 [矩阵压缩存储](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%9F%A9%E9%98%B5%E5%8E%8B%E7%BC%A9%E5%AD%98%E5%82%A8.html) 页加了“公式速查”表，约定矩阵下标从 1、数组从 0：
 - 含对角线的下三角行优先 i(i−1)/2 + j − 1；下三角列优先 (j−1)(2n−j+2)/2 + i − j；上三角行优先 (i−1)(2n−i+2)/2 + j − i；上三角列优先 j(j−1)/2 + i − 1。对称矩阵问到没存的那半先交换 i、j。三角矩阵的常数 c 放在 n(n+1)/2。
 - 不含对角线的四种：(i−1)(i−2)/2 + j − 1、(i−1)(2n−i)/2 + j − i − 1、(j−1)(2n−j)/2 + i − j − 1、(j−1)(j−2)/2 + i − 1。
 - 三对角行优先 2i + j − 3，反求 i = ⌊(k+1)/3⌋ + 1、j = k − 2i + 3；列优先 i + 2j − 3。
@@ -4807,7 +4807,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [关键路径](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E5%85%B3%E9%94%AE%E8%B7%AF%E5%BE%84.html) 演示页：按拓扑序正推 ve（进来的边取最大）、逆拓扑序倒推 vl（出去的边取最小）、再算 e = ve(起点)、l = vl(终点) − 时长，每步在图上标出参与比较的边和取到最值的边。默认先猜再看，常见错（ve 没取最大、vl 没取最小、l 忘了减时长、e 看成终点）会单独提示。活动时长可改，讲义三道思考题和强化选项一键试。
+**答**：做了 [关键路径](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E5%85%B3%E9%94%AE%E8%B7%AF%E5%BE%84.html) 演示页：按拓扑序正推 ve（进来的边取最大）、逆拓扑序倒推 vl（出去的边取最小）、再算 e = ve(起点)、l = vl(终点) − 时长，每步在图上标出参与比较的边和取到最值的边。默认先猜再看，常见错（ve 没取最大、vl 没取最小、l 忘了减时长、e 看成终点）会单独提示。活动时长可改，讲义三道思考题和强化选项一键试。
 
 **核对结果**：
 - 讲义例题：ve(1–6) = 0,12,8,19,18,27，vl = 0,12,8,21,18,27；关键路径 1→3→2→5→6、1→3→5→6，工期 27。思考题 ① 不变 27，② 26，③ 25（关键路径变成 1→3→2→4→6）。
@@ -4832,7 +4832,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [KMP 讲义法](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/KMP.html)，三段逐步：① 列前缀后缀求 PM，右移一位首位补 −1 得 next；② 改进 PM：从最长相同前后缀往下试，紧邻字符和失配字符相同就是无效后退，空串时首字符相同记 −1、不同记 0，右移补 −1 得 nextval，附教材递推对照；③ 匹配逐次比较，数比较次数、失配次数、滑动距离 j − next[j]。B+ 树：讲义（第七章 p97–99）只讲概念和一张图，放进之后的 B 树页做“B 树和 B+ 树查找路径对照”，不单独做页。
+**答**：做了 [KMP 讲义法](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/KMP.html)，三段逐步：① 列前缀后缀求 PM，右移一位首位补 −1 得 next；② 改进 PM：从最长相同前后缀往下试，紧邻字符和失配字符相同就是无效后退，空串时首字符相同记 −1、不同记 0，右移补 −1 得 nextval，附教材递推对照；③ 匹配逐次比较，数比较次数、失配次数、滑动距离 j − next[j]。B+ 树：讲义（第七章 p97–99）只讲概念和一张图，放进之后的 B 树页做“B 树和 B+ 树查找路径对照”，不单独做页。
 
 **核对结果**：ababaa 失配 2 次；aaabaa 失配 4 次；aabaaba 的 nextval = −1 −1 1 −1 −1 1 −1；强化例 1 答 D（2 次，滑 3）；强化例 2 答 B（nextval = −1 0 −1 0 −1 0 4，最大滑 5）；2015 答 C；2019 答 B（10 次）；2024 答 A（nextval = −1 −1 1 −1 −1 1，j − nextval[j] 最大 5）。
 
@@ -4848,7 +4848,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [堆的插入与删除](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E5%A0%86.html)：筛选法建堆、插入上滤、删除堆顶下滤，树和数组同步，每次比较先猜（和左孩子换／右孩子换／不换），操作结束填比较次数。比较次数口径：上滤每层 1 次；下滤每层两孩子互比 1 次加较大孩子与当前比 1 次，只有一个孩子算 1 次。其余页面陆续追加在下面。
+**答**：做了 [堆的插入与删除](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E5%A0%86.html)：筛选法建堆、插入上滤、删除堆顶下滤，树和数组同步，每次比较先猜（和左孩子换／右孩子换／不换），操作结束填比较次数。比较次数口径：上滤每层 1 次；下滤每层两孩子互比 1 次加较大孩子与当前比 1 次，只有一个孩子算 1 次。其余页面陆续追加在下面。
 
 **核对结果**：讲义建堆 3 5 9 7 2 4 6 → 9,7,6,5,2,4,3（比较 8 次）；插 10 → 10,9,6,7,2,4,3,5（3 次）；删 9 → 7,5,6,3,2,4（4 次）。强化 p24 选 A；p25–26 即 2009 选 A，删堆顶比较 5 次；p27 即 2011 选 B（2 次）；2015 选 C（3 次）；2018 选 A；2021 选 B；2024 选 B。
 
@@ -4864,7 +4864,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [哈夫曼树与归并树](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E5%93%88%E5%A4%AB%E6%9B%BC%E6%A0%91.html)：左边候选队列、右边森林逐轮长成树，WPL 用“分支结点权值之和”和“叶子权×路径长”两种算法对照；左 0 右 1 编码、平均码长、定长对比；k 叉先判断补几个虚结点（(n0−1) % (k−1) 不为 0 时补 k−1−余数个），最佳归并树 I/O = 2×WPL。先猜每轮新结点、补几个、WPL、I/O。同权值先取谁只影响树形和编码，不影响 WPL。
+**答**：做了 [哈夫曼树与归并树](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E5%93%88%E5%A4%AB%E6%9B%BC%E6%A0%91.html)：左边候选队列、右边森林逐轮长成树，WPL 用“分支结点权值之和”和“叶子权×路径长”两种算法对照；左 0 右 1 编码、平均码长、定长对比；k 叉先判断补几个虚结点（(n0−1) % (k−1) 不为 0 时补 k−1−余数个），最佳归并树 I/O = 2×WPL。先猜每轮新结点、补几个、WPL、I/O。同权值先取谁只影响树形和编码，不影响 WPL。
 
 **核对结果**：{7,5,2,4} WPL 35；{6,5,3,4} 第二步合并 5 和 6，WPL 36；AAABBACCCDEEA 编码 A=0、C=10、B=110、D=1110、E=1111，WPL 29，定长 39；k=3 不补 42、补 1 个 34；a～h WPL 261、平均码长 2.61；9 段 3 路 WPL 253、I/O 506；8 段 4 路补 2 个，WPL 439、I/O 878；2018 A；2019 B（补 2 个）；2021 B（WPL 200）；2023 B（2.5）；2025 D（5 个）。
 
@@ -4880,7 +4880,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [外部排序](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F.html)：① 置换-选择 FO/WA/FI 逐行表，比 MINIMAX 小的冻结标灰，全冻结输出 # 结束本段；② 败者树逐结点建树，每输出一个元素沿单侧路径重赛，猜新的冠军；③ 归并趟数 ⌈log_k r⌉ 与每趟 I/O，附 in1/in2/out1 缓冲区动画。最佳归并树在“哈夫曼树与归并树”页。
+**答**：做了 [外部排序](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F.html)：① 置换-选择 FO/WA/FI 逐行表，比 MINIMAX 小的冻结标灰，全冻结输出 # 结束本段；② 败者树逐结点建树，每输出一个元素沿单侧路径重赛，猜新的冠军；③ 归并趟数 ⌈log_k r⌉ 与每趟 I/O，附 in1/in2/out1 缓冲区动画。最佳归并树在“哈夫曼树与归并树”页。
 
 **核对结果**：第八章例得 3,24,46,48,91# 和 9,12,14,29#；零壹一模得 50,62,69,76,98# 和 06,20,38,41,45,55,77,81#；第八章五路败者树初始 ls = 0,3,2,4,1，输出 1 后重赛 3 次；强化 p67 归并过程 3 趟×32 = 96 次，选 B（把内部排序那遍也算上是 128）；2016 选 D；2019 选 B（补 2 个虚段）；2023-41 三段 37…99#、14…166#、8,17,43,100#；2024 选 D。
 
@@ -4896,7 +4896,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [栈和队列](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97.html)：① 出栈序列逐步模拟，每步先选入栈/出栈/走不下去，卡住时标红被压住的元素，可设容量和连续出栈限制，枚举全部合法序列对照卡特兰数；② 中缀转后缀用讲义的 result/temp 双栈，遇运算符先猜弹出几个（同级也弹），后缀求值算 b op a，中缀直接求值；③ 循环队列环形图，三种指针约定 × 三种判满方案。
+**答**：做了 [栈和队列](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%A0%88%E5%92%8C%E9%98%9F%E5%88%97.html)：① 出栈序列逐步模拟，每步先选入栈/出栈/走不下去，卡住时标红被压住的元素，可设容量和连续出栈限制，枚举全部合法序列对照卡特兰数；② 中缀转后缀用讲义的 result/temp 双栈，遇运算符先猜弹出几个（同级也弹），后缀求值算 b op a，中缀直接求值；③ 循环队列环形图，三种指针约定 × 三种判满方案。
 
 **核对结果**：abc 5 种（B）；P3 可能取值 n−1 个（C，即 2013）；容量 3 只有 32154 合法（D）；2009 栈最大深度 3（C）；2010 afedcb 不合法（D）；2011 以 d 开头 4 种（B）；2020 答 D；(2+3−1)*2−3*(8/4) → 23+1-2*384/*-，值 2；(2+3)*2−3*(8/4)+5−2 → 23+2*384/*-5+2-，值 7；2012 temp 最多 5 个（A）；2014 扫到 f 时栈为 +(-*（B）；2024 xyzu-*v/+（A）；2018 值 15（B）；循环队列初值 0, n−1（讲义选项 C、2011 原卷 B）；强化 p50 长度 (2−5+8)%8 = 5（A）；2014 队列题 A。
 
@@ -4912,7 +4912,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [B 树与 B+ 树](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/B%E6%A0%91.html)：m 阶（3/4/5）B 树逐步插入删除，上溢第 ⌈m/2⌉ 个关键字上移分裂，删除分直接删、兄弟够借（父下移、兄弟上移）、合并三种，连到根时树高 ±1；先猜上移哪个、前驱是几、借还是并。B+ 树对照：讲义 p99 的 B+ 树和同样关键字的 4 阶 B 树查找路径对比（B+ 必须到叶、叶链范围查找），8 行概念对照表和 12 道小测。
+**答**：做了 [B 树与 B+ 树](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/B%E6%A0%91.html)：m 阶（3/4/5）B 树逐步插入删除，上溢第 ⌈m/2⌉ 个关键字上移分裂，删除分直接删、兄弟够借（父下移、兄弟上移）、合并三种，连到根时树高 ±1；先猜上移哪个、前驱是几、借还是并。B+ 树对照：讲义 p99 的 B+ 树和同样关键字的 4 阶 B 树查找路径对比（B+ 必须到叶、叶链范围查找），8 行概念对照表和 12 道小测。
 
 **核对结果**：插 13、22 后根变 [23]，树高 +1；删 10 终态根 [23 33]（同 p95）；p96 删 20 得 [12 18]，树高 −1；强化 PPT 终态根 [30]、下层 [20] [50]；2020 选 B（根 [6 9]）；2012 选 D；2022 选 D（前驱/后继、并左/并右三种结果均可看）；小测计数题（最少关键字 5 和 31、最多 124、54 个关键字高度 3～4、2021 题 11、2025 题 9）与标答一致。
 
@@ -4928,7 +4928,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [红黑树](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%BA%A2%E9%BB%91%E6%A0%91.html)：左边红黑树、右边等价 4 阶 B 树每步同步重画（黑结点和它的红孩子合成一个 B 树结点）。插入按讲义 RR-1（叔叔黑，3-4 重构）/ RR-2（叔叔红，只染色，相当于 B 树上溢往上传），删除按 BB-1～BB-4，每步写明 B 树上发生的上溢、下溢、借或合并；先猜是哪种情况；四条红黑性质每步实时检查。
+**答**：做了 [红黑树](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%BA%A2%E9%BB%91%E6%A0%91.html)：左边红黑树、右边等价 4 阶 B 树每步同步重画（黑结点和它的红孩子合成一个 B 树结点）。插入按讲义 RR-1（叔叔黑，3-4 重构）/ RR-2（叔叔红，只染色，相当于 B 树上溢往上传），删除按 BB-1～BB-4，每步写明 B 树上发生的上溢、下溢、借或合并；先猜是哪种情况；四条红黑性质每步实时检查。
 
 **核对结果**：插 33 走 RR-2 到根得 35B(30B(,33R),39B)；p32–35 删 60 为 BB-1 内侧侄子旋转两次；p49 删 200 为 BB-1 单旋；p69–73 插 30 为 RR-2，B 树根变 [8 11 25]；p74 删红结点直接删；p75–77 删 100 为 BB-3 传到根，黑高减 1；王道第 20 题 C，第 21 题 D，Relax 第 33 题 B。
 
@@ -4944,7 +4944,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [遍历建树与线索树](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E9%81%8D%E5%8E%86%E5%BB%BA%E6%A0%91%E4%B8%8E%E7%BA%BF%E7%B4%A2.html)：先序/后序/层序配中序逐步建树，中序数组和树横坐标对齐，高亮根和左右子树区间，层序显示跳过了哪些结点；先序+后序列出全部可能的树说明不唯一。线索化三种切换，每个空指针先猜指向，虚线画前驱、后继和 NULL；点结点看找前驱/后继命中的规则（先序找前驱、后序找后继需要双亲）。
+**答**：做了 [遍历建树与线索树](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E9%81%8D%E5%8E%86%E5%BB%BA%E6%A0%91%E4%B8%8E%E7%BA%BF%E7%B4%A2.html)：先序/后序/层序配中序逐步建树，中序数组和树横坐标对齐，高亮根和左右子树区间，层序显示跳过了哪些结点；先序+后序列出全部可能的树说明不唯一。线索化三种切换，每个空指针先猜指向，虚线画前驱、后继和 NULL；点结点看找前驱/后继命中的规则（先序找前驱、后序找后继需要双亲）。
 
 **核对结果**：p53 后序 CBEFDA（A）；p54 选 D；强化 p56 树 A(B(D,E(G,H(·,J))),C(·,F(I,·)))；2010 选 D；2011 选 C；2012 选 A；2013 选 A；2014 选 D；2020 选 C（后序 bfedca）；强化 p25 选 B。
 
@@ -4960,7 +4960,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [树、森林与二叉树](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%A0%91%E5%92%8C%E6%A3%AE%E6%9E%97%E8%BD%AC%E6%8D%A2.html)：转换分步动画（兄弟连线、只留第一个孩子、旋转，森林再把各根连成右链；反过来断右链），之后逐结点猜“左孩子，右孩子”；点结点说明它在原树中的第一个孩子和下一个兄弟；遍历序列实时对照；强化 8 类情形表；统计栏实时核对森林叶子数 = 左指针为空数、无右孩子数 = 分支结点数 + 1。
+**答**：做了 [树、森林与二叉树](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%A0%91%E5%92%8C%E6%A3%AE%E6%9E%97%E8%BD%AC%E6%8D%A2.html)：转换分步动画（兄弟连线、只留第一个孩子、旋转，森林再把各根连成右链；反过来断右链），之后逐结点猜“左孩子，右孩子”；点结点说明它在原树中的第一个孩子和下一个兄弟；遍历序列实时对照；强化 8 类情形表；统计栏实时核对森林叶子数 = 左指针为空数、无右孩子数 = 分支结点数 + 1。
 
 **核对结果**：2011 题 1896（D）；强化 p57 森林先序 ABDEGHJCFI、中序 DBGEHJACIF；2014 选 C；2019 选 B；2021 选 C（3 棵树）。
 
@@ -4976,7 +4976,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [最短路径与最小生成树](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84%E4%B8%8E%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91.html)：Dijkstra 按讲义表每轮一列，已入 S 冻结灰显，跑完点顶点回溯 path；Floyd 逐个中转点算 A(k)，高亮第 k 行第 k 列，每格写 min；Prim 的 lowcost 表和 Kruskal 的排序边表加并查集在同一张图上对照，同权边可换选看结果不唯一。
+**答**：做了 [最短路径与最小生成树](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E6%9C%80%E7%9F%AD%E8%B7%AF%E5%BE%84%E4%B8%8E%E6%9C%80%E5%B0%8F%E7%94%9F%E6%88%90%E6%A0%91.html)：Dijkstra 按讲义表每轮一列，已入 S 冻结灰显，跑完点顶点回溯 path；Floyd 逐个中转点算 A(k)，高亮第 k 行第 k 列，每格写 min；Prim 的 lowcost 表和 Kruskal 的排序边表加并查集在同一张图上对照，同权边可换选看结果不唯一。
 
 **核对结果**：讲义 Dijkstra dist：b 5、c 6、d 2、e 15，S 依次并入 d、b、c、e，e 的路径 a→d→b→e；负权反例 Dijkstra 得 4、实际 2；Floyd 例 1 最终 A→D = 3、C→D = 4，例 2 A→D = 6；讲义 MST 权 15，并查集例权 18；2015-33 选 C；2012-29 选 C；2016-35 选 B；2021-44 选 C；概念题 D、D、A、B。
 
@@ -4992,7 +4992,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **作答**：本条无作答。
 
-**答**：做了 [算法题思路动画](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%AE%97%E6%B3%95%E9%A2%98%E6%80%9D%E8%B7%AF.html)：六题各一个标签，完整题干、三句话设计思想、复杂度，C 代码逐行高亮，数组画格子、链表画方框加箭头，指针跟着一步步动；先猜再看，可输入自己的数据。2011 有双指针和折半舍弃两种解法；2019 分找中点、头插逆置、交替合并三阶段。
+**答**：做了 [算法题思路动画](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/%E7%AE%97%E6%B3%95%E9%A2%98%E6%80%9D%E8%B7%AF.html)：六题各一个标签，完整题干、三句话设计思想、复杂度，C 代码逐行高亮，数组画格子、链表画方框加箭头，指针跟着一步步动；先猜再看，可输入自己的数据。2011 有双指针和折半舍弃两种解法；2019 分找中点、头插逆置、交替合并三阶段。
 
 **核对结果**：2011 A、B 中位数 11，偶数长度例子 10；2013 (0,5,5,3,5,7,5,5) → 5，(0,5,5,3,5,1,5,7) → −1；2018 {−5,3,2,3} → 1，{1,2,3} → 4；2020 最小距离 2，三元组 (9,10,9)；2019 1..6 → 1,6,2,5,3,4；2009 链表 23,8,15,42,4,16 中 k = 2 输出 4。
 
@@ -5059,7 +5059,7 @@ gcc 核对：1–8 左移 3 位得 4 5 6 7 8 1 2 3；1–5 左移 1 位得 2 3 4
 
 **题**（原题，取自王道《数据结构》第 3 章选择题 19【2024 统考真题】；统考题号按用户所说记为第 2 题）：与表达式 x + y*(z − u)/v 等价的后缀表达式是（ ）。
 A. x y z u − * v / +　B. x y z u − v / * +　C. + x / * y − z u v　D. + x * y / − z u v
-答案：A（王道答案页）。用户 10-12 整卷作答选 B（见 [2026-10-12](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) 20:15）。
+答案：A（王道答案页）。用户 10-12 整卷作答选 B（见 [2026-10-12](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) 20:15）。
 
 **问**：24 年选择第二个我以为要用到树呢，结构就是栈。
 
@@ -5101,7 +5101,7 @@ A. x y z u − * v / +　B. x y z u − v / * +　C. + x / * y − z u v　D. + 
 
 ## 19:24　`408-2024-6`　KMP 修正 next 数组的最大右滑距离
 
-**题**（原题，取自王道《数据结构》第 4 章选择题 12【2024 统考真题】；统考题号按用户所说记为第 6 题）：KMP 算法使用修正后的 next 数组进行模式匹配，模式串为 S = 'aabaab'，当主串的某个字符与 S 的某个字符失配时，S 向右滑动的最长距离是（ ）。A. 5　B. 4　C. 3　D. 2。答案：A。用户 10-12 整卷作答选 D（见 [2026-10-12](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) 20:15）。
+**题**（原题，取自王道《数据结构》第 4 章选择题 12【2024 统考真题】；统考题号按用户所说记为第 6 题）：KMP 算法使用修正后的 next 数组进行模式匹配，模式串为 S = 'aabaab'，当主串的某个字符与 S 的某个字符失配时，S 向右滑动的最长距离是（ ）。A. 5　B. 4　C. 3　D. 2。答案：A。用户 10-12 整卷作答选 D（见 [2026-10-12](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) 20:15）。
 
 **问**：24 年选择 6，怎么做的。
 
@@ -5123,7 +5123,7 @@ A. x y z u − * v / +　B. x y z u − v / * +　C. + x / * y − z u v　D. + 
 
 **核对结果**：A，与王道答案一致；nextval 与 2026-10-13 KMP 页的 Python 递推结果一致。
 
-**来源**：王道《数据结构》Markdown 第 4 章选择题 12；罗素讲义第四章 改进 PM 法；[KMP 讲义法](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/KMP.html)。
+**来源**：王道《数据结构》Markdown 第 4 章选择题 12；罗素讲义第四章 改进 PM 法；[KMP 讲义法](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/KMP.html)。
 
 ## 19:26　`408-2024-6`　补：nextval 前两位（第 0、1 位）的规则
 
@@ -5168,9 +5168,9 @@ A. x y z u − * v / +　B. x y z u − v / * +　C. + x / * y − z u v　D. + 
 **作答**：本条无作答。
 
 **答**：以后仓库里 KMP 一律用 01 讲义（罗素第四章、强化第一讲 PPT）的写法：下标从 0；next = PM 右移一位、首位补 −1；nextval 按「前缀(失配字符)」逐列求改进 PM，再右移一位、首位补 −1；右滑 j − nextval[j]；选项从 1 开始时整体 +1。已改：
-- [10-12 复盘](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%AF%8F%E6%97%A5%E5%A4%8D%E7%9B%98/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md)：知识点和 abaabc 迁移自测卡改成改进 PM 法（nextval = −1 0 −1 1 0 2，最大右滑 4，在第 4 位）。
-- [2024 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)：第 6 题那行和 abaabc 自测卡同样改写。
-- [KMP 讲义法](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/KMP.html) 本来就按 01 讲义做，教材递推只放在折叠的“对照”里，不改。
+- [10-12 复盘](https://wengu-408.pages.dev/%E6%AF%8F%E6%97%A5%E5%A4%8D%E7%9B%98/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md)：知识点和 abaabc 迁移自测卡改成改进 PM 法（nextval = −1 0 −1 1 0 2，最大右滑 4，在第 4 位）。
+- [2024 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)：第 6 题那行和 abaabc 自测卡同样改写。
+- [KMP 讲义法](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/KMP.html) 本来就按 01 讲义做，教材递推只放在折叠的“对照”里，不改。
 - 10-12 及之前的问答记录按规则保持原样（那里写的是从 1 开始的 0 0 2 0 0 2，数值等价）。
 
 **来源**：罗素数据结构讲义第四章 矩阵&串；数据结构强化第一讲 PPT。
@@ -5231,7 +5231,7 @@ A. x y z u − * v / +　B. x y z u − v / * +　C. + x / * y − z u v　D. + 
 
 ## 19:50　`408-2024-11`　败者树“冠军”结点保存什么
 
-**题**（原题，取自王道《数据结构》第 8 章外部排序选择题 16【2024 统考真题】；统考题号按用户所说记为第 11 题）：在外排序中，利用败者树对初始为升序的归并段进行多路归并，败者树中记录“冠军”的结点保存的是（ ）。A. 最大关键字　B. 最小关键字　C. 最大关键字所在的归并段号　D. 最小关键字所在的归并段号。答案：D（王道答案页）。用户 10-12 整卷作答选 A（见 [2026-10-12](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) 20:15）。
+**题**（原题，取自王道《数据结构》第 8 章外部排序选择题 16【2024 统考真题】；统考题号按用户所说记为第 11 题）：在外排序中，利用败者树对初始为升序的归并段进行多路归并，败者树中记录“冠军”的结点保存的是（ ）。A. 最大关键字　B. 最小关键字　C. 最大关键字所在的归并段号　D. 最小关键字所在的归并段号。答案：D（王道答案页）。用户 10-12 整卷作答选 A（见 [2026-10-12](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) 20:15）。
 
 **问**：11 题。
 
@@ -5260,7 +5260,7 @@ A. x y z u − * v / +　B. x y z u − v / * +　C. + x / * y − z u v　D. + 
 
 科目：线性代数（李林 880 第九章 向量：基础篇选择 + 强化篇综合选择；讲解时串张宇《线代9讲》）。时间为北京时间。
 
-来源：项目线程「880 第2章错题」的原对话（Chen 在里面插问了线代），项目主聊天里的一问，以及项目文件里同日的混合问答副本；本文件只收线代部分，高数部分见 [高等数学 2026-10-05](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md)。2026-10-06 补录到仓库。
+来源：项目线程「880 第2章错题」的原对话（Chen 在里面插问了线代），项目主聊天里的一问，以及项目文件里同日的混合问答副本；本文件只收线代部分，高数部分见 [高等数学 2026-10-05](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md)。2026-10-06 补录到仓库。
 
 说明：下面除综合 (6)(7) 外，Chen 都是直接要讲解，没有作答记录。张宇书页码指书上印的页码（上传版 PDF 页码 = 印刷页码 + 11）；「第 6 讲 p.68【注】框（定理 1–4）」已对照 PDF 第 79 页核实。
 
@@ -5702,7 +5702,7 @@ $\alpha$ 无关时 $A$ 可逆，$r(AC)=r(C)=2$，$\beta$ 无关；反向反例 $
 
 **题**（强化篇做题本 PDF 第 167 页，第九章解答题 (2)）：设向量组 $\alpha_1=(1,0,1)^{\mathrm T}$，$\alpha_2=(0,1,1)^{\mathrm T}$，$\alpha_3=(1,3,5)^{\mathrm T}$ 不能由向量组 $\beta_1=(1,1,1)^{\mathrm T}$，$\beta_2=(1,2,3)^{\mathrm T}$，$\beta_3=(3,4,a)^{\mathrm T}$ 线性表示，求 $a$ 的值，并将 $\beta_1,\beta_2,\beta_3$ 用 $\alpha_1,\alpha_2,\alpha_3$ 线性表示。
 
-**问**：再讲讲向量综合第二个大题。（10-08 12:12 只讲了行变换一步，见 [2026-10-08](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md)。）
+**问**：再讲讲向量综合第二个大题。（10-08 12:12 只讲了行变换一步，见 [2026-10-08](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md)。）
 
 **作答**：
 - 作答方式：未作答（要求讲解）
@@ -6600,7 +6600,7 @@ $$\begin{cases}x_1+ax_2+f(a)x_3=f(b),\\x_1+bx_2+f(b)x_3=f(c),\\x_1+cx_2+f(c)x_3=
 
 **问**：总结之前的
 
-**答**：依据交接仓库 [04_计算机组成原理.md](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/04_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86.md) 及原文 C01–C05、O02 整理。旧回答是当时助手的建议，本次未重新核对官方大纲或原题。
+**答**：依据交接仓库 [04_计算机组成原理.md](https://wengu-408.pages.dev/04_%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86.md) 及原文 C01–C05、O02 整理。旧回答是当时助手的建议，本次未重新核对官方大纲或原题。
 
 - 背景：二战，计组直接进强化（2026-06-11，C01）。
 - 数据运算取舍（2026-09-05，C02）：重点四块为标志位（OF/SF/ZF/CF）、补码加减与溢出、移位实现常量乘除、浮点加减全流程（对阶、尾数运算、规格化、舍入、溢出）。原码／补码乘除只懂原理；快速乘法器、浮点乘除当时判为可跳。
@@ -6625,7 +6625,7 @@ D. RISC 的指令数、寻址方式和指令格式种类相对 CISC 少
 
 **作答**：独立整卷作答，用户自己对答案判错。所选选项见考试记录里的答题卡原图（2026-10-13 起公开）。
 
-**待做**：对照真题册补每题考点和错因，再写回[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)的「逐题丢分」表。
+**待做**：对照真题册补每题考点和错因，再写回[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)的「逐题丢分」表。
 
 来源：16:51 用户在项目对话上传的 2009 年 408 答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；估分按 2009 官方评分标准凭记忆，未对答案册逐条核。
 
@@ -6696,7 +6696,7 @@ D. RISC 的指令数、寻址方式和指令格式种类相对 CISC 少
 
 **问**：43 题讲讲，最新要求看看
 
-**答**：按 main 上最新约定（[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)「下次先做」，2026-10-08 11:03 更新）：2009 卷复盘不重做原题，每题先说漏洞、再补知识、最后用迁移题检验。顺带把本文件 16:51 小节里 43 题的漏洞／补法／检验移回 43 题下（原先误放在 44 题小节）。
+**答**：按 main 上最新约定（[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)「下次先做」，2026-10-08 11:03 更新）：2009 卷复盘不重做原题，每题先说漏洞、再补知识、最后用迁移题检验。顺带把本文件 16:51 小节里 43 题的漏洞／补法／检验移回 43 题下（原先误放在 44 题小节）。
 
 讲解（原题题意见本文件 16:51 `408-2009-43` 小节）：
 
@@ -6781,7 +6781,7 @@ D. RISC 的指令数、寻址方式和指令格式种类相对 CISC 少
 
 **问**：今天内容记录到github
 
-**答**：今天各条问答已逐条推送到 main。另按 每日复盘/模板.md 写了 [每日复盘/计算机组成原理/2026-10-08.md](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%AF%8F%E6%97%A5%E5%A4%8D%E7%9B%98/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)：题目状态（17、43、44 均为作答待核实）、作答记录、知识点、卡点与纠正、4 道闭卷自测（3 道迁移题）、下次先做 3 项。
+**答**：今天各条问答已逐条推送到 main。另按 每日复盘/模板.md 写了 [每日复盘/计算机组成原理/2026-10-08.md](https://wengu-408.pages.dev/%E6%AF%8F%E6%97%A5%E5%A4%8D%E7%9B%98/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)：题目状态（17、43、44 均为作答待核实）、作答记录、知识点、卡点与纠正、4 道闭卷自测（3 道迁移题）、下次先做 3 项。
 
 是否独立作答：本条无作答。
 
@@ -6889,7 +6889,7 @@ A. 001111100010　B. 001110100010　C. 010000010001　D. 发生溢出
 
 **答**：
 
-![微程序控制器的结构与工作过程](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%BE%AE%E7%A8%8B%E5%BA%8F%E6%8E%A7%E5%88%B6%E5%99%A8%E7%BB%93%E6%9E%84%E4%B8%8E%E5%B7%A5%E4%BD%9C%E8%BF%87%E7%A8%8B.svg)
+![微程序控制器的结构与工作过程](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%BE%AE%E7%A8%8B%E5%BA%8F%E6%8E%A7%E5%88%B6%E5%99%A8%E7%BB%93%E6%9E%84%E4%B8%8E%E5%B7%A5%E4%BD%9C%E8%BF%87%E7%A8%8B.svg)
 
 - 结构：IR 的操作码、状态条件和 μIR 的顺序控制字段 → 微地址形成部件 → 微地址寄存器 μPC（CMAR）→ 控制存储器 CM → 微指令寄存器 μIR（CMDR）。μIR 的操作控制字段发出微命令（控制信号）给执行部件，顺序控制字段反馈给微地址形成部件。
 - 工作过程：① 取指微程序（入口通常为 CM 的 0 号单元）把机器指令取入 IR；② 操作码经微地址形成部件得到该指令微程序的入口地址，送 μPC；③ 逐条从 CM 读微指令到 μIR 执行；④ 微程序结束，转回取指入口。
@@ -6981,7 +6981,7 @@ A. 001111100010　B. 001110100010　C. 010000010001　D. 发生溢出
 
 ## 16:57　408-2009-44　完整过一遍（审题→通路→取指→执行）
 
-**用户问题**：上传视频课讲 2009-44 的截图（含原题图和老师批注），“完整带我过一遍”。截图含第三方水印，未入库；按截图中的原题图重绘为 [2009-44单总线数据通路.svg](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2009-44%E5%8D%95%E6%80%BB%E7%BA%BF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF.svg)。
+**用户问题**：上传视频课讲 2009-44 的截图（含原题图和老师批注），“完整带我过一遍”。截图含第三方水印，未入库；按截图中的原题图重绘为 [2009-44单总线数据通路.svg](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2009-44%E5%8D%95%E6%80%BB%E7%BA%BF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF.svg)。
 
 **题干（原题）**：某计算机字长为 16 位，采用 16 位定长指令字结构，部分数据通路结构如图所示，图中所有控制信号为 1 时表示有效、为 0 时表示无效。例如，控制信号 MDRinE 为 1 表示允许数据从 DB 打入 MDR，MDRin 为 1 表示允许数据从内总线打入 MDR。假设 MAR 的输出一直处于使能状态。加法指令“ADD (R1),R0”的功能为 (R0)+((R1))→(R1)，即将 R0 中的数据与 R1 的内容所指主存单元的数据相加，并将结果送入 R1 的内容所指主存单元中保存。下表给出了上述指令取指和译码阶段每个节拍（时钟周期）的功能和有效控制信号，请按相同方式给出该指令执行阶段每个节拍的功能和有效控制信号。
 
@@ -7040,11 +7040,11 @@ A. 001111100010　B. 001110100010　C. 010000010001　D. 发生溢出
 
 **漏洞**：硬件“谁做什么”的边界不清：关中断、保存断点是隐指令（硬件）做的，不在中断服务程序里；字扩展时每组芯片占多大的地址范围没先算出来；补码转真值、带宽占比的方向也有失误。
 
-**补法**：按[跨科串联表](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 1 条把中断画成一条时间线，标出哪几步是硬件、哪几步是服务程序；存储器扩展题先写“每组容量 → 每组地址范围”，再看地址落在哪组。
+**补法**：按[跨科串联表](https://wengu-408.pages.dev/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 1 条把中断画成一条时间线，标出哪几步是硬件、哪几步是服务程序；存储器扩展题先写“每组容量 → 每组地址范围”，再看地址落在哪组。
 
 **检验**（迁移题，不重做原题）：(a) 多重中断系统中，中断服务程序有哪些步骤、什么顺序？哪几步是隐指令做的？(b) 用 1K×4 位芯片组成 4K×8 位存储器，地址 0A3FH 所在芯片的最小地址是多少？
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 ## 17:52　`408-2010-43`　指令格式、按字编址与寄存器间接自增
 
@@ -7062,7 +7062,7 @@ A. 001111100010　B. 001110100010　C. 010000010001　D. 发生溢出
 
 **检验**（迁移题，不重做原题）：同一格式，R4 = 1234H，R5 = 5678H，主存 1234H 单元为 5678H、5678H 单元为 1234H。执行 ADD R4,(R5)+（源在前，寄存器直接 000）后哪些地方改变、改成多少？机器码是多少？另：主存 256KB、按 16 位字编址，MAR 至少几位？
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 ## 17:52　`408-2010-44`　Cache 总位数、数组元素所在行与命中率
 
@@ -7078,7 +7078,7 @@ A. 001111100010　B. 001110100010　C. 010000010001　D. 发生溢出
 
 **检验**（迁移题，不重做原题）：主存 64MB、按字节编址；直接映射 Cache 16 行，每行数据 32B，回写，有效位、脏位各 1 位。(1) Cache 总位数；(2) int b[128][128] 按行存放、首地址 96，b[0][20] 和 b[2][3] 各在哪一行；(3) 按行遍历的命中率。
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 ## 19:30　`408-2010-15`　为什么两片一组（位扩展 + 字扩展）
 
@@ -7238,11 +7238,11 @@ A. I→V→VI→II→VII　B. III→I→V→VII　C. III→IV→V→VI→VII　D
 
 **漏洞**：截断后的值没算出来（只想到“溢出”，没减 65536）；访存流程里 MMU 和 Cache 的先后没分清，和 2009-46 漏访存是同一条线。
 
-**补法**：截断题统一写“看新最高位，是 1 就减 2^位数”；访存流程按[跨科串联表](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 3 条默写一遍：查 TLB → 查页表 → 得物理地址 → 查 Cache → 访主存。
+**补法**：截断题统一写“看新最高位，是 1 就减 2^位数”；访存流程按[跨科串联表](https://wengu-408.pages.dev/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 3 条默写一遍：查 TLB → 查页表 → 得物理地址 → 查 Cache → 访主存。
 
 **检验**（迁移题，不重做原题）：int i = 40000; short s = i; int j = s; 求 j 和它的机器数；并判断越权、缺页、TLB 缺失、Cache 缺失哪些在 MMU 中检测。
 
-来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:15　`408-2024-43`、`408-2024-44`　指令格式、数据通路与数组地址
 
@@ -7256,7 +7256,7 @@ A. I→V→VI→II→VII　B. III→I→V→VII　C. III→IV→V→VI→VII　D
 
 **检验**（迁移题，不重做原题）：int a[100] 首地址 0040 1000H，int 占 4B，求 a[25] 的地址；若 a[25] = −300，写出它的机器数。
 
-来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:24　408-2024 选择拿不准但做对（14、15、16、21、22）
 
@@ -7275,7 +7275,7 @@ A. I→V→VI→II→VII　B. III→I→V→VII　C. III→IV→V→VI→VII　D
 
 **检验**（迁移题，不重做原题）：(a) 要精确表示 ±2³⁰ 的整数，用单精度浮点数行不行？(b) 中断屏蔽字能不能改变两个中断的响应次序？能改变什么？
 
-来源：2026-10-12 20:24 用户在项目对话说明“选择我标横线或者圈起来的也是拿不准的”；题号由助手看试卷照片识别（划线：5、11、15、18、22、24、28、33、40；圈：14、16、21、25、30、38）。正确要点由助手给出，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:24 用户在项目对话说明“选择我标横线或者圈起来的也是拿不准的”；题号由助手看试卷照片识别（划线：5、11、15、18、22、24、28、33、40；圈：14、16、21、25、30、38）。正确要点由助手给出，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:27　`CO-补漏-2024`　截断与扩展、数组地址与负数机器数、Cache 与虚存、中断两种优先级
 
@@ -7460,7 +7460,7 @@ A. I→V→VI→II→VII　B. III→I→V→VII　C. III→IV→V→VI→VII　D
 4. 元素定位：地址 = 首地址 + 下标 × 元素大小 → 块号 = ⌊地址 ÷ 块大小⌋ → 组号 = 块号 mod 组数。
 5. 本题：28 位 = 19｜3｜6；每行 1 + 19 + 512 = 532 位，总 4256 位；a[0][31] 地址 444 → 块 6 → 行 6；a[1][1] 地址 1348 → 块 21 → 行 5。
 
-**可视化**：[Cache 地址与容量](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E5%9C%B0%E5%9D%80%E4%B8%8E%E5%AE%B9%E9%87%8F.html)（网站“可视化”目录中），三种映射的地址拆分条、一行结构条、总容量与标记阵列算式、数组元素定位，可开“闭卷”先算再看。预设 2010-44、王道例 3.3 改 2 路、王道第 3 章综合 01（68480 位）、综合 02（标记阵列全写 10752 位 / 回写 11264 位）均与王道解析核对。
+**可视化**：[Cache 地址与容量](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E5%9C%B0%E5%9D%80%E4%B8%8E%E5%AE%B9%E9%87%8F.html)（网站“可视化”目录中），三种映射的地址拆分条、一行结构条、总容量与标记阵列算式、数组元素定位，可开“闭卷”先算再看。预设 2010-44、王道例 3.3 改 2 路、王道第 3 章综合 01（68480 位）、综合 02（标记阵列全写 10752 位 / 回写 11264 位）均与王道解析核对。
 
 **检验**（换条件，不重做原题）：主存 4GB、按字节编址；Cache 数据区 32KB，块 64B，8 路组相联，回写，LRU。(1) 地址三段各几位；(2) 每行几位、总容量多少位；(3) int b[64][64] 首地址 0040 0000H，b[2][17] 在第几组。另：2026-10-10 记录里的迁移题（64MB、16 行 × 32B、回写）仍待作答。
 
@@ -7474,7 +7474,7 @@ A. I→V→VI→II→VII　B. III→I→V→VII　C. III→IV→V→VI→VII　D
 **范围**：第一至第八章基础 PPT（第三章分上、中、下三份）、强化 1～5，共 16 份 PDF，逐页抽取文字并对重点页渲染成图核对。页码一律是 **PDF 页码**（阅读器左下角显示的那个），不是幻灯片角标。`第二章（上）` 与 `第二章（全）` 第 1～142 页内容相同，下文只写“第二章”。
 
 **已做，不重复**：
-- 交互页 [Cache 地址与容量](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E5%9C%B0%E5%9D%80%E4%B8%8E%E5%AE%B9%E9%87%8F.html)：三种映射的地址拆分、控制位、总容量、数组元素在哪一行。
+- 交互页 [Cache 地址与容量](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E5%9C%B0%E5%9D%80%E4%B8%8E%E5%AE%B9%E9%87%8F.html)：三种映射的地址拆分、控制位、总容量、数组元素在哪一行。
 - 静态图：`图解/计算机组成原理/2009-44单总线数据通路.svg`、`微程序控制器结构与工作过程.svg`。下面若有同主题的条目，做的是“能单步、能换条件”的交互版。
 
 **优先级**：
@@ -7613,11 +7613,11 @@ A. I→V→VI→II→VII　B. III→I→V→VII　C. III→IV→V→VI→VII　D
 
 | 页面 | 内容 | 核对结果 |
 |---|---|---|
-| [浮点数加减五步走](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8A%A0%E5%87%8F%E4%BA%94%E6%AD%A5%E8%B5%B0.html) | 对阶、尾数加减、规格化、舍入、判溢出，双符号位补码逐位显示，可开“闭卷” | 2009-13 得阶码 8、溢出；第二章 p285 得 −3.5；p290 的 x − y 得 2⁻³ × (−0.100111)，与 PPT 一致 |
-| [I/O 方式占 CPU 时间](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/IO%E6%96%B9%E5%BC%8F%E5%8D%A0CPU%E6%97%B6%E9%97%B4.html) | 程序查询、中断、DMA 统一换算成时钟周期；DMA 三种访存方式时间轴 | 2009-43 两问得 2.5%、0.1% |
-| [单总线数据通路逐拍](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%8D%95%E6%80%BB%E7%BA%BF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E9%80%90%E6%8B%8D.html) | 2009-44 的结构，逐拍点亮总线和控制信号；取指、ADD (R1),R0、间址 MOV、三寄存器 ADD、存数、JMP | ADD (R1),R0 的 C5–C10 按 2009-44 标准答案；迁移题 ADD R1,(R0) 没放进去，留给你自己做 |
-| [单周期数据通路与五段流水线](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%8D%95%E5%91%A8%E6%9C%9F%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E4%B8%8E%E4%BA%94%E6%AE%B5%E6%B5%81%E6%B0%B4%E7%BA%BF.html) | 单周期 add/addi/lw/sw/beq 的有效路径、无效数据流、控制信号；五段流水线时空图可写指令，比较转发与不转发 | 控制信号按强化 3 p25–33（RegDst = 1 选 rt）；第六章 p58 例不转发停 2 拍、转发不停；load-use 转发后仍停 1 拍；beq 在 MEM 段更新 PC（强化 3 p40），冻结时插 3 个气泡 |
-| [Cache 访问序列模拟](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E8%AE%BF%E9%97%AE%E5%BA%8F%E5%88%97.html) | 地址序列逐次看命中、装入、替换、LRU 计数器、脏位；三种映射、LRU/FIFO、三种写策略；二维数组遍历生成地址 | 存储器（中）p40 的序列依次淘汰块 3、4、5、1，命中 4/12；2010-44 程序 A 15/16、程序 B 0 |
+| [浮点数加减五步走](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8A%A0%E5%87%8F%E4%BA%94%E6%AD%A5%E8%B5%B0.html) | 对阶、尾数加减、规格化、舍入、判溢出，双符号位补码逐位显示，可开“闭卷” | 2009-13 得阶码 8、溢出；第二章 p285 得 −3.5；p290 的 x − y 得 2⁻³ × (−0.100111)，与 PPT 一致 |
+| [I/O 方式占 CPU 时间](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/IO%E6%96%B9%E5%BC%8F%E5%8D%A0CPU%E6%97%B6%E9%97%B4.html) | 程序查询、中断、DMA 统一换算成时钟周期；DMA 三种访存方式时间轴 | 2009-43 两问得 2.5%、0.1% |
+| [单总线数据通路逐拍](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%8D%95%E6%80%BB%E7%BA%BF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E9%80%90%E6%8B%8D.html) | 2009-44 的结构，逐拍点亮总线和控制信号；取指、ADD (R1),R0、间址 MOV、三寄存器 ADD、存数、JMP | ADD (R1),R0 的 C5–C10 按 2009-44 标准答案；迁移题 ADD R1,(R0) 没放进去，留给你自己做 |
+| [单周期数据通路与五段流水线](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%8D%95%E5%91%A8%E6%9C%9F%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E4%B8%8E%E4%BA%94%E6%AE%B5%E6%B5%81%E6%B0%B4%E7%BA%BF.html) | 单周期 add/addi/lw/sw/beq 的有效路径、无效数据流、控制信号；五段流水线时空图可写指令，比较转发与不转发 | 控制信号按强化 3 p25–33（RegDst = 1 选 rt）；第六章 p58 例不转发停 2 拍、转发不停；load-use 转发后仍停 1 拍；beq 在 MEM 段更新 PC（强化 3 p40），冻结时插 3 个气泡 |
+| [Cache 访问序列模拟](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E8%AE%BF%E9%97%AE%E5%BA%8F%E5%88%97.html) | 地址序列逐次看命中、装入、替换、LRU 计数器、脏位；三种映射、LRU/FIFO、三种写策略；二维数组遍历生成地址 | 存储器（中）p40 的序列依次淘汰块 3、4、5、1，命中 4/12；2010-44 程序 A 15/16、程序 B 0 |
 
 **说明**：强化 3 的 RegDst 约定和部分英文教材相反，页面里注明了“以题目说明为准”。PPT 对 add、beq 把 ExtOp 写成 0，页面记作 x，因为 ALUSrc = 0 时扩展器输出不被选用。
 
@@ -7659,8 +7659,8 @@ A. I→V→VI→II→VII　B. III→I→V→VII　C. III→IV→V→VI→VII　D
 4. “上溢、下溢”两套说法：定点补码那几页把比最小负数还小叫下溢；浮点数的下溢是绝对值太小、接近 0。
 
 **页面**
-- 新页 [溢出与符号判断](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)：输入字长和两个数（十进制、十六进制、二进制都行），选加、减、乘、左移。加减法显示加法器逐位进位（圈出 Cn 和 Cn+1）、两种解释、四个标志位、有符号的四种溢出判断法、无符号的 CF 判断、真实符号、cmp 比大小表；乘法显示 2n 位乘积和高 n+1 位判据；左移显示逻辑、算术、双符号位三种看法。可开“闭卷”。
-- [浮点数加减五步走](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8A%A0%E5%87%8F%E4%BA%94%E6%AD%A5%E8%B5%B0.html) 第 ⑤ 步补了：阶码双符号位 00/11/01/10 对照表；按尾数符号分正上溢、负上溢、正下溢、负下溢，并在区间条上标出结果落在哪；这种格式的最大正数、最小正数、最大负数、最小负数及机器数；对阶时阶差本身超出阶码范围的情况（强化 1 p72 的问题）。新增预设：负上溢、下溢、阶差超出范围。
+- 新页 [溢出与符号判断](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)：输入字长和两个数（十进制、十六进制、二进制都行），选加、减、乘、左移。加减法显示加法器逐位进位（圈出 Cn 和 Cn+1）、两种解释、四个标志位、有符号的四种溢出判断法、无符号的 CF 判断、真实符号、cmp 比大小表；乘法显示 2n 位乘积和高 n+1 位判据；左移显示逻辑、算术、双符号位三种看法。可开“闭卷”。
+- [浮点数加减五步走](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8A%A0%E5%87%8F%E4%BA%94%E6%AD%A5%E8%B5%B0.html) 第 ⑤ 步补了：阶码双符号位 00/11/01/10 对照表；按尾数符号分正上溢、负上溢、正下溢、负下溢，并在区间条上标出结果落在哪；这种格式的最大正数、最小正数、最大负数、最小负数及机器数；对阶时阶差本身超出阶码范围的情况（强化 1 p72 的问题）。新增预设：负上溢、下溢、阶差超出范围。
 
 **核对**：预设结果与 PPT 一致。第二章 p155、p156 两例都溢出，p169 不溢出；第四章 p72 的 (−4) + (−7) 得 OF = 1、SF = 0；第四章 p76–79 的 n − 5 得 ZF = 0、CF = 0、OF = 1、SF = 0；第二章 p166 的 11,011 左移得 10,110，负溢出；2010-13 的 F2H × 90H = 1568，溢出。整数除法溢出（最小负数 ÷ −1）一条按教材写，强化 1 p58 的乘除法页是图片，没提取到文字，页面里已注明。
 
@@ -7827,7 +7827,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **作答**：独立整卷作答，用户自己对答案判错。所选选项见考试记录里的答题卡原图（2026-10-13 起公开）。
 
-**待做**：对照真题册补每题考点和错因，再写回[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)的「逐题丢分」表。
+**待做**：对照真题册补每题考点和错因，再写回[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)的「逐题丢分」表。
 
 来源：16:51 用户在项目对话上传的 2009 年 408 答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；估分按 2009 官方评分标准凭记忆，未对答案册逐条核。
 
@@ -7839,7 +7839,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 (2) 请给出 R1 的路由表（目的网络 IP 地址，子网掩码，下一跳 IP 地址，接口），使其明确包括到局域网 1 的路由、局域网 2 的路由、域名服务器的主机路由和互联网的路由。
 (3) 请采用路由聚合技术，给出 R2 到局域网 1 和局域网 2 的路由。
 
-![2009-47 网络拓扑](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2009-47%E6%8B%93%E6%89%91.svg)
+![2009-47 网络拓扑](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2009-47%E6%8B%93%E6%89%91.svg)
 
 （题干按用户 19:38 上传的课件原题截图转录，拓扑图据截图重绘。）
 
@@ -7889,7 +7889,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **答复**：按课件示例重绘为静态 SVG：慢开始、拥塞避免、超时后 cwnd 回 1、3 个重复 ACK 快重传后快恢复。图只帮助回忆规则，不含 39 题答案；39 题仍在提示阶段等作答。
 
-![TCP 拥塞窗口变化](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/TCP%E6%8B%A5%E5%A1%9E%E7%AA%97%E5%8F%A3%E5%8F%98%E5%8C%96.svg)
+![TCP 拥塞窗口变化](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/TCP%E6%8B%A5%E5%A1%9E%E7%AA%97%E5%8F%A3%E5%8F%98%E5%8C%96.svg)
 
 来源：用户上传的课件截图（湖科大教书匠 2009 真题解析）。
 
@@ -7897,7 +7897,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **题**：2009-47 第 (2) 问。拓扑：R1 的 E1、E2 接局域网 1（202.118.1.0/25）、局域网 2（202.118.1.128/25）；R1 的 L0（202.118.2.1）与 R2 的 L0（202.118.2.2）相连；R2 的 L1（130.11.120.1）接互联网，E0（202.118.3.1）接域名服务器 202.118.3.2。要求写出 R1 的路由表（目的网络 IP 地址，子网掩码，下一跳 IP 地址，接口），包括到局域网 1、局域网 2 的路由，域名服务器的主机路由和互联网的路由。
 
-![2009-47 网络拓扑](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2009-47%E6%8B%93%E6%89%91.svg)
+![2009-47 网络拓扑](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2009-47%E6%8B%93%E6%89%91.svg)
 
 课件解析给出的 R1 路由表：
 
@@ -7940,7 +7940,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **答复**：画成地址块划分图：末字节 0～127 给局域网 1（202.118.1.0/25，7 位主机号，126 个可用），128～191 给局域网 2（202.118.1.128/26），192～255 给局域网 3（202.118.1.192/26），各 62 个可用。图已挂在 2026-10-08 复盘该卡的参考要点后，翻开答案时显示。
 
-![第 (1) 问：/24 按 120、60、60 划分](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E4%B8%80%E4%B8%AA24%E5%88%86%E4%B8%89%E4%B8%AA%E5%AD%90%E7%BD%91.svg)
+![第 (1) 问：/24 按 120、60、60 划分](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E4%B8%80%E4%B8%AA24%E5%88%86%E4%B8%89%E4%B8%AA%E5%AD%90%E7%BD%91.svg)
 
 **作答**：本次未作答（只要图）。
 
@@ -7960,7 +7960,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **答复**：上一条（08:14）的“水管”画法是我对字面的猜测，与课件不同，以本条为准。按二叉树重画：/24 为根，/25 层堵左支 0 → 局域网 1：202.118.1.0/25（128 个，可用 126 ≥ 120）；右支 1 不够分给两个 60，再往下一层，/26 层堵 10、11 → 局域网 2：202.118.1.128/26、局域网 3：202.118.1.192/26（各可用 62 ≥ 60）。三个堵点覆盖全部叶子，没有漏水、没有重复封堵。图已挂到复盘自测卡参考要点后。
 
-![二叉树堵水法：/24 分给 120、60、60](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%A0%B5%E6%B0%B4%E6%B3%95-120-60-60.svg)
+![二叉树堵水法：/24 分给 120、60、60](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%A0%B5%E6%B0%B4%E6%B3%95-120-60-60.svg)
 
 **作答**：本次未作答（只要图）。
 
@@ -8033,7 +8033,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **答复**：每部门最多 30 台 → 主机号 5 位 → 全部在 /27 层封堵。/27 层共 8 块，堵 000～100 五块给五个部门（.0、.32、.64、.96、.128，掩码 255.255.255.224），101、110、111 三块（.160～.255）留作备用。与 2026-10-08 那题不同：这里各部门大小相同，所有堵点都在同一层。
 
-![堵水法：192.168.161.0/24 分给 5 个部门](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%A0%B5%E6%B0%B4%E6%B3%95-5%E4%B8%AA27%E5%AD%90%E7%BD%91.svg)
+![堵水法：192.168.161.0/24 分给 5 个部门](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%A0%B5%E6%B0%B4%E6%B3%95-5%E4%B8%AA27%E5%AD%90%E7%BD%91.svg)
 
 **作答**：本次未作答（只要图）。
 
@@ -8112,7 +8112,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **检验**（迁移题，不重做原题）：(a) 拥塞窗口 6000B，MSS 1000B，甲已连续发出 3 个最大段，收到第 1 段的确认，确认里通告接收窗口 3000B。不考虑窗口因这次确认而增长，甲还能发多少字节？(b) H1 到 H2 经过 3 个路由器（4 段链路），各链路 10Mbps，文件分成 100 个 1000B 的分组（不计首部），从 H1 开始发到 H2 收完需要多久（忽略传播时延）？
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 ## 17:52　`408-2010-47`　CSMA/CD 冲突检测时间与有效数据速率
 
@@ -8130,7 +8130,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **检验**（迁移题，不重做原题）：以太网 100Mbps，甲乙相距 1km，传播速度 200000km/s。甲发一个 1000B 的帧（数据 980B），乙收完立即回一个 64B 确认帧，甲收到后才发下一帧。甲的有效数据传输速率是多少？
 
-来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-10 17:52 用户在项目对话上传的 2010 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分按 2010 官方评分标准凭记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 
 
 ---
@@ -8149,11 +8149,11 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **漏洞**：三道计算题都是“时间按流程逐项加”没列全：NAV 不知道从哪个帧之后算起、包括哪几段；TCP 漏了 TIME_WAIT 的 2MSL；HTTP 没把每个对象都要重新建连算进去。
 
-**补法**：先画时序图（谁发什么帧、隔一个 SIFS），在每段旁边标时间再加，见[跨科串联表](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 12 条。HTTP 记三种情况：非持久每对象 2 RTT；持久非流水 1 + 对象数；持久流水 1 + 1 + 1。
+**补法**：先画时序图（谁发什么帧、隔一个 SIFS），在每段旁边标时间再加，见[跨科串联表](https://wengu-408.pages.dev/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 12 条。HTTP 记三种情况：非持久每对象 2 RTT；持久非流水 1 + 对象数；持久流水 1 + 1 + 1。
 
 **检验**（迁移题，不重做原题）：(a) SIFS = 10μs，CTS、ACK 各 4μs，数据帧 1500B、24Mb/s，求 RTS 和 CTS 中的 NAV。(b) 网页引用 5 张同站图片，非持久不并行、持久非流水、持久流水各要几个 RTT？(c) 发 1000B（MSS 1000B），RTT 20ms，MSL 10s，从请求建连到主动方进入 CLOSED 至少多久？
 
-来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:15　`408-2024-47`　OSPF 与 BGP
 
@@ -8167,7 +8167,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **检验**（迁移题，不重做原题）：口头答：BGP 发言人之间用什么协议传输、用哪种报文通告新路由？OSPF 的报文直接封装在什么里？
 
-来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:15 用户在项目对话上传的 2024 年 408 试卷和答题卡照片（含姓名，经用户同意于 2026-10-13 公开，见考试记录的「作答原图」）。作答由批改助手看原图后转述；选择题答案按用户红笔订正；大题估分参照红笔订正和 2024 官方答案的记忆，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:24　408-2024 选择拿不准但做对（33）
 
@@ -8181,7 +8181,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **检验**（迁移题，不重做原题）：H1 接入 100Mb/s，H2 接入 1000Mb/s，中间两条路径分别是 50→200 和 300→80（Mb/s），H1 到 H2 的最大吞吐量？
 
-来源：2026-10-12 20:24 用户在项目对话说明“选择我标横线或者圈起来的也是拿不准的”；题号由助手看试卷照片识别（划线：5、11、15、18、22、24、28、33、40；圈：14、16、21、25、30、38）。正确要点由助手给出，未对答案册逐条核。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+来源：2026-10-12 20:24 用户在项目对话说明“选择我标横线或者圈起来的也是拿不准的”；题号由助手看试卷照片识别（划线：5、11、15、18、22、24、28、33、40；圈：14、16、21、25、30、38）。正确要点由助手给出，未对答案册逐条核。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 ## 20:27　408-2024 计时题专项：先画时序图再逐项加（训练开始）
 
@@ -8224,7 +8224,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **用户原问题**：“24年计网47题第五问”（只发题号，没有新作答）。
 
-**此前作答**：2026-10-12 整卷独立作答，答题卡（[作答原图 7](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_7.jpg)，第 8 页 47 题）第 (5) 问写了“R14　R15”，下面一行红笔订正。10-12 记录转述为“红笔补 R11、R15”；本次看原图，红笔第二个字迹不够清楚，王道解析给的答案是 R14→R11、R15→R13，两者不一致，待用户确认红笔写的是什么。
+**此前作答**：2026-10-12 整卷独立作答，答题卡（[作答原图 7](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_7.jpg)，第 8 页 47 题）第 (5) 问写了“R14　R15”，下面一行红笔订正。10-12 记录转述为“红笔补 R11、R15”；本次看原图，红笔第二个字迹不够清楚，王道解析给的答案是 R14→R11、R15→R13，两者不一致，待用户确认红笔写的是什么。
 
 **答复**：按项目规则先给提示，未直接讲：先比较三条 AS 路径的长度，筛掉一条；剩下两条一样长时，再看在 AS1 内部哪个出口路由器离自己近（看拓扑里 R14、R15 各自和 R11、R13 隔几跳）。等用户作答或说“直接讲”。
 
@@ -8268,11 +8268,11 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **题**：用户完整听完湖科大教书匠的 B 站视频“计算机网络408考研2024年真题解析”（BV1VE411A7Ak p16），上传了术语整理版转写稿。用户问：结合自己 2024 卷的错题（选择 34、36、38、40，大题 47），讲解里哪些值得记录，哪些值得画成图？
 
-**作答**：不是做题，未作答。错题情况见[2026-10-12 问答记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)和[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+**作答**：不是做题，未作答。错题情况见[2026-10-12 问答记录](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)和[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 
 **答复**：
 
-值得做成动画的有三处，都对应算时间丢的分（原先画的静态图已按用户 08:21 的要求换成[动画](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E6%97%B6%E9%A2%98%E4%B8%8EBGP%E5%8A%A8%E7%94%BB.html)）：
+值得做成动画的有三处，都对应算时间丢的分（原先画的静态图已按用户 08:21 的要求换成[动画](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E6%97%B6%E9%A2%98%E4%B8%8EBGP%E5%8A%A8%E7%94%BB.html)）：
 - 36 题 NAV：动画第 1 页
 - 38 题 TCP：动画第 2 页
 - 40 题 HTTP：动画第 3 页
@@ -8308,7 +8308,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 **补法**：
 - 记顺序：① 本地偏好高 → ② AS 跳数少 → ③ 热土豆（AS 内离出口近）→ ④ BGP 标识符小。前一条分出胜负就停。
 - 题目说“无策略约束”就从 ② 开始。答题时写出每一步淘汰了谁、为什么。
-- 动画：[计时题与 BGP 动画](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E6%97%B6%E9%A2%98%E4%B8%8EBGP%E5%8A%A8%E7%94%BB.html)。共五页（36 题 NAV、38 题 TCP、40 题 HTTP、47(4) BGP 通告、47(5) BGP 选路），每页上方列出讲解强调的注意点。可以改数字核对迁移题；“先猜再看”打开时，关键一步前会先停下来提问。
+- 动画：[计时题与 BGP 动画](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E6%97%B6%E9%A2%98%E4%B8%8EBGP%E5%8A%A8%E7%94%BB.html)。共五页（36 题 NAV、38 题 TCP、40 题 HTTP、47(4) BGP 通告、47(5) BGP 选路），每页上方列出讲解强调的注意点。可以改数字核对迁移题；“先猜再看”打开时，关键一步前会先停下来提问。
 
 **检验**（迁移题，不重做原题）：AS1 内路由器 Ra 有两条到网络 N 的路由：经出口 Rx，AS 路径 AS2 AS5，AS 内 3 跳；经出口 Ry，AS 路径 AS3 AS5，AS 内 1 跳。无策略约束。(1) Ra 选哪个出口，用的是第几条规则？(2) 若管理员把经 Rx 的本地偏好设成 300、经 Ry 的设成 100，Ra 改选哪个？(3) 离 Rx 只有 1 跳的另一台路由器 Rb，在无策略时会不会和 Ra 选同一个出口？
 
@@ -8320,7 +8320,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **作答**：不是做题，未作答。
 
-**答复**：按课件重画了[计时题与 BGP 动画](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E6%97%B6%E9%A2%98%E4%B8%8EBGP%E5%8A%A8%E7%94%BB.html)，五页都保留“先猜再看”：
+**答复**：按课件重画了[计时题与 BGP 动画](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E6%97%B6%E9%A2%98%E4%B8%8EBGP%E5%8A%A8%E7%94%BB.html)，五页都保留“先猜再看”：
 - **36 题**：帧画成斜的平行四边形，标出 RTS 20B、CTS 14B、ACK 14B。DIFS、SIFS 用双向箭头标出。每一步下方配讲解原话：SIFS 不能小于收发切换时间；C 不等 DIFS 就发，会让 AP 的 ACK 推迟。最后一步是“连续发下一帧要再等 DIFS 并在碰撞窗口 CW 里退避”，并列出必须退避的三种情况。
 - **38 题**：左侧逐轮写 swnd = cwnd。三报文握手和四报文挥手画成阴影分区，每段 RTT 用竖向括号标出，右侧配讲解的说明框。TIME-WAIT 画成红块，标 2MSL，H、S 各有 CLOSED 框。预设“第三次握手不带数据”多一步，画出脑补的“四报文握手”错例并打叉。
 - **40 题**：第一步是 DNS 查询 → 三报文握手 → HTTP 访问三个阶段，各列影响 RTT 的因素。之后按课件画浏览器／服务器时序图，每行一个 RTT。并行方式画成多列连接，旁边是“受带宽限制、好处不明显”的红框。非持续方式说明了为什么没画释放过程。
@@ -8336,7 +8336,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 **作答**：不是做题，未作答。
 
-**答复**：[计时题与 BGP 动画](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E6%97%B6%E9%A2%98%E4%B8%8EBGP%E5%8A%A8%E7%94%BB.html)改成了连续动画。选好一页就自动播放：每一步新出现的帧从左往右逐渐“发出去”；报文箭头从发送方画到接收方，箭头前端带一个小圆点；文字在箭头到达后淡入。停留时间随速度滑块变化，“先猜再看”的提问步停留时间加倍；可以随时暂停、单步或拖进度条。系统开了“减少动态效果”时不播动画。
+**答复**：[计时题与 BGP 动画](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E8%AE%A1%E6%97%B6%E9%A2%98%E4%B8%8EBGP%E5%8A%A8%E7%94%BB.html)改成了连续动画。选好一页就自动播放：每一步新出现的帧从左往右逐渐“发出去”；报文箭头从发送方画到接收方，箭头前端带一个小圆点；文字在箭头到达后淡入。停留时间随速度滑块变化，“先猜再看”的提问步停留时间加倍；可以随时暂停、单步或拖进度条。系统开了“减少动态效果”时不播动画。
 本日 07:57、08:04 小节原先嵌的四张静态图（NAV、TCP、HTTP、BGP 选路四条规则）已删除，改为指向这个动画，内容都在动画的对应页里。
 
 来源：用户 2026-10-15 08:21 在项目对话的回复。
@@ -8350,7 +8350,7 @@ D. Cache-主存层次可采用直接映射方式，主存-外存层次通常采�
 
 科目：高等数学（李林 880 数二基础篇第 2 章错题回顾）。时间为北京时间。
 
-来源：项目线程「880 第2章错题」的原对话，以及项目文件里同日的混合问答副本（21 条，含线代）；本文件只收高数部分，线代部分见 [线性代数 2026-10-05](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)。2026-10-06 补录到仓库。
+来源：项目线程「880 第2章错题」的原对话，以及项目文件里同日的混合问答副本（21 条，含线代）；本文件只收高数部分，线代部分见 [线性代数 2026-10-05](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)。2026-10-06 补录到仓库。
 
 ## 10:14　能看到 880 的文件吗
 
@@ -8645,17 +8645,17 @@ $$\left|\frac{f(x)-f(0)}{x-0}\right|=\frac{|f(x)|}{|x|}\le|x|\to0,$$
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `PV-22` 三线程复数相加（记录称2017统考） | 作答待核实 | [14:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | thread3写y用了未定义的`P(mutex_y)` → 先后获取`mutex_y1`、`mutex_y2`再写，写完两把都释放（写者要同时排除两类读者） | 闭卷重写thread3写y片段，逐把说明保护对象 |
-| `PV-23` 哲学家＋碗（记录称2019统考） | 作答待核实 | [15:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 数组未写长度 → `semaphore kuai[n]`；`kuai[i+1]%n`取模在下标外 → `kuai[(i+1)%n]`；未写信号量含义会扣分 | 闭卷重写，写出`wan`初值理由和每个信号量含义 |
-| `PV-24` 前驱关系（记录称2020统考） | 作答待核实 | [15:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 记录中没有指出错误；尚不能确认是否覆盖原图全部边 | 补原题图后逐条边核对P、V位置 |
-| `PV-25` 开关中断实现互斥（记录称2021统考） | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)、[14:58](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 只有旧助手对题型的概括，没有你的判断 | 先盖住答案，判断关中断后能否忙等，再对解析 |
-| `PV-27` swap实现临界区（记录称2023统考） | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)、[14:58](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 只有旧助手对题型的概括，没有你的判断 | 先盖住答案，判断退出区和swap原子性，再对解析 |
-| `PV-08` 纯软件两线程互斥 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)、[14:58](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 只有旧助手对题型的概括，没有你的判断 | 先盖住答案，判断是否满足忙则等待、空闲让进 |
-| `PV-04` 回炉 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
-| `PV-05` 回炉 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
-| `PV-06` 回炉 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
-| `PV-07(2)` 回炉，第(2)问 | 仅安排 | [14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
-| `二模-27` 时钟中断作用 | 已讨论 | [11:26](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 没有你的作答；选A是旧助手推导，PPT未给答案 | 找到原题后先自己逐项判断，再对照 |
+| `PV-22` 三线程复数相加（记录称2017统考） | 作答待核实 | [14:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | thread3写y用了未定义的`P(mutex_y)` → 先后获取`mutex_y1`、`mutex_y2`再写，写完两把都释放（写者要同时排除两类读者） | 闭卷重写thread3写y片段，逐把说明保护对象 |
+| `PV-23` 哲学家＋碗（记录称2019统考） | 作答待核实 | [15:13](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 数组未写长度 → `semaphore kuai[n]`；`kuai[i+1]%n`取模在下标外 → `kuai[(i+1)%n]`；未写信号量含义会扣分 | 闭卷重写，写出`wan`初值理由和每个信号量含义 |
+| `PV-24` 前驱关系（记录称2020统考） | 作答待核实 | [15:13](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 记录中没有指出错误；尚不能确认是否覆盖原图全部边 | 补原题图后逐条边核对P、V位置 |
+| `PV-25` 开关中断实现互斥（记录称2021统考） | 仅安排 | [14:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)、[14:58](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 只有旧助手对题型的概括，没有你的判断 | 先盖住答案，判断关中断后能否忙等，再对解析 |
+| `PV-27` swap实现临界区（记录称2023统考） | 仅安排 | [14:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)、[14:58](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 只有旧助手对题型的概括，没有你的判断 | 先盖住答案，判断退出区和swap原子性，再对解析 |
+| `PV-08` 纯软件两线程互斥 | 仅安排 | [14:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)、[14:58](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 只有旧助手对题型的概括，没有你的判断 | 先盖住答案，判断是否满足忙则等待、空闲让进 |
+| `PV-04` 回炉 | 仅安排 | [14:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
+| `PV-05` 回炉 | 仅安排 | [14:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
+| `PV-06` 回炉 | 仅安排 | [14:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
+| `PV-07(2)` 回炉，第(2)问 | 仅安排 | [14:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 当天没有重做证据 | 闭卷重做，写下卡住的那一步 |
+| `二模-27` 时钟中断作用 | 已讨论 | [11:26](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) | 没有你的作答；选A是旧助手推导，PPT未给答案 | 找到原题后先自己逐项判断，再对照 |
 
 ## 作答记录
 
@@ -8663,9 +8663,9 @@ $$\left|\frac{f(x)-f(0)}{x-0}\right|=\frac{|f(x)|}{|x|}\le|x|\to0,$$
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `PV-22` | 未注明 | 手写图未入库；thread3写y片段摘录见来源 | 部分正确 | 仅旧助手判断 | [14:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) |
-| `PV-23` | 未注明 | 手写图未入库；被改的下标与声明摘录见来源 | 部分正确 | 仅旧助手判断 | [15:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) |
-| `PV-24` | 未注明 | 手写图未入库；信号量命名摘录见来源 | 正确 | 仅旧助手判断 | [15:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) |
+| `PV-22` | 未注明 | 手写图未入库；thread3写y片段摘录见来源 | 部分正确 | 仅旧助手判断 | [14:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) |
+| `PV-23` | 未注明 | 手写图未入库；被改的下标与声明摘录见来源 | 部分正确 | 仅旧助手判断 | [15:13](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) |
+| `PV-24` | 未注明 | 手写图未入库；信号量命名摘录见来源 | 正确 | 仅旧助手判断 | [15:13](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md) |
 
 ## 知识点与适用条件
 
@@ -8728,7 +8728,7 @@ thread3 {
 
 **参考要点**：两类读者分别受y1、y2保护。写者要同时排除两类读者；单拿一把会漏掉另一类。锁名可以不同，语义必须覆盖全部冲突。
 
-![写者必须同时拿到 y1、y2 两把读锁](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/PV-22%E8%AF%BB%E5%86%99%E4%B8%A4%E6%8A%8A%E9%94%81.svg)
+![写者必须同时拿到 y1、y2 两把读锁](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/PV-22%E8%AF%BB%E5%86%99%E4%B8%A4%E6%8A%8A%E9%94%81.svg)
 
 ### 自测：wan限制为min(m,n-1)主要阻止哪种情况？
 
@@ -8766,7 +8766,7 @@ thread3 {
 
 ## 来源与边界
 
-- [当天操作系统问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)：11:26、12:18、14:51、14:54、14:58、15:13。
+- [当天操作系统问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-05.md)：11:26、12:18、14:51、14:54、14:58、15:13。
 - 本复盘依据已上传文字；不是重新读取了PPT、教材、流程图或手写原图。
 - 2026-10-07题面补充：检索了王道2026与2027《操作系统》的本机OCR文本。第22题代码来自2027版OCR第137页标记，第23、24题文字与2026版第136页标记交叉比对；代码中的OCR冒号已按语法改排为分号。PDF原页当前未能成功读取，版面及逐字符仍待核，不能宣称已经对照扫描页。此补充不改变任何作答状态，也不代表找回了你的手写解答。
 
@@ -8779,7 +8779,7 @@ thread3 {
 
 ## 今天实际涉及
 
-- 已作答（整卷，独立）：2009 年 408 真题。操作系统部分判错的是选择 28、31；大题 45 估 4/7，46 估 4/8。用户自己对答案；作答由批改助手看答题卡原图后转述，原图 10-13 起公开在[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)。
+- 已作答（整卷，独立）：2009 年 408 真题。操作系统部分判错的是选择 28、31；大题 45 估 4/7，46 估 4/8。用户自己对答案；作答由批改助手看答题卡原图后转述，原图 10-13 起公开在[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)。
 - 计划，未完成：18:57 按记录出了 28、31、45、46 四道闭卷重做题，截至记录没有收到作答，不改变状态。
 - 承接 10-05：「下次先做」里的 `PV-22` 闭卷重写、`PV-23` 重写、补 `PV-22`、`PV-23`、`PV-24` 原图，今天都没有记录，状态沿用 10-05（作答待核实）。
 - 28、31 的题面是助手 18:57 凭记忆写的，没有对照真题册；45、46 按 16:51 批改记录整理。
@@ -8788,10 +8788,10 @@ thread3 {
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2009-28` 适合随机访问又易扩展的文件物理结构（题面凭记忆，待核） | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md)、[18:57](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 判错；所选选项和错因没有转录 | 闭卷做 18:57 的重做题，写出每个选项错在哪 |
-| `408-2009-31` 软链接、硬链接后的引用计数（题面凭记忆，待核） | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md)、[18:57](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 判错；所选选项和错因没有转录 | 闭卷做 18:57 的重做题，画出每个目录项指向哪个 inode |
-| `408-2009-45` 奇偶数生产者与两个消费者（PV） | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | P1 在 put() 之前就 V 奇偶信号量，且把偶数映射到 `ji` → 先 P(n)、P(mutex)、put()、V(mutex)，再按 x 的奇偶 V 对应信号量 | 闭卷重写 P1，每个信号量写一句“代表什么、谁 P 谁 V” |
-| `408-2009-46` TLB＋缺页的访问时间与物理地址 | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | (1) 三个时间都漏了得到物理地址后那次访存 100ns → 210ns、100000220ns、110ns；(2) 101565H 对 | 闭卷重算 (1)，先写流程再逐项加时间 |
+| `408-2009-28` 适合随机访问又易扩展的文件物理结构（题面凭记忆，待核） | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md)、[18:57](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 判错；所选选项和错因没有转录 | 闭卷做 18:57 的重做题，写出每个选项错在哪 |
+| `408-2009-31` 软链接、硬链接后的引用计数（题面凭记忆，待核） | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md)、[18:57](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 判错；所选选项和错因没有转录 | 闭卷做 18:57 的重做题，画出每个目录项指向哪个 inode |
+| `408-2009-45` 奇偶数生产者与两个消费者（PV） | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | P1 在 put() 之前就 V 奇偶信号量，且把偶数映射到 `ji` → 先 P(n)、P(mutex)、put()、V(mutex)，再按 x 的奇偶 V 对应信号量 | 闭卷重写 P1，每个信号量写一句“代表什么、谁 P 谁 V” |
+| `408-2009-46` TLB＋缺页的访问时间与物理地址 | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | (1) 三个时间都漏了得到物理地址后那次访存 100ns → 210ns、100000220ns、110ns；(2) 101565H 对 | 闭卷重算 (1)，先写流程再逐项加时间 |
 
 - 以下旧题今天没有记录，状态沿用 10-05：`PV-22`、`PV-23`、`PV-24` 作答待核实；`PV-25`、`PV-27`、`PV-08`、`PV-04`、`PV-05`、`PV-06`、`PV-07(2)` 仅安排；`二模-27` 已讨论。
 
@@ -8799,10 +8799,10 @@ thread3 {
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2009-28` | 独立 | 整卷答题卡原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；所选选项未转录 | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) |
-| `408-2009-31` | 独立 | 整卷答题卡原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；所选选项未转录 | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) |
-| `408-2009-45` | 独立 | 整卷答题卡原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；转写见 16:51 小节「作答」 | 部分正确 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) |
-| `408-2009-46` | 独立 | 整卷答题卡原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；转写见 16:51 小节「作答」 | 部分正确 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) |
+| `408-2009-28` | 独立 | 整卷答题卡原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；所选选项未转录 | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) |
+| `408-2009-31` | 独立 | 整卷答题卡原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；所选选项未转录 | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) |
+| `408-2009-45` | 独立 | 整卷答题卡原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；转写见 16:51 小节「作答」 | 部分正确 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) |
+| `408-2009-46` | 独立 | 整卷答题卡原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；转写见 16:51 小节「作答」 | 部分正确 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) |
 
 - 选择题对错以用户自己对答案为准；45、46 是批改助手凭 2009 年评分标准的记忆估分，没有对答案册逐条核，所以核对依据只能记“仅旧助手判断”。18:57 的重做没有作答，不写入本表。
 
@@ -8831,7 +8831,7 @@ thread3 {
 - 25A5H：查页表 100 + 访存 100 = 200ns。
 - 变化点：没有 TLB 就没有 10ns 的查 TLB，也没有“TLB 命中省掉查页表”；但最后那次访存仍然要算。
 
-[地址转换演示台](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2.html)
+[地址转换演示台](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2.html)
 
 ### 自测：迁移｜缓冲区只有 1 个单元时，mutex 还必要吗？
 
@@ -8870,8 +8870,8 @@ thread3 {
 
 ## 来源与边界
 
-- [当天操作系统问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md)：16:51（三节）、18:57。
-- 作答原图是整卷答题卡，在[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；本复盘没有重新看图判卷，作答内容沿用批改助手的转写。
+- [当天操作系统问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md)：16:51（三节）、18:57。
+- 作答原图是整卷答题卡，在[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)；本复盘没有重新看图判卷，作答内容沿用批改助手的转写。
 - 28、31 题面凭记忆，未对照真题册；45、46 题意整理以真题册为准。28 的参考要点是按教材知识整理的答案，不是从记录里抄的。
 
 
@@ -8892,10 +8892,10 @@ thread3 {
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2009-25` 8 台打印机、每进程最多 3 台，可能死锁的最小进程数（题面凭记忆，待核） | 已讨论 | [14:47](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md) | 没有作答；讲解给出 R ≥ K(m−1)+1 一定不死锁，K=4 时可能死锁 | 闭卷换数据，用公式求最小 K |
-| `408-2009-26` 分区分配的主要保护措施（题面凭记忆，待核） | 已讨论 | [14:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md) | 自述对这块陌生；没有作答 | 闭卷画出“先比界地址、再加基址”的流程 |
-| `408-2009-30` 文件访问控制信息存放位置（题面凭记忆，待核） | 已讨论 | [14:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[14:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md) | 自述对这块陌生；没有作答 | 闭卷说出 FCB／inode 里有哪些信息，FAT 存什么 |
-| `408-2009-31` 软链接、硬链接后的引用计数（题面凭记忆，待核） | 作答待核实 | [15:09](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[15:12](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[15:14](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[15:16](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md) | 把 F1 的 inode 计数和软链接自己 inode 的计数当成同一个数 → 每个 inode 各有一个计数，只数指向它的目录项；答案 B（1，1） | 闭卷画出每个目录项指向哪个 inode，再算计数 |
+| `408-2009-25` 8 台打印机、每进程最多 3 台，可能死锁的最小进程数（题面凭记忆，待核） | 已讨论 | [14:47](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md) | 没有作答；讲解给出 R ≥ K(m−1)+1 一定不死锁，K=4 时可能死锁 | 闭卷换数据，用公式求最小 K |
+| `408-2009-26` 分区分配的主要保护措施（题面凭记忆，待核） | 已讨论 | [14:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[14:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md) | 自述对这块陌生；没有作答 | 闭卷画出“先比界地址、再加基址”的流程 |
+| `408-2009-30` 文件访问控制信息存放位置（题面凭记忆，待核） | 已讨论 | [14:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[14:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md) | 自述对这块陌生；没有作答 | 闭卷说出 FCB／inode 里有哪些信息，FAT 存什么 |
+| `408-2009-31` 软链接、硬链接后的引用计数（题面凭记忆，待核） | 作答待核实 | [15:09](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[15:12](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[15:14](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[15:16](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md) | 把 F1 的 inode 计数和软链接自己 inode 的计数当成同一个数 → 每个 inode 各有一个计数，只数指向它的目录项；答案 B（1，1） | 闭卷画出每个目录项指向哪个 inode，再算计数 |
 
 - `408-2009-31` 今天只有讲解，没有新作答，状态由 10-08 的整卷作答推出。`408-2009-28`、`408-2009-45`、`408-2009-46` 今天没有记录，沿用 10-08（作答待核实）。10-05 的旧题沿用 10-05。
 
@@ -8939,7 +8939,7 @@ thread3 {
 - 顺序是先比较界地址、再加基址；比较的是逻辑地址。
 - 两个寄存器只能在内核态用特权指令修改，进程切换时由操作系统装入。
 
-![分区分配先比界地址再加基址](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-26%E7%95%8C%E5%9C%B0%E5%9D%80%E4%BF%9D%E6%8A%A4.svg)
+![分区分配先比界地址再加基址](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-26%E7%95%8C%E5%9C%B0%E5%9D%80%E4%BF%9D%E6%8A%A4.svg)
 
 ### 自测：迁移｜给软链接再建一个硬链接，然后删掉原文件
 
@@ -8951,7 +8951,7 @@ thread3 {
 - 通过 F4 读，读到的是 i2 里的路径 "F1"，再按名字找 F1，找不到，访问失败（悬空链接）。
 - 判断方法：每个目录项看它指向哪个 inode，计数记在那个 inode 上。
 
-![两个计数器：i1 归 F1/F3，i2 归软链接 F2](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-31%E8%BD%AF%E7%A1%AC%E9%93%BE%E6%8E%A5%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0.svg)
+![两个计数器：i1 归 F1/F3，i2 归软链接 F2](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2009-31%E8%BD%AF%E7%A1%AC%E9%93%BE%E6%8E%A5%E5%BC%95%E7%94%A8%E8%AE%A1%E6%95%B0.svg)
 
 ### 自测：迁移｜同一文件的两个硬链接名，权限能不能不同？
 
@@ -8971,7 +8971,7 @@ thread3 {
 
 ## 来源与边界
 
-- [当天操作系统问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)：14:47、14:52、14:54、15:09、15:12、15:14、15:16。
+- [当天操作系统问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)：14:47、14:52、14:54、15:09、15:12、15:14、15:16。
 - 四题的答案和讲解都由当天助手给出，题面待对照真题册。“混淆两个计数器”是助手根据追问做的推断。
 - 自测中的 14000、3000、10 台磁带机等数字是自拟的，不是原题数据。
 
@@ -8985,7 +8985,7 @@ thread3 {
 ## 今天实际涉及
 
 - 已讨论（上午，没有作答）：零壹考研课程视频里的一道选择题“动态链接相比静态链接的优点”，看了分步动画，又追问三种链接、三种装入的区别，并让助手串联相关知识点、完善“从源程序到运行”总图。用户自述：三种链接、三种装入“很模糊”。
-- 已作答（整卷，独立）：2010 年 408 真题。操作系统选择判错 26、27、29、30、32；大题 45 估 3/7，46 估 2/8。用户自己对答案并用红笔订正；作答由批改助手看原图后转述，原图 10-13 起公开在[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+- 已作答（整卷，独立）：2010 年 408 真题。操作系统选择判错 26、27、29、30、32；大题 45 估 3/7，46 估 2/8。用户自己对答案并用红笔订正；作答由批改助手看原图后转述，原图 10-13 起公开在[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 - 已讨论（晚上）：选择 26（降低优先级的时机）、27（Peterson 算法）各讲了一遍，27 还看了分步动画。两题都没有重新作答。
 - 计划，未完成：2009 年四道重做题（28、31、45、46）仍没有作答记录；各错题小节的“检验”迁移题也都未作答。
 - 2010 年 26、27 的题面是助手凭记忆整理的；45、46 题意凭记忆整理，未对照真题册。
@@ -8994,14 +8994,14 @@ thread3 {
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `零壹考研视频-内存管理-动态链接优点` 动态链接相比静态链接的优点（截图逐字转录，无题号和官方答案） | 已讨论 | [08:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[08:14](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[08:18](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[08:23](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 没有作答；三种链接、三种装入自述模糊 → 链接管“库何时接入”，装入管“地址何时变成物理地址” | 闭卷说出三种链接、三种装入各自“什么时候做” |
-| `408-2010-26` 降低进程优先级的合理时机（题面凭记忆，待核） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[19:57](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 C“长期处于就绪队列” → 应选 A 时间片用完；长期等待应升优先级（老化） | 闭卷判断四种情况各是升、降还是不变 |
-| `408-2010-27` Peterson 算法能否互斥、会否饥饿（题面凭记忆，待核） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[20:04](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[20:09](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 A“不能互斥、会饥饿” → 应选 D；两者同时进入需要 turn 同时为 0 和 1 | 闭卷写出 Peterson 代码，用 turn 论证互斥和有限等待 |
-| `408-2010-29` 二级页表的页目录项数（原题干未录入） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 D → 应选 B：每页放 2¹⁰/2 = 2⁹ 个页表项，页目录 2¹⁶/2⁹ = 128 项 | 先写“一页放几项”，闭卷做 17:52 检验 (a) |
-| `408-2010-30` 索引结点能表示的最大文件（原题干未录入） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 D → 应选 C：每块放 256/4 = 64 个地址，(4 + 2×64 + 64²) × 256B = 1057KB | 先写“一块放几个地址”，闭卷做 17:52 检验 (b) |
-| `408-2010-32` 键盘输入最先由谁取得（原题干未录入） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 C → 应选 B，先由中断处理程序取得 | 闭卷写出键盘输入从中断到用户进程的层次 |
-| `408-2010-45` 位示图、CSCAN 访问时间、Flash 调度 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | (2) 漏了旋转延迟，把“转一圈”和“读一个扇区”的时间混了 → 170ms + 20ms + 0.4ms = 190.4ms；(3) 写 LRU 后划掉 → FCFS | 时间题先写“寻道 + 旋转 + 传输”再算 |
-| `408-2010-46` FIFO 与 CLOCK 置换后的物理地址 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | (2) 换了页 2 → FIFO 换装入最早的 0 号页，1FCAH；(3) 没有从指针处扫 → 访问位全 1 时转一圈回到 2 号页框，0BCAH | 闭卷在纸上画环，逐格清访问位 |
+| `零壹考研视频-内存管理-动态链接优点` 动态链接相比静态链接的优点（截图逐字转录，无题号和官方答案） | 已讨论 | [08:13](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[08:14](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[08:18](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[08:23](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 没有作答；三种链接、三种装入自述模糊 → 链接管“库何时接入”，装入管“地址何时变成物理地址” | 闭卷说出三种链接、三种装入各自“什么时候做” |
+| `408-2010-26` 降低进程优先级的合理时机（题面凭记忆，待核） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[19:57](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 C“长期处于就绪队列” → 应选 A 时间片用完；长期等待应升优先级（老化） | 闭卷判断四种情况各是升、降还是不变 |
+| `408-2010-27` Peterson 算法能否互斥、会否饥饿（题面凭记忆，待核） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[20:04](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)、[20:09](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 A“不能互斥、会饥饿” → 应选 D；两者同时进入需要 turn 同时为 0 和 1 | 闭卷写出 Peterson 代码，用 turn 论证互斥和有限等待 |
+| `408-2010-29` 二级页表的页目录项数（原题干未录入） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 D → 应选 B：每页放 2¹⁰/2 = 2⁹ 个页表项，页目录 2¹⁶/2⁹ = 128 项 | 先写“一页放几项”，闭卷做 17:52 检验 (a) |
+| `408-2010-30` 索引结点能表示的最大文件（原题干未录入） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 D → 应选 C：每块放 256/4 = 64 个地址，(4 + 2×64 + 64²) × 256B = 1057KB | 先写“一块放几个地址”，闭卷做 17:52 检验 (b) |
+| `408-2010-32` 键盘输入最先由谁取得（原题干未录入） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 选 C → 应选 B，先由中断处理程序取得 | 闭卷写出键盘输入从中断到用户进程的层次 |
+| `408-2010-45` 位示图、CSCAN 访问时间、Flash 调度 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | (2) 漏了旋转延迟，把“转一圈”和“读一个扇区”的时间混了 → 170ms + 20ms + 0.4ms = 190.4ms；(3) 写 LRU 后划掉 → FCFS | 时间题先写“寻道 + 旋转 + 传输”再算 |
+| `408-2010-46` FIFO 与 CLOCK 置换后的物理地址 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | (2) 换了页 2 → FIFO 换装入最早的 0 号页，1FCAH；(3) 没有从指针处扫 → 访问位全 1 时转一圈回到 2 号页框，0BCAH | 闭卷在纸上画环，逐格清访问位 |
 
 - `408-2009-28`、`408-2009-31`、`408-2009-45`、`408-2009-46` 今天没有记录，沿用 10-09；10-09 讨论过的 25、26、30 沿用“已讨论”；10-05 的旧题沿用 10-05。
 
@@ -9009,13 +9009,13 @@ thread3 {
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2010-26` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 C | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
-| `408-2010-27` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 A | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
-| `408-2010-29` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 D | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
-| `408-2010-30` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 D | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
-| `408-2010-32` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 C | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
-| `408-2010-45` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；转写见 17:52 小节「作答」 | 部分正确 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
-| `408-2010-46` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；转写见 17:52 小节「作答」 | 部分正确 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
+| `408-2010-26` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 C | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
+| `408-2010-27` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 A | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
+| `408-2010-29` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 D | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
+| `408-2010-30` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 D | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
+| `408-2010-32` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)，选 C | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
+| `408-2010-45` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；转写见 17:52 小节「作答」 | 部分正确 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
+| `408-2010-46` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；转写见 17:52 小节「作答」 | 部分正确 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) |
 
 - 选择题对错按用户红笔订正；大题由批改助手凭 2010 年评分标准的记忆估分，未对答案册逐条核。19:57、20:04 的讲解不是新作答。
 
@@ -9049,7 +9049,7 @@ thread3 {
 - (2) 动态链接（装入时或运行时）：可执行文件只记录调用的库，库在磁盘和内存都只有一份，各进程页表项指向同一批页框。
 - 不能。地址转换靠 MMU 查页表、TLB，与链接方式无关；运行时动态链接首次调用还更慢。
 
-![三种链接与三种装入对比](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E4%B8%8E%E8%A3%85%E5%85%A5%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94.svg)
+![三种链接与三种装入对比](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%93%BE%E6%8E%A5%E4%B8%8E%E8%A3%85%E5%85%A5%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94.svg)
 
 ### 自测：迁移｜把 Peterson 算法的两句对调，还能互斥吗？
 
@@ -9068,7 +9068,7 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 - 不能保证互斥。反例：P0 执行 turn = 1；P1 执行 turn = 0；P1 执行 flag[1] = TRUE，检查 flag[0] 为 FALSE，进入临界区；P0 执行 flag[0] = TRUE，检查 turn == 1 为假（turn 已是 0），也进入。
 - 原算法的关键是先表明意愿（flag = TRUE）再谦让（turn = 对方）：最后写 turn 的一方必然看到对方的 flag 已为 TRUE，从而等待。对调后谦让发生在表明意愿之前，对方看不到你的意愿。
 
-![Peterson：争抢时互斥](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Peterson-%E4%BA%89%E6%8A%A2%E6%97%B6%E4%BA%92%E6%96%A5.svg)
+![Peterson：争抢时互斥](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Peterson-%E4%BA%89%E6%8A%A2%E6%97%B6%E4%BA%92%E6%96%A5.svg)
 
 ### 自测：迁移｜先算“一块能放几项”：页目录项数和最大文件
 
@@ -9100,7 +9100,7 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 - 物理地址 = 9 × 1KB + 3CAH = 2400H + 3CAH = 27CAH。
 - 对比原题：访问位全为 1 时转一圈回到 2 号页框，得 0BCAH。
 
-[地址转换演示台](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2.html)
+[地址转换演示台](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2.html)
 
 ## 下次先做
 
@@ -9110,9 +9110,9 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 
 ## 来源与边界
 
-- [当天操作系统问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)：08:13、08:14、08:18、08:23、17:52（三节）、19:57、20:04、20:09。
-- 作答原图在[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；本复盘没有重新看图判卷。零壹考研截图未公开存档，也没有官方答案，选 C 是当天助手的判断。
-- 分步动画只在对话里，仓库存的是关键帧图。2010-45 的磁盘调度可以用[磁盘调度轨迹](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6.html)演示页逐站走一遍。
+- [当天操作系统问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md)：08:13、08:14、08:18、08:23、17:52（三节）、19:57、20:04、20:09。
+- 作答原图在[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；本复盘没有重新看图判卷。零壹考研截图未公开存档，也没有官方答案，选 C 是当天助手的判断。
+- 分步动画只在对话里，仓库存的是关键帧图。2010-45 的磁盘调度可以用[磁盘调度轨迹](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6.html)演示页逐站走一遍。
 - 自测里的 CLOCK 访问位和扫描顺序是自拟条件，不是原题数据。
 
 
@@ -9134,9 +9134,9 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2010-46` FIFO 与 CLOCK 置换后的物理地址 | 作答待核实 | [10-10 17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 今天没有记录；错因同 10-10：FIFO 没选装入最早的页，CLOCK 没从指针处扫 | 闭卷画页框环逐格清访问位 |
-| `408-2010-30` 索引结点能表示的最大文件 | 作答待核实 | [10-10 17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 今天没有记录；错因同 10-10：没先算“一块放几个地址” | 闭卷重算，第一行先写 256/4 = 64 |
-| `408-2009-45` 奇偶数生产者与两个消费者（PV） | 作答待核实 | [10-08 16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 今天没有记录；错因同 10-08：V 产品写在 put() 之前，奇偶映射写反 | 闭卷重写三个进程并写信号量含义 |
+| `408-2010-46` FIFO 与 CLOCK 置换后的物理地址 | 作答待核实 | [10-10 17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 今天没有记录；错因同 10-10：FIFO 没选装入最早的页，CLOCK 没从指针处扫 | 闭卷画页框环逐格清访问位 |
+| `408-2010-30` 索引结点能表示的最大文件 | 作答待核实 | [10-10 17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 今天没有记录；错因同 10-10：没先算“一块放几个地址” | 闭卷重算，第一行先写 256/4 = 64 |
+| `408-2009-45` 奇偶数生产者与两个消费者（PV） | 作答待核实 | [10-08 16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 今天没有记录；错因同 10-08：V 产品写在 put() 之前，奇偶映射写反 | 闭卷重写三个进程并写信号量含义 |
 
 - 其余题目沿用 10-10 及以前的复盘。
 
@@ -9194,8 +9194,8 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 
 ## 来源与边界
 
-- [当天操作系统问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-11.md)：08:49。
-- 今天只有一条考情问答，没有做题和讲题。自测卡取自 [10-09](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[10-10](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) 的讲解，是局部复习，不代表今天学过。
+- [当天操作系统问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-11.md)：08:49。
+- 今天只有一条考情问答，没有做题和讲题。自测卡取自 [10-09](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-09.md)、[10-10](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) 的讲解，是局部复习，不代表今天学过。
 
 
 ---
@@ -9206,7 +9206,7 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 
 ## 今天实际涉及
 
-- 已作答（整卷，独立）：2024 年 408 真题。操作系统选择判错 30、32；大题 45 估 4/7，46 估 4/8。用户自己对答案并用红笔订正；作答由批改助手看原图后转述，原图 10-13 起公开在[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+- 已作答（整卷，独立）：2024 年 408 真题。操作系统选择判错 30、32；大题 45 估 4/7，46 估 4/8。用户自己对答案并用红笔订正；作答由批改助手看原图后转述，原图 10-13 起公开在[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 - 已作答但拿不准（做对）：选择 24、25、28。用户 20:24 说明“标横线或圈起来的也是拿不准的”，这三题都做对了，28 先写 A 后改 B。
 - 今天没有单独讲题或追问，问答里只有整卷批改的三个小节。
 - 计划，未完成：10-10 起的 `408-2010-46`、`408-2010-30`、`408-2009-45` 重做仍没有记录。
@@ -9216,13 +9216,13 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2024-24` 终止进程时一定做的操作（原题干未录入） | 作答待核实 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 选 A，做对但自述拿不准 → 回收资源、释放 PCB 一定做；子进程不一定跟着终止 | 闭卷说出终止进程必做和不一定做的事 |
-| `408-2024-25` 进程切换要换的寄存器（原题干未录入） | 作答待核实 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 选 D，做对但自述拿不准 → PC、栈基址寄存器、页表基址寄存器都要换 | 闭卷列出进程切换保存／恢复的内容 |
-| `408-2024-28` 同一进程的线程共享什么（原题干未录入） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md)、[20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 先写 A 后改 B，做对但拿不准 → 地址空间、打开的文件共享，栈私有 | 闭卷写出线程私有／共享两张清单 |
-| `408-2024-30` 时间片轮转求 P 的周转时间（原题干未录入） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 选 D → 应选 C：P 要 5 个时间片，4 × 50 + 45 + 5 = 250ms | 按“完整轮数 × 每轮 + 最后一轮前面的人 + 自己”闭卷算换数据题 |
-| `408-2024-32` CSCAN 磁头移动距离（原题干未录入） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 选 A → 应选 C：200→0 走 200，回到 399 走 399，再到 300、210 走 189，共 788；不清楚回扫距离算不算（本题算） | 画数轴逐段加，包括回扫 |
-| `408-2024-45` 页表项的虚拟地址、物理地址与页框号 | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 第 (1) 问物理地址算错，红笔改为 6540 0120H；第 (2) 问基址先写 B3C 后改 654 → 页表项地址是“页表基址 + 页号 × 项大小”，物理地址是“页框号拼偏移”，分两栏写 | 闭卷分“查表用的地址／最终访问的地址”两栏重写 |
-| `408-2024-46` 同步加互斥 | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | (1)(2) 对；(3) 两个进程都写成 signal(mutex); C3; wait(mutex)，等于没有互斥 → wait(mutex); C3; signal(mutex) | 闭卷重写第 (3) 问，并说明写反会发生什么 |
+| `408-2024-24` 终止进程时一定做的操作（原题干未录入） | 作答待核实 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 选 A，做对但自述拿不准 → 回收资源、释放 PCB 一定做；子进程不一定跟着终止 | 闭卷说出终止进程必做和不一定做的事 |
+| `408-2024-25` 进程切换要换的寄存器（原题干未录入） | 作答待核实 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 选 D，做对但自述拿不准 → PC、栈基址寄存器、页表基址寄存器都要换 | 闭卷列出进程切换保存／恢复的内容 |
+| `408-2024-28` 同一进程的线程共享什么（原题干未录入） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md)、[20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 先写 A 后改 B，做对但拿不准 → 地址空间、打开的文件共享，栈私有 | 闭卷写出线程私有／共享两张清单 |
+| `408-2024-30` 时间片轮转求 P 的周转时间（原题干未录入） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 选 D → 应选 C：P 要 5 个时间片，4 × 50 + 45 + 5 = 250ms | 按“完整轮数 × 每轮 + 最后一轮前面的人 + 自己”闭卷算换数据题 |
+| `408-2024-32` CSCAN 磁头移动距离（原题干未录入） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 选 A → 应选 C：200→0 走 200，回到 399 走 399，再到 300、210 走 189，共 788；不清楚回扫距离算不算（本题算） | 画数轴逐段加，包括回扫 |
+| `408-2024-45` 页表项的虚拟地址、物理地址与页框号 | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | 第 (1) 问物理地址算错，红笔改为 6540 0120H；第 (2) 问基址先写 B3C 后改 654 → 页表项地址是“页表基址 + 页号 × 项大小”，物理地址是“页框号拼偏移”，分两栏写 | 闭卷分“查表用的地址／最终访问的地址”两栏重写 |
+| `408-2024-46` 同步加互斥 | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) | (1)(2) 对；(3) 两个进程都写成 signal(mutex); C3; wait(mutex)，等于没有互斥 → wait(mutex); C3; signal(mutex) | 闭卷重写第 (3) 问，并说明写反会发生什么 |
 
 - 10-10 以前的题今天没有记录，沿用 10-11。
 
@@ -9230,13 +9230,13 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2024-24` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，选 A（题号划线） | 正确 | 仅旧助手判断 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
-| `408-2024-25` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，选 D（题号圈出） | 正确 | 仅旧助手判断 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
-| `408-2024-28` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，先写 A 后改 B | 正确 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
-| `408-2024-30` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，选 D | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
-| `408-2024-32` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，选 A | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
-| `408-2024-45` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；转写见 20:15 第二节「作答」 | 部分正确 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
-| `408-2024-46` | 独立 | 整卷原图，见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；转写见 20:15 第二节「作答」 | 部分正确 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
+| `408-2024-24` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，选 A（题号划线） | 正确 | 仅旧助手判断 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
+| `408-2024-25` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，选 D（题号圈出） | 正确 | 仅旧助手判断 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
+| `408-2024-28` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，先写 A 后改 B | 正确 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
+| `408-2024-30` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，选 D | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
+| `408-2024-32` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)，选 A | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
+| `408-2024-45` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；转写见 20:15 第二节「作答」 | 部分正确 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
+| `408-2024-46` | 独立 | 整卷原图，见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；转写见 20:15 第二节「作答」 | 部分正确 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md) |
 
 - 24、25、28 做对了，但对错只依据用户红笔订正和批改助手转述，正确要点也“未对答案册逐条核”，所以只能记“仅旧助手判断”，停在作答待核实。原图已公开，以后对照原图和答案册核过，可以按规则改记“原件已核”。
 
@@ -9269,7 +9269,7 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 - 周转时间 = 150 + 20 + 5 = 175ms。
 - 易错：把 P 前面的人算成 4 个；或者忘了最后一片只用 5ms。
 
-[CPU 调度甘特图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CPU%E8%B0%83%E5%BA%A6.html)
+[CPU 调度甘特图](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/CPU%E8%B0%83%E5%BA%A6.html)
 
 ### 自测：迁移｜同一组请求，CSCAN 和 C-LOOK 各移动多少？
 
@@ -9280,7 +9280,7 @@ P0: turn = 1; flag[0] = TRUE;        P1: turn = 0; flag[1] = TRUE;
 - (2) 80→40→10 走 70；10→150 回跳 140；150→120 走 30；共 240。
 - 区别：CSCAN 要走到端点、跳到另一端点；C-LOOK 只到最远请求、跳到另一侧最远请求。题目说“回扫算不算”要先看清。
 
-[磁盘调度轨迹](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6.html)
+[磁盘调度轨迹](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E8%B0%83%E5%BA%A6.html)
 
 ### 自测：把 signal 写在临界区前面，会发生什么？
 
@@ -9310,7 +9310,7 @@ wait(mutex);
 - (3) C000 0000H 的页号 = 300H；它的页表项虚拟地址 = C000 0000H + 300H × 4 = C000 0C00H，里面的页框号就是 100H（页表指向自己）。
 - 分两栏写：查表用的地址（页表项的地址）和最终访问的地址（页框号拼偏移）。
 
-[页表项的两个地址（2024-45）](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%A1%B5%E8%A1%A8%E8%87%AA%E6%98%A0%E5%B0%84.html)
+[页表项的两个地址（2024-45）](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E9%A1%B5%E8%A1%A8%E8%87%AA%E6%98%A0%E5%B0%84.html)
 
 ### 自测：同一进程的两个线程，哪些东西共享？
 
@@ -9329,8 +9329,8 @@ wait(mutex);
 
 ## 来源与边界
 
-- [当天操作系统问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md)：20:15（两节）、20:24。
-- 作答原图在[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；本复盘没有重新看图判卷。选择题原题干没有录入，题目名称是按批改要点概括的。
+- [当天操作系统问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-12.md)：20:15（两节）、20:24。
+- 作答原图在[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；本复盘没有重新看图判卷。选择题原题干没有录入，题目名称是按批改要点概括的。
 - 自测里的数据都是自拟的。轮转、CSCAN 两张卡和考试记录里的迁移题换了数据和问法，不是同一题。
 
 
@@ -9352,7 +9352,7 @@ wait(mutex);
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2024-45` 页表项的虚拟地址、物理地址与页框号 | 作答待核实 | [14:57](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-13.md) | 今天核对了原题和答案，没有新作答；10-12 的作答仍是“仅旧助手判断”。题目是一级页表：页号 10 位、偏移 22 位，页表项虚拟地址 B8C0 0120H、物理地址 6540 0120H | 闭卷重做，分“查表用的地址／最终访问的地址”两栏写 |
+| `408-2024-45` 页表项的虚拟地址、物理地址与页框号 | 作答待核实 | [14:57](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-13.md) | 今天核对了原题和答案，没有新作答；10-12 的作答仍是“仅旧助手判断”。题目是一级页表：页号 10 位、偏移 22 位，页表项虚拟地址 B8C0 0120H、物理地址 6540 0120H | 闭卷重做，分“查表用的地址／最终访问的地址”两栏写 |
 
 - 14:53 用演示页重算的 `408-2009-46`、`408-2010-45`、`408-2010-46`、`408-2024-30` 都只是助手验算，不是作答，状态沿用前几天（作答待核实）。其余题目沿用 10-12。
 
@@ -9396,7 +9396,7 @@ wait(mutex);
 - (4) BIOS 不了解各分区的文件系统，也不知道装了哪个系统；三级接力让每一级只做自己知道的事。
 - “活动分区、开机菜单”是演示页的补充说明，PPT 没讲。
 
-[从空白磁盘到第一个用户进程](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%BC%80%E6%9C%BA%E5%88%B0%E7%94%A8%E6%88%B7%E8%BF%9B%E7%A8%8B.html)
+[从空白磁盘到第一个用户进程](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%BC%80%E6%9C%BA%E5%88%B0%E7%94%A8%E6%88%B7%E8%BF%9B%E7%A8%8B.html)
 
 ### 自测：迁移｜open 一个三级路径，要读几次磁盘？
 
@@ -9408,7 +9408,7 @@ wait(mutex);
 - (3) 系统级打开文件表里该文件的表项不新建，访问计数 +1；第二个进程在自己的用户级打开文件表里新增一项，有自己的文件指针。
 - 方法：沿路径列出“inode → 目录块”交替序列，最后一级只读 inode。
 
-[文件打开与读取](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%96%87%E4%BB%B6%E6%89%93%E5%BC%80%E4%B8%8E%E8%AF%BB%E5%8F%96.html)
+[文件打开与读取](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E6%96%87%E4%BB%B6%E6%89%93%E5%BC%80%E4%B8%8E%E8%AF%BB%E5%8F%96.html)
 
 ### 自测：迁移｜第 326 号 inode 在哪个磁盘块的第几个？
 
@@ -9431,7 +9431,7 @@ wait(mutex);
 - 中断处理程序（内核态）检查完成情况，唤醒 A（阻塞 → 就绪）；A 被调度后（就绪 → 运行）把数据交给用户缓冲区，read 返回用户态。
 - 对比：中断方式每个字（字节）中断一次；程序查询方式 CPU 一直忙等。
 
-[I/O 全链路](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E5%85%A8%E9%93%BE%E8%B7%AF.html)
+[I/O 全链路](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E5%85%A8%E9%93%BE%E8%B7%AF.html)
 
 ## 下次先做
 
@@ -9441,7 +9441,7 @@ wait(mutex);
 
 ## 来源与边界
 
-- [当天操作系统问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-13.md)：14:53、14:57、16:45、18:07。
+- [当天操作系统问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-13.md)：14:53、14:57、16:45、18:07。
 - 今天的演示页都是助手做的，页面验算和 PPT 核对是助手的工作，不代表用户会做。演示页的默认数据按 PPT 核对过；自测里的路径、inode 大小等是自拟条件。
 - 中断屏蔽字、超级块等 PPT 例题的完整题面没有录入问答，今天的自测没有用这些原题，避免编造题面。
 
@@ -9465,9 +9465,9 @@ wait(mutex);
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2009-45` 奇偶数生产者与两个消费者（PV） | 作答待核实 | [10-08 16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 今天没有记录；V 产品写在 put() 之前、奇偶映射写反。`408-2024-46` (3) 又把互斥的 P、V 写反，PV 位置是重复错误 | 闭卷重写三个进程，每个信号量写含义 |
-| `408-2009-46` TLB＋缺页的访问时间 | 作答待核实 | [10-08 16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 今天没有记录；漏最后一次访存。`408-2010-45` 漏旋转延迟、`408-2024-45` 混两类地址，同属没按流程逐项列 | 闭卷重算，先写流程再逐项加 |
-| `408-2010-46` FIFO 与 CLOCK 置换后的物理地址 | 作答待核实 | [10-10 17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 今天没有记录；FIFO 没选装入最早的页，CLOCK 没从指针处扫，估 2/8 | 闭卷画页框环逐格清访问位 |
+| `408-2009-45` 奇偶数生产者与两个消费者（PV） | 作答待核实 | [10-08 16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 今天没有记录；V 产品写在 put() 之前、奇偶映射写反。`408-2024-46` (3) 又把互斥的 P、V 写反，PV 位置是重复错误 | 闭卷重写三个进程，每个信号量写含义 |
+| `408-2009-46` TLB＋缺页的访问时间 | 作答待核实 | [10-08 16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-08.md) | 今天没有记录；漏最后一次访存。`408-2010-45` 漏旋转延迟、`408-2024-45` 混两类地址，同属没按流程逐项列 | 闭卷重算，先写流程再逐项加 |
+| `408-2010-46` FIFO 与 CLOCK 置换后的物理地址 | 作答待核实 | [10-10 17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-10.md) | 今天没有记录；FIFO 没选装入最早的页，CLOCK 没从指针处扫，估 2/8 | 闭卷画页框环逐格清访问位 |
 
 - 其余题目沿用 10-13 及以前的复盘。
 
@@ -9513,7 +9513,7 @@ wait(mutex);
 - (3) 从 1 开始：b = 16 × (3 − 1) + 5 = 37。
 - 先看清编号起点，再套公式。
 
-[磁盘空闲空间管理](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B2%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86.html)
+[磁盘空闲空间管理](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%A9%BA%E9%97%B2%E7%A9%BA%E9%97%B4%E7%AE%A1%E7%90%86.html)
 
 ### 自测：迁移｜处理比输入慢时，单缓冲和双缓冲各要多久？
 
@@ -9525,7 +9525,7 @@ wait(mutex);
 - 双缓冲时 M + C = 100 大于 T = 80，瓶颈在“传送 + 处理”，磁盘输入要等。
 - 易错：单缓冲里 M 不能和 T 并行，所以要加在 max 外面。
 
-[I/O 控制方式与缓冲](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E6%8E%A7%E5%88%B6%E6%96%B9%E5%BC%8F%E4%B8%8E%E7%BC%93%E5%86%B2.html)
+[I/O 控制方式与缓冲](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E6%8E%A7%E5%88%B6%E6%96%B9%E5%BC%8F%E4%B8%8E%E7%BC%93%E5%86%B2.html)
 
 ### 自测：迁移｜簇号和（柱面, 盘面, 扇区）互换
 
@@ -9537,7 +9537,7 @@ wait(mutex);
 - (2) 扇区号 = 12 × 2000 + 3 × 200 + 40 = 24640，簇号 = 24640 ÷ 2 = 12320。
 - 公式是 u = i × 2000 + j × 200 + k，不是 PPT p180 笔误写的 u = i*j+k。
 
-[磁盘结构、RAID 与固态硬盘](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84%E4%B8%8ESSD.html)
+[磁盘结构、RAID 与固态硬盘](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84%E4%B8%8ESSD.html)
 
 ### 自测：SPOOLing 怎样让三个进程“同时”使用一台打印机？
 
@@ -9549,7 +9549,7 @@ wait(mutex);
 - (3) 每个进程都觉得自己有一台打印机，是逻辑上的虚拟设备；物理上打印机仍然一次只打一份，是 SPOOLing 把独占设备“虚拟”成共享。磁盘是物理上就允许多个进程交替访问。
 - (4) 输入井和输出井（磁盘上）、输入缓冲区和输出缓冲区（内存中）、输入进程和输出进程。
 
-[设备分配与 SPOOLing](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%AE%BE%E5%A4%87%E5%88%86%E9%85%8D%E4%B8%8ESPOOLing.html)
+[设备分配与 SPOOLing](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%AE%BE%E5%A4%87%E5%88%86%E9%85%8D%E4%B8%8ESPOOLing.html)
 
 ## 下次先做
 
@@ -9559,7 +9559,7 @@ wait(mutex);
 
 ## 来源与边界
 
-- [当天操作系统问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-14.md)：07:29。
+- [当天操作系统问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/2026-10-14.md)：07:29。
 - 今天的四个演示页和 PPT 核对都是助手的工作，不代表用户会做。演示页里控制方式的计时模型和默认数值是页面设定，PPT 没给数；自测数据都是自拟。
 - 本复盘替换了 10-05 起一直挂着的「下次先做」`PV-22`：`PV-22`、`PV-23`、`PV-24` 仍是作答待核实，但三套真题暴露的 PV 位置、时间题漏步、置换算法错误更新、更集中，先做这三题。“18 道”是按 10-08、10-10、10-12 三份复盘的作答记录行数统计的。
 
@@ -9620,7 +9620,7 @@ wait(mutex);
 
 ## 来源与边界
 
-- [当天数据结构问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-05.md)：12:30。
+- [当天数据结构问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-05.md)：12:30。
 - 整理时补充了复杂度和边界解释，但未执行用户代码、未重新核验手册或真题年份。
 
 
@@ -9642,19 +9642,19 @@ wait(mutex);
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2009-3` 由遍历序列 3175624 判断遍历方式（LRN／NRL／RLN／RNL） | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)、[19:07](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 选 C（RLN），答案 D；错因待用户重做时说明 | 独立选出答案并逐个排除另外三项 |
-| `408-2009-41` 「每次走离当前顶点最近的邻点」能否求最短路径 | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)、[19:07](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 反例 a–b、a–c 边权都是 3，打平时选谁不确定，也没写两条路径长度 → 改成无打平的权值，并写出贪心路径长度和最短路径长度 | 闭卷做迁移题：Prim 每次选与已选集合相连的最小边，是否一定得到最小生成树，说明理由 |
-| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)、[19:07](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)、[22:09](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 数组＋逆置、没有 `p=p->link`、`link` 声明成 int、失败时打印 0 → 先求表长 n，k>n 返回 0，再走到第 n−k+1 个；link 是 `struct LNode *` | 隔日不看答案重写暴力版（结构体、两遍循环、return 都写全），再闭卷写求表长、找第 i 个、找最后一个三段 |
-| `暴力手册-T1骨架` 双重循环骨架默写，内层 j 从 i 还是 i+1 开始 | 仅安排 | [08:38](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 10/5 布置，未见作答 | 空白纸默写骨架并说明 j 的起点 |
-| `真题2025-乘积最大` 对每个 i 求 A[i]·A[j]（i≤j）的最大值存入 res[i] | 仅安排 | [08:38](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 10/5 布置，未见作答 | 限时 15 分钟三段式作答 |
+| `408-2009-3` 由遍历序列 3175624 判断遍历方式（LRN／NRL／RLN／RNL） | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)、[19:07](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 选 C（RLN），答案 D；错因待用户重做时说明 | 独立选出答案并逐个排除另外三项 |
+| `408-2009-41` 「每次走离当前顶点最近的邻点」能否求最短路径 | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)、[19:07](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 反例 a–b、a–c 边权都是 3，打平时选谁不确定，也没写两条路径长度 → 改成无打平的权值，并写出贪心路径长度和最短路径长度 | 闭卷做迁移题：Prim 每次选与已选集合相连的最小边，是否一定得到最小生成树，说明理由 |
+| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)、[19:07](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)、[22:09](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 数组＋逆置、没有 `p=p->link`、`link` 声明成 int、失败时打印 0 → 先求表长 n，k>n 返回 0，再走到第 n−k+1 个；link 是 `struct LNode *` | 隔日不看答案重写暴力版（结构体、两遍循环、return 都写全），再闭卷写求表长、找第 i 个、找最后一个三段 |
+| `暴力手册-T1骨架` 双重循环骨架默写，内层 j 从 i 还是 i+1 开始 | 仅安排 | [08:38](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 10/5 布置，未见作答 | 空白纸默写骨架并说明 j 的起点 |
+| `真题2025-乘积最大` 对每个 i 求 A[i]·A[j]（i≤j）的最大值存入 res[i] | 仅安排 | [08:38](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 10/5 布置，未见作答 | 限时 15 分钟三段式作答 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2009-3` | 独立 | 整卷答题卡原图（含姓名，未公开）；选 C，见 [19:07 核对](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) |
-| `408-2009-41` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 部分正确 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) |
-| `408-2009-42` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)，补充见 [19:07](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) |
+| `408-2009-3` | 独立 | 整卷答题卡原图（含姓名，未公开）；选 C，见 [19:07 核对](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) |
+| `408-2009-41` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 部分正确 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) |
+| `408-2009-42` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)，补充见 [19:07](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) |
 
 - 三题的原图本助手看过，但原图不在仓库，按规则核对依据只能记「仅旧助手判断」。
 - 42 估 5/15，代码不能运行，核对结果记「错误」。
@@ -9740,7 +9740,7 @@ printf("%d", p->data); return 1;
 
 ## 来源与边界
 
-- [当天数据结构问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)：16:51（整卷错题转述）、18:57（重做出题）、19:06（改为漏洞诊断）、19:07（原图核对）、22:09（42 讲解）。
+- [当天数据结构问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md)：16:51（整卷错题转述）、18:57（重做出题）、19:06（改为漏洞诊断）、19:07（原图核对）、22:09（42 讲解）。
 - 答题卡原图含姓名，没有放进仓库；本助手看过选择 3、41、42 三处，其余科目未核。
 - 选择 3 的题干取自王道《数据结构》第 5 章选择题 32；树形 10/9 已对照用户上传的真题 PDF 原图核实。
 - 42 的评分口径凭记忆，未对答案册逐条核；两段代码由本助手用 gcc 编译测试（5 结点链表 k=1、2、5、6 和空表）。
@@ -9769,20 +9769,20 @@ printf("%d", p->data); return 1;
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2009-4` 四棵二叉排序树中哪棵满足平衡二叉树定义 | 作答待核实 | [13:37](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)、[13:46](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 选 B，对；原图不在仓库，只有助手判断。易错点：只看根、比结点个数 → 每个非叶结点都要写平衡因子 | 闭卷做「只有某个子结点为 ±2」的判定题 |
-| `408-2009-6` 森林转二叉树后 u 是 v 父结点的父结点，原森林中可能的关系 | 作答待核实 | [13:48](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 答对；方法是把路径上每条边标成左（孩子）或右（兄弟），枚举四种组合 | 闭卷做「v 在 u 的左子树中」的迁移题 |
-| `408-2009-3` 由遍历序列 3175624 判断遍历方式 | 作答待核实 | [13:46](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 今天只核实了树形，错因仍缺用户自述 | 独立选出答案并逐个排除另外三项 |
-| `408-2009-41` 「每次走最近邻点」能否求最短路径 | 作答待核实 | [10/8 16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 今天没有涉及，沿用 10/8：反例要避免边权打平 | 闭卷回答 Prim 是否一定得到最小生成树 |
-| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [15:29](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)、[15:48](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)、[15:50](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 用户把一遍扫描当成快慢指针 → 是间距指针（两指针每次各走 1 步，相距 k）；考场用两遍扫描暴力版即可 | 白纸闭卷重写两遍扫描，作答方式记「看答案后」 |
-| `暴力手册-T1骨架` 双重循环骨架默写，内层 j 从 i 还是 i+1 开始 | 仅安排 | [10/8 08:38](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 10/5 布置，今天没有涉及，未见作答 | 空白纸默写骨架并说明 j 的起点 |
-| `真题2025-乘积最大` 对每个 i 求 A[i]·A[j]（i≤j）的最大值存入 res[i] | 仅安排 | [10/8 08:38](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 10/5 布置，今天没有涉及，未见作答 | 限时 15 分钟三段式作答 |
+| `408-2009-4` 四棵二叉排序树中哪棵满足平衡二叉树定义 | 作答待核实 | [13:37](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)、[13:46](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 选 B，对；原图不在仓库，只有助手判断。易错点：只看根、比结点个数 → 每个非叶结点都要写平衡因子 | 闭卷做「只有某个子结点为 ±2」的判定题 |
+| `408-2009-6` 森林转二叉树后 u 是 v 父结点的父结点，原森林中可能的关系 | 作答待核实 | [13:48](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 答对；方法是把路径上每条边标成左（孩子）或右（兄弟），枚举四种组合 | 闭卷做「v 在 u 的左子树中」的迁移题 |
+| `408-2009-3` 由遍历序列 3175624 判断遍历方式 | 作答待核实 | [13:46](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 今天只核实了树形，错因仍缺用户自述 | 独立选出答案并逐个排除另外三项 |
+| `408-2009-41` 「每次走最近邻点」能否求最短路径 | 作答待核实 | [10/8 16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 今天没有涉及，沿用 10/8：反例要避免边权打平 | 闭卷回答 Prim 是否一定得到最小生成树 |
+| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [15:29](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)、[15:48](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)、[15:50](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 用户把一遍扫描当成快慢指针 → 是间距指针（两指针每次各走 1 步，相距 k）；考场用两遍扫描暴力版即可 | 白纸闭卷重写两遍扫描，作答方式记「看答案后」 |
+| `暴力手册-T1骨架` 双重循环骨架默写，内层 j 从 i 还是 i+1 开始 | 仅安排 | [10/8 08:38](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 10/5 布置，今天没有涉及，未见作答 | 空白纸默写骨架并说明 j 的起点 |
+| `真题2025-乘积最大` 对每个 i 求 A[i]·A[j]（i≤j）的最大值存入 res[i] | 仅安排 | [10/8 08:38](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-08.md) | 10/5 布置，今天没有涉及，未见作答 | 限时 15 分钟三段式作答 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2009-4` | 独立 | 10/8 整卷答题卡原图（含姓名，未公开）；涂 B，见 [13:37](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 正确 | 仅旧助手判断 | [13:37](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) |
-| `408-2009-6` | 独立 | 10/8 整卷答题卡原图（未公开）；记录只写「未被判错」，见 [13:48](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 正确 | 仅旧助手判断 | [13:48](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) |
+| `408-2009-4` | 独立 | 10/8 整卷答题卡原图（含姓名，未公开）；涂 B，见 [13:37](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 正确 | 仅旧助手判断 | [13:37](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) |
+| `408-2009-6` | 独立 | 10/8 整卷答题卡原图（未公开）；记录只写「未被判错」，见 [13:48](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 正确 | 仅旧助手判断 | [13:48](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) |
 
 - 两题是 10/8 整卷时作答的，问答里今天才记录，所以来源链接的是今天的小节。
 - 原图不在仓库里，所以只能记「仅旧助手判断」，状态停在作答待核实。
@@ -9868,7 +9868,7 @@ int Search_k(LinkList list, int k){
 
 ## 来源与边界
 
-- [当天数据结构问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)：13:37、13:46（`408-2009-4`）、13:48（`408-2009-6`）、15:29、15:48、15:50（`408-2009-42`）。
+- [当天数据结构问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)：13:37、13:46（`408-2009-4`）、13:48（`408-2009-6`）、15:29、15:48、15:50（`408-2009-42`）。
 - 2009 真题 PDF 和解析 PDF 是用户上传的，第 4 题的树形据此转写；10/8 的答题卡原图含姓名，没有放进仓库。
 - 15:29 还提到逐日表 D9 快速排序手推，那只是「若指逐日表」的备选，未见作答，不列入状态表。
 
@@ -9893,24 +9893,24 @@ int Search_k(LinkList list, int k){
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2010-3` 选出符合后序线索树定义的线索二叉树 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 选 B，应 D → 先写后序序列 d b c a，再把空指针连到序列里的前驱、后继 | 闭卷给同一棵树画后序或中序线索 |
-| `408-2010-5` 树的叶结点个数（原题干未记录，按正确要点 n0 = 1 + n2 + 2n3 + 3n4 整理） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 选 D，应 B（82）→ 用的是「度」，应乘「度 − 1」：n0 = 1 + n2 + 2n3 + 3n4 | 迁移题：度为 3 的树，n3 = 5、n2 = 4，求叶子数 |
-| `408-2010-9` 折半查找失败时最多比较几次（原题干未记录，按正确要点 ⌈log₂(16+1)⌉ 整理） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 选 A，应 B（5）→ 数成了「对半几次」，应看判定树高度 ⌈log₂(n+1)⌉ | 迁移题：长度 20 的有序表 |
-| `408-2010-11` 由前三趟结果判断排序算法 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 选 C，应 A（冒泡）→ 没认出「每趟最大值沉到末尾」这个特征 | 手跑 (5, 1, 4, 2, 8) 冒泡前两趟 |
-| `408-2010-41` 线性探测散列表与查找成功、失败的 ASL | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 30×3 mod 7 算成 2 号（应为 6 号），后面错位；失败 ASL 分母和数法不对 → 先列 key、H(key)、探测序列三列；失败从地址 0～6 各自数到空位，÷ 7 | 迁移题：(5, 12, 19, 3, 10)，H = key mod 7，表长 8 |
-| `408-2010-42` 数组循环左移 p 位 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 思路和复杂度对；逆置循环条件 i<n 应为 i<j，交换没用临时变量，两段边界应为 [0, n−p−1] 和 [n−p, n−1] | 默写 reverse，用 n=5、p=2 代入检查下标 |
-| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [10/9 15:29](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 今天没有作答，沿用 10/9 | 白纸闭卷重写两遍扫描 |
+| `408-2010-3` 选出符合后序线索树定义的线索二叉树 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 选 B，应 D → 先写后序序列 d b c a，再把空指针连到序列里的前驱、后继 | 闭卷给同一棵树画后序或中序线索 |
+| `408-2010-5` 树的叶结点个数（原题干未记录，按正确要点 n0 = 1 + n2 + 2n3 + 3n4 整理） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 选 D，应 B（82）→ 用的是「度」，应乘「度 − 1」：n0 = 1 + n2 + 2n3 + 3n4 | 迁移题：度为 3 的树，n3 = 5、n2 = 4，求叶子数 |
+| `408-2010-9` 折半查找失败时最多比较几次（原题干未记录，按正确要点 ⌈log₂(16+1)⌉ 整理） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 选 A，应 B（5）→ 数成了「对半几次」，应看判定树高度 ⌈log₂(n+1)⌉ | 迁移题：长度 20 的有序表 |
+| `408-2010-11` 由前三趟结果判断排序算法 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 选 C，应 A（冒泡）→ 没认出「每趟最大值沉到末尾」这个特征 | 手跑 (5, 1, 4, 2, 8) 冒泡前两趟 |
+| `408-2010-41` 线性探测散列表与查找成功、失败的 ASL | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 30×3 mod 7 算成 2 号（应为 6 号），后面错位；失败 ASL 分母和数法不对 → 先列 key、H(key)、探测序列三列；失败从地址 0～6 各自数到空位，÷ 7 | 迁移题：(5, 12, 19, 3, 10)，H = key mod 7，表长 8 |
+| `408-2010-42` 数组循环左移 p 位 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 思路和复杂度对；逆置循环条件 i<n 应为 i<j，交换没用临时变量，两段边界应为 [0, n−p−1] 和 [n−p, n−1] | 默写 reverse，用 n=5、p=2 代入检查下标 |
+| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [10/9 15:29](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 今天没有作答，沿用 10/9 | 白纸闭卷重写两遍扫描 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2010-3` | 独立 | [2010 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；选 B | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
-| `408-2010-5` | 独立 | [2010 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；选 D | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
-| `408-2010-9` | 独立 | [2010 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；选 A | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
-| `408-2010-11` | 独立 | [2010 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；选 C | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
-| `408-2010-41` | 独立 | [2010 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；转写见 [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
-| `408-2010-42` | 独立 | [2010 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；转写见 [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 部分正确 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
+| `408-2010-3` | 独立 | [2010 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；选 B | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
+| `408-2010-5` | 独立 | [2010 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；选 D | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
+| `408-2010-9` | 独立 | [2010 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；选 A | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
+| `408-2010-11` | 独立 | [2010 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；选 C | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
+| `408-2010-41` | 独立 | [2010 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；转写见 [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
+| `408-2010-42` | 独立 | [2010 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)；转写见 [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 部分正确 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) |
 
 - 选择题按用户的红笔订正记对错，大题按批改助手看原图后的估分。都没有对答案册逐条核，所以核对依据只记「仅旧助手判断」。
 - 41 估 2/10，散列表和两个 ASL 都不对，所以记「错误」。42 估 7/13，思路对、代码三处错，所以记「部分正确」。
@@ -10007,9 +10007,9 @@ void Converse(int R[], int n, int p){   // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天数据结构问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md)：17:52 四个小节（选择题错题、41、42）。整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
+- [当天数据结构问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md)：17:52 四个小节（选择题错题、41、42）。整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)。
 - 41、42 的题意在 10/10 记录里是凭记忆整理的；选择 5、9 的原题干、选项没有写进当天问答，所以自测只用迁移题，不复述原题。
-- 10/9 的 `408-2009-3`、`408-2009-41` 今天没有涉及，状态不变，见 [10/9 复盘](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%AF%8F%E6%97%A5%E5%A4%8D%E7%9B%98/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)。因为「下次先做」最多 3 项，本份没有再列入。
+- 10/9 的 `408-2009-3`、`408-2009-41` 今天没有涉及，状态不变，见 [10/9 复盘](https://wengu-408.pages.dev/%E6%AF%8F%E6%97%A5%E5%A4%8D%E7%9B%98/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md)。因为「下次先做」最多 3 项，本份没有再列入。
 
 
 ---
@@ -10036,11 +10036,11 @@ void Converse(int R[], int n, int p){   // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2010-3` 选出符合后序线索树定义的线索二叉树 | 作答待核实 | [13:57](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-11.md) | 以为线索只指后继 → 左空指针指前驱、右空指针指后继，两种都有；先写遍历序列再逐个连 | 闭卷给同一棵树写中序线索（迁移题） |
-| `408-2010-11` 由前三趟结果判断排序算法 | 作答待核实 | [15:33](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-11.md) | 演示页的冒泡是从后往前、最小值上浮，真题是从前往后、最大值沉底 → 演示页已拆成两个版本；判断冒泡看端点是否每趟多一个最终位置元素 | 手跑 (5, 1, 4, 2, 8) 冒泡前两趟 |
-| `408-2010-42` 数组循环左移 p 位 | 作答待核实 | [10/10 17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 今天没有涉及，沿用 10/10 | 默写 reverse，用 n=5、p=2 检查下标 |
-| `408-2010-41` 线性探测散列表与查找成功、失败的 ASL | 作答待核实 | [10/10 17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 今天没有涉及，沿用 10/10 | 迁移题 (5, 12, 19, 3, 10)，表长 8 |
-| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [10/9 15:29](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 今天没有涉及，沿用 10/9 | 白纸闭卷重写两遍扫描 |
+| `408-2010-3` 选出符合后序线索树定义的线索二叉树 | 作答待核实 | [13:57](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-11.md) | 以为线索只指后继 → 左空指针指前驱、右空指针指后继，两种都有；先写遍历序列再逐个连 | 闭卷给同一棵树写中序线索（迁移题） |
+| `408-2010-11` 由前三趟结果判断排序算法 | 作答待核实 | [15:33](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-11.md) | 演示页的冒泡是从后往前、最小值上浮，真题是从前往后、最大值沉底 → 演示页已拆成两个版本；判断冒泡看端点是否每趟多一个最终位置元素 | 手跑 (5, 1, 4, 2, 8) 冒泡前两趟 |
+| `408-2010-42` 数组循环左移 p 位 | 作答待核实 | [10/10 17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 今天没有涉及，沿用 10/10 | 默写 reverse，用 n=5、p=2 检查下标 |
+| `408-2010-41` 线性探测散列表与查找成功、失败的 ASL | 作答待核实 | [10/10 17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 今天没有涉及，沿用 10/10 | 迁移题 (5, 12, 19, 3, 10)，表长 8 |
+| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [10/9 15:29](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-09.md) | 今天没有涉及，沿用 10/9 | 白纸闭卷重写两遍扫描 |
 
 ## 作答记录
 
@@ -10150,7 +10150,7 @@ void Converse(int R[], int n, int p){   // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天数据结构问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-11.md)：
+- [当天数据结构问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-11.md)：
   - 13:57（`408-2010-3`）；
   - 14:00、14:05、14:26、14:37、14:51（树的公式、卡特兰数、森林、哈夫曼树）；
   - 14:52、15:21、15:29（排序演示和口诀）；
@@ -10187,27 +10187,27 @@ void Converse(int R[], int n, int p){   // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2024-2` 中缀表达式转后缀表达式（原题干未写入问答，正确答案为 x y z u − * v / +） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 选 B，应 A；当天记录没有写错因 | 闭卷做一道中缀转后缀的迁移题 |
-| `408-2024-5` 折半查找适用的存储结构（原题干未写入问答） | 作答待核实 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 选 D，对，但用户自述拿不准：静态链表存在数组里，却不能按下标取中间元素 → 折半查找 = 顺序表 + 有序 | 迁移题：四种结构哪些能折半、哪些能 O(log n) 查找 |
-| `408-2024-6` 模式串 aabaab 用 nextval 匹配时的最大右滑距离 | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 选 D，应 A → 只会算 next，不会由 nextval 推右滑距离 j − nextval[j]（第 4 位失配时最大为 5） | 迁移题：模式串 abaabc |
-| `408-2024-11` 败者树结点记录的内容（原题干未写入问答） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 选 A，应 D → 只记了「比大小」，没记清结点存的是归并段号，冠军记最小关键字所在的段号 | 画 4 路败者树，标出每个结点存的段号 |
-| `408-2024-41` 判断有向图是否存在唯一的拓扑序列 | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 思想基本对，代码空白 → 默写邻接矩阵上的拓扑排序（求入度、入队、出队减入度、计数），判唯一只需加一句「队里多于 1 个就返回 0」 | 迁移题：写 hasTopo，再说判唯一加哪一行 |
-| `408-2024-42` 平方探测散列表（原题干未写入问答） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 估 10/10，全对；原卷未对答案册逐条核 | 暂不安排 |
-| `手册-图10-矩阵拓扑` 邻接矩阵 TopoCount 闭卷默写（队列版） | 仅安排 | [20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 20:27 布置，未见作答；统一用手册的队列版，不用栈 | 闭卷手写拍照，用 gcc 跑唯一、不唯一、有环三种图 |
-| `408-2010-42` 数组循环左移 p 位 | 作答待核实 | [20:30](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 今天只在诊断里提到它，没有作答 | 默写 reverse，用 n=5、p=2 检查下标 |
-| `408-2010-41` 线性探测散列表与查找成功、失败的 ASL | 作答待核实 | [10/10 17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 今天没有涉及，沿用 10/10 | 迁移题 (5, 12, 19, 3, 10)，表长 8 |
-| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [20:30](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 今天只在诊断里提到它，没有作答 | 白纸闭卷重写两遍扫描 |
+| `408-2024-2` 中缀表达式转后缀表达式（原题干未写入问答，正确答案为 x y z u − * v / +） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 选 B，应 A；当天记录没有写错因 | 闭卷做一道中缀转后缀的迁移题 |
+| `408-2024-5` 折半查找适用的存储结构（原题干未写入问答） | 作答待核实 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 选 D，对，但用户自述拿不准：静态链表存在数组里，却不能按下标取中间元素 → 折半查找 = 顺序表 + 有序 | 迁移题：四种结构哪些能折半、哪些能 O(log n) 查找 |
+| `408-2024-6` 模式串 aabaab 用 nextval 匹配时的最大右滑距离 | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 选 D，应 A → 只会算 next，不会由 nextval 推右滑距离 j − nextval[j]（第 4 位失配时最大为 5） | 迁移题：模式串 abaabc |
+| `408-2024-11` 败者树结点记录的内容（原题干未写入问答） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 选 A，应 D → 只记了「比大小」，没记清结点存的是归并段号，冠军记最小关键字所在的段号 | 画 4 路败者树，标出每个结点存的段号 |
+| `408-2024-41` 判断有向图是否存在唯一的拓扑序列 | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 思想基本对，代码空白 → 默写邻接矩阵上的拓扑排序（求入度、入队、出队减入度、计数），判唯一只需加一句「队里多于 1 个就返回 0」 | 迁移题：写 hasTopo，再说判唯一加哪一行 |
+| `408-2024-42` 平方探测散列表（原题干未写入问答） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 估 10/10，全对；原卷未对答案册逐条核 | 暂不安排 |
+| `手册-图10-矩阵拓扑` 邻接矩阵 TopoCount 闭卷默写（队列版） | 仅安排 | [20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 20:27 布置，未见作答；统一用手册的队列版，不用栈 | 闭卷手写拍照，用 gcc 跑唯一、不唯一、有环三种图 |
+| `408-2010-42` 数组循环左移 p 位 | 作答待核实 | [20:30](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 今天只在诊断里提到它，没有作答 | 默写 reverse，用 n=5、p=2 检查下标 |
+| `408-2010-41` 线性探测散列表与查找成功、失败的 ASL | 作答待核实 | [10/10 17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-10.md) | 今天没有涉及，沿用 10/10 | 迁移题 (5, 12, 19, 3, 10)，表长 8 |
+| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [20:30](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 今天只在诊断里提到它，没有作答 | 白纸闭卷重写两遍扫描 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2024-2` | 独立 | [2024 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；选 B | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
-| `408-2024-5` | 独立 | [2024 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；选 D，题号划线 | 正确 | 仅旧助手判断 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
-| `408-2024-6` | 独立 | [2024 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；选 D | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
-| `408-2024-11` | 独立 | [2024 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；选 A，题号划线 | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
-| `408-2024-41` | 独立 | [2024 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；思想转写见 [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md)，代码空白 | 部分正确 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
-| `408-2024-42` | 独立 | [2024 整卷考试记录与作答原图](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；转写见 [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 正确 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
+| `408-2024-2` | 独立 | [2024 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；选 B | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
+| `408-2024-5` | 独立 | [2024 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；选 D，题号划线 | 正确 | 仅旧助手判断 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
+| `408-2024-6` | 独立 | [2024 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；选 D | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
+| `408-2024-11` | 独立 | [2024 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；选 A，题号划线 | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
+| `408-2024-41` | 独立 | [2024 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；思想转写见 [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md)，代码空白 | 部分正确 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
+| `408-2024-42` | 独立 | [2024 整卷考试记录与作答原图](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)；转写见 [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 正确 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) |
 
 - 选择题按用户的红笔订正记对错，大题按批改助手看原图后的估分，都没有对答案册逐条核，所以核对依据只记「仅旧助手判断」。
 - 因此 `408-2024-5`、`408-2024-42` 虽然做对，状态也停在作答待核实。
@@ -10319,13 +10319,13 @@ int TopoCount(MGraph G){
 
 ## 来源与边界
 
-- [当天数据结构问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md)：
+- [当天数据结构问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md)：
   - 20:15 四个小节（选择题错题、41、42）；
   - 20:24（拿不准的选择 5）；
   - 20:27（TopoCount 默写布置）；
   - 20:30（补法安排）；
   - 20:32（代码走读与分工）。
-  - 整卷见[考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
+  - 整卷见[考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)。
 - 2024 选择 2、5、11 和大题 42 的原题干没有写进当天问答，表中只写记录里有的内容，自测用迁移题。
 - 用户在照片上划线、圈出的其他拿不准题号（如 14、15、16 等），记录里没有区分科目，本份不列入。
 - 10/11「下次先做」里的 `408-2010-41`、`408-2009-42` 今天仍未作答。因为最多写 3 项，本份「下次先做」优先列拓扑默写，这两项保留在状态表里。
@@ -10357,13 +10357,13 @@ int TopoCount(MGraph G){
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2010-41` 线性探测散列表与查找成功、失败的 ASL | 作答待核实 | [09:01](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 用户自述「挺迷糊」→ 失败从散列函数能取到的每个地址出发，比到空位（空位也算一次），÷ 地址个数 7；表长 10 只决定探测范围 | 迁移题 (5, 12, 19, 3, 10)，表长 8，仍未作答 |
-| `408-2010-42` 数组循环左移 p 位 | 作答待核实 | [14:48](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 原代码：for 里重新定义 i、条件 i<n、借 a[t] 交换、两段差 1、for 后漏大括号 → 在原代码上逐处改正，gcc 核对 | 闭卷重写改后版本，作答方式记「看答案后」 |
-| `408-矩阵压缩` 对称、三角、三对角矩阵压缩存储的下标定位（2016、2018、2020、2021 选择题与 2011-41） | 已讨论 | [15:58](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md)、[16:17](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 公式记不住 → 不背公式，数「前面存了几个 + 数组起始下标」；对称矩阵问到没存的那半先交换 i、j | 闭卷做下面的迁移题 |
-| `408-2024-6` 模式串 aabaab 用 nextval 匹配时的最大右滑距离 | 作答待核实 | [18:08](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 今天在 KMP 页上讲了讲义的改进 PM 法，没有重新作答 | 迁移题 abaabc，仍未作答 |
-| `408-2024-41` 判断有向图是否存在唯一的拓扑序列 | 作答待核实 | [08:21](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 今天只用作「一个遍历骨架 + 一个处理动作」的例子，没有作答 | TopoCount 默写过关后写 hasTopo |
-| `手册-图10-矩阵拓扑` 邻接矩阵 TopoCount 闭卷默写（队列版） | 仅安排 | [10/12 20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 10/12 布置，今天仍未见作答 | 闭卷手写拍照，gcc 跑三种图 |
-| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [02:14](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 今天只在走读页和算法题思路页里出现，没有作答 | 白纸闭卷重写两遍扫描 |
+| `408-2010-41` 线性探测散列表与查找成功、失败的 ASL | 作答待核实 | [09:01](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 用户自述「挺迷糊」→ 失败从散列函数能取到的每个地址出发，比到空位（空位也算一次），÷ 地址个数 7；表长 10 只决定探测范围 | 迁移题 (5, 12, 19, 3, 10)，表长 8，仍未作答 |
+| `408-2010-42` 数组循环左移 p 位 | 作答待核实 | [14:48](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 原代码：for 里重新定义 i、条件 i<n、借 a[t] 交换、两段差 1、for 后漏大括号 → 在原代码上逐处改正，gcc 核对 | 闭卷重写改后版本，作答方式记「看答案后」 |
+| `408-矩阵压缩` 对称、三角、三对角矩阵压缩存储的下标定位（2016、2018、2020、2021 选择题与 2011-41） | 已讨论 | [15:58](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md)、[16:17](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 公式记不住 → 不背公式，数「前面存了几个 + 数组起始下标」；对称矩阵问到没存的那半先交换 i、j | 闭卷做下面的迁移题 |
+| `408-2024-6` 模式串 aabaab 用 nextval 匹配时的最大右滑距离 | 作答待核实 | [18:08](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 今天在 KMP 页上讲了讲义的改进 PM 法，没有重新作答 | 迁移题 abaabc，仍未作答 |
+| `408-2024-41` 判断有向图是否存在唯一的拓扑序列 | 作答待核实 | [08:21](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 今天只用作「一个遍历骨架 + 一个处理动作」的例子，没有作答 | TopoCount 默写过关后写 hasTopo |
+| `手册-图10-矩阵拓扑` 邻接矩阵 TopoCount 闭卷默写（队列版） | 仅安排 | [10/12 20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-12.md) | 10/12 布置，今天仍未见作答 | 闭卷手写拍照，gcc 跑三种图 |
+| `408-2009-42` 带头结点单链表找倒数第 k 个结点 | 作答待核实 | [02:14](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md) | 今天只在走读页和算法题思路页里出现，没有作答 | 白纸闭卷重写两遍扫描 |
 
 ## 作答记录
 
@@ -10478,7 +10478,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天数据结构问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md)：
+- [当天数据结构问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/2026-10-13.md)：
   - 07:36～08:55（骨架背诵页、走读、结构体、打卡表）；
   - 09:01（`408-2010-41`）；
   - 14:48（`408-2010-42`）；
@@ -10509,23 +10509,23 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `880-线代9-基础4` 向量组表示与相关性 | 已讨论 | [10:36](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；工具：被表示的组秩不大，秩 ≤ 个数 | 先写不等号链 $r(\mathrm I)\le r(\mathrm{II})\le s$ 再判断 |
-| `880-线代9-基础5` 三条直线恰交于一点 | 已讨论 | [10:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[10:53](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 追问时把方程个数 3 当成 $n$ → $n$ 是未知数个数 2 | 说出唯一解条件里 $n$ 是谁 |
-| `880-线代9-基础6` 加成组的无关性 | 已讨论 | [11:01](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[11:05](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 忘了“可逆矩阵乘上去秩不变” → 三种理解见 11:05 | 写成 $(\beta)=(\alpha)C$ 再看 $C$ |
-| `880-线代9-基础3` 哪组向量线性无关 | 已讨论 | [11:49](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；凑零或算 $\lvert C\rvert$ | 首尾相接组 $\lvert C\rvert$ 公式 |
-| `880-线代9-综合3` $k_1k_3\ne0$ 时哪两组等价 | 已讨论 | [11:50](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[12:31](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 题眼 $k_2$ 可能为 0；系数不为零才能解出对应向量 | 说出 A、B、D 的共同反例思路 |
-| `880-线代9-综合4` $\beta$ 组也无关的充要条件 | 已讨论 | [12:43](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；矩阵等价只看秩 | 区分矩阵等价与向量组等价 |
-| `880-线代9-综合5` 正交向量组的秩 | 已讨论 | [12:47](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[12:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 追问 $n=4$ 怎么看 → $n$ 是 $A^{\mathrm T}$ 的列数 | 用基础解系个数 $n-r$ 求秩 |
-| `880-线代9-综合6` $Ax=0$ 与 $Bx=0$ 同解的充要条件 | 作答待核实 | [13:16](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 选 C（矩阵等价）→ 应为 B（行向量组等价）；矩阵等价只是秩相等 | 给出反例 $A=(1,0)$、$B=(0,1)$ |
-| `880-线代9-综合7` 选错误的一项 | 作答待核实 | [13:20](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 选 B（正确命题）→ 题问错误项，答案 D；左乘管行、右乘管列 | 先圈出“错误的” |
-| `880-线代9-综合8` $r(A)=n$ 时 $AB$ 与 $B$ | 已讨论 | [13:26](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[13:28](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；列满秩 ⇒ $ABx=0\iff Bx=0$ | 复述三步：同解 → 秩相等 → 行组等价 |
+| `880-线代9-基础4` 向量组表示与相关性 | 已讨论 | [10:36](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；工具：被表示的组秩不大，秩 ≤ 个数 | 先写不等号链 $r(\mathrm I)\le r(\mathrm{II})\le s$ 再判断 |
+| `880-线代9-基础5` 三条直线恰交于一点 | 已讨论 | [10:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[10:53](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 追问时把方程个数 3 当成 $n$ → $n$ 是未知数个数 2 | 说出唯一解条件里 $n$ 是谁 |
+| `880-线代9-基础6` 加成组的无关性 | 已讨论 | [11:01](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[11:05](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 忘了“可逆矩阵乘上去秩不变” → 三种理解见 11:05 | 写成 $(\beta)=(\alpha)C$ 再看 $C$ |
+| `880-线代9-基础3` 哪组向量线性无关 | 已讨论 | [11:49](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；凑零或算 $\lvert C\rvert$ | 首尾相接组 $\lvert C\rvert$ 公式 |
+| `880-线代9-综合3` $k_1k_3\ne0$ 时哪两组等价 | 已讨论 | [11:50](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[12:31](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 题眼 $k_2$ 可能为 0；系数不为零才能解出对应向量 | 说出 A、B、D 的共同反例思路 |
+| `880-线代9-综合4` $\beta$ 组也无关的充要条件 | 已讨论 | [12:43](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；矩阵等价只看秩 | 区分矩阵等价与向量组等价 |
+| `880-线代9-综合5` 正交向量组的秩 | 已讨论 | [12:47](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[12:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 追问 $n=4$ 怎么看 → $n$ 是 $A^{\mathrm T}$ 的列数 | 用基础解系个数 $n-r$ 求秩 |
+| `880-线代9-综合6` $Ax=0$ 与 $Bx=0$ 同解的充要条件 | 作答待核实 | [13:16](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 选 C（矩阵等价）→ 应为 B（行向量组等价）；矩阵等价只是秩相等 | 给出反例 $A=(1,0)$、$B=(0,1)$ |
+| `880-线代9-综合7` 选错误的一项 | 作答待核实 | [13:20](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 选 B（正确命题）→ 题问错误项，答案 D；左乘管行、右乘管列 | 先圈出“错误的” |
+| `880-线代9-综合8` $r(A)=n$ 时 $AB$ 与 $B$ | 已讨论 | [13:26](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)、[13:28](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) | 未作答；列满秩 ⇒ $ABx=0\iff Bx=0$ | 复述三步：同解 → 秩相等 → 行组等价 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `880-线代9-综合6` | 未注明 | 文字「第六题我选c了」 | 错误 | 仅旧助手判断 | [13:16](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) |
-| `880-线代9-综合7` | 未注明 | 文字「第七题选的b」 | 错误 | 仅旧助手判断 | [13:20](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) |
+| `880-线代9-综合6` | 未注明 | 文字「第六题我选c了」 | 错误 | 仅旧助手判断 | [13:16](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) |
+| `880-线代9-综合7` | 未注明 | 文字「第七题选的b」 | 错误 | 仅旧助手判断 | [13:20](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md) |
 
 ## 知识点与适用条件
 
@@ -10555,7 +10555,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 **参考要点**：行向量组等价，即 $r(A)=r(B)=r\begin{pmatrix}A\\B\end{pmatrix}$。矩阵等价只说明秩相等，不够：$A=(1,0)$、$B=(0,1)$ 秩都为 1，但解集不同。每个方程是一行，所以看行。
 
-![三种等价的强弱](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E4%B8%89%E7%A7%8D%E7%AD%89%E4%BB%B7%E7%9A%84%E5%BC%BA%E5%BC%B1.svg)
+![三种等价的强弱](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E4%B8%89%E7%A7%8D%E7%AD%89%E4%BB%B7%E7%9A%84%E5%BC%BA%E5%BC%B1.svg)
 
 ### 自测：迁移｜$A=PB$、$A=BQ$、$A=PBQ$（$P$、$Q$ 可逆）分别能推出哪种等价？
 
@@ -10563,7 +10563,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 **参考要点**：左乘管行，右乘管列。$A=PB$ ⇒ 行组等价；$A=BQ$ ⇒ 列组等价；$A=PBQ$ ⇒ 只有矩阵等价（秩相等）。反例：$B=\mathrm{diag}(1,0)$，$P=Q=\begin{pmatrix}0&1\\1&0\end{pmatrix}$，得 $A=\mathrm{diag}(0,1)$，行组、列组都不等价。做题先圈出问的是“正确”还是“错误”。
 
-![左乘管行，右乘管列](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E4%B8%89%E7%A7%8D%E7%AD%89%E4%BB%B7%E7%9A%84%E5%BC%BA%E5%BC%B1.svg)
+![左乘管行，右乘管列](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/%E4%B8%89%E7%A7%8D%E7%AD%89%E4%BB%B7%E7%9A%84%E5%BC%BA%E5%BC%B1.svg)
 
 ### 自测：$\alpha_1,\alpha_2,\alpha_3$ 无关，$\beta_1=\alpha_1+k\alpha_3$、$\beta_2=\alpha_2+\mu\alpha_3$ 一定无关吗？用矩阵说明。
 
@@ -10584,7 +10584,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天线性代数问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)：10:36～13:28 及项目主聊天一问。
+- [当天线性代数问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-05.md)：10:36～13:28 及项目主聊天一问。
 - 本复盘只依据问答记录整理；参考要点里的反例和结论均出自当天讲解。880 选项原文没有收录，题干按记录改写。
 
 
@@ -10605,21 +10605,21 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `880-线代9-综合填空1` 三个向量相关但两两无关，求 $k$ | 作答待核实 | [08:20](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 你自述做错，没给过程；未核对 | 独立重做，把行列式化简过程发来 |
-| `张宇9讲-线代7-例7.1` 由 $\lvert A^2+2A\rvert=0$ 等求 $A_{11}+A_{22}+A_{33}$ | 已讨论 | [09:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；$\mathrm{tr}(A^*)$ 等于 $A^*$ 特征值之和 $\sum\frac{\lvert A\rvert}{\lambda_i}$ | 说出 $A^*$ 的特征值 |
-| `张宇9讲-线代7-例7.2` 已知特征值求特征向量；$P^{-1}A^{100}P+E$ 的特征向量 | 已讨论 | [09:56](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；$B=P^{-1}AP$ 的特征向量是 $P^{-1}\xi$ | 写出 $P^{-1}\xi$ 的推导一行 |
-| `张宇9讲-线代7-例7.4` 由 $(A+2E)B=O$、$CA^{\mathrm T}=2C$ 求特征值与特征向量 | 已讨论 | [10:58](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；$B$ 的非零列是 $-2$ 的特征向量，$C^{\mathrm T}$ 的列是 $A^{\mathrm T}$ 的 | 独立说出两条关系各给出什么 |
-| `880-线代9-综合解答2` 行变换求表示系数 | 已讨论 | [12:12](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答 | 独立化到 $(E\mid X)$ |
-| `880-线代9-综合解答3` 含参 $AX=B$ 回代 | 已讨论 | [12:22](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md)、[12:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；$AX=B$ 可按列拆成多个 $Ax=b_j$ | 说出为什么只看右边一列 |
-| `880-线代9-综合解答4` 证任意 $k$ 个线性无关 | 已讨论 | [12:36](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答 | 独立写出反证的第一步 |
-| `880-线代9-综合解答5` 把 $\beta$ 拆成特征向量求 $A^n\beta$ | 已讨论 | [12:48](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答 | 独立写出 $A^n\beta=\sum k_i\lambda_i^n\xi_i$ |
-| `880-线代9-综合解答6` $r(A)=n-1$ ⇒ $\beta$ 与 $\alpha_1-\alpha_2$ 相关 | 已讨论 | [12:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；两个非齐次解之差是齐次解 | 复述三步 |
+| `880-线代9-综合填空1` 三个向量相关但两两无关，求 $k$ | 作答待核实 | [08:20](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 你自述做错，没给过程；未核对 | 独立重做，把行列式化简过程发来 |
+| `张宇9讲-线代7-例7.1` 由 $\lvert A^2+2A\rvert=0$ 等求 $A_{11}+A_{22}+A_{33}$ | 已讨论 | [09:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；$\mathrm{tr}(A^*)$ 等于 $A^*$ 特征值之和 $\sum\frac{\lvert A\rvert}{\lambda_i}$ | 说出 $A^*$ 的特征值 |
+| `张宇9讲-线代7-例7.2` 已知特征值求特征向量；$P^{-1}A^{100}P+E$ 的特征向量 | 已讨论 | [09:56](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；$B=P^{-1}AP$ 的特征向量是 $P^{-1}\xi$ | 写出 $P^{-1}\xi$ 的推导一行 |
+| `张宇9讲-线代7-例7.4` 由 $(A+2E)B=O$、$CA^{\mathrm T}=2C$ 求特征值与特征向量 | 已讨论 | [10:58](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；$B$ 的非零列是 $-2$ 的特征向量，$C^{\mathrm T}$ 的列是 $A^{\mathrm T}$ 的 | 独立说出两条关系各给出什么 |
+| `880-线代9-综合解答2` 行变换求表示系数 | 已讨论 | [12:12](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答 | 独立化到 $(E\mid X)$ |
+| `880-线代9-综合解答3` 含参 $AX=B$ 回代 | 已讨论 | [12:22](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md)、[12:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；$AX=B$ 可按列拆成多个 $Ax=b_j$ | 说出为什么只看右边一列 |
+| `880-线代9-综合解答4` 证任意 $k$ 个线性无关 | 已讨论 | [12:36](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答 | 独立写出反证的第一步 |
+| `880-线代9-综合解答5` 把 $\beta$ 拆成特征向量求 $A^n\beta$ | 已讨论 | [12:48](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答 | 独立写出 $A^n\beta=\sum k_i\lambda_i^n\xi_i$ |
+| `880-线代9-综合解答6` $r(A)=n-1$ ⇒ $\beta$ 与 $\alpha_1-\alpha_2$ 相关 | 已讨论 | [12:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) | 未作答；两个非齐次解之差是齐次解 | 复述三步 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `880-线代9-综合填空1` | 未注明 | 未提供（只说做错了） | 未核对 | 未核对 | [08:20](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) |
+| `880-线代9-综合填空1` | 未注明 | 未提供（只说做错了） | 未核对 | 未核对 | [08:20](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md) |
 
 
 ## 知识点与适用条件
@@ -10664,7 +10664,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天线性代数问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md)：08:20～12:52。
+- [当天线性代数问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-08.md)：08:20～12:52。
 - 晚上的模拟卷按你的要求不公开。张宇讲次页码只写了问答里已核对的部分。
 
 
@@ -10694,12 +10694,12 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `880-线代9-综合解答2` 由「$\alpha$ 不能由 $\beta$ 表示」求 $a$，再求表示系数 | 已讨论 | [08:21](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；「不能表示」先转成 $r(\beta)<3$，用行列式得 $a=5$；系数拼成 $(\alpha\mid\beta)$ 化到 $(E\mid X)$，竖着读 | 独立写出行列式和行变换两步 |
-| `880-线代9-综合解答10` 初等变换求 $A$、Schmidt 正交化、$A=QT$ | 已讨论 | [09:58](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md)、[22:29](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md)、[22:36](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；（Ⅲ）三次讲解才接近讲通：把（Ⅱ）的关系反写成 $\alpha$ 用 $\gamma$ 表示，系数竖着填就是 $T$ | 先独立做（Ⅰ）（Ⅱ）；（Ⅲ）闭卷写出 $\alpha_3$ 用 $\gamma_1,\gamma_2,\gamma_3$ 表示的一行 |
-| `880-线代10-基础选择9` $AB=E$ 时 $AX=\alpha$、$BX=\beta$ 的解 | 已讨论 | [10:26](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；由 $AB=E$ 得 $A$ 行满秩、$B$ 列满秩 | 说出四个选项各错在哪 |
-| `880-线代10-基础选择10` 与所有 $\alpha_i$ 正交的 $\beta_1,\beta_2$，求 $AX=0$ 通解 | 已讨论 | [10:36](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；$\beta_1,\beta_2$ 可能为零向量，只有 $\beta_1-\beta_2\ne0$ 有保证 | 说出为什么排除 A、B、C |
-| `880-线代10-基础选择11` $ABX=0$ 与 $BX=0$ 同解的充要条件 | 已讨论 | [10:40](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；解集包含 + 基础解系个数相同 ⇒ 同解 ⇔ $r(AB)=r(B)$ | 闭卷写出包含关系和个数比较 |
-| `880-线代10-基础选择12` 三个无关解推 $r(A)=1$，比较 $AX=0$ 与 $A^*X=0$ | 已讨论 | [10:47](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；10:49 你说「第二步不好想」：作差消掉 $b$，$k$ 个无关非齐次解得 $k-1$ 个无关齐次解 | 独立写出 $r(A)$、$r(A^*)$ 的推导 |
+| `880-线代9-综合解答2` 由「$\alpha$ 不能由 $\beta$ 表示」求 $a$，再求表示系数 | 已讨论 | [08:21](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；「不能表示」先转成 $r(\beta)<3$，用行列式得 $a=5$；系数拼成 $(\alpha\mid\beta)$ 化到 $(E\mid X)$，竖着读 | 独立写出行列式和行变换两步 |
+| `880-线代9-综合解答10` 初等变换求 $A$、Schmidt 正交化、$A=QT$ | 已讨论 | [09:58](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md)、[22:29](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md)、[22:36](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；（Ⅲ）三次讲解才接近讲通：把（Ⅱ）的关系反写成 $\alpha$ 用 $\gamma$ 表示，系数竖着填就是 $T$ | 先独立做（Ⅰ）（Ⅱ）；（Ⅲ）闭卷写出 $\alpha_3$ 用 $\gamma_1,\gamma_2,\gamma_3$ 表示的一行 |
+| `880-线代10-基础选择9` $AB=E$ 时 $AX=\alpha$、$BX=\beta$ 的解 | 已讨论 | [10:26](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；由 $AB=E$ 得 $A$ 行满秩、$B$ 列满秩 | 说出四个选项各错在哪 |
+| `880-线代10-基础选择10` 与所有 $\alpha_i$ 正交的 $\beta_1,\beta_2$，求 $AX=0$ 通解 | 已讨论 | [10:36](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；$\beta_1,\beta_2$ 可能为零向量，只有 $\beta_1-\beta_2\ne0$ 有保证 | 说出为什么排除 A、B、C |
+| `880-线代10-基础选择11` $ABX=0$ 与 $BX=0$ 同解的充要条件 | 已讨论 | [10:40](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；解集包含 + 基础解系个数相同 ⇒ 同解 ⇔ $r(AB)=r(B)$ | 闭卷写出包含关系和个数比较 |
+| `880-线代10-基础选择12` 三个无关解推 $r(A)=1$，比较 $AX=0$ 与 $A^*X=0$ | 已讨论 | [10:47](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md) | 未作答；10:49 你说「第二步不好想」：作差消掉 $b$，$k$ 个无关非齐次解得 $k-1$ 个无关齐次解 | 独立写出 $r(A)$、$r(A^*)$ 的推导 |
 
 ## 作答记录
 
@@ -10783,7 +10783,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天线性代数问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md)：08:21～22:36。
+- [当天线性代数问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-09.md)：08:21～22:36。
 - 6 道题都没有你的作答，选项答案来自你上传的参考答案截图，截图原图不在仓库。
 - 张宇页码只写问答里已核对的（第5讲 p49 起、第6讲 p65 起），Schmidt 正交化所在讲次未核实。
 
@@ -10814,27 +10814,27 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `880-线代10-综合选择1` 行满秩 $A_{m\times n}$（$m<n$），判断四个方程组的解 | 已讨论 | [08:37](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；$A^{\mathrm T}x=b_2$ 是列满秩，可能无解 | 说出四个选项的系数矩阵和未知数个数 |
-| `张宇线代9讲-例6.2` 含参向量组：两两无关但整体相关 | 已讨论 | [08:43](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；秩等于 2 之外还要检验两两不成比例，$a=1$ 被这一条排除 | 独立化阶梯形求出 $a,b$ |
-| `880-线代10-综合选择2` $Ax=b$ 有无穷多解的充要条件 | 已讨论 | [08:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；「有两个不同解」⇔ 有解且齐次有非零解 | 说出 A、B、D 各缺什么条件 |
-| `880-线代10-综合选择4` 秩为 $a$ 的向量组，$\beta$ 表示法不唯一 | 已讨论 | [09:14](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；题中的「秩为 $a$」不是笔误，表示不唯一 ⇒ $r(A)=r(A,\beta)<3$ | 独立列出秩条件 |
-| `880-线代10-综合选择5` $A(E-2\alpha\alpha^{\mathrm T})=B$，谁和谁同解 | 已讨论 | [09:29](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[09:35](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；09:35 问「$P$ 的左右为什么会影响」：左乘可逆阵保解，右乘改变解 | 说出 $E-2\alpha\alpha^{\mathrm T}$ 为什么可逆，以及转置后 $P$ 到了哪一边 |
-| `880-线代10-综合选择6` $A^nX=0$、$A^{n+1}X=0$、$(A^{\mathrm T})^nA^nX=0$ 同解 | 已讨论 | [09:41](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[09:49](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[09:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；追问了反证法中为什么要和「$n+1$ 个 $n$ 维向量必相关」比较 | 闭卷写出①的反证三步 |
-| `880-线代10-综合选择7` 反对称实矩阵，$AX=\pm X$ 只有零解 | 已讨论 | [10:06](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；左乘 $X^{\mathrm T}$，用 $X^{\mathrm T}AX=0$ | 独立写出 $X^{\mathrm T}X=0$ 那一行 |
-| `880-线代10-综合选择8` $\alpha^{\mathrm T}(AB+B^{\mathrm T}A)\alpha>0$ 推出可逆 | 已讨论 | [10:12](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答 | 说出怎么由正定推出 $A$ 可逆 |
-| `880-线代10-综合选择9` 行向量不能表示 ⇒ 联立方程组无解 | 已讨论 | [10:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；行向量问题先转置成列向量问题 | 说出选项 C 的矩阵是怎么来的 |
-| `880-线代10-综合选择10` 曲线上三点的方程组：行列式 + 拉格朗日中值定理 | 已讨论 | [10:37](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[10:40](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[10:47](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；$f''\ne0$ 保证三点不共线，系数行列式非零 | 说出 $f''\ne0$ 在哪一步用到 |
-| `880-线代10-综合选择11` $AX=b$ 有解的充要条件 | 已讨论 | [10:56](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[10:59](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[11:02](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；11 题你说「什么鬼，这些我怎么不会的这么多」；助手推导选 D，未对照参考答案（待核实） | 说出为什么 $r(A^{\mathrm T})=r\binom{A^{\mathrm T}}{b^{\mathrm T}}$ 就是有解条件 |
-| `880-线代10-综合填空1` $A=(\beta-\alpha_1-2\alpha_2-3\alpha_3,\alpha_1,\alpha_2,\alpha_3)$，求 $Ax=\beta$ 一个特解 | 作答待核实 | [11:14](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 你的思路是把 $A$ 写成 $(\beta,\alpha_1,\alpha_2,\alpha_3)C$，可行，但没写出最终特解；更快的是移项直接读系数 | 闭卷写出特解 $(1,1,2,3)^{\mathrm T}$ 和读系数的一行 |
-| `880-线代10-综合填空2` $A_{ij}=a_{ij}$、$\lvert A\rvert=1$，解 $Ax=(0,0,1)^{\mathrm T}$ | 已讨论 | [11:48](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[11:50](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[20:47](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[20:50](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；问了两次「为什么 $A^*=A^{\mathrm T}$」：$A^*$ 的 $(i,j)$ 元是 $A_{ji}=a_{ji}$ | 闭卷写出 $A^*=A^{\mathrm T}$ 和 $x=A^{-1}b=A^{\mathrm T}b$ |
-| `880-线代10-综合填空3` 由通解求 $\beta^{\mathrm T}A\beta$ | 已讨论 | [12:20](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[12:21](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[12:23](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[21:31](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；追问了 3 次 $A\beta=2A\xi+3A\eta$：通解 $k\xi+\eta$ 意味着 $A\xi=0$、$A\eta=b$ | 独立写出 $\beta=2\xi+3\eta$ 并算出 $-15$ |
-| `880-线代10-综合填空4` $\alpha,A\alpha,A^2\alpha$ 无关，求 $\operatorname{tr}A$ | 已讨论 | [12:23](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；你说「第四题也不会」；令 $P=(\alpha,A\alpha,A^2\alpha)$，$AP=PB$，$\operatorname{tr}A=\operatorname{tr}B$ | 闭卷写出 $B$ 并求迹 |
+| `880-线代10-综合选择1` 行满秩 $A_{m\times n}$（$m<n$），判断四个方程组的解 | 已讨论 | [08:37](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；$A^{\mathrm T}x=b_2$ 是列满秩，可能无解 | 说出四个选项的系数矩阵和未知数个数 |
+| `张宇线代9讲-例6.2` 含参向量组：两两无关但整体相关 | 已讨论 | [08:43](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；秩等于 2 之外还要检验两两不成比例，$a=1$ 被这一条排除 | 独立化阶梯形求出 $a,b$ |
+| `880-线代10-综合选择2` $Ax=b$ 有无穷多解的充要条件 | 已讨论 | [08:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；「有两个不同解」⇔ 有解且齐次有非零解 | 说出 A、B、D 各缺什么条件 |
+| `880-线代10-综合选择4` 秩为 $a$ 的向量组，$\beta$ 表示法不唯一 | 已讨论 | [09:14](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；题中的「秩为 $a$」不是笔误，表示不唯一 ⇒ $r(A)=r(A,\beta)<3$ | 独立列出秩条件 |
+| `880-线代10-综合选择5` $A(E-2\alpha\alpha^{\mathrm T})=B$，谁和谁同解 | 已讨论 | [09:29](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[09:35](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；09:35 问「$P$ 的左右为什么会影响」：左乘可逆阵保解，右乘改变解 | 说出 $E-2\alpha\alpha^{\mathrm T}$ 为什么可逆，以及转置后 $P$ 到了哪一边 |
+| `880-线代10-综合选择6` $A^nX=0$、$A^{n+1}X=0$、$(A^{\mathrm T})^nA^nX=0$ 同解 | 已讨论 | [09:41](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[09:49](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[09:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；追问了反证法中为什么要和「$n+1$ 个 $n$ 维向量必相关」比较 | 闭卷写出①的反证三步 |
+| `880-线代10-综合选择7` 反对称实矩阵，$AX=\pm X$ 只有零解 | 已讨论 | [10:06](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；左乘 $X^{\mathrm T}$，用 $X^{\mathrm T}AX=0$ | 独立写出 $X^{\mathrm T}X=0$ 那一行 |
+| `880-线代10-综合选择8` $\alpha^{\mathrm T}(AB+B^{\mathrm T}A)\alpha>0$ 推出可逆 | 已讨论 | [10:12](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答 | 说出怎么由正定推出 $A$ 可逆 |
+| `880-线代10-综合选择9` 行向量不能表示 ⇒ 联立方程组无解 | 已讨论 | [10:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；行向量问题先转置成列向量问题 | 说出选项 C 的矩阵是怎么来的 |
+| `880-线代10-综合选择10` 曲线上三点的方程组：行列式 + 拉格朗日中值定理 | 已讨论 | [10:37](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[10:40](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[10:47](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；$f''\ne0$ 保证三点不共线，系数行列式非零 | 说出 $f''\ne0$ 在哪一步用到 |
+| `880-线代10-综合选择11` $AX=b$ 有解的充要条件 | 已讨论 | [10:56](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[10:59](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[11:02](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；11 题你说「什么鬼，这些我怎么不会的这么多」；助手推导选 D，未对照参考答案（待核实） | 说出为什么 $r(A^{\mathrm T})=r\binom{A^{\mathrm T}}{b^{\mathrm T}}$ 就是有解条件 |
+| `880-线代10-综合填空1` $A=(\beta-\alpha_1-2\alpha_2-3\alpha_3,\alpha_1,\alpha_2,\alpha_3)$，求 $Ax=\beta$ 一个特解 | 作答待核实 | [11:14](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 你的思路是把 $A$ 写成 $(\beta,\alpha_1,\alpha_2,\alpha_3)C$，可行，但没写出最终特解；更快的是移项直接读系数 | 闭卷写出特解 $(1,1,2,3)^{\mathrm T}$ 和读系数的一行 |
+| `880-线代10-综合填空2` $A_{ij}=a_{ij}$、$\lvert A\rvert=1$，解 $Ax=(0,0,1)^{\mathrm T}$ | 已讨论 | [11:48](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[11:50](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[20:47](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[20:50](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；问了两次「为什么 $A^*=A^{\mathrm T}$」：$A^*$ 的 $(i,j)$ 元是 $A_{ji}=a_{ji}$ | 闭卷写出 $A^*=A^{\mathrm T}$ 和 $x=A^{-1}b=A^{\mathrm T}b$ |
+| `880-线代10-综合填空3` 由通解求 $\beta^{\mathrm T}A\beta$ | 已讨论 | [12:20](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[12:21](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[12:23](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)、[21:31](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；追问了 3 次 $A\beta=2A\xi+3A\eta$：通解 $k\xi+\eta$ 意味着 $A\xi=0$、$A\eta=b$ | 独立写出 $\beta=2\xi+3\eta$ 并算出 $-15$ |
+| `880-线代10-综合填空4` $\alpha,A\alpha,A^2\alpha$ 无关，求 $\operatorname{tr}A$ | 已讨论 | [12:23](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 未作答；你说「第四题也不会」；令 $P=(\alpha,A\alpha,A^2\alpha)$，$AP=PB$，$\operatorname{tr}A=\operatorname{tr}B$ | 闭卷写出 $B$ 并求迹 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `880-线代10-综合填空1` | 未注明 | [口述思路：把 $A$ 写成向量组乘矩阵来做，没有写出最终特解](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 部分正确 | 仅旧助手判断 | [11:14](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) |
+| `880-线代10-综合填空1` | 未注明 | [口述思路：把 $A$ 写成向量组乘矩阵来做，没有写出最终特解](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) | 部分正确 | 仅旧助手判断 | [11:14](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md) |
 
 - 作答方式记为「未注明」：你说「一开始」就这样想，但提问时附上了答案解析截图，分不清是否先看过答案。思路可行，但没有写出完整结果，所以记「部分正确」。
 
@@ -10930,7 +10930,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天线性代数问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)：08:37～21:31。
+- [当天线性代数问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-10.md)：08:37～21:31。
 - 选择题、填空题的答案来自你上传的参考答案截图，截图原图不在仓库。
 - `880-线代10-综合选择11` 的答案 D 是助手推导，没有对照参考答案，待核实。
 - 张宇页码只写问答里已核对的：第5讲 p49 起、第6讲 p66、第8讲 p79 起。秩一矩阵所在页码待核实。
@@ -10955,7 +10955,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `知识点-特征向量个数` 解向量个数 $n-r$ 与特征向量个数的关系 | 已讨论 | [08:38](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-14.md) | 没有把特征向量看成 $(\lambda E-A)x=0$ 的非零解 → 个数是 $n-r(\lambda E-A)$ | 对一个具体矩阵，闭卷算出每个特征值的线性无关特征向量个数 |
+| `知识点-特征向量个数` 解向量个数 $n-r$ 与特征向量个数的关系 | 已讨论 | [08:38](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-14.md) | 没有把特征向量看成 $(\lambda E-A)x=0$ 的非零解 → 个数是 $n-r(\lambda E-A)$ | 对一个具体矩阵，闭卷算出每个特征值的线性无关特征向量个数 |
 
 ## 作答记录
 
@@ -11016,7 +11016,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天线性代数问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-14.md)：08:38。
+- [当天线性代数问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0/2026-10-14.md)：08:38。
 - 10-11 至 10-13 没有线性代数问答记录，这几天的进度无法从仓库确认。
 - 第十二章综合解答 (8) 的题型来自 10-11 按做题本整理的计划，题干没有记录在问答里。
 
@@ -11040,17 +11040,17 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2009-17` 关于 RISC 的错误说法（题号推定） | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[18:57](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 整卷判错；所选选项未转写，错因待用户说明 | 独立选出错误项并说出理由 |
-| `408-2009-43` 中断与 DMA 占 CPU 时间的百分比 | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[19:42](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[19:48](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[19:50](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[19:54](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 只写了“500MHz ÷ 0.5MB/s = 125”，单位对不上，没算出每秒次数 → 每秒次数 × 每次周期 ÷ 主频；中断“一次”搬一个单位（4B），DMA“一次”搬一块（5000B） | 闭卷做 19:42 的 (a)(b) 迁移题，每步写单位 |
-| `408-2009-44` ADD (R1),R0 执行阶段的微操作和控制信号 | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 把 (R1) 当寄存器，结果写回 R1，没有送 MAR、没有 MemR/MemW → (R1) 是 R1 所指主存单元，读要 MAR→MemR→MDR，写要 MDR→MemW | 闭卷写换指令的迁移题执行阶段 |
+| `408-2009-17` 关于 RISC 的错误说法（题号推定） | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[18:57](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 整卷判错；所选选项未转写，错因待用户说明 | 独立选出错误项并说出理由 |
+| `408-2009-43` 中断与 DMA 占 CPU 时间的百分比 | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[19:42](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[19:48](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[19:50](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)、[19:54](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 只写了“500MHz ÷ 0.5MB/s = 125”，单位对不上，没算出每秒次数 → 每秒次数 × 每次周期 ÷ 主频；中断“一次”搬一个单位（4B），DMA“一次”搬一块（5000B） | 闭卷做 19:42 的 (a)(b) 迁移题，每步写单位 |
+| `408-2009-44` ADD (R1),R0 执行阶段的微操作和控制信号 | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 把 (R1) 当寄存器，结果写回 R1，没有送 MAR、没有 MemR/MemW → (R1) 是 R1 所指主存单元，读要 MAR→MemR→MDR，写要 MDR→MemW | 闭卷写换指令的迁移题执行阶段 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2009-17` | 独立 | 整卷答题卡原图（含姓名，未公开），所选选项未转写 | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) |
-| `408-2009-43` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) |
-| `408-2009-44` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) |
+| `408-2009-17` | 独立 | 整卷答题卡原图（含姓名，未公开），所选选项未转写 | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) |
+| `408-2009-43` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) |
+| `408-2009-44` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md) |
 
 - 17 由用户自己对答案判错；43、44 由批改助手看原图估分。原图不在仓库，核对依据只能记“仅旧助手判断”。43 的红笔 2.5% 是看答案后的订正，不算作答。
 - 今天的讲解和小检验都还没有用户作答，所以不写入本表。
@@ -11121,8 +11121,8 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [2026-10-08 计算机组成原理问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)：16:51、18:57、19:42、19:48、19:50、19:51、19:54、19:55。
-- [2009 真题考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)：只用于说明整卷背景，考试记录本身不改变题目状态。
+- [2026-10-08 计算机组成原理问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-08.md)：16:51、18:57、19:42、19:48、19:50、19:51、19:54、19:55。
+- [2009 真题考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)：只用于说明整卷背景，考试记录本身不改变题目状态。
 - 答题卡原图含姓名，未上传；17 的所选选项未转写。43、44 的作答是批改助手转写，估分凭记忆对照 2009 评分标准，未逐条核对答案册。
 - 17 题的题号按 2009 卷计组选择题顺序推定。用户上传的 2009-43 视频课解答截图含第三方群号水印，未入库。
 - “200/8000 为纳秒”是助手推断，未见原件。
@@ -11148,11 +11148,11 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2009-13` 浮点加法，阶码尾数均为补码，判溢出 | 已讨论 | [14:06](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[14:08](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[14:09](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[14:13](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 尾数怎么快速写成二进制、尾数相加后右规阶码加一都忘了 → 分母 2ⁿ 就写 n 位小数；尾数 01.xxx 或 10.xxx 右规一次、阶码加一，再看阶码是否超出范围 | 闭卷做 14:08 的改编题（2⁶×29/32 + 2⁴×5/8） |
-| `408-2009-17` 关于 RISC 的错误说法（题号推定） | 作答待核实 | [14:22](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 10-08 整卷判错，今天只听了 A 项“RISC 普遍用微程序控制器”为什么错，没有重新作答 | 独立选出错误项并说出理由 |
-| `408-2009-20` 总线带宽（4B、2 个时钟一周期、10MHz） | 已讨论 | [14:37](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[14:38](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 位与字节、总线周期与时钟周期分不清 → 带宽 = 每次字节数 × 每秒次数，每秒次数 = 频率 ÷ 每次占的时钟数 | 闭卷做 14:42 的 64 位、200MHz 突发题 |
-| `408-2009-44` ADD (R1),R0 执行阶段的微操作和控制信号 | 作答待核实 | [16:07](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[16:57](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 10-08 作答的六处问题（16:07 列出）：(R1) 当寄存器、没送 MAR、数据方向反、一拍两次用内总线、ALU 另一输入不是 MDR、漏写回主存两步 → 标准 C5～C10 六拍 | 闭卷写 ADD R1,(R0) 的执行阶段 |
-| `CO-总线带宽-01` 32 位总线、100MHz，单次与突发带宽 | 作答待核实 | [14:42](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | (a) 把频率当时间放进分母，也没把 32 位换成 4B → 4B × 100×10⁶/s = 400MB/s；(b) 未作答 → 5 个时钟传 16B，320MB/s | 闭卷做换数字的 64 位、200MHz 突发题 |
+| `408-2009-13` 浮点加法，阶码尾数均为补码，判溢出 | 已讨论 | [14:06](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[14:08](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[14:09](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[14:13](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 尾数怎么快速写成二进制、尾数相加后右规阶码加一都忘了 → 分母 2ⁿ 就写 n 位小数；尾数 01.xxx 或 10.xxx 右规一次、阶码加一，再看阶码是否超出范围 | 闭卷做 14:08 的改编题（2⁶×29/32 + 2⁴×5/8） |
+| `408-2009-17` 关于 RISC 的错误说法（题号推定） | 作答待核实 | [14:22](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 10-08 整卷判错，今天只听了 A 项“RISC 普遍用微程序控制器”为什么错，没有重新作答 | 独立选出错误项并说出理由 |
+| `408-2009-20` 总线带宽（4B、2 个时钟一周期、10MHz） | 已讨论 | [14:37](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[14:38](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 位与字节、总线周期与时钟周期分不清 → 带宽 = 每次字节数 × 每秒次数，每秒次数 = 频率 ÷ 每次占的时钟数 | 闭卷做 14:42 的 64 位、200MHz 突发题 |
+| `408-2009-44` ADD (R1),R0 执行阶段的微操作和控制信号 | 作答待核实 | [16:07](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)、[16:57](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 10-08 作答的六处问题（16:07 列出）：(R1) 当寄存器、没送 MAR、数据方向反、一拍两次用内总线、ALU 另一输入不是 MDR、漏写回主存两步 → 标准 C5～C10 六拍 | 闭卷写 ADD R1,(R0) 的执行阶段 |
+| `CO-总线带宽-01` 32 位总线、100MHz，单次与突发带宽 | 作答待核实 | [14:42](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | (a) 把频率当时间放进分母，也没把 32 位换成 4B → 4B × 100×10⁶/s = 400MB/s；(b) 未作答 → 5 个时钟传 16B，320MB/s | 闭卷做换数字的 64 位、200MHz 突发题 |
 
 - 今天未涉及、状态沿用 10-08：`408-2009-43` 作答待核实（14:38 只提到它和带宽是同一套路）。
 - `408-2009-13`、`408-2009-20` 都在 10-08 整卷里做过，但对错和所选选项都没有记录，所以没有作答行，只记“已讨论”。
@@ -11161,7 +11161,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `CO-总线带宽-01` | 独立 | 文字原文“1 32b除100m。不知道”，见[问答记录 14:42](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 错误 | 原件已核 | [14:42](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) |
+| `CO-总线带宽-01` | 独立 | 文字原文“1 32b除100m。不知道”，见[问答记录 14:42](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) | 错误 | 原件已核 | [14:42](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md) |
 
 - 作答是用户打字，原文已记在问答里，所以记“原件已核”；(a) 错、(b) 没答，整体记错误。
 - 14:42 之外的检验题都还没有作答，不写入本表。
@@ -11248,7 +11248,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [2026-10-09 计算机组成原理问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)：14:06、14:08、14:09、14:13、14:22、14:32、14:36、14:37、14:38、14:42、16:07、16:57。
+- [2026-10-09 计算机组成原理问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-09.md)：14:06、14:08、14:09、14:13、14:22、14:32、14:36、14:37、14:38、14:42、16:07、16:57。
 - 2009-13、2009-20 的题号按 2009 卷计组选择题顺序推定，未与用户原卷核对；整卷时的作答没有转写。
 - 2009-44 的原作答只有批改助手的转写，答题卡原图（含姓名）未入库；16:57 用户上传的视频课截图有第三方水印，未入库，原题图已重绘为静态图。
 - 控制器的三条（14:22、14:32、14:36）是概念讲解，没有题目编号进入状态表；其中的检验题写进了上面的自测。
@@ -11273,14 +11273,14 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2010-12` 能缩短程序执行时间的措施 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 C（漏了提高主频）→ 执行时间 = 指令数 × CPI ÷ 主频，三项各对一个因子，选 D | 说出三个选项分别改的是哪个因子 |
-| `408-2010-13` 8 位补码乘法哪个溢出 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 A → 先转真值：F2H = −14、90H = −112，乘积 1568 > 127，选 B | 闭卷判断 10-11 的 E0H、FCH、C0H 三个运算 |
-| `408-2010-15` 2K×4 芯片组成 8K×8，0B1FH 所在芯片最小地址 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)、[19:30](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 B；不知道“两片一组”，没先算每组地址范围 → 两片位扩展成一组 2K×8，每组占 0800H 个地址，0B1FH 在 0800H～0FFFH，选 D | 闭卷做 1K×4 → 4K×8、0A3FH 的迁移题 |
-| `408-2010-16` RAM 和 ROM 的正确叙述 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 所选选项未转写；ROM 不能做 Cache，也不需要刷新，选 A | 10-11 已补 RAM/ROM 总结，闭卷做 DRAM 引脚题 |
-| `408-2010-21` 单重中断服务程序内的执行顺序 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)、[19:50](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 C，把关中断、保存断点算进服务程序 → 这两步是中断隐指令（硬件）做的，服务程序从保存现场开始，选 A | 闭卷答多重中断三问 |
-| `408-2010-22` 显存总带宽至少多少 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 C；刷新带宽只占 50%，总带宽要再 ÷ 50% → 1600×1200×24×85 ≈ 3917Mbps，÷0.5 ≈ 7834Mbps，选 D | 闭卷做换分辨率的显存带宽题 |
-| `408-2010-43` 指令格式、按字编址、相对寻址和 (Rn)+ | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | MAR 写 17 位（按字编址应 16 位）；转移范围写 [−2¹⁶+Rn, 2¹⁶−1+Rn]（应为整个主存）；(3) 结果写回 R4（应写主存 5678H 单元，68ACH） | 闭卷做 ADD R4,(R5)+ 的迁移题 |
-| `408-2010-44` Cache 总位数、数组元素所在行、命中率 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | (1) 只算了数据区 512B；(2) 没加首地址；(3) A 命中率写 31/32 → 每行要加有效位和标记；元素地址 = 首地址 + 下标 × 4 | 闭卷做 64MB、16 行 × 32B 的迁移题 |
+| `408-2010-12` 能缩短程序执行时间的措施 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 C（漏了提高主频）→ 执行时间 = 指令数 × CPI ÷ 主频，三项各对一个因子，选 D | 说出三个选项分别改的是哪个因子 |
+| `408-2010-13` 8 位补码乘法哪个溢出 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 A → 先转真值：F2H = −14、90H = −112，乘积 1568 > 127，选 B | 闭卷判断 10-11 的 E0H、FCH、C0H 三个运算 |
+| `408-2010-15` 2K×4 芯片组成 8K×8，0B1FH 所在芯片最小地址 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)、[19:30](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 B；不知道“两片一组”，没先算每组地址范围 → 两片位扩展成一组 2K×8，每组占 0800H 个地址，0B1FH 在 0800H～0FFFH，选 D | 闭卷做 1K×4 → 4K×8、0A3FH 的迁移题 |
+| `408-2010-16` RAM 和 ROM 的正确叙述 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 所选选项未转写；ROM 不能做 Cache，也不需要刷新，选 A | 10-11 已补 RAM/ROM 总结，闭卷做 DRAM 引脚题 |
+| `408-2010-21` 单重中断服务程序内的执行顺序 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)、[19:50](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 C，把关中断、保存断点算进服务程序 → 这两步是中断隐指令（硬件）做的，服务程序从保存现场开始，选 A | 闭卷答多重中断三问 |
+| `408-2010-22` 显存总带宽至少多少 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 选 C；刷新带宽只占 50%，总带宽要再 ÷ 50% → 1600×1200×24×85 ≈ 3917Mbps，÷0.5 ≈ 7834Mbps，选 D | 闭卷做换分辨率的显存带宽题 |
+| `408-2010-43` 指令格式、按字编址、相对寻址和 (Rn)+ | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | MAR 写 17 位（按字编址应 16 位）；转移范围写 [−2¹⁶+Rn, 2¹⁶−1+Rn]（应为整个主存）；(3) 结果写回 R4（应写主存 5678H 单元，68ACH） | 闭卷做 ADD R4,(R5)+ 的迁移题 |
+| `408-2010-44` Cache 总位数、数组元素所在行、命中率 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | (1) 只算了数据区 512B；(2) 没加首地址；(3) A 命中率写 31/32 → 每行要加有效位和标记；元素地址 = 首地址 + 下标 × 4 | 闭卷做 64MB、16 行 × 32B 的迁移题 |
 
 - 今天未涉及、状态沿用：`408-2009-17`、`408-2009-43`、`408-2009-44`、`CO-总线带宽-01` 作答待核实；`408-2009-13`、`408-2009-20` 已讨论。
 
@@ -11288,14 +11288,14 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2010-12` | 独立 | 选 C（应 D）；整卷原图见[2010 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
-| `408-2010-13` | 独立 | 选 A（应 B）；整卷原图见[2010 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
-| `408-2010-15` | 独立 | 选 B（应 D）；整卷原图见[2010 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
-| `408-2010-16` | 独立 | 所选选项未转写（应 A）；整卷原图见[2010 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
-| `408-2010-21` | 独立 | 选 C（应 A）；整卷原图见[2010 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
-| `408-2010-22` | 独立 | 选 C（应 D）；整卷原图见[2010 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
-| `408-2010-43` | 独立 | 转写见[问答 17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)：(1) 16 种、8 个、MAR 17、MDR 16；(2) [−2¹⁶+Rn, 2¹⁶−1+Rn]；(3) 机器码 2315H，R5 = 5679H，R4 = 69BDH | 部分正确 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
-| `408-2010-44` | 独立 | 转写见[问答 17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)：(1) 512B；(2) 未得出行号；(3) A 31/32、B 0、A 更快 | 部分正确 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
+| `408-2010-12` | 独立 | 选 C（应 D）；整卷原图见[2010 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
+| `408-2010-13` | 独立 | 选 A（应 B）；整卷原图见[2010 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
+| `408-2010-15` | 独立 | 选 B（应 D）；整卷原图见[2010 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
+| `408-2010-16` | 独立 | 所选选项未转写（应 A）；整卷原图见[2010 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
+| `408-2010-21` | 独立 | 选 C（应 A）；整卷原图见[2010 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
+| `408-2010-22` | 独立 | 选 C（应 D）；整卷原图见[2010 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
+| `408-2010-43` | 独立 | 转写见[问答 17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)：(1) 16 种、8 个、MAR 17、MDR 16；(2) [−2¹⁶+Rn, 2¹⁶−1+Rn]；(3) 机器码 2315H，R5 = 5679H，R4 = 69BDH | 部分正确 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
+| `408-2010-44` | 独立 | 转写见[问答 17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)：(1) 512B；(2) 未得出行号；(3) A 31/32、B 0、A 更快 | 部分正确 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) |
 
 - 选择题对错按用户红笔订正，大题估分是批改助手凭记忆对照 2010 评分标准，未逐条核答案册，所以都记“仅旧助手判断”。作答原图于 10-13 经用户同意公开在考试记录里，本复盘没有重新看图判卷。
 
@@ -11318,7 +11318,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 - 2010-44：Cache 行里除了数据还有控制位和标记，这个结构没建立；“首地址 + 下标 × 元素大小”这一步没加首地址。
 - 2010-13：所选 A 的错因当天没写，10-11 用户追问“负负变为正还不算溢出吗”，暴露的是把加法的“变号判溢出”套到了乘法上（见 10-11 复盘）。
 - **需要纠正的旧结论**（原问答保持不动）：
-  - 17:52 记录把 2010-44 写成“回写方式、含脏位”，第 (1) 问算成每行 533 位、共 4264 位 → 更正：原题写明“不考虑一致性维护和替换算法的控制位”，每行 1 + 19 + 512 = 532 位，共 4256 位 → 依据：王道 27 版第 3 章综合题 04 解析原件，见 [2026-10-13 问答 15:40](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md)。A 的命中率 15/16 也在同一处与王道解析核对。
+  - 17:52 记录把 2010-44 写成“回写方式、含脏位”，第 (1) 问算成每行 533 位、共 4264 位 → 更正：原题写明“不考虑一致性维护和替换算法的控制位”，每行 1 + 19 + 512 = 532 位，共 4256 位 → 依据：王道 27 版第 3 章综合题 04 解析原件，见 [2026-10-13 问答 15:40](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md)。A 的命中率 15/16 也在同一处与王道解析核对。
 
 ## 闭卷自测
 
@@ -11375,8 +11375,8 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [2026-10-10 计算机组成原理问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)：17:52（三个小节）、19:30、19:50。
-- [2010 真题考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)：只说明整卷背景，考试记录本身不改变题目状态。
+- [2026-10-10 计算机组成原理问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md)：17:52（三个小节）、19:30、19:50。
+- [2010 真题考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)：只说明整卷背景，考试记录本身不改变题目状态。
 - 2010-43、2010-44 的题意是批改助手凭记忆整理的，10-13 才与王道原题核对（见 10-13 复盘）。
 - 2010-16 用户所选选项未转写；2010-22 的题干选项没有记在问答里，只记了正确要点。
 - 本复盘于 2026-10-14 依据用户“补总结”的要求按问答记录补写，不是当天口述的总结。
@@ -11403,10 +11403,10 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2010-12` 能缩短程序执行时间的措施 | 作答待核实 | [14:56](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-11.md) | 整卷选 C → 三个因子各对一个选项；同族公式：IPS = 主频 ÷ CPI，总周期数 = 指令数 × CPI = 时间 × 主频 | 闭卷做 M1/M2 换机器求主频的检验题 |
-| `408-2010-13` 8 位补码乘法哪个溢出 | 作答待核实 | [15:43](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-11.md) | 以为“负×负变正”就是溢出 → 溢出只看真实结果是否超出 −128～+127；“同号相加变号”只适用于加减法 | 闭卷判断 E0H×FCH、E0H+C0H、C0H+C0H |
-| `408-2010-16` RAM 和 ROM 的正确叙述 | 作答待核实 | [15:49](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-11.md) | III“都可作 Cache”、IV“都要刷新”判断错 → Cache 要频繁写只能用 SRAM；只有 DRAM 刷新 | 闭卷做 DRAM 引脚数和 EPROM 判断 |
-| `408-2010-21` 单重中断服务程序内的执行顺序 | 作答待核实 | [15:56 补写，在 10-10 问答 19:50 小节](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 单重、多重的区别没成体系 → 多重 = 单重在事件处理前插“开中断”、后插“关中断”，再加屏蔽字的保存与恢复 | 闭卷答 10-10 复盘的多重中断三问 |
+| `408-2010-12` 能缩短程序执行时间的措施 | 作答待核实 | [14:56](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-11.md) | 整卷选 C → 三个因子各对一个选项；同族公式：IPS = 主频 ÷ CPI，总周期数 = 指令数 × CPI = 时间 × 主频 | 闭卷做 M1/M2 换机器求主频的检验题 |
+| `408-2010-13` 8 位补码乘法哪个溢出 | 作答待核实 | [15:43](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-11.md) | 以为“负×负变正”就是溢出 → 溢出只看真实结果是否超出 −128～+127；“同号相加变号”只适用于加减法 | 闭卷判断 E0H×FCH、E0H+C0H、C0H+C0H |
+| `408-2010-16` RAM 和 ROM 的正确叙述 | 作答待核实 | [15:49](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-11.md) | III“都可作 Cache”、IV“都要刷新”判断错 → Cache 要频繁写只能用 SRAM；只有 DRAM 刷新 | 闭卷做 DRAM 引脚数和 EPROM 判断 |
+| `408-2010-21` 单重中断服务程序内的执行顺序 | 作答待核实 | [15:56 补写，在 10-10 问答 19:50 小节](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) | 单重、多重的区别没成体系 → 多重 = 单重在事件处理前插“开中断”、后插“关中断”，再加屏蔽字的保存与恢复 | 闭卷答 10-10 复盘的多重中断三问 |
 
 - 今天未涉及、状态沿用：`408-2010-15`、`408-2010-22`、`408-2010-43`、`408-2010-44`、`408-2009-17`、`408-2009-43`、`408-2009-44`、`CO-总线带宽-01` 作答待核实；`408-2009-13`、`408-2009-20` 已讨论。
 
@@ -11487,8 +11487,8 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [2026-10-11 计算机组成原理问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-11.md)：14:56、15:43、15:49。
-- 2010-21 的单重 / 多重中断对照是 10-11 15:56 补写在 [2026-10-10 问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) 19:50 小节里的，依据王道 27 版第 7 章中断处理流程。
+- [2026-10-11 计算机组成原理问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-11.md)：14:56、15:43、15:49。
+- 2010-21 的单重 / 多重中断对照是 10-11 15:56 补写在 [2026-10-10 问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-10.md) 19:50 小节里的，依据王道 27 版第 7 章中断处理流程。
 - 三道题的题干与答案按问答所记，与王道 27 版对应章节习题一致；用户整卷作答见 10-10 复盘。
 - 本复盘于 2026-10-14 依据用户“补总结”的要求按问答记录补写，不是当天口述的总结。
 
@@ -11511,15 +11511,15 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2024-12` int 32777 截成 short 再赋给 int | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 选 A，只想到“溢出”，没算出截断后的值 → 新最高位是 1 就减 2¹⁶：32777 − 65536 = −32759，再符号扩展值不变，选 B | 闭卷做 0xFF9C 和 −70000 的截断扩展题 |
-| `408-2024-18` 哪项不在 MMU 地址转换中检测 | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 选 A，MMU 与 Cache 的先后不清 → 越权、缺页、TLB 缺失在地址转换中检测；Cache 缺失在得到物理地址之后，选 B | 默写访存顺序：TLB → 页表 → 物理地址 → Cache → 主存 |
-| `408-2024-43` 指令格式、控制信号与 shamt | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | (3) 写“零扩展或符号扩展对结果无影响” → shamt 取自 IR[24:20] 的 5 位；读指令先把每个字段的位段标出来 | 对着格式表说出立即数、移位量各取哪几位、怎么扩展 |
-| `408-2024-44` 数组元素地址与机器数 | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | (1) 一个寄存器写成 r4（应 r2）；(2) a[i] 地址、a[i] 机器数、sum 机器数都被改正 → 先写“首地址 + 下标 × 元素大小”再代数；负数机器数 = 2ⁿ − 绝对值 | 闭卷做 short b[50][20] 的地址和机器数题 |
-| `408-2024-14` ±2²⁰、±2⁴⁰ 整数分别用什么类型 | 作答待核实 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → 浮点数能精确表示的整数看尾数有效位：单精度 24 位、双精度 53 位 | 闭卷答“±2³⁰ 用单精度行不行” |
-| `408-2024-15` 乘法运算的实现 | 作答待核实 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → 两个变量相乘也能编成“判断一位、移位、相加”的循环；阵列乘法器一个周期，ALU 加移位器多个周期 | 说出三种实现各要几个周期 |
-| `408-2024-16` 存储层次的叙述 | 作答待核实 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → 主存—外存层次是全相联，只能写回 | 闭卷答 20:27 的 Cache 与虚存三问 |
-| `408-2024-21` 中断屏蔽字的作用 | 作答待核实 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → 屏蔽字改的是处理优先级，响应优先级由硬件判优电路决定 | 闭卷写 L0～L3 的屏蔽字 |
-| `408-2024-22` DMA 方式的叙述 | 作答待核实 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → DMA 方式下数据在设备接口和主存之间直接传，不经过 CPU | 说出 DMA 传送前、中、后 CPU 各做什么 |
+| `408-2024-12` int 32777 截成 short 再赋给 int | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 选 A，只想到“溢出”，没算出截断后的值 → 新最高位是 1 就减 2¹⁶：32777 − 65536 = −32759，再符号扩展值不变，选 B | 闭卷做 0xFF9C 和 −70000 的截断扩展题 |
+| `408-2024-18` 哪项不在 MMU 地址转换中检测 | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 选 A，MMU 与 Cache 的先后不清 → 越权、缺页、TLB 缺失在地址转换中检测；Cache 缺失在得到物理地址之后，选 B | 默写访存顺序：TLB → 页表 → 物理地址 → Cache → 主存 |
+| `408-2024-43` 指令格式、控制信号与 shamt | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | (3) 写“零扩展或符号扩展对结果无影响” → shamt 取自 IR[24:20] 的 5 位；读指令先把每个字段的位段标出来 | 对着格式表说出立即数、移位量各取哪几位、怎么扩展 |
+| `408-2024-44` 数组元素地址与机器数 | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | (1) 一个寄存器写成 r4（应 r2）；(2) a[i] 地址、a[i] 机器数、sum 机器数都被改正 → 先写“首地址 + 下标 × 元素大小”再代数；负数机器数 = 2ⁿ − 绝对值 | 闭卷做 short b[50][20] 的地址和机器数题 |
+| `408-2024-14` ±2²⁰、±2⁴⁰ 整数分别用什么类型 | 作答待核实 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → 浮点数能精确表示的整数看尾数有效位：单精度 24 位、双精度 53 位 | 闭卷答“±2³⁰ 用单精度行不行” |
+| `408-2024-15` 乘法运算的实现 | 作答待核实 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → 两个变量相乘也能编成“判断一位、移位、相加”的循环；阵列乘法器一个周期，ALU 加移位器多个周期 | 说出三种实现各要几个周期 |
+| `408-2024-16` 存储层次的叙述 | 作答待核实 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → 主存—外存层次是全相联，只能写回 | 闭卷答 20:27 的 Cache 与虚存三问 |
+| `408-2024-21` 中断屏蔽字的作用 | 作答待核实 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)、[20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → 屏蔽字改的是处理优先级，响应优先级由硬件判优电路决定 | 闭卷写 L0～L3 的屏蔽字 |
+| `408-2024-22` DMA 方式的叙述 | 作答待核实 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) | 做对但拿不准 → DMA 方式下数据在设备接口和主存之间直接传，不经过 CPU | 说出 DMA 传送前、中、后 CPU 各做什么 |
 
 - 今天未涉及、状态沿用：2010 卷的 `408-2010-12`、`408-2010-13`、`408-2010-15`、`408-2010-16`、`408-2010-21`、`408-2010-22`、`408-2010-43`、`408-2010-44`，以及 `408-2009-17`、`408-2009-43`、`408-2009-44`、`CO-总线带宽-01` 作答待核实；`408-2009-13`、`408-2009-20` 已讨论。
 
@@ -11527,15 +11527,15 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2024-12` | 独立 | 选 A（应 B）；整卷原图见[2024 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
-| `408-2024-18` | 独立 | 选 A（应 B）；整卷原图见[2024 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
-| `408-2024-43` | 独立 | 转写见[问答 20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)：(3) 写“零扩展或符号扩展对结果无影响”，其余按红笔基本对 | 部分正确 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
-| `408-2024-44` | 独立 | 转写见[问答 20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)：(1) 一个寄存器写成 r4；(2) 三个值被改正；(3) 对 | 部分正确 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
-| `408-2024-14` | 独立 | 选 C，题号画圈表示拿不准；整卷原图见[2024 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
-| `408-2024-15` | 独立 | 选 D，题号划线表示拿不准；整卷原图见[2024 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
-| `408-2024-16` | 独立 | 选 D，题号画圈表示拿不准；整卷原图见[2024 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
-| `408-2024-21` | 独立 | 选 A，题号画圈表示拿不准；整卷原图见[2024 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
-| `408-2024-22` | 独立 | 选 C，题号划线表示拿不准；整卷原图见[2024 考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
+| `408-2024-12` | 独立 | 选 A（应 B）；整卷原图见[2024 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
+| `408-2024-18` | 独立 | 选 A（应 B）；整卷原图见[2024 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
+| `408-2024-43` | 独立 | 转写见[问答 20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)：(3) 写“零扩展或符号扩展对结果无影响”，其余按红笔基本对 | 部分正确 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
+| `408-2024-44` | 独立 | 转写见[问答 20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)：(1) 一个寄存器写成 r4；(2) 三个值被改正；(3) 对 | 部分正确 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
+| `408-2024-14` | 独立 | 选 C，题号画圈表示拿不准；整卷原图见[2024 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
+| `408-2024-15` | 独立 | 选 D，题号划线表示拿不准；整卷原图见[2024 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
+| `408-2024-16` | 独立 | 选 D，题号画圈表示拿不准；整卷原图见[2024 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
+| `408-2024-21` | 独立 | 选 A，题号画圈表示拿不准；整卷原图见[2024 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
+| `408-2024-22` | 独立 | 选 C，题号划线表示拿不准；整卷原图见[2024 考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md) | 正确 | 仅旧助手判断 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md) |
 
 - 选择题对错按用户红笔订正，正确要点由助手给出，未对答案册逐条核；大题估分参照红笔订正和对 2024 官方答案的记忆。所以都记“仅旧助手判断”。
 - 14、15、16、21、22 虽然独立做对，但核对依据只到“仅旧助手判断”，而且用户自述拿不准，状态停在“作答待核实”，不算独立做对。
@@ -11617,8 +11617,8 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [2026-10-12 计算机组成原理问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)：20:15（两个小节）、20:24、20:27。
-- [2024 真题考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)：只说明整卷背景，考试记录本身不改变题目状态。
+- [2026-10-12 计算机组成原理问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-12.md)：20:15（两个小节）、20:24、20:27。
+- [2024 真题考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)：只说明整卷背景，考试记录本身不改变题目状态。
 - 2024-44 的题面没有拍到，作答只有“哪几个值被改正”，原题数值不在仓库记录里，所以自测用改编题，不补编原题。
 - 20:24 的拿不准题号由助手看试卷照片识别；作答原图于 10-13 经用户同意公开在考试记录里，本复盘没有重新看图判卷。
 - 本复盘于 2026-10-14 依据用户“补总结”的要求按问答记录补写，不是当天口述的总结。
@@ -11639,18 +11639,18 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
   - `王道CO-4-27`（2014 统考，基址寻址偏移量的范围）：在含解析的课件截图下答“选 a 吧”，正确（08:23）。
 - 已讨论（用户说“直接讲”）：`王道CO-5-23`（2014 统考，断定法下地址字段位数）（08:42、08:43）。
 - 已讨论（追问 2010 整卷的错题，并与王道原题核对）：`408-2010-43` 第 (2) 问转移范围（15:28）、第 (3) 问为什么先相加后自增（15:36）；`408-2010-44` Cache 地址拆分、控制位与总容量（15:40），并更正了 10-10 记录里的错误。
-- 可视化（不是做题）：做了 [Cache 地址与容量](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E5%9C%B0%E5%9D%80%E4%B8%8E%E5%AE%B9%E9%87%8F.html)（15:40）；逐页看 16 份 PPT 列出可视化选题（16:55）；按选题做了浮点数加减、I/O 占 CPU 时间、单总线数据通路逐拍、单周期数据通路与五段流水线、Cache 访问序列 5 个交互页（21:10）。
+- 可视化（不是做题）：做了 [Cache 地址与容量](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E5%9C%B0%E5%9D%80%E4%B8%8E%E5%AE%B9%E9%87%8F.html)（15:40）；逐页看 16 份 PPT 列出可视化选题（16:55）；按选题做了浮点数加减、I/O 占 CPU 时间、单总线数据通路逐拍、单周期数据通路与五段流水线、Cache 访问序列 5 个交互页（21:10）。
 - 未完成：08:15、08:19、08:23、08:43、15:28、15:36、15:40 各留了一道检验题，都在等闭卷作答。
 
 ## 题目状态
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `王道CO-4-31` 2019 统考：基址寻址 + 大端，求操作数 LSB 的地址 | 作答待核实 | [08:16](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 大端说成“最低放在最右边”，没落到地址上；EA 只列式没算完 → 大端是高位字节放低地址，LSB 在 EA+3；FF12H 先符号扩展成 FFFF FF12H，EA = EFFF FF12H，LSB 地址 EFFF FF15H，选 D | 闭卷做小端、形式地址 FFF0H 的检验题 |
-| `王道CO-4-27` 2014 统考：Store 指令基址寻址偏移量的取值范围 | 作答待核实 | [08:23](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 在已含解析的截图下作答 → 偏移量 32 − 8 − 4 − 4 = 16 位，补码 −32768～+32767，选 A；B 把补码两端写反 | 闭卷做 64 个寄存器、操作码 7 位的检验题 |
-| `王道CO-5-23` 2014 统考：断定法下地址字段至少几位 | 已讨论 | [08:42](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 看讲解后，未作答 → 控存总条数 32 × 4 + 2 = 130，2⁸ ≥ 130，至少 8 位，选 C；坑是漏掉公共取指的 2 条或把它乘 32 | 闭卷做 64 条指令、公共取指 1 条 + 间址 2 条的检验题 |
-| `408-2010-43` 指令格式、按字编址、相对寻址和 (Rn)+ | 作答待核实 | [15:28](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md)、[15:36](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 10-10 的作答今天与王道原件核对：(2) 把 Rn 当起点、偏移量写成 ±2¹⁶ → 起点是 PC，16 位按模 2¹⁶ 回绕，范围是整个主存 0000H～FFFFH；(3) 先自增后取数 → (Rn)+ 是先用原值、后加 1 | 闭卷做 8 位偏移 / 16 位寄存器偏移的范围题和 -(R5) 题 |
-| `408-2010-44` Cache 总位数、数组元素所在行、命中率 | 作答待核实 | [15:40](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 用户说“tag 行号 块内地址给忘记了” → 地址位数、块内地址、行（组）号、标记依次算；控制位看题意，本题只加有效位，每行 532 位，共 4256 位 | 闭卷做 4GB、32KB、8 路组相联的检验题 |
+| `王道CO-4-31` 2019 统考：基址寻址 + 大端，求操作数 LSB 的地址 | 作答待核实 | [08:16](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 大端说成“最低放在最右边”，没落到地址上；EA 只列式没算完 → 大端是高位字节放低地址，LSB 在 EA+3；FF12H 先符号扩展成 FFFF FF12H，EA = EFFF FF12H，LSB 地址 EFFF FF15H，选 D | 闭卷做小端、形式地址 FFF0H 的检验题 |
+| `王道CO-4-27` 2014 统考：Store 指令基址寻址偏移量的取值范围 | 作答待核实 | [08:23](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 在已含解析的截图下作答 → 偏移量 32 − 8 − 4 − 4 = 16 位，补码 −32768～+32767，选 A；B 把补码两端写反 | 闭卷做 64 个寄存器、操作码 7 位的检验题 |
+| `王道CO-5-23` 2014 统考：断定法下地址字段至少几位 | 已讨论 | [08:42](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 看讲解后，未作答 → 控存总条数 32 × 4 + 2 = 130，2⁸ ≥ 130，至少 8 位，选 C；坑是漏掉公共取指的 2 条或把它乘 32 | 闭卷做 64 条指令、公共取指 1 条 + 间址 2 条的检验题 |
+| `408-2010-43` 指令格式、按字编址、相对寻址和 (Rn)+ | 作答待核实 | [15:28](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md)、[15:36](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 10-10 的作答今天与王道原件核对：(2) 把 Rn 当起点、偏移量写成 ±2¹⁶ → 起点是 PC，16 位按模 2¹⁶ 回绕，范围是整个主存 0000H～FFFFH；(3) 先自增后取数 → (Rn)+ 是先用原值、后加 1 | 闭卷做 8 位偏移 / 16 位寄存器偏移的范围题和 -(R5) 题 |
+| `408-2010-44` Cache 总位数、数组元素所在行、命中率 | 作答待核实 | [15:40](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 用户说“tag 行号 块内地址给忘记了” → 地址位数、块内地址、行（组）号、标记依次算；控制位看题意，本题只加有效位，每行 532 位，共 4256 位 | 闭卷做 4GB、32KB、8 路组相联的检验题 |
 
 - 今天未涉及、状态沿用：2024 卷的 `408-2024-12`、`408-2024-14`、`408-2024-15`、`408-2024-16`、`408-2024-18`、`408-2024-21`、`408-2024-22`、`408-2024-43`、`408-2024-44`，2010 卷的 `408-2010-12`、`408-2010-13`、`408-2010-15`、`408-2010-16`、`408-2010-21`、`408-2010-22`，以及 `408-2009-17`、`408-2009-43`、`408-2009-44`、`CO-总线带宽-01` 作答待核实；`408-2009-13`、`408-2009-20` 已讨论。
 - 21:10 的单总线演示页特意没放 2009-44 的迁移题 ADD R1,(R0)，留给用户自己做；这不是作答。
@@ -11659,9 +11659,9 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `王道CO-4-31` | 有提示 | 08:17 文字原文“大端方式最低放在最右边，大的在左边”，见[问答记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 部分正确 | 原件已核 | [08:16](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) |
-| `王道CO-4-31` | 有提示 | 08:19 文字原文“ffffff12 + f0000000 + 3”，未写最终结果，见[问答记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 部分正确 | 原件已核 | [08:16](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) |
-| `王道CO-4-27` | 有提示 | 文字原文“选 a 吧”，作答时课件截图已含解析，见[问答记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 正确 | 原件已核 | [08:23](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) |
+| `王道CO-4-31` | 有提示 | 08:17 文字原文“大端方式最低放在最右边，大的在左边”，见[问答记录](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 部分正确 | 原件已核 | [08:16](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) |
+| `王道CO-4-31` | 有提示 | 08:19 文字原文“ffffff12 + f0000000 + 3”，未写最终结果，见[问答记录](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 部分正确 | 原件已核 | [08:16](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) |
+| `王道CO-4-27` | 有提示 | 文字原文“选 a 吧”，作答时课件截图已含解析，见[问答记录](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) | 正确 | 原件已核 | [08:23](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md) |
 
 - 三次作答都是用户打字，原文在问答里，所以记“原件已核”；但都有提示，不能升级。
 - `王道CO-5-23` 用户说“直接讲”，没有作答，不写入本表。
@@ -11752,7 +11752,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 - (1) 地址 32 位；块内 log₂64 = 6 位；行数 32KB ÷ 64B = 512，组数 512 ÷ 8 = 64，组号 6 位；标记 32 − 6 − 6 = 20 位。
 - (2) LRU 位 log₂8 = 3 位；每行 1 + 1 + 3 + 20 + 512 = 537 位；总容量 512 × 537 = 274944 位。
 - (3) 地址 = 0040 0000H + (2 × 64 + 17) × 4 = 0040 0000H + 580 = 0040 0244H；块号 = 地址 ÷ 64 取整 = 1 0000H + 9（0040 0000H ÷ 64 = 1 0000H，580 ÷ 64 取整 = 9）；1 0000H 是 64 的倍数，所以组号 = 块号 mod 64 = 9。
-- 可视化：[Cache 地址与容量](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E5%9C%B0%E5%9D%80%E4%B8%8E%E5%AE%B9%E9%87%8F.html)
+- 可视化：[Cache 地址与容量](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/Cache%E5%9C%B0%E5%9D%80%E4%B8%8E%E5%AE%B9%E9%87%8F.html)
 
 ## 下次先做
 
@@ -11762,7 +11762,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [2026-10-13 计算机组成原理问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md)：08:15、08:16（含 08:17、08:19）、08:23、08:42（含 08:43）、15:28、15:36、15:40、16:55、21:10。
+- [2026-10-13 计算机组成原理问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-13.md)：08:15、08:16（含 08:17、08:19）、08:23、08:42（含 08:43）、15:28、15:36、15:40、16:55、21:10。
 - 三道原题的编号：问答里记为“408-2019-?”“408-2014-?”，因为它们在当年卷中的题号未核实。本复盘按王道 27 版所在章节和习题号编为 `王道CO-4-31`、`王道CO-4-27`、`王道CO-5-23`，以后沿用；题号与 408 卷的对应仍未核实。
 - 08:16、08:23、08:42 的题来自第三方课件截图（含水印），未入库；题干已与王道 27 版习题核对，08:42 的选项取自王道。
 - `CO-寻址-01`（08:15）是概念讲解，没有原题，不进状态表；它的检验题写在自测第 1 题。
@@ -11780,7 +11780,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 - 承接 10-13「下次先做」三项：`408-2010-44` 组相联 Cache 题、`408-2010-43` 的 -(R5) 和转移范围题、`王道CO-4-31` 小端题，截至今天的问答记录都没有作答，状态不变。
 - 可视化（不是做题）：
-  - 07:17 用户：“溢出判断再完善一下……还有符号判断，这个之前也花了很久。”助手在 16 份 PPT 里搜出讲溢出和符号的 11 处，做了新页 [溢出与符号判断](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)，并在 [浮点数加减五步走](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8A%A0%E5%87%8F%E4%BA%94%E6%AD%A5%E8%B5%B0.html) 第 ⑤ 步补了阶码双符号位对照、上溢下溢分类和阶差超出范围的情况。
+  - 07:17 用户：“溢出判断再完善一下……还有符号判断，这个之前也花了很久。”助手在 16 份 PPT 里搜出讲溢出和符号的 11 处，做了新页 [溢出与符号判断](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)，并在 [浮点数加减五步走](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8A%A0%E5%87%8F%E4%BA%94%E6%AD%A5%E8%B5%B0.html) 第 ⑤ 步补了阶码双符号位对照、上溢下溢分类和阶差超出范围的情况。
   - 07:25 用户说四个标志位卡片“不够详尽”，每张卡改成“从哪来、这次是多少、为什么、做题怎么用”四段，随输入变化。
 - 今天没有讨论或作答具体题目。页面预设用到了 2010-13（F2H × 90H = 1568，溢出）和 2009-13 的结果，只是核对页面，不是用户作答。
 
@@ -11838,7 +11838,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 - ZF = 0，SF = 1，CF = Cout = 0，OF = Cn ⊕ Cn+1 = 1。
 - 有符号：112 + 80 = 192 > 127，溢出；真实符号 = SF ⊕ OF = 0，是正数，SF = 1 说反了。
 - 无符号：112 + 80 = 192 ≤ 255，CF = 0，不溢出。
-- 可视化：[溢出与符号判断](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)
+- 可视化：[溢出与符号判断](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)
 
 ### 自测：迁移｜减法后有符号、无符号比大小结论相反
 
@@ -11850,7 +11850,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 - 有符号：−128 − 1 = −129 溢出；SF ≠ OF，A < B（−128 < 1）。
 - 无符号：CF = 0 且 ZF = 0，A > B（128 > 1）。
 - 同一组标志位，有符号看 SF 与 OF，无符号看 CF。
-- 可视化：[溢出与符号判断](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)
+- 可视化：[溢出与符号判断](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)
 
 ### 自测：迁移｜负数乘正数是否溢出
 
@@ -11861,7 +11861,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 - 16 位乘积：120 = 0078H，取反加 1 得 FF88H = 1111 1111 1000 1000。
 - 高 9 位 1111 1111 1 全为 1，不溢出，与真值判断一致。
 - 乘法不能用“符号变没变”判断，要看真实乘积或高 n+1 位。
-- 可视化：[溢出与符号判断](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)
+- 可视化：[溢出与符号判断](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%BA%A2%E5%87%BA%E4%B8%8E%E7%AC%A6%E5%8F%B7%E5%88%A4%E6%96%AD.html)
 
 ### 自测：迁移｜阶码双符号位说明了什么
 
@@ -11872,17 +11872,17 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 - 10 111：−9，低于 −8，阶码负溢出 → 浮点数下溢（绝对值太小），一般按机器零处理，不报错。
 - 11 000：−8，在范围内，正常。
 - 尾数的 01、10 只说明要右规；判浮点溢出只看规格化后的阶码。
-- 可视化：[浮点数加减五步走](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8A%A0%E5%87%8F%E4%BA%94%E6%AD%A5%E8%B5%B0.html)
+- 可视化：[浮点数加减五步走](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E6%B5%AE%E7%82%B9%E6%95%B0%E5%8A%A0%E5%87%8F%E4%BA%94%E6%AD%A5%E8%B5%B0.html)
 
 ## 下次先做
 
-- [ ] `408-2009-44`：闭卷写 ADD R1,(R0) 执行阶段 C5 起每拍的功能和控制信号（10-08 复盘自测第 3 题），写完用 [单总线数据通路逐拍](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%8D%95%E6%80%BB%E7%BA%BF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E9%80%90%E6%8B%8D.html) 对照 ADD (R1),R0 的写法自查。
-- [ ] `408-2009-43`：闭卷做 10-08 复盘自测第 1、2 题（DMA 10MB/s、中断每次 16 位），每步写已知量和单位，再用 [I/O 方式占 CPU 时间](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/IO%E6%96%B9%E5%BC%8F%E5%8D%A0CPU%E6%97%B6%E9%97%B4.html) 核对。
+- [ ] `408-2009-44`：闭卷写 ADD R1,(R0) 执行阶段 C5 起每拍的功能和控制信号（10-08 复盘自测第 3 题），写完用 [单总线数据通路逐拍](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/%E5%8D%95%E6%80%BB%E7%BA%BF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E9%80%90%E6%8B%8D.html) 对照 ADD (R1),R0 的写法自查。
+- [ ] `408-2009-43`：闭卷做 10-08 复盘自测第 1、2 题（DMA 10MB/s、中断每次 16 位），每步写已知量和单位，再用 [I/O 方式占 CPU 时间](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/IO%E6%96%B9%E5%BC%8F%E5%8D%A0CPU%E6%97%B6%E9%97%B4.html) 核对。
 - [ ] `408-2010-13`：闭卷做 10-11 复盘自测第 3 题和今天自测第 3 题，每个运算先写真值，再写判断依据。
 
 ## 来源与边界
 
-- [2026-10-14 计算机组成原理问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-14.md)：07:17、07:25。
+- [2026-10-14 计算机组成原理问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/2026-10-14.md)：07:17、07:25。
 - 截至写本复盘时（北京时间 2026-10-14 下午），今天的问答只有这两条可视化，没有题目讨论或作答，所以题目状态表和作答记录表为空，状态沿用前一天。
 - 「下次先做」选这三项，是因为 2009-43、2009-44 从 10-08 起一直没有闭卷作答，演示页已经做好可以自查；2010-13 和今天的溢出主题直接相关。
 - PPT 页码是 PDF 页码，出自 07:17 记录，本复盘没有重新翻 PPT。
@@ -11929,7 +11929,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 **参考要点**：在经典CSMA/CD最坏情况中，冲突信息返回发送端前不能已经发完；发送时间至少覆盖往返传播时延。不要套到全双工以太网。
 
-![最坏情况下冲突信号 2τ 才回到发送方](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/CSMA-CD%E6%9C%80%E7%9F%AD%E5%B8%A7%E9%95%BF.svg)
+![最坏情况下冲突信号 2τ 才回到发送方](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/CSMA-CD%E6%9C%80%E7%9F%AD%E5%B8%A7%E9%95%BF.svg)
 
 ### 自测：交换机学习源MAC还是目的MAC？未知目的怎样处理？
 
@@ -11945,7 +11945,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天计算机网络问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-05.md)：16:50。
+- [当天计算机网络问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-05.md)：16:50。
 - 原答仅提供复习路线，没有课件附件或作答证据。本复盘的条件补充是一般原理解释，教材页码、对应真题与个人掌握程度待核实。
 
 
@@ -11968,21 +11968,21 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2009-33` 2009 真题选择第 33 题（题干缺失） | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 整卷判错；原题与考点未补，错因待核实 | 对照真题册补题干、考点和错因 |
-| `408-2009-34` 2009 真题选择第 34 题（题干缺失） | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 整卷判错；原题与考点未补，错因待核实 | 对照真题册补题干、考点和错因 |
-| `408-2009-36` 2009 真题选择第 36 题（题干缺失） | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 整卷判错；原题与考点未补，错因待核实 | 对照真题册补题干、考点和错因 |
-| `408-2009-47` 子网划分、R1 路由表与路由聚合 | 作答待核实 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md)、[19:38](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 子网写成 /7 → 202.118.1.0/25、202.118.1.128/25；主机路由接口写 E0、无掩码 → 255.255.255.255、L0；互联网写 130.11.120.0、L1 → 默认路由 0.0.0.0/0、下一跳 202.118.2.2、L0（站在 R1 的角度写）；第 (3) 问空 → R2 加 202.118.1.0/24、下一跳 202.118.2.1 | 闭卷做三子网（120、60、60）迁移题并写 R1 路由表 |
-| `408-2009-35` GBN 只收到 0、2、3 号确认时重发几帧 | 已讨论 | [19:12](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 疑问“1 号帧为什么不重传” → ACK3 累积确认了 0～3，窗口左沿滑到 4，只有 4～7 会超时重发 | 闭卷做 19:12 的 GBN／SR 变式 |
-| `408-2009-39` TCP 超时后 4 个 RTT 的拥塞窗口 | 已讨论 | [19:23](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md)、[19:26](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 尚未作答，停在提示阶段 | 独立写出超时后 ssthresh、cwnd，逐个 RTT 列 cwnd 并选答案 |
+| `408-2009-33` 2009 真题选择第 33 题（题干缺失） | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 整卷判错；原题与考点未补，错因待核实 | 对照真题册补题干、考点和错因 |
+| `408-2009-34` 2009 真题选择第 34 题（题干缺失） | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 整卷判错；原题与考点未补，错因待核实 | 对照真题册补题干、考点和错因 |
+| `408-2009-36` 2009 真题选择第 36 题（题干缺失） | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 整卷判错；原题与考点未补，错因待核实 | 对照真题册补题干、考点和错因 |
+| `408-2009-47` 子网划分、R1 路由表与路由聚合 | 作答待核实 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md)、[19:38](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 子网写成 /7 → 202.118.1.0/25、202.118.1.128/25；主机路由接口写 E0、无掩码 → 255.255.255.255、L0；互联网写 130.11.120.0、L1 → 默认路由 0.0.0.0/0、下一跳 202.118.2.2、L0（站在 R1 的角度写）；第 (3) 问空 → R2 加 202.118.1.0/24、下一跳 202.118.2.1 | 闭卷做三子网（120、60、60）迁移题并写 R1 路由表 |
+| `408-2009-35` GBN 只收到 0、2、3 号确认时重发几帧 | 已讨论 | [19:12](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 疑问“1 号帧为什么不重传” → ACK3 累积确认了 0～3，窗口左沿滑到 4，只有 4～7 会超时重发 | 闭卷做 19:12 的 GBN／SR 变式 |
+| `408-2009-39` TCP 超时后 4 个 RTT 的拥塞窗口 | 已讨论 | [19:23](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md)、[19:26](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 尚未作答，停在提示阶段 | 独立写出超时后 ssthresh、cwnd，逐个 RTT 列 cwnd 并选答案 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2009-33` | 独立 | 整卷答题卡原图（含姓名，未公开），所选选项未转写 | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) |
-| `408-2009-34` | 独立 | 整卷答题卡原图（含姓名，未公开），所选选项未转写 | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) |
-| `408-2009-36` | 独立 | 整卷答题卡原图（含姓名，未公开），所选选项未转写 | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) |
-| `408-2009-47` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) |
+| `408-2009-33` | 独立 | 整卷答题卡原图（含姓名，未公开），所选选项未转写 | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) |
+| `408-2009-34` | 独立 | 整卷答题卡原图（含姓名，未公开），所选选项未转写 | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) |
+| `408-2009-36` | 独立 | 整卷答题卡原图（含姓名，未公开），所选选项未转写 | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) |
+| `408-2009-47` | 独立 | 整卷答题卡原图（未公开）；转写见 [16:51 作答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) | 错误 | 仅旧助手判断 | [16:51](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md) |
 
 - 33、34、36 由用户自己对答案判错，47 由批改助手看原图估分。原图不在仓库，所以核对依据只能记“仅旧助手判断”。
 - 35、39 今天没有作答记录（35 是看解析后追问，39 停在提示阶段），所以不写入本表。
@@ -12030,9 +12030,9 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
   - 0.0.0.0／0.0.0.0／202.118.2.2／L0
 - 易错：下一跳和接口要站在 R1 的角度写。
 
-![第 (1) 问：/24 按 120、60、60 划分](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E4%B8%80%E4%B8%AA24%E5%88%86%E4%B8%89%E4%B8%AA%E5%AD%90%E7%BD%91.svg)
+![第 (1) 问：/24 按 120、60、60 划分](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E4%B8%80%E4%B8%AA24%E5%88%86%E4%B8%89%E4%B8%AA%E5%AD%90%E7%BD%91.svg)
 
-![第 (1) 问：二叉树堵水法](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%A0%B5%E6%B0%B4%E6%B3%95-120-60-60.svg)
+![第 (1) 问：二叉树堵水法](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%A0%B5%E6%B0%B4%E6%B3%95-120-60-60.svg)
 
 ### 自测：路由器按哪一行转发？
 
@@ -12061,7 +12061,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 - 各 RTT 结束时 cwnd 依次为 2、4、8、12、13KB。前 4 个 RTT 是慢开始，其中第 4 个 RTT 翻倍到 16 时取 ssthresh = 12；之后进入拥塞避免，每个 RTT 加 1。
 - 答案是 13KB。常见错误：超时后把 cwnd 设为 ssthresh（那是快恢复的做法），或者到达门限后仍然翻倍。
 
-![TCP 拥塞窗口变化](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/TCP%E6%8B%A5%E5%A1%9E%E7%AA%97%E5%8F%A3%E5%8F%98%E5%8C%96.svg)
+![TCP 拥塞窗口变化](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/TCP%E6%8B%A5%E5%A1%9E%E7%AA%97%E5%8F%A3%E5%8F%98%E5%8C%96.svg)
 
 ## 下次先做
 
@@ -12071,8 +12071,8 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [2026-10-08 计算机网络问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md)：16:51、19:12、19:23、19:26、19:38。
-- [2009 真题考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)：只用于说明整卷背景，考试记录本身不改变题目状态。
+- [2026-10-08 计算机网络问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-08.md)：16:51、19:12、19:23、19:26、19:38。
+- [2009 真题考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-08_408_2009%E7%9C%9F%E9%A2%98.md)：只用于说明整卷背景，考试记录本身不改变题目状态。
 - 答题卡原图含姓名，未上传；33、34、36 的原题题干、所选选项和正确答案都缺失。47 的作答是批改助手转写，估分凭记忆对照 2009 评分标准，未逐条核对答案册。
 - 35、39 在整卷中的作答结果未记录，待核实。
 - 2026-10-06 的问答（`2017-47`）还没有对应的复盘，所以该题状态未进入题目追踪。
@@ -12097,18 +12097,18 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `王道CN-3.6-综合` 以太网有效数据传输速率（题号待核实） | 已讨论 | [19:08](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 疑问：分子为什么是 1500×8 → 有效数据只算帧的数据部分 1500B，首尾 18B 不算；周期含数据帧、确认帧发送时延和往返传播时延 | 闭卷做 19:08 变式（不回确认、最短帧两种情况） |
-| `王道CN-4-综合01` IP 分片片偏移（节号待核实） | 已讨论 | [19:14](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 疑问：片偏移怎么算 → 本片数据在原数据部分中的起始字节 ÷ 8，不算首部；除最后一片外每片数据长度须为 8 的倍数 | 闭卷做 MTU = 1006B 的分片变式 |
-| `王道CN-4-综合05` 5 个部门分 192.168.161.0（节号待核实） | 已讨论 | [19:32](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md)、[19:35](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 忘了 A、B、C 类的划分 → 看首字节范围：192～223 为 C 类，默认 /24；每部门 ≤ 30 台 → 5 位主机号 → /27 | 闭卷做 19:32 分类地址检验题 |
-| `王道CN-4-综合` 131.128.56.0/24 分 4 个最大子网（题号待核实） | 作答待核实 | [19:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | “从 0～126 开始堵” → 堵水按整块 .0～.127 划分，.1～.126 是写主机范围时才用的；“先大后小”的顺序是对的（保证对齐） | 闭卷做 100、50、25、25 台的变长划分 |
-| `王道CN-4.2-08` VLSM 主机号位数为什么“+1” | 已讨论 | [20:02](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 疑问：150 为什么加 1 → 路由器接口（网关）也占子网里的一个地址，条件是 主机数 + 1 ≤ 2ⁿ − 2 | 闭卷做 62 台主机加 1 个接口的检验题 |
-| `王道CN-4.2-10` IP 首部十六进制找源、目的地址 | 已讨论 | [20:21](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 疑问：怎么找 → 从首部第 1 字节数起，第 13～16 字节是源地址，第 17～20 字节是目的地址，每字节单独换成十进制 | 闭卷做 20:21 改编首部检验题 |
+| `王道CN-3.6-综合` 以太网有效数据传输速率（题号待核实） | 已讨论 | [19:08](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 疑问：分子为什么是 1500×8 → 有效数据只算帧的数据部分 1500B，首尾 18B 不算；周期含数据帧、确认帧发送时延和往返传播时延 | 闭卷做 19:08 变式（不回确认、最短帧两种情况） |
+| `王道CN-4-综合01` IP 分片片偏移（节号待核实） | 已讨论 | [19:14](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 疑问：片偏移怎么算 → 本片数据在原数据部分中的起始字节 ÷ 8，不算首部；除最后一片外每片数据长度须为 8 的倍数 | 闭卷做 MTU = 1006B 的分片变式 |
+| `王道CN-4-综合05` 5 个部门分 192.168.161.0（节号待核实） | 已讨论 | [19:32](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md)、[19:35](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 忘了 A、B、C 类的划分 → 看首字节范围：192～223 为 C 类，默认 /24；每部门 ≤ 30 台 → 5 位主机号 → /27 | 闭卷做 19:32 分类地址检验题 |
+| `王道CN-4-综合` 131.128.56.0/24 分 4 个最大子网（题号待核实） | 作答待核实 | [19:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | “从 0～126 开始堵” → 堵水按整块 .0～.127 划分，.1～.126 是写主机范围时才用的；“先大后小”的顺序是对的（保证对齐） | 闭卷做 100、50、25、25 台的变长划分 |
+| `王道CN-4.2-08` VLSM 主机号位数为什么“+1” | 已讨论 | [20:02](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 疑问：150 为什么加 1 → 路由器接口（网关）也占子网里的一个地址，条件是 主机数 + 1 ≤ 2ⁿ − 2 | 闭卷做 62 台主机加 1 个接口的检验题 |
+| `王道CN-4.2-10` IP 首部十六进制找源、目的地址 | 已讨论 | [20:21](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) | 疑问：怎么找 → 从首部第 1 字节数起，第 13～16 字节是源地址，第 17～20 字节是目的地址，每字节单独换成十进制 | 闭卷做 20:21 改编首部检验题 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `王道CN-4-综合` | 看答案后 | 口述规则：“堵水的时候先堵大的再堵小的，从 0～126 开始”（全文见 19:52） | 部分正确 | 仅旧助手判断 | [19:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) |
+| `王道CN-4-综合` | 看答案后 | 口述规则：“堵水的时候先堵大的再堵小的，从 0～126 开始”（全文见 19:52） | 部分正确 | 仅旧助手判断 | [19:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md) |
 
 - 其余各题今天都是看解析后追问或只要图，没有作答，不写入本表。
 
@@ -12172,7 +12172,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 - (2) 加 1 后需要 101、51、26、26 个地址，仍分别 ≤ 126、62、30，结果不变。
 - 检查 2ⁿ − 2 ≥ 需求时，一定要看清是否要加接口地址。
 
-![堵水法：/24 分给 120、60、60](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%A0%B5%E6%B0%B4%E6%B3%95-120-60-60.svg)
+![堵水法：/24 分给 120、60、60](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%A0%B5%E6%B0%B4%E6%B3%95-120-60-60.svg)
 
 ### 自测：从 IP 首部十六进制读字段
 
@@ -12201,7 +12201,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [2026-10-09 计算机网络问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md)：08:11、08:14、08:17、19:08、19:14、19:32、19:35、19:52、20:02、20:21。
+- [2026-10-09 计算机网络问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-09.md)：08:11、08:14、08:17、19:08、19:14、19:32、19:35、19:52、20:02、20:21。
 - 今天的王道题都是据用户上传的解析截图整理，多数原题干没有截到；`王道CN-3.6-综合`、`王道CN-4-综合01`、`王道CN-4-综合05`、`王道CN-4-综合` 的题号和节号待核实，以后补齐时沿用或改正编号。
 - 08:11～08:17 画的是 2026-10-08 复盘自测卡的改编题，用户今天没有作答，所以该题不进状态表。
 - 昨天的 `408-2009-33`、`408-2009-34`、`408-2009-36` 题面已由别的助手凭记忆补在 2026-10-08 问答里，但题号和题面仍待核实，错因也还没补。
@@ -12226,21 +12226,21 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2010-34` 存储转发：1000 个分组经 2 段链路的总时延（原题干未录入） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 选 A，只算了源点发完 → 还要加最后一个分组多走 2 段链路的 0.16ms，共 80.16ms，选 C | 闭卷做 17:52 检验 (b)（4 段链路、100 个分组） |
-| `408-2010-36` 路由器因拥塞丢弃分组时发什么 ICMP 报文（原题干未录入） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 选 B → 应选 C，源点抑制；知识点不会 | 背 ICMP 差错报告报文 5 类，闭卷默写 |
-| `408-2010-39` TCP 发送方还能发多少字节（原题干未录入） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 选 C，忘了减已发未确认 → min(4000, 2000) − 1000 = 1000B，选 A | 闭卷做 17:52 检验 (a)（拥塞窗口 6000B） |
-| `408-2010-40` 递归查询时主机和本地域名服务器各发几条请求（原题干未录入） | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 选 B → 应选 A：递归时主机只问本地服务器 1 次，本地服务器也只发 1 次 | 闭卷对比递归和迭代各发几条 |
-| `408-2010-47` CSMA/CD 冲突检测时间与有效数据速率 | 作答待核实 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | (1) 对；(2) 写成 1500/1582 → 周期还要加 2 × 0.01ms 传播时延，结果是速率不是比值：12000bit ÷ 1.2856ms ≈ 9.33Mbps | 闭卷做 17:52 检验（100Mbps、1km、1000B 帧） |
+| `408-2010-34` 存储转发：1000 个分组经 2 段链路的总时延（原题干未录入） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 选 A，只算了源点发完 → 还要加最后一个分组多走 2 段链路的 0.16ms，共 80.16ms，选 C | 闭卷做 17:52 检验 (b)（4 段链路、100 个分组） |
+| `408-2010-36` 路由器因拥塞丢弃分组时发什么 ICMP 报文（原题干未录入） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 选 B → 应选 C，源点抑制；知识点不会 | 背 ICMP 差错报告报文 5 类，闭卷默写 |
+| `408-2010-39` TCP 发送方还能发多少字节（原题干未录入） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 选 C，忘了减已发未确认 → min(4000, 2000) − 1000 = 1000B，选 A | 闭卷做 17:52 检验 (a)（拥塞窗口 6000B） |
+| `408-2010-40` 递归查询时主机和本地域名服务器各发几条请求（原题干未录入） | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 选 B → 应选 A：递归时主机只问本地服务器 1 次，本地服务器也只发 1 次 | 闭卷对比递归和迭代各发几条 |
+| `408-2010-47` CSMA/CD 冲突检测时间与有效数据速率 | 作答待核实 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | (1) 对；(2) 写成 1500/1582 → 周期还要加 2 × 0.01ms 传播时延，结果是速率不是比值：12000bit ÷ 1.2856ms ≈ 9.33Mbps | 闭卷做 17:52 检验（100Mbps、1km、1000B 帧） |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2010-34` | 独立 | 整卷答题卡原图（未公开），选 A | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
-| `408-2010-36` | 独立 | 整卷答题卡原图（未公开），选 B | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
-| `408-2010-39` | 独立 | 整卷答题卡原图（未公开），选 C | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
-| `408-2010-40` | 独立 | 整卷答题卡原图（未公开），选 B | 错误 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
-| `408-2010-47` | 独立 | 整卷答题卡原图（未公开）；转写见 [17:52 作答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 部分正确 | 仅旧助手判断 | [17:52](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
+| `408-2010-34` | 独立 | 整卷答题卡原图（未公开），选 A | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
+| `408-2010-36` | 独立 | 整卷答题卡原图（未公开），选 B | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
+| `408-2010-39` | 独立 | 整卷答题卡原图（未公开），选 C | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
+| `408-2010-40` | 独立 | 整卷答题卡原图（未公开），选 B | 错误 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
+| `408-2010-47` | 独立 | 整卷答题卡原图（未公开）；转写见 [17:52 作答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) | 部分正确 | 仅旧助手判断 | [17:52](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md) |
 
 - 选择题答案以用户红笔订正为准，47 由批改助手凭记忆对照评分标准估分。原图不在仓库，所以核对依据只能记“仅旧助手判断”。
 
@@ -12304,7 +12304,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 - (2) 发送时间要不小于 2τ：最短帧长 = 2τ × R = 10μs × 10Mbps = 100bit。
 - 只适用于半双工共享介质；全双工交换式以太网不用 CSMA/CD。
 
-![最坏情况下冲突信号 2τ 才回到发送方](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/CSMA-CD%E6%9C%80%E7%9F%AD%E5%B8%A7%E9%95%BF.svg)
+![最坏情况下冲突信号 2τ 才回到发送方](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/CSMA-CD%E6%9C%80%E7%9F%AD%E5%B8%A7%E9%95%BF.svg)
 
 ### 自测：迁移｜递归查询和迭代查询各发几条请求
 
@@ -12323,8 +12323,8 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [2026-10-10 计算机网络问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md)：17:52 两节。
-- [2010 真题考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)：只用于说明整卷背景，考试记录本身不改变题目状态。
+- [2026-10-10 计算机网络问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-10.md)：17:52 两节。
+- [2010 真题考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-10_408_2010%E7%9C%9F%E9%A2%98.md)：只用于说明整卷背景，考试记录本身不改变题目状态。
 - 34、36、39、40 的原题题干和选项没有录入问答，题意根据批改要点整理；47 的题干是凭记忆整理的。
 - `408-2010-47` 和 `王道CN-3.6-综合` 是否为同一道题待核实。
 - ICMP 报文分类和 DNS 查询次数按常见教材口径整理，页码待核实；自测改编题的数值是助手计算的结果，没有对照原书核对。
@@ -12348,30 +12348,30 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2024-33` 多条路径时两主机间的最大吞吐量（原题干未录入） | 作答待核实 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 B 做对，但用户自述拿不准 → 先取每条路径上的最小值，再在路径之间取最大值 | 闭卷做 20:24 的 50→200、300→80 检验 |
-| `408-2024-34` 用两个不同频率载波表示 0 和 1 的调制方式（原题干未录入） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 B → 应选 C，FSK；概念不清 | 闭卷区分 ASK、FSK、PSK、QAM 各改变载波的哪个量 |
-| `408-2024-36` 802.11 CTS 帧中的 NAV（原题干未录入） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)、[20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 D → CTS 的 NAV = SIFS + 数据帧 + SIFS + ACK = 28 + 296 + 28 + 2 = 354μs，选 B；不知道从哪一帧之后开始算 | 闭卷做 20:27 检验 (a) |
-| `408-2024-38` TCP 从建连到主动方进入 CLOSED 的最短时间（原题干未录入） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)、[20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 A，漏了 TIME_WAIT 的 2MSL → 握手 1 RTT + 慢开始 2 RTT + 释放 1 RTT + 2MSL = 60.04s，选 D | 闭卷做 20:27 检验 (c) |
-| `408-2024-40` HTTP/1.0 非持久不并行取 1 页面 + 7 张图片的 RTT 数（原题干未录入） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)、[20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 B，没把每个对象都要重新建连算进去 → 8 个对象 × 2 RTT = 16，选 D | 闭卷做 20:27 检验 (b) |
-| `408-2024-47` OSPF 与 BGP（题面未拍到） | 作答待核实 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | (3) 写成 305 × 2、305 × 3 一类 → 红笔改为 30、60，计算思路待对照答案册；(4) 没写 BGP 用 UPDATE 报文；(5) 只写 R14、R15 → 红笔补 R11、R15 | RIP、OSPF、BGP 三行对比闭卷默写 |
+| `408-2024-33` 多条路径时两主机间的最大吞吐量（原题干未录入） | 作答待核实 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 B 做对，但用户自述拿不准 → 先取每条路径上的最小值，再在路径之间取最大值 | 闭卷做 20:24 的 50→200、300→80 检验 |
+| `408-2024-34` 用两个不同频率载波表示 0 和 1 的调制方式（原题干未录入） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 B → 应选 C，FSK；概念不清 | 闭卷区分 ASK、FSK、PSK、QAM 各改变载波的哪个量 |
+| `408-2024-36` 802.11 CTS 帧中的 NAV（原题干未录入） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)、[20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 D → CTS 的 NAV = SIFS + 数据帧 + SIFS + ACK = 28 + 296 + 28 + 2 = 354μs，选 B；不知道从哪一帧之后开始算 | 闭卷做 20:27 检验 (a) |
+| `408-2024-38` TCP 从建连到主动方进入 CLOSED 的最短时间（原题干未录入） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)、[20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 A，漏了 TIME_WAIT 的 2MSL → 握手 1 RTT + 慢开始 2 RTT + 释放 1 RTT + 2MSL = 60.04s，选 D | 闭卷做 20:27 检验 (c) |
+| `408-2024-40` HTTP/1.0 非持久不并行取 1 页面 + 7 张图片的 RTT 数（原题干未录入） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)、[20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 选 B，没把每个对象都要重新建连算进去 → 8 个对象 × 2 RTT = 16，选 D | 闭卷做 20:27 检验 (b) |
+| `408-2024-47` OSPF 与 BGP（题面未拍到） | 作答待核实 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | (3) 写成 305 × 2、305 × 3 一类 → 红笔改为 30、60，计算思路待对照答案册；(4) 没写 BGP 用 UPDATE 报文；(5) 只写 R14、R15 → 红笔补 R11、R15 | RIP、OSPF、BGP 三行对比闭卷默写 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `408-2024-33` | 独立 | 整卷答题卡原图（未公开），选 B，题号划线表示拿不准 | 正确 | 仅旧助手判断 | [20:24](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
-| `408-2024-34` | 独立 | 整卷答题卡原图（未公开），选 B | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
-| `408-2024-36` | 独立 | 整卷答题卡原图（未公开），选 D | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
-| `408-2024-38` | 独立 | 整卷答题卡原图（未公开），选 A | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
-| `408-2024-40` | 独立 | 整卷答题卡原图（未公开），选 B | 错误 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
-| `408-2024-47` | 独立 | 整卷答题卡原图（未公开）；转写见 [20:15 作答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 部分正确 | 仅旧助手判断 | [20:15](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
+| `408-2024-33` | 独立 | 整卷答题卡原图（未公开），选 B，题号划线表示拿不准 | 正确 | 仅旧助手判断 | [20:24](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
+| `408-2024-34` | 独立 | 整卷答题卡原图（未公开），选 B | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
+| `408-2024-36` | 独立 | 整卷答题卡原图（未公开），选 D | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
+| `408-2024-38` | 独立 | 整卷答题卡原图（未公开），选 A | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
+| `408-2024-40` | 独立 | 整卷答题卡原图（未公开），选 B | 错误 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
+| `408-2024-47` | 独立 | 整卷答题卡原图（未公开）；转写见 [20:15 作答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) | 部分正确 | 仅旧助手判断 | [20:15](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) |
 
 - 原图不在仓库，核对依据只能记“仅旧助手判断”。33 虽然做对，也只能停在“作答待核实”。
 - 47 的估分：问答记 5/9，用户在线程里说约丢 4 分，两者一致；题面没拍到，第 (3)(5) 问的正确做法待对照答案册。
 
 ## 知识点与适用条件
 
-- **算时间的题先画时序图**：每一段写上名称和时间，最后再加，并检查单位（μs、ms、s）。2024 选择丢的 8 分里，NAV、TCP、HTTP 三道都是漏了某一段。依据：[跨科串联表](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 12 条。
+- **算时间的题先画时序图**：每一段写上名称和时间，最后再加，并检查单位（μs、ms、s）。2024 选择丢的 8 分里，NAV、TCP、HTTP 三道都是漏了某一段。依据：[跨科串联表](https://wengu-408.pages.dev/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 12 条。
 - **802.11 的 NAV**：
   - 帧序列是 RTS → SIFS → CTS → SIFS → DATA → SIFS → ACK。
   - 某个帧里的 NAV = 这个帧结束之后，一直到 ACK 结束的所有段。
@@ -12456,15 +12456,15 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 下次先做
 
-- [ ] 计时题专项：闭卷做 [20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) 的 (a) NAV、(b) HTTP RTT 数、(c) TCP 到 CLOSED 三道题，每题先画时序图，按“段名：时间”逐行列出再求和，写清单位。
+- [ ] 计时题专项：闭卷做 [20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) 的 (a) NAV、(b) HTTP RTT 数、(c) TCP 到 CLOSED 三道题，每题先画时序图，按“段名：时间”逐行列出再求和，写清单位。
 - [ ] `408-2010-47` 迁移检验：闭卷做 100Mbps、1km、1000B 帧的有效速率题（与计时题是同一个漏洞，已拖两天）。
 - [ ] `2017-47`：闭卷重做 4 问（10-06 部分正确，已拖六天）；`408-2024-47` 的 BGP 口头检验排在之后。
 
 ## 来源与边界
 
-- [2026-10-12 计算机网络问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)：20:15 两节、20:24、20:27。
+- [2026-10-12 计算机网络问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)：20:15 两节、20:24、20:27。
 - 项目线程“查看仓库最新改动”里，用户 20:27 的请求和助手的时序图讲解，与问答 20:27 小节一致；截至本复盘，三道检验题都还没作答。
-- [2024 真题考试记录](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)：只用于说明整卷背景，考试记录本身不改变题目状态。
+- [2024 真题考试记录](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/2026-10-12_408_2024%E7%9C%9F%E9%A2%98.md)：只用于说明整卷背景，考试记录本身不改变题目状态。
 - 选择题的原题干和选项都没有录入问答，题意根据批改要点整理；47 的题面没拍到。
 - 2026-10-11 没有计算机网络问答，所以没有那天的复盘。
 - 自测改编题的数值是助手计算的结果，没有对照原书核对。
@@ -12489,14 +12489,14 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `408-2024-47` OSPF 与 BGP（第 (5) 问 BGP 选路、第 (4) 问 iBGP 通告） | 作答待核实 | [18:49](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-14.md)、[18:56](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-14.md) | 第 (5) 问卷面写“R14　R15”，把问的路由器本身当成了答案 → 先比 AS 路径长度，淘汰经过 4 个 AS 的 R12；R11、R13 打平后用热土豆，选 AS 内离自己最近的出口：R14 → R11，R15 → R13。第 (4) 问：靠 iBGP 全连接，边界路由器直接通告 AS 内每台路由器 | 闭卷做 18:52 的迁移检验（第三条路径改为 AS4 AS19）和 18:56 的 5 台路由器 iBGP 检验 |
+| `408-2024-47` OSPF 与 BGP（第 (5) 问 BGP 选路、第 (4) 问 iBGP 通告） | 作答待核实 | [18:49](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-14.md)、[18:56](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-14.md) | 第 (5) 问卷面写“R14　R15”，把问的路由器本身当成了答案 → 先比 AS 路径长度，淘汰经过 4 个 AS 的 R12；R11、R13 打平后用热土豆，选 AS 内离自己最近的出口：R14 → R11，R15 → R13。第 (4) 问：靠 iBGP 全连接，边界路由器直接通告 AS 内每台路由器 | 闭卷做 18:52 的迁移检验（第三条路径改为 AS4 AS19）和 18:56 的 5 台路由器 iBGP 检验 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
 
-- 今天没有新的作答。`408-2024-47` 的状态由 [2026-10-12 复盘](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%AF%8F%E6%97%A5%E5%A4%8D%E7%9B%98/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)记录的那次整卷作答推出（独立·部分正确·仅旧助手判断）。
+- 今天没有新的作答。`408-2024-47` 的状态由 [2026-10-12 复盘](https://wengu-408.pages.dev/%E6%AF%8F%E6%97%A5%E5%A4%8D%E7%9B%98/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md)记录的那次整卷作答推出（独立·部分正确·仅旧助手判断）。
 
 ## 知识点与适用条件
 
@@ -12559,13 +12559,13 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 下次先做
 
-- [ ] 计时题专项：闭卷做 [10-12 问答 20:27](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) 的 NAV、HTTP RTT 数、TCP 到 CLOSED 三道题，每题先画时序图再逐项相加（已拖两天）。
+- [ ] 计时题专项：闭卷做 [10-12 问答 20:27](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-12.md) 的 NAV、HTTP RTT 数、TCP 到 CLOSED 三道题，每题先画时序图再逐项相加（已拖两天）。
 - [ ] `408-2024-47`：闭卷做今天 18:52、18:56 的两道检验，并确认 10-12 卷面红笔订正写的是 R13 还是 R15。
 - [ ] `2017-47`：闭卷重做 4 问（10-06 部分正确，已拖八天）；`408-2010-47` 有效速率迁移题排在之后。
 
 ## 来源与边界
 
-- [2026-10-14 计算机网络问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-14.md)：18:49（含 18:52 追记）、18:56。
+- [2026-10-14 计算机网络问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/2026-10-14.md)：18:49（含 18:52 追记）、18:56。
 - 项目线程“2024-47 第五问”与问答 18:49～18:52 的内容一致，没有新的作答。
 - 第 (5) 问的题干和答案依据王道 Markdown 第 4.4 节综合题 06 及其解析；拓扑图没有存进仓库，热土豆的跳数比较没有对照拓扑图核实。
 - 2026-10-13 没有计算机网络问答，所以没有那天的复盘。
@@ -12587,14 +12587,14 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `880-高数2-基础选择17` $\lvert f(x)\rvert\le x^2$ 时 $x=0$ 是什么点 | 作答待核实 | [10:19](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md) | 记录中没有错误；只有当时助手的判断 | 写出夹逼的那一行不等式 |
-| `880-高数2-基础选择19` 三次函数求 $a,b,c$ | 仅安排 | [10:19](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md) | 未作答、未讲解 | 列三个方程解出 $a,b,c$ |
+| `880-高数2-基础选择17` $\lvert f(x)\rvert\le x^2$ 时 $x=0$ 是什么点 | 作答待核实 | [10:19](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md) | 记录中没有错误；只有当时助手的判断 | 写出夹逼的那一行不等式 |
+| `880-高数2-基础选择19` 三次函数求 $a,b,c$ | 仅安排 | [10:19](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md) | 未作答、未讲解 | 列三个方程解出 $a,b,c$ |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `880-高数2-基础选择17` | 未注明 | 文字「定义 c」：用导数定义，选 C | 正确 | 仅旧助手判断 | [10:19](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md) |
+| `880-高数2-基础选择17` | 未注明 | 文字「定义 c」：用导数定义，选 C | 正确 | 仅旧助手判断 | [10:19](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md) |
 
 ## 知识点与适用条件
 
@@ -12620,7 +12620,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 **参考要点**：能推出连续：$f(0)=0$，且 $|f(x)|\le|x|\to0$。不能推出可导：差商只被夹在 $[-1,1]$ 之间，反例 $f(x)=|x|$。规律：$|f(x)|\le|x|^{\alpha}$ 时，$\alpha>1$ 可导且导数为 0，$\alpha=1$ 只保证连续。
 
-![被 x² 夹住与被 |x| 夹住](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E5%9B%BE%E8%A7%A3/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/%E5%A4%B9%E9%80%BC%E4%B8%8E%E5%8F%AF%E5%AF%BC.svg)
+![被 x² 夹住与被 |x| 夹住](https://wengu-408.pages.dev/%E5%9B%BE%E8%A7%A3/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/%E5%A4%B9%E9%80%BC%E4%B8%8E%E5%8F%AF%E5%AF%BC.svg)
 
 ### 自测：三次函数在 $x=-2$ 取极值，又与 $y=-3x+3$ 相切于 $(1,0)$，列出求 $a,b,c$ 的三个方程。
 
@@ -12635,7 +12635,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天高等数学问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md)：10:14、10:17、10:19。
+- [当天高等数学问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-05.md)：10:14、10:17、10:19。
 - 基础选择 19 的参考要点是整理时推导的结果，不是当时的讲解，也没有核对原书答案。
 
 
@@ -12655,15 +12655,15 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `880-高数2-基础选择21` 参数式＋隐函数，判断 $x=0$ 是否极值点 | 已讨论 | [08:32](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md) | 未作答；导数写成因子乘积，只看会变号的因子 | 独立写出 $\frac{dy}{dx}$ 并判断符号 |
-| `880-高数2-基础选择22` $y=\frac1{\lvert x\rvert-1}+\ln(1+e^{-x})$ 的渐近线条数 | 作答待核实 | [08:44](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md) | 只找到 $x=\pm1$ → 漏了 $+\infty$ 侧水平 $y=0$、$-\infty$ 侧斜 $y=-x$；两侧要分开算 | 按铅直→水平→斜三步，两侧分开，独立重做 |
-| `880-高数2-基础填空3` 由 $\lim\frac{\ln[f(x+1)+e^{x^2}]}{x}=1$ 求导数型极限 | 已讨论 | [08:53](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md) | 未作答；分母 $\to0$、极限存在 ⇒ 分子 $\to0$ ⇒ 真数 $\to1$ 才能等价替换 | 独立写出 $f(1)=0$、$f'(1)=1$ 的推导 |
+| `880-高数2-基础选择21` 参数式＋隐函数，判断 $x=0$ 是否极值点 | 已讨论 | [08:32](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md) | 未作答；导数写成因子乘积，只看会变号的因子 | 独立写出 $\frac{dy}{dx}$ 并判断符号 |
+| `880-高数2-基础选择22` $y=\frac1{\lvert x\rvert-1}+\ln(1+e^{-x})$ 的渐近线条数 | 作答待核实 | [08:44](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md) | 只找到 $x=\pm1$ → 漏了 $+\infty$ 侧水平 $y=0$、$-\infty$ 侧斜 $y=-x$；两侧要分开算 | 按铅直→水平→斜三步，两侧分开，独立重做 |
+| `880-高数2-基础填空3` 由 $\lim\frac{\ln[f(x+1)+e^{x^2}]}{x}=1$ 求导数型极限 | 已讨论 | [08:53](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md) | 未作答；分母 $\to0$、极限存在 ⇒ 分子 $\to0$ ⇒ 真数 $\to1$ 才能等价替换 | 独立写出 $f(1)=0$、$f'(1)=1$ 的推导 |
 
 ## 作答记录
 
 | 编号 | 作答方式 | 作答内容／附件 | 核对结果 | 核对依据 | 来源 |
 |---|---|---|---|---|---|
-| `880-高数2-基础选择22` | 未注明 | 口述「只想到了1和-1」 | 错误 | 仅旧助手判断 | [08:44](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md) |
+| `880-高数2-基础选择22` | 未注明 | 口述「只想到了1和-1」 | 错误 | 仅旧助手判断 | [08:44](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md) |
 
 ## 知识点与适用条件
 
@@ -12710,7 +12710,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天高等数学问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md)：08:32～08:53。
+- [当天高等数学问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-08.md)：08:32～08:53。
 - 晚上的模拟卷按你的要求不公开。
 
 
@@ -12737,10 +12737,10 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 | 题目 | 状态 | 来源 | 卡点／错误步骤 → 更正 | 下次验证 |
 |---|---|---|---|---|
-| `来源待核实-不定积分-1` $\int\frac{x^2-1}{(x^2+x+1)^2}dx$ | 已讨论 | [20:44](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md) | 未作答；分母是平方 → 先想商的导数 $\left(\frac{x}{x^2+x+1}\right)'$，或同除 $x^2$ 凑 $d\!\left(x+\frac1x\right)$ | 闭卷写出 $I=-\frac{x}{x^2+x+1}+C$，并求导验证 |
-| `EP3加1模考卷数二-题号待核实` 由偏导数还原 $f(x,y)$ 并求极值 | 已讨论 | [21:14](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md) | 未作答；分不清「极值只看内部驻点」和「闭区域最值要比较边界」 | 先说出题目问的是极值、最值还是条件极值，再选方法 |
-| `来源待核实-20` 星形线绕 $y$ 轴的体积、绕 $x$ 轴的表面积 | 已讨论 | [21:47](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md) | 未作答；不知道用哪个公式 → 绕 $y$ 轴用柱壳 $2\pi\int x\lvert y\rvert dx$，表面积用 $2\pi\int\lvert y\rvert ds$，内外两层都算 | 闭卷写出两个公式和参数代换后 $t$ 的上下限 |
-| `来源待核实-19` $\iint_D[\sqrt{x^2+y^2}]\max\{x,y\}$，$D$：$r\le2\cos\theta$ | 已讨论 | [22:38](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md) | 未作答；取整按 $r$ 分区（$r<1$ 处为 0），$\max$ 按 $\theta=\frac\pi4$ 分区，$\theta$ 上限缩到 $\frac\pi3$ | 闭卷写出积分区域的划分和两块的累次积分 |
+| `来源待核实-不定积分-1` $\int\frac{x^2-1}{(x^2+x+1)^2}dx$ | 已讨论 | [20:44](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md) | 未作答；分母是平方 → 先想商的导数 $\left(\frac{x}{x^2+x+1}\right)'$，或同除 $x^2$ 凑 $d\!\left(x+\frac1x\right)$ | 闭卷写出 $I=-\frac{x}{x^2+x+1}+C$，并求导验证 |
+| `EP3加1模考卷数二-题号待核实` 由偏导数还原 $f(x,y)$ 并求极值 | 已讨论 | [21:14](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md) | 未作答；分不清「极值只看内部驻点」和「闭区域最值要比较边界」 | 先说出题目问的是极值、最值还是条件极值，再选方法 |
+| `来源待核实-20` 星形线绕 $y$ 轴的体积、绕 $x$ 轴的表面积 | 已讨论 | [21:47](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md) | 未作答；不知道用哪个公式 → 绕 $y$ 轴用柱壳 $2\pi\int x\lvert y\rvert dx$，表面积用 $2\pi\int\lvert y\rvert ds$，内外两层都算 | 闭卷写出两个公式和参数代换后 $t$ 的上下限 |
+| `来源待核实-19` $\iint_D[\sqrt{x^2+y^2}]\max\{x,y\}$，$D$：$r\le2\cos\theta$ | 已讨论 | [22:38](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md) | 未作答；取整按 $r$ 分区（$r<1$ 处为 0），$\max$ 按 $\theta=\frac\pi4$ 分区，$\theta$ 上限缩到 $\frac\pi3$ | 闭卷写出积分区域的划分和两块的累次积分 |
 
 - 编号说明：问答记录里写的是 `EP3+1模考卷数二-题号待核实`。台账编号不允许出现「+」，这里改记为 `EP3加1模考卷数二-题号待核实`，两者指同一题，以后沿用新写法。
 
@@ -12841,7 +12841,7 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 ## 来源与边界
 
-- [当天高等数学问答](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md)：20:44～22:38。
+- [当天高等数学问答](https://wengu-408.pages.dev/%E9%97%AE%E7%AD%94%E8%AE%B0%E5%BD%95/%E9%AB%98%E7%AD%89%E6%95%B0%E5%AD%A6/2026-10-09.md)：20:44～22:38。
 - 4 道题都没有你的作答。`来源待核实-19` 的结果只经过助手数值验算，没有参考答案。`来源待核实-20` 与你上传的参考答案一致。
 - `来源待核实-19`、`来源待核实-20` 所在试卷和 `EP3加1模考卷数二` 的来源与是否公开发售，均未注明。闭卷自测只用了迁移改编题，原题题干只保留在当天问答里。
 - 张宇讲次与页码都未核实，没有编写。
@@ -12932,21 +12932,21 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 用户上传的原始照片（按上传顺序；已缩小尺寸并去掉照片元数据）。红笔是用户对答案后的订正。
 
-![2009 作答原图 1](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_1.jpg)
+![2009 作答原图 1](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_1.jpg)
 
-![2009 作答原图 2](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_2.jpg)
+![2009 作答原图 2](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_2.jpg)
 
-![2009 作答原图 3](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_3.jpg)
+![2009 作答原图 3](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_3.jpg)
 
-![2009 作答原图 4](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_4.jpg)
+![2009 作答原图 4](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_4.jpg)
 
-![2009 作答原图 5](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_5.jpg)
+![2009 作答原图 5](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_5.jpg)
 
-![2009 作答原图 6](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_6.jpg)
+![2009 作答原图 6](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_6.jpg)
 
-![2009 作答原图 7](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_7.jpg)
+![2009 作答原图 7](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_7.jpg)
 
-![2009 作答原图 8](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_8.jpg)
+![2009 作答原图 8](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2009/2009_8.jpg)
 
 ## 来源与边界
 
@@ -13059,19 +13059,19 @@ void Converse(int R[], int n, int p){        // 循环左移 p 位
 
 用户上传的原始照片（按上传顺序；已缩小尺寸并去掉照片元数据）。红笔是用户对答案后的订正。
 
-![2010 作答原图 1](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_1.jpg)
+![2010 作答原图 1](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_1.jpg)
 
-![2010 作答原图 2](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_2.jpg)
+![2010 作答原图 2](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_2.jpg)
 
-![2010 作答原图 3](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_3.jpg)
+![2010 作答原图 3](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_3.jpg)
 
-![2010 作答原图 4](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_4.jpg)
+![2010 作答原图 4](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_4.jpg)
 
-![2010 作答原图 5](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_5.jpg)
+![2010 作答原图 5](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_5.jpg)
 
-![2010 作答原图 6](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_6.jpg)
+![2010 作答原图 6](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_6.jpg)
 
-![2010 作答原图 7](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_7.jpg)
+![2010 作答原图 7](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2010/2010_7.jpg)
 
 ## 来源与边界
 
@@ -13190,26 +13190,26 @@ P2：wait(s); B1; wait(mutex); B2; signal(mutex);
 ## 下次先做
 
 - [ ] 41 题代码空白是第三次“基本代码写不出”（2009-42、2010-42、2024-41）：先把上面 hasTopo 默写到能写对，拓扑排序、DFS、BFS 在邻接矩阵和邻接表上各写一遍。
-- [ ] 计网选择丢 8 分，集中在计算题（NAV、TCP 释放时间、HTTP 的 RTT 数）：按[跨科串联表](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 12 条“时间按流程逐项加”，先画时序图再加。
+- [ ] 计网选择丢 8 分，集中在计算题（NAV、TCP 释放时间、HTTP 的 RTT 数）：按[跨科串联表](https://wengu-408.pages.dev/%E4%B8%B2%E8%81%94/408%E8%B7%A8%E7%A7%91%E4%B8%B2%E8%81%94.md)第 12 条“时间按流程逐项加”，先画时序图再加。
 - [ ] 46 第 (3) 问互斥顺序反了，44 第 (2) 问地址和机器数全错，先做上面两张迁移卡。
 
 ## 作答原图
 
 用户上传的原始照片（按上传顺序；已缩小尺寸并去掉照片元数据）。红笔是用户对答案后的订正。
 
-![2024 作答原图 1](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_1.jpg)
+![2024 作答原图 1](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_1.jpg)
 
-![2024 作答原图 2](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_2.jpg)
+![2024 作答原图 2](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_2.jpg)
 
-![2024 作答原图 3](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_3.jpg)
+![2024 作答原图 3](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_3.jpg)
 
-![2024 作答原图 4](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_4.jpg)
+![2024 作答原图 4](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_4.jpg)
 
-![2024 作答原图 5](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_5.jpg)
+![2024 作答原图 5](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_5.jpg)
 
-![2024 作答原图 6](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_6.jpg)
+![2024 作答原图 6](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_6.jpg)
 
-![2024 作答原图 7](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_7.jpg)
+![2024 作答原图 7](https://wengu-408.pages.dev/%E8%80%83%E8%AF%95%E8%AE%B0%E5%BD%95/%E5%8E%9F%E5%9B%BE/2024/2024_7.jpg)
 
 ## 来源与边界
 
@@ -13284,7 +13284,7 @@ P2：wait(s); B1; wait(mutex); B2; signal(mutex);
 - **操作系统**：中断是从用户态进入核心态的唯一途径；系统调用靠访管（trap）指令产生异常；进程切换发生在中断处理之后。
 - **串起来**：计组讲硬件怎么“停下来、跳过去”，OS 讲跳过去之后内核做什么。按一条时间线说：外设发请求 → CPU 在指令结束时响应 → 隐指令保存 PC、关中断 → 进入内核的中断服务程序 → 可能触发调度 → 返回。
 - **易混**：中断（外部、异步）和异常（内部、同步，如缺页、除零）；缺页异常返回后要**重新执行**原指令，普通中断返回到下一条。
-- **可视化**：[I/O 全链路](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E5%85%A8%E9%93%BE%E8%B7%AF.html) 把陷入、外部中断、缺页三种入口和返回位置放在同一画面里对比。
+- **可视化**：[I/O 全链路](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E5%85%A8%E9%93%BE%E8%B7%AF.html) 把陷入、外部中断、缺页三种入口和返回位置放在同一画面里对比。
 
 ## 2. I/O 控制方式
 
@@ -13292,7 +13292,7 @@ P2：wait(s); B1; wait(mutex); B2; signal(mutex);
 - **操作系统**：同样的四种控制方式（加通道），以及缓冲、SPOOLing、设备独立性。
 - **串起来**：计组算“占多少 CPU”，OS 讲“为什么要这样设计”。计算时统一换成时钟周期或秒，分清“每次中断传多少数据”和“每次 DMA 传多少数据”。
 - **你的漏洞**：2009-43 百分比没做完。
-- **可视化**：[I/O 全链路](https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E5%85%A8%E9%93%BE%E8%B7%AF.html) 的 ① 是中断方式（每个字符一次中断），② ③ 是 DMA（整块传完一次中断），可以对照看 CPU 何时被占用。
+- **可视化**：[I/O 全链路](https://wengu-408.pages.dev/%E6%BC%94%E7%A4%BA/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/IO%E5%85%A8%E9%93%BE%E8%B7%AF.html) 的 ① 是中断方式（每个字符一次中断），② ③ 是 DMA（整块传完一次中断），可以对照看 CPU 何时被占用。
 
 ## 3. 地址转换与存储层次
 

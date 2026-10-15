@@ -11,7 +11,7 @@ for p in sources:
     def fix(m):
         relative=m.group(1);target=(p.parent/relative).resolve()
         if not relative.startswith('http') and target.is_file() and target.is_relative_to(root):
-            return ']('+'https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/'+quote(str(target.relative_to(root)))+')'
+            return ']('+'https://wengu-408.pages.dev/'+quote(str(target.relative_to(root)))+')'
         return m.group(0)
     content=re.sub(r'\]\(([^)]+)\)',fix,content)
     parts.extend(['\n---\n',f'来源文件：`{p.relative_to(root)}`\n',content])

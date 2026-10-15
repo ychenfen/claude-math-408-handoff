@@ -1,13 +1,12 @@
-name: Build and publish study workspace
+name: Build and test study workspace
+# 公开站点由 Cloudflare Pages 从 main 自动部署（https://wengu-408.pages.dev/，构建命令 python3 scripts/stage_pages.py，输出 _site）。
+# 仓库改为私有后免费账号不能用 GitHub Pages，这里只做构建和测试。
 on:
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
-concurrency:
-  group: study-pages
-  cancel-in-progress: false
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,19 +23,3 @@ jobs:
           node-version: '22'
       - run: node --test tests/spaced-review.test.cjs
       - run: python3 scripts/stage_pages.py
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy public site
-        id: deployment
-        uses: actions/deploy-pages@v4
