@@ -1,0 +1,94 @@
+[
+  {
+    "path": "sources/UPSTREAM-LICENSE",
+    "sha256": "24e0920bafce70c5254f1c824774dbfd302100470cfbda1fcbe72f6d0cbaaec8"
+  },
+  {
+    "path": "sources/assets/img_in_image_box_770_222_1041_381.jpg",
+    "sha256": "4ee1599d32deef486d014d5c67258dfff4d9766d6dab4c5b74fd0698521f2275"
+  },
+  {
+    "path": "sources/assets/img_in_image_box_790_148_1039_313.jpg",
+    "sha256": "9897aba33e2edb37ffa284287de7664896a26953359597fc870e0822075df4a6"
+  },
+  {
+    "path": "sources/assets/img_in_image_box_791_224_1043_384.jpg",
+    "sha256": "714d3f5e5539bc5d68be4b161904dd4c560df33d6fbfeb924229d84e79184f94"
+  },
+  {
+    "path": "sources/assets/img_in_image_box_812_137_1043_328.jpg",
+    "sha256": "8f37f8334349392aa3e28f6dcf1c5025609ca8bc222936af685137a108f06b9a"
+  },
+  {
+    "path": "sources/assets/img_in_image_box_842_126_1038_276.jpg",
+    "sha256": "bd8ed597a95958854597ca449e9fbdd496f67d79935ad07d9103437540a9fffb"
+  },
+  {
+    "path": "sources/upstream/2010.md",
+    "sha256": "c2889a2463aee1def9c159e7456a62558e0f423e2d0e34a85a14d0ad7a4b1b28"
+  },
+  {
+    "path": "sources/upstream/2011.md",
+    "sha256": "cb11d783863153531de72c81865d39dbfacf92dcb59332935b1b95e3ed79fb08"
+  },
+  {
+    "path": "sources/upstream/2012.md",
+    "sha256": "32c8f3a646301f8d750d6d82920478c085bb9a0226475bd3db817905008aae9f"
+  },
+  {
+    "path": "sources/upstream/2013.md",
+    "sha256": "755525d36011c666d7bd40d68ee9f88d2701ff55d2d117ddb6f93d6f06cb6d26"
+  },
+  {
+    "path": "sources/upstream/2014.md",
+    "sha256": "6eb40d69e9b440d97fff552ac957850e6e6a5e32573086dcf775b6d4793c23fe"
+  },
+  {
+    "path": "sources/upstream/2015.md",
+    "sha256": "c522e2b75101b399770ef82a7dc92fd31e3b659906eeca9ba8b8d3f9ac2ec44f"
+  },
+  {
+    "path": "sources/upstream/2016.md",
+    "sha256": "8abfbe6afaf228a6f8ff9b5dfabeefa9710417bee6bc5771127156438707c64c"
+  },
+  {
+    "path": "sources/upstream/2017.md",
+    "sha256": "cdffb34df993f29c876186924cc6347460d85a997fc8380bf885e0d59a31fd96"
+  },
+  {
+    "path": "sources/upstream/2018.md",
+    "sha256": "3ce9ce6d690751c24a09efa9ba2ca2e0cd45fbb89953308b6b2a9c402563cc45"
+  },
+  {
+    "path": "sources/upstream/2019.md",
+    "sha256": "87cd78da4bdd5dd35b393ada5be8eefdb80f5b12d06c22b317c3fb57732683d7"
+  },
+  {
+    "path": "sources/upstream/2020.md",
+    "sha256": "b8bc8cbe461194cd1bfe4048721095650972fa10962db4c6cff786c6d9e27454"
+  },
+  {
+    "path": "sources/upstream/2021.md",
+    "sha256": "2b0caac82e4576a94245f63e999deb27e8dfe347c3e896de342164c813aeb4f5"
+  },
+  {
+    "path": "sources/upstream/2022.md",
+    "sha256": "4f5cc326e6a36a86c7450439228c8e219c1525390500a3df4ca30c664dca66ca"
+  },
+  {
+    "path": "sources/upstream/2023.md",
+    "sha256": "e001e5208aa91255317a72f8690c4a46fad540fac24421ba71c4ada51da302f1"
+  },
+  {
+    "path": "sources/upstream/2024.md",
+    "sha256": "26cc0a4c1e1727afe7a1db5c712a94c83e4a6b39f76493f259f28379d8db460d"
+  },
+  {
+    "path": "sources/upstream/2025.md",
+    "sha256": "c8827939ee0e87d22c852eb2ca28df845f01001da35980d7d75ee8a3fccf0740"
+  },
+  {
+    "path": "sources/upstream/2026.md",
+    "sha256": "2642f4037c12ba253c906db8d9de699e04880e683fdcd68501b121663a857076"
+  }
+]

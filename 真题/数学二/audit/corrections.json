@@ -1,0 +1,650 @@
+[
+  {
+    "year": 2011,
+    "question": 8,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "向量alpha恢复",
+    "occurrences": 14
+  },
+  {
+    "year": 2011,
+    "question": 18,
+    "before": "记 a 为",
+    "after": "记 $\\alpha$ 为",
+    "reason": "切线倾角alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2011,
+    "question": 18,
+    "before": "\\frac{da}{dx}",
+    "after": "\\frac{d\\alpha}{dx}",
+    "reason": "切线倾角alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2011,
+    "question": 22,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "向量alpha恢复",
+    "occurrences": 3
+  },
+  {
+    "year": 2012,
+    "question": 7,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "向量alpha恢复",
+    "occurrences": 16
+  },
+  {
+    "year": 2012,
+    "question": 10,
+    "before": "\\lim_{n\\to\\infty}\\left",
+    "after": "\\lim_{n\\to\\infty}n\\left",
+    "reason": "极限表达式遗漏因子n",
+    "occurrences": 1
+  },
+  {
+    "year": 2012,
+    "question": 15,
+    "before": "已知  $\\overrightarrow{a} \\cdot \\overrightarrow{b} =$\n\n $c(x)$.",
+    "after": "已知函数 $f(x)=\\frac{1+x}{\\sin x}-\\frac{1}{x}$，记 $a=\\lim_{x\\to0}f(x)$。",
+    "reason": "恢复被OCR错误替代的整段函数定义",
+    "occurrences": 1
+  },
+  {
+    "year": 2013,
+    "question": 1,
+    "before": "a(x)",
+    "after": "\\alpha(x)",
+    "reason": "无穷小量alpha恢复",
+    "occurrences": 2
+  },
+  {
+    "year": 2013,
+    "question": 4,
+    "before": "a-1",
+    "after": "\\alpha-1",
+    "reason": "指数参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2013,
+    "question": 4,
+    "before": "a+1",
+    "after": "\\alpha+1",
+    "reason": "指数参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2013,
+    "question": 4,
+    "before": "A. a<-2.",
+    "after": "A. $\\alpha<-2$.",
+    "reason": "参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2013,
+    "question": 4,
+    "before": "B. a>2.",
+    "after": "B. $\\alpha>2$.",
+    "reason": "参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2013,
+    "question": 4,
+    "before": "C. -2<a<0.",
+    "after": "C. $-2<\\alpha<0$.",
+    "reason": "参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2013,
+    "question": 4,
+    "before": "D. 0<a<2.",
+    "after": "D. $0<\\alpha<2$.",
+    "reason": "参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2014,
+    "question": 20,
+    "before": "\\lim_{n\\to\\infty}S_{n}",
+    "after": "\\lim_{n\\to\\infty}nS_{n}",
+    "reason": "所求极限遗漏因子n",
+    "occurrences": 1
+  },
+  {
+    "year": 2015,
+    "question": 3,
+    "before": "x^a",
+    "after": "x^{\\alpha}",
+    "reason": "指数参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2015,
+    "question": 3,
+    "before": "x^b",
+    "after": "x^{\\beta}",
+    "reason": "指数参数beta恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2015,
+    "question": 3,
+    "before": "a>0,b>0",
+    "after": "\\alpha>0,\\beta>0",
+    "reason": "参数与选项一致",
+    "occurrences": 1
+  },
+  {
+    "year": 2015,
+    "question": 4,
+    "before": "\n为()\n\n为()\n",
+    "after": "\n",
+    "reason": "删除重复OCR片段",
+    "occurrences": 1
+  },
+  {
+    "year": 2015,
+    "question": 5,
+    "before": "|_{u=1}",
+    "after": "|_{u=1,v=1}",
+    "reason": "两处偏导取值条件均漏v=1",
+    "occurrences": 2
+  },
+  {
+    "year": 2015,
+    "question": 6,
+    "before": "C. $\\int_{\\frac{\\pi}{4}}^{\\frac{\\pi}{3}} d\\theta \\int_{\\frac{1}{2\\sin2\\theta}}^{\\frac{1}{\\sin2\\theta}} f(r\\cos\\theta, r\\sin\\theta) r \\, dr$",
+    "after": "C. $\\int_{\\frac{\\pi}{4}}^{\\frac{\\pi}{3}} d\\theta \\int_{\\frac{1}{2\\sin2\\theta}}^{\\frac{1}{\\sin2\\theta}} f(r\\cos\\theta, r\\sin\\theta) \\, dr$",
+    "reason": "C项不含雅可比因子r",
+    "occurrences": 1
+  },
+  {
+    "year": 2015,
+    "question": 6,
+    "before": "D. $\\int_{\\frac{\\pi}{4}}^{\\frac{\\pi}{3}} d\\theta \\int_{\\frac{1}{\\sqrt{2}\\sin2\\theta}}^{\\frac{1}{\\sqrt{2}\\sin2\\theta}} f(r\\cos\\theta, r\\sin\\theta) r \\, dr$",
+    "after": "D. $\\int_{\\frac{\\pi}{4}}^{\\frac{\\pi}{3}} d\\theta \\int_{\\frac{1}{\\sqrt{2}\\sin2\\theta}}^{\\frac{1}{\\sqrt{2}\\sin2\\theta}} f(r\\cos\\theta, r\\sin\\theta) \\, dr$",
+    "reason": "D项不含雅可比因子r；根号范围另行修正",
+    "occurrences": 1
+  },
+  {
+    "year": 2015,
+    "question": 6,
+    "before": "\\frac{1}{\\sqrt{2}\\sin2\\theta}}^{\\frac{1}{\\sqrt{2}\\sin2\\theta}",
+    "after": "\\frac{1}{\\sqrt{2\\sin2\\theta}}}^{\\frac{1}{\\sqrt{\\sin2\\theta}}",
+    "reason": "B、D项恢复上下限根号范围",
+    "occurrences": 2
+  },
+  {
+    "year": 2015,
+    "question": 7,
+    "before": "1 & & \\\\ d & & \\\\ d^2 & &",
+    "after": "1 \\\\ d \\\\ d^2",
+    "reason": "恢复b为三维列向量",
+    "occurrences": 1
+  },
+  {
+    "year": 2016,
+    "question": 14,
+    "before": "爱数学",
+    "after": "",
+    "reason": "删除混入题干的水印",
+    "occurrences": 1
+  },
+  {
+    "year": 2016,
+    "question": 22,
+    "before": "0 & & \\\\ 1 & & \\\\ 2a - 2",
+    "after": "0 \\\\ 1 \\\\ 2a - 2",
+    "reason": "恢复beta为三维列向量",
+    "occurrences": 1
+  },
+  {
+    "year": 2017,
+    "question": 7,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "向量alpha恢复",
+    "occurrences": 14
+  },
+  {
+    "year": 2017,
+    "question": 22,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "向量alpha恢复",
+    "occurrences": 2
+  },
+  {
+    "year": 2018,
+    "question": 14,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "向量alpha恢复",
+    "occurrences": 13
+  },
+  {
+    "year": 2018,
+    "question": 16,
+    "before": "\n值.",
+    "after": "(II) 若 $f(x)$ 在区间 $[0,1]$ 上的平均值为 1，求 $a$ 的值。",
+    "reason": "补回遗漏的第二问",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 7,
+    "before": "a_{1}",
+    "after": "\\alpha_{1}",
+    "reason": "列向量alpha恢复，保留元素a_12与a_ij",
+    "occurrences": 4
+  },
+  {
+    "year": 2020,
+    "question": 7,
+    "before": "a_{2}",
+    "after": "\\alpha_{2}",
+    "reason": "列向量alpha恢复",
+    "occurrences": 4
+  },
+  {
+    "year": 2020,
+    "question": 7,
+    "before": "a_{3}",
+    "after": "\\alpha_{3}",
+    "reason": "列向量alpha恢复",
+    "occurrences": 4
+  },
+  {
+    "year": 2020,
+    "question": 7,
+    "before": "a_{4}",
+    "after": "\\alpha_{4}",
+    "reason": "列向量alpha恢复",
+    "occurrences": 4
+  },
+  {
+    "year": 2020,
+    "question": 8,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "选项向量名与题干一致",
+    "occurrences": 16
+  },
+  {
+    "year": 2020,
+    "question": 15,
+    "before": "第 15 题",
+    "after": "第 15 题（10 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 16,
+    "before": "第 16 题",
+    "after": "第 16 题（10 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 17,
+    "before": "第 17 题",
+    "after": "第 17 题（10 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 18,
+    "before": "第 18 题",
+    "after": "第 18 题（10 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 19,
+    "before": "第 19 题",
+    "after": "第 19 题（10 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 20,
+    "before": "第 20 题",
+    "after": "第 20 题（11 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 21,
+    "before": "第 21 题",
+    "after": "第 21 题（11 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 22,
+    "before": "第 22 题",
+    "after": "第 22 题（11 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 23,
+    "before": "P = (a, A a)",
+    "after": "P = (\\alpha, A\\alpha)",
+    "reason": "向量符号与第二问一致",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 23,
+    "before": "其中 a 是",
+    "after": "其中 $\\alpha$ 是",
+    "reason": "向量符号与第二问一致",
+    "occurrences": 1
+  },
+  {
+    "year": 2020,
+    "question": 23,
+    "before": "第 23 题",
+    "after": "第 23 题（11 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 1,
+    "before": "dt$ 时",
+    "after": "dt$ 是",
+    "reason": "题干错字",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 6,
+    "before": "f(x,y)",
+    "after": "f(u,v)",
+    "reason": "恢复函数参数名",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 7,
+    "before": "\\lim_{x\\to0}",
+    "after": "\\lim_{n\\to\\infty}",
+    "reason": "D项极限变量及趋向错误",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 9,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "向量alpha误识为a",
+    "occurrences": 6
+  },
+  {
+    "year": 2021,
+    "question": 9,
+    "before": "$\\beta_1, \\beta_2$ 线性表出",
+    "after": "$\\beta_1, \\beta_2, \\beta_3$ 线性表出",
+    "reason": "遗漏第三个生成向量",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 14,
+    "before": "\\int_1^t",
+    "after": "\\int_1^{t^2}",
+    "reason": "外层积分上限漏平方",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 14,
+    "before": "\\int_{\\sqrt{x}}^{1}",
+    "after": "\\int_{\\sqrt{x}}^{t}",
+    "reason": "内层积分上限t误识为1",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 15,
+    "before": "y'' - y",
+    "after": "y''' - y",
+    "reason": "三阶微分方程漏一个撇号",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 18,
+    "before": "凹凸性",
+    "after": "凹凸区间",
+    "reason": "恢复所求对象为区间",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 20,
+    "before": "函数  $y = y(x)$ 的微分方程",
+    "after": "设函数 $y = y(x)$（$x>0$）满足微分方程",
+    "reason": "补回定义域x>0并修复病句",
+    "occurrences": 1
+  },
+  {
+    "year": 2021,
+    "question": 20,
+    "before": "Iy",
+    "after": "$I_P$",
+    "reason": "截距下标P误识为y",
+    "occurrences": 2
+  },
+  {
+    "year": 2021,
+    "question": 22,
+    "before": "第 22 题",
+    "after": "第 22 题（12 分）",
+    "reason": "补回参考题图中的分值",
+    "occurrences": 1
+  },
+  {
+    "year": 2022,
+    "question": 1,
+    "before": "$a(x)",
+    "after": "$\\alpha(x)",
+    "reason": "无穷小量alpha恢复",
+    "occurrences": 7
+  },
+  {
+    "year": 2022,
+    "question": 1,
+    "before": "$a^{2}(x)",
+    "after": "$\\alpha^{2}(x)",
+    "reason": "无穷小量alpha恢复",
+    "occurrences": 2
+  },
+  {
+    "year": 2022,
+    "question": 1,
+    "before": "o(a(x))",
+    "after": "o(\\alpha(x))",
+    "reason": "无穷小量alpha恢复",
+    "occurrences": 2
+  },
+  {
+    "year": 2022,
+    "question": 9,
+    "before": "$b =",
+    "after": "$\\boldsymbol{b} =",
+    "reason": "向量b用粗体与矩阵中的标量b区分",
+    "occurrences": 1
+  },
+  {
+    "year": 2022,
+    "question": 9,
+    "before": "Ax = b",
+    "after": "$A\\boldsymbol{x} = \\boldsymbol{b}$",
+    "reason": "向量b用粗体与矩阵中的标量b区分",
+    "occurrences": 1
+  },
+  {
+    "year": 2023,
+    "question": 6,
+    "before": "f(a)",
+    "after": "f(\\alpha)",
+    "reason": "参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2023,
+    "question": 6,
+    "before": "a+1",
+    "after": "\\alpha+1",
+    "reason": "参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2023,
+    "question": 6,
+    "before": "a=a_{0}",
+    "after": "\\alpha=\\alpha_{0}",
+    "reason": "参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2023,
+    "question": 6,
+    "before": "a_{0}=",
+    "after": "\\alpha_{0}=",
+    "reason": "参数alpha恢复",
+    "occurrences": 1
+  },
+  {
+    "year": 2023,
+    "question": 8,
+    "before": "O & |A|B \\end{pmatrix}",
+    "after": "O & |A|B^{*} \\end{pmatrix}",
+    "reason": "D项右下分块漏伴随符号",
+    "occurrences": 1
+  },
+  {
+    "year": 2024,
+    "question": 9,
+    "before": "A为4阶矩阵，若",
+    "after": "设 $A$ 为4阶矩阵，$A^{*}$ 为 $A$ 的伴随矩阵。若",
+    "reason": "补回伴随矩阵定义",
+    "occurrences": 1
+  },
+  {
+    "year": 2024,
+    "question": 14,
+    "before": "f^{(5)}(x)",
+    "after": "f^{(5)}(1)",
+    "reason": "所求为x=1处五阶导数而非导函数",
+    "occurrences": 1
+  },
+  {
+    "year": 2024,
+    "question": 16,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "向量符号alpha误识为a",
+    "occurrences": 6
+  },
+  {
+    "year": 2024,
+    "question": 17,
+    "before": "已知函设平面有界区域D位于第一象限",
+    "after": "设平面有界区域 $D$ 位于第一象限",
+    "reason": "清理OCR拼接乱码",
+    "occurrences": 1
+  },
+  {
+    "year": 2024,
+    "question": 20,
+    "before": "\\partial u\\partial\\nu",
+    "after": "\\partial u\\partial v",
+    "reason": "变量v被识成希腊字母nu",
+    "occurrences": 1
+  },
+  {
+    "year": 2024,
+    "question": 22,
+    "before": "\\begin{pmatrix}0&a&0\\\\ 1&0&1\\end{pmatrix}",
+    "after": "\\begin{pmatrix}0&1&a\\\\1&0&1\\end{pmatrix}",
+    "reason": "恢复A第一行0、1、a",
+    "occurrences": 1
+  },
+  {
+    "year": 2024,
+    "question": 22,
+    "before": "\\begin{pmatrix}1&1&1\\\\ 1&1&1\\\\ 2&b\\end{pmatrix}",
+    "after": "\\begin{pmatrix}1&1\\\\1&1\\\\b&2\\end{pmatrix}",
+    "reason": "恢复B为3×2矩阵，第三行为b、2",
+    "occurrences": 1
+  },
+  {
+    "year": 2025,
+    "question": 3,
+    "before": "(-2, -1)",
+    "after": "(-2, -1]",
+    "reason": "A项右端点应闭合",
+    "occurrences": 1
+  },
+  {
+    "year": 2025,
+    "question": 5,
+    "before": "C. $\\int_{0}^{4}\\left[\\int_{-2}^{\\sqrt{4-y}}",
+    "after": "C. $\\int_{0}^{4}\\left[\\int_{-2}^{-\\sqrt{4-y}}",
+    "reason": "C项第一积分上限漏负号",
+    "occurrences": 1
+  },
+  {
+    "year": 2025,
+    "question": 9,
+    "before": "0&1&0&3\\\\0&1&0&0",
+    "after": "0&1&0&3\\\\0&0&0&0",
+    "reason": "C项第三行第二元素应为0",
+    "occurrences": 1
+  },
+  {
+    "year": 2025,
+    "question": 16,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "向量符号alpha误识为a；本题所有同名向量统一恢复",
+    "occurrences": 13
+  },
+  {
+    "year": 2026,
+    "question": 19,
+    "before": "第 19 题（10 分）",
+    "after": "第 19 题（12 分）",
+    "reason": "参考PDF第5页题头为12分；恢复全卷150分",
+    "occurrences": 1
+  },
+  {
+    "year": 2026,
+    "question": 22,
+    "before": "a_",
+    "after": "\\alpha_",
+    "reason": "第一问向量alpha恢复",
+    "occurrences": 6
+  }
+]
