@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 670" role="img" aria-label="2024-38 TCP 最少时间时序图：三报文握手第三段带数据，cwnd 1、2，三报文挥手，H 等 2MSL 后进入 CLOSED，共 4RTT 加 2MSL" font-family="PingFang SC,Microsoft YaHei,Noto Sans CJK SC,sans-serif" font-size="13"><title>2024-38 TCP 从建连到 CLOSED 的最少时间</title>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="#333"/></marker></defs>
+<text x="220" y="34" text-anchor="middle" fill="#252d25" font-weight="600">主机 H</text><text x="560" y="34" text-anchor="middle" fill="#252d25" font-weight="600">服务器 S</text>
+<path d="M220 44V600M560 44V560" stroke="#555"/>
+<path d="M220 60L560 110" stroke="#333" stroke-width="1" marker-end="url(#a)"/>
+<text x="390.0" y="80" text-anchor="middle" fill="#252d25" font-size="12" transform="rotate(7 390.0 85)">SYN</text>
+<path d="M560 110L220 160" stroke="#333" stroke-width="1" marker-end="url(#a)"/>
+<text x="390.0" y="130" text-anchor="middle" fill="#252d25" font-size="12" transform="rotate(-7 390.0 135)">SYN + ACK</text>
+<path d="M220 160L560 210" stroke="#333" stroke-width="1" marker-end="url(#a)"/>
+<text x="390.0" y="180" text-anchor="middle" fill="#252d25" font-size="12" transform="rotate(7 390.0 185)">ACK + 数据①（cwnd = 1）</text>
+<path d="M560 210L220 260" stroke="#333" stroke-width="1" marker-end="url(#a)"/>
+<text x="390.0" y="230" text-anchor="middle" fill="#252d25" font-size="12" transform="rotate(-7 390.0 235)">ACK</text>
+<path d="M220 260L560 310" stroke="#333" stroke-width="3" marker-end="url(#a)"/>
+<text x="390.0" y="280" text-anchor="middle" fill="#252d25" font-size="12" transform="rotate(7 390.0 285)">数据②③（cwnd = 2）</text>
+<path d="M560 310L220 360" stroke="#333" stroke-width="1" marker-end="url(#a)"/>
+<text x="390.0" y="330" text-anchor="middle" fill="#252d25" font-size="12" transform="rotate(-7 390.0 335)">ACK</text>
+<path d="M220 360L560 410" stroke="#333" stroke-width="1" marker-end="url(#a)"/>
+<text x="390.0" y="380" text-anchor="middle" fill="#252d25" font-size="12" transform="rotate(7 390.0 385)">FIN</text>
+<path d="M560 410L220 460" stroke="#333" stroke-width="1" marker-end="url(#a)"/>
+<text x="390.0" y="430" text-anchor="middle" fill="#252d25" font-size="12" transform="rotate(-7 390.0 435)">FIN + ACK（S 无数据，挥手只要三段）</text>
+<path d="M220 460L560 510" stroke="#333" stroke-width="1" marker-end="url(#a)"/>
+<text x="390.0" y="480" text-anchor="middle" fill="#252d25" font-size="12" transform="rotate(7 390.0 485)">ACK</text>
+<path d="M200 60H190V160H200" stroke="#6a9a4f" fill="none"/><text x="184" y="114.0" text-anchor="end" fill="#2f5520">RTT 1</text>
+<path d="M200 160H190V260H200" stroke="#6a9a4f" fill="none"/><text x="184" y="214.0" text-anchor="end" fill="#2f5520">RTT 2</text>
+<path d="M200 260H190V360H200" stroke="#6a9a4f" fill="none"/><text x="184" y="314.0" text-anchor="end" fill="#2f5520">RTT 3</text>
+<path d="M200 360H190V460H200" stroke="#6a9a4f" fill="none"/><text x="184" y="414.0" text-anchor="end" fill="#2f5520">RTT 4</text>
+<rect x="212" y="460" width="16" height="140" fill="#f3d9bf" stroke="#b07a3f"/><text x="236" y="535" fill="#7a4c1c">TIME_WAIT：2MSL</text>
+<text x="570" y="514" fill="#252d25" font-size="12">S 先进入 CLOSED</text>
+<text x="236" y="605" fill="#252d25" font-weight="600">H 进入 CLOSED（题目问的终点）</text>
+<text x="20" y="80" fill="#666" font-size="12">起点：H 请求建连</text>
+<text x="20" y="632" fill="#252d25" font-weight="600">合计 = 4RTT + 2MSL（3000B = 3 个 MSS，按 1、2 两轮发完）</text>
+<text x="20" y="652" fill="#666" font-size="12">易错：第三次握手不带数据也不多花 RTT（忽略发送时延），不能脑补成“等 ACK 再发数据”的四次握手。</text>
+</svg>
