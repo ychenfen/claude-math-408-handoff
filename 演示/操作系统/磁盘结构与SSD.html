@@ -36,7 +36,7 @@ h3{font:13px var(--sans);font-weight:600;margin:10px 0 6px;color:var(--muted)}
 .flow button.on{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
 .flow button.past{color:var(--ink);border-color:var(--accent)}
 .flow .ar{color:var(--muted)}
-.stage{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:14px;align-items:start}
+.stage{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
 @media (max-width:900px){.stage{grid-template-columns:minmax(0,1fr)}}
 .view{overflow-x:auto}
 .view svg{display:block;width:100%;height:auto;min-width:620px}
@@ -81,7 +81,7 @@ svg .lb{paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:
 .cmp thead th{white-space:nowrap}
 .bad{color:var(--mv)}
 .err{color:var(--mv);font-size:13px;min-height:1em}
-.two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;align-items:start}
+.two{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
 @media (max-width:900px){.two{grid-template-columns:minmax(0,1fr)}}
 .ex svg{display:block;width:100%;height:auto;min-width:620px}
 .ex [data-t],.ex [data-h]{cursor:pointer}
@@ -275,6 +275,14 @@ details .ans{font-size:14px;margin-top:6px;border-top:1px dashed var(--line);pad
   <section class="panel"><h2>来源</h2><ol class="src" id="src"></ol></section>
 </div>
 <script>
+(()=>{
+  /* 手机上不把图缩到看不清：图里最小的字至少 12px，放不下就横向滚动 */
+  function fit(){document.querySelectorAll('svg[viewBox]').forEach(s=>{const vb=s.viewBox.baseVal;if(!vb||vb.width<200)return;let fm=99;s.querySelectorAll('text').forEach(t=>{if(!t.textContent.trim())return;const v=parseFloat(getComputedStyle(t).fontSize);if(v&&v<fm)fm=v});if(fm===99)return;
+    let need=Math.round(Math.min(vb.width*1.5,vb.width*12/Math.max(fm,8)));if(innerWidth>=900&&s.parentElement)need=Math.min(need,s.parentElement.clientWidth);const cur=parseFloat(getComputedStyle(s).minWidth)||0;if(need>cur){s.style.minWidth=need+'px';const p=s.parentElement;if(p&&getComputedStyle(p).overflowX==='visible')p.style.overflowX='auto'}})}
+  let fitT=0;new MutationObserver(()=>{clearTimeout(fitT);fitT=setTimeout(fit,120)}).observe(document.documentElement,{childList:true,subtree:true});addEventListener('load',fit);
+})();
+</script>
+<script>
 const $=id=>document.getElementById(id);
 const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 let frames=[],at=0,timer=null,shown=null,raf=0;
@@ -426,7 +434,7 @@ function draw(f,fwd){cancelAnimationFrame(raf);
   $('flow').innerHTML=ST.map(([k,n],i)=>`${i?'<span class="ar">→</span>':''}<button type="button" data-g="${k}" class="${i===gi?'on':(i<gi?'past':'')}">${n}</button>`).join('');
   $('note').innerHTML=f.ask?`<span class="ask">${f.q}</span><span class="ref">先想一下，再按“下一步”看答案。</span>`:f.note+`<span class="ref">出处：${f.ref}</span>`}
 $('flow').onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;stop();at=frames.findIndex(f=>f.g===b.dataset.g);lastAt=at;render()};
-showSpd();build();render();
+showSpd();build();render();if(!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))setTimeout(()=>{if(!timer&&at===0)play()},700);
 
 /* ===== 换算器 ===== */
 const GP=[['强化4 p178 真题',{C:300,H:10,S:200,K:2,rk:'cl',rv:100530}],['小盘（能完整画出来）',{C:4,H:6,S:8,K:2,rk:'sec',rv:101}]];
