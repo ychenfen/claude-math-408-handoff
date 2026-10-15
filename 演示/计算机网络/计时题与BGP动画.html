@@ -93,7 +93,7 @@ svg .b{fill:var(--q)}
     </div>
     <div class="view" id="view"></div>
     <div class="note" id="note" role="status" aria-live="polite"></div>
-    <p class="tip">“先猜再看”开着时，关键一步之前先停下来问你。键盘 ← → 单步，空格播放／暂停。</p>
+    <p class="tip">选好一页会自动播放：帧一点点发出去，报文带着小圆点从一端飞到另一端。“先猜再看”开着时，关键一步之前先停下来问你（停留时间加倍）。随时可以暂停、单步（键盘 ← →）或拖进度条；空格播放／暂停。</p>
   </section>
   <p class="src">来源：湖科大教书匠 B 站“计算机网络408考研2024年真题解析”（BV1VE411A7Ak p16），用户 2026-10-15 上传的转写稿；王道《计算机网络》第 4.4 节。BGP 选路四条规则以讲解为准（王道只写了 AS 路径最短和热土豆）；“BGP 标识符”预设里的数值是示意。对应问答：<a href="../../问答记录/计算机网络/2026-10-15.md">计算机网络 2026-10-15</a>。</p>
 </div>
@@ -420,17 +420,38 @@ const ADV={
 
 /* ---------------- player ---------------- */
 const MODES={nav:NAV,tcp:TCP,http:HTTP,sel:SEL,adv:ADV};let mode='nav',frames=[],at=0,timer=null;
-const SPD=[3200,2400,1700,1200,800,500,300];const delay=()=>SPD[+$('speed').value];
+let autoplay=true;const SPD=[4200,3200,2400,1800,1300,900,600];const delay=()=>SPD[+$('speed').value];
 function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
 function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
 function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].q)j--;return Math.max(j,0)}
 function stop(){if(timer){clearTimeout(timer);timer=null}}
-function render(){const f=frames[at];if(!f)return;$('view').innerHTML=f.s;$('note').innerHTML=f.q?`<span class="ask">先想：${esc(f.q)}</span>`:f.t;
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;let shown=null,anims=[];
+/* Animate only what is new compared with the frame shown before: lines draw from source to target with a moving dot,
+   frames/boxes reveal from left (tall ones from top), text fades in after the line lands. */
+function animateNew(prevSvg){anims.forEach(a=>{try{a()}catch(e){}});anims=[];
+  const svgEl=$('view').querySelector('svg');if(!svgEl||RM||prevSvg==null)return;
+  const tpl=document.createElement('template');tpl.innerHTML=prevSvg;const old=new Map();const ps=tpl.content.querySelector('svg');
+  if(ps)[...ps.children].forEach(c=>{const h=c.outerHTML;old.set(h,(old.get(h)||0)+1)});
+  const dur=Math.max(450,Math.min(1300,(timer?delay():1500)*0.6));let lines=0;
+  [...svgEl.children].forEach(c=>{const h=c.outerHTML;if(old.get(h)){old.set(h,old.get(h)-1);return}const tag=c.tagName.toLowerCase();if(tag==='defs')return;
+    if(tag==='path'&&(c.getAttribute('fill')||'none')==='none'){let L=0;try{L=c.getTotalLength()}catch(e){}if(!L)return;
+      const me=c.getAttribute('marker-end'),ms=c.getAttribute('marker-start'),da=c.getAttribute('stroke-dasharray');const d0=lines++*90;
+      if(me)c.removeAttribute('marker-end');if(ms)c.removeAttribute('marker-start');
+      const a=c.animate([{strokeDasharray:`${L} ${L}`,strokeDashoffset:L},{strokeDasharray:`${L} ${L}`,strokeDashoffset:0}],{duration:dur,delay:d0,easing:'ease-in-out',fill:'backwards'});
+      let dot=null,raf=0;if(me){dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('r','6');dot.setAttribute('fill','var(--cmp)');dot.setAttribute('stroke','var(--paper)');dot.style.opacity=0;svgEl.appendChild(dot);
+        const t0=performance.now()+d0;const stepf=now=>{const t=Math.min(1,Math.max(0,(now-t0)/dur));const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;const pt=c.getPointAtLength(e*L);dot.setAttribute('cx',pt.x);dot.setAttribute('cy',pt.y);dot.style.opacity=now<t0?0:1;if(t<1)raf=requestAnimationFrame(stepf);else dot.remove()};raf=requestAnimationFrame(stepf)}
+      const done=()=>{if(me)c.setAttribute('marker-end',me);if(ms)c.setAttribute('marker-start',ms);if(da)c.setAttribute('stroke-dasharray',da);if(dot)dot.remove();cancelAnimationFrame(raf)};
+      a.onfinish=done;anims.push(()=>{a.cancel();done()});return}
+    if(tag==='polygon'||tag==='rect'){let bb={width:1,height:1};try{bb=c.getBBox()}catch(e){}const tall=bb.height>bb.width*1.5;
+      const a=c.animate([{clipPath:tall?'inset(0 0 100% 0)':'inset(0 100% 0 0)',opacity:.35},{clipPath:'inset(0 0 0 0)',opacity:1}],{duration:dur,easing:'ease-in-out',fill:'backwards'});anims.push(()=>a.cancel());return}
+    const a=c.animate([{opacity:0},{opacity:1}],{duration:dur*0.5,delay:tag==='text'?dur*0.55:dur*0.2,fill:'backwards'});anims.push(()=>a.cancel())});}
+function render(anim){const f=frames[at];if(!f)return;const prev=anim&&shown!=null?shown:null;$('view').innerHTML=f.s;shown=f.s;if(anim)animateNew(prev);else{anims.forEach(a=>{try{a()}catch(e){}});anims=[]}
+  $('note').innerHTML=f.q?`<span class="ask">先想：${esc(f.q)}</span>`:f.t;
   $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':'播放'}
-function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());render()}else{timer=null;render()}}
-function play(){if(timer){stop();render();return}if(at===frames.length-1)at=0;timer=setTimeout(tick,delay());render()}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());render(true)}else{timer=null;render()}}
+function play(){if(timer){stop();$('play').textContent='播放';return}if(at===frames.length-1){at=0;render()}timer=setTimeout(tick,600);$('play').textContent='暂停'}
 function run(){stop();const r=MODES[mode].build();if(typeof r==='string'){$('err').textContent=r;return}$('err').textContent='';
-  frames=[];r.forEach(st=>{if(st.q){const prev=frames.length?frames[frames.length-1].s:st.s;frames.push({s:prev,q:st.q});}frames.push({s:st.s,t:st.t})});at=0;render()}
+  frames=[];r.forEach(st=>{if(st.q){const prev=frames.length?frames[frames.length-1].s:st.s;frames.push({s:prev,q:st.q});}frames.push({s:st.s,t:st.t})});at=0;shown=null;render();if(autoplay)play()}
 function applyPreset(v){for(const [k,x] of Object.entries(v)){const el=$(k);if(!el)continue;if(el.type==='checkbox')el.checked=!!x;else el.value=x}run()}
 function setMode(m){mode=m;try{localStorage.setItem('cn-anim-mode',m)}catch(e){}
   $('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
@@ -441,7 +462,7 @@ function setMode(m){mode=m;try{localStorage.setItem('cn-anim-mode',m)}catch(e){}
   if(M.presets.length)applyPreset(M.presets[0][1]);else run()}
 $('modes').innerHTML=Object.entries(MODES).map(([k,v])=>`<button class="chip" type="button" data-m="${k}">${v.name}</button>`).join('');
 $('modes').querySelectorAll('.chip').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
-$('first').onclick=()=>{stop();at=0;render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};$('next').onclick=()=>{stop();at=nextIdx(at);render()};
+$('first').onclick=()=>{stop();at=0;render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};$('next').onclick=()=>{stop();const j=nextIdx(at);const fw=j===at+1||(frames[at]&&frames[at].q);at=j;render(fw)};
 $('play').onclick=play;$('scrub').oninput=e=>{stop();at=+e.target.value;render()};$('speed').oninput=showSpd;$('guess').onchange=()=>{if(frames[at]&&frames[at].q&&!$('guess').checked){at=nextIdx(at-1);render()}};
 document.addEventListener('keydown',e=>{const t=e.target.tagName;if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA'||(t==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
 showSpd();let saved='nav';try{saved=localStorage.getItem('cn-anim-mode')||'nav'}catch(e){}setMode(MODES[saved]?saved:'nav');
