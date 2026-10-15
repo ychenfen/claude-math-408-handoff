@@ -2,10 +2,10 @@
 (() => {
   'use strict';
   const $ = s => document.querySelector(s);
-  const RAW = 'https://raw.githubusercontent.com/ychenfen/claude-math-408-handoff/main/';
-  const API = 'https://api.github.com/repos/ychenfen/claude-math-408-handoff/contents/';
+  // Documents are read from the site's own published copies, so the reader keeps working when the repository is private.
+  const RAW = '';
   let data, subject, date, mode = 'subject', tab = 'daily', generation = 0, currentText = '', storageOK = true;
-  const memo = {}, synced = new Map();
+  const memo = {};
   let disposeDrill = () => {};
   const STATUSES = ['仅安排','已讨论','作答待核实','独立做对','隔日重做通过'];
   const STATUS_NOTE = {'仅安排':'计划，未讨论','已讨论':'看过讲解，没有作答','作答待核实':'有作答，未达独立＋正确＋原件已核','独立做对':'独立作答，对照原件核对正确','隔日重做通过':'另一天再次独立做对'};
@@ -179,7 +179,7 @@
     $('#eyebrow').textContent=`SUBJECT ${String(data.subjects.indexOf(subject)+1).padStart(2,'0')} / 六科独立记录`;
     $('#subjects').innerHTML=data.subjects.map((s,i)=>`<button class="subject" data-subject="${s.id}" aria-current="${mode!=='all'&&s===subject}"><span class="num">0${i+1}</span>${escape(s.name)}${s.records.length?'<i class="dot"></i>':''}</button>`).join('');
     $('#subjects').querySelectorAll('button').forEach(b=>b.onclick=()=>select(b.dataset.subject,null,null));
-    if(mode==='all'){document.title='六科总览 · 温故学习工作台';$('#subject-title').textContent='六科总览';$('#tagline').textContent='先看哪科卡着，再进该科做题';$('#eyebrow').textContent='OVERVIEW / 数学二 + 408';$('#overview').innerHTML='';$('#sync-state').textContent='发布快照 · 已检查科目会合并GitHub新记录';return;}
+    if(mode==='all'){document.title='六科总览 · 温故学习工作台';$('#subject-title').textContent='六科总览';$('#tagline').textContent='先看哪科卡着，再进该科做题';$('#eyebrow').textContent='OVERVIEW / 数学二 + 408';$('#overview').innerHTML='';$('#sync-state').textContent='发布快照';return;}
     const available=Boolean(summaryDoc());
     const next=available?nextAction(summaryDoc().text).replace(/`/g,''):'';
     $('#overview').innerHTML=`<div class="metric"><div class="mark">↗</div><div><b>${next?'下次先做':available?'这一天，已有复盘':recordDoc()?'已有问答 · 等待整理':'这一天，尚无记录'}</b><span class="${next?'next-action':''}">${next?escape(next):available?'先闭卷回想，再展开参考要点':recordDoc()?'记录不是完成，先确认再归纳':'留白真实，比补写可靠'}</span></div></div><div class="metric"><strong>${subject.records.length}</strong><div><b>天问答</b><span>本科独立保存</span></div></div><div class="metric"><strong>${subject.archive.length}</strong><div><b>历史主题</b><span>不是掌握数量</span></div></div>`;
@@ -187,7 +187,7 @@
     const reviewed=get(key('reviewed'))==='yes';$('#reviewed').textContent=reviewed?'✓ 已标记复盘 · 点击撤销':'标记本次已复盘';$('#reviewed').classList.toggle('done',reviewed);$('#reviewed').disabled=!available;
     $('#review-state').textContent=storageOK?'仅当前浏览器的自报标记，不代表掌握':'存储不可用，请导出；标记仅临时保留';
     $('#draft').value=get(key('draft'));
-    $('#sync-state').textContent=synced.get(subject.id)||'已加载发布快照';
+    $('#sync-state').textContent='已加载发布快照';
   }
   async function loadDoc(doc) {
     if(doc.text!==undefined)return doc;
@@ -318,30 +318,11 @@
   }
   function select(id,day,nextTab){if(id==='bed'){openBed();return;}if(id==='all'){mode='all';subject=subject||data.subjects[4];history.replaceState(null,'','#all');render();return;}mode='subject';subject=data.subjects.find(s=>s.id===id)||data.subjects[4];date=day||subject.records[0]?.date||data.latestDate||localDate();if(!/^\d{4}-\d{2}-\d{2}$/.test(date))date=localDate();
     // Opening a subject without a chosen tab: show that day's review if there is one, else that day's Q&A rather than an empty page.
-    tab=nextTab||(subject.summaries.some(d=>d.date===date)||!subject.records.some(d=>d.date===date)?'daily':'records');history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();syncSubject(false);}
-  async function syncSubject(force) {
-    const s=subject;if(synced.has(s.id)&&!force)return;
-    synced.set(s.id,'正在检查GitHub新记录…');updateChrome();
-    try {
-      const results=await Promise.all(['问答记录','每日复盘'].map(async area=>{
-        const base=`${area}/${s.name}`;
-        const r=await fetch(API+encodePath(base)+'?ref=main',{signal:AbortSignal.timeout(10000),credentials:'omit'});
-        if(r.status===404)return [];if(!r.ok)throw Error();const values=await r.json();if(!Array.isArray(values))throw Error();
-        return values.filter(d=>d.type==='file'&&/^\d{4}-\d{2}-\d{2}\.md$/.test(d.name)).map(d=>({path:base+'/'+d.name,date:d.name.slice(0,10),title:d.name,gitSha:d.sha})).sort((a,b)=>b.date.localeCompare(a.date));
-      }));
-      // A local preview may contain not-yet-published days; do not erase its evidence on 404.
-      // Same blob sha → keep the snapshot text; changed or new on GitHub → use GitHub's version (fetched from Raw on demand).
-      // A file missing on GitHub is kept, so a local preview does not lose unpublished evidence.
-      const merge=(old,remote)=>{const m=new Map(old.map(d=>[d.date,d]));remote.forEach(r=>{const o=m.get(r.date);if(!o||o.gitSha!==r.gitSha)m.set(r.date,r);});return [...m.values()].sort((a,b)=>b.date.localeCompare(a.date));};
-      s.records=merge(s.records,results[0]);s.summaries=merge(s.summaries,results[1]);
-      const fresh=[...s.records,...s.summaries].filter(d=>d.text===undefined).length;synced.set(s.id,fresh?`已检查GitHub · ${fresh}个文件比快照新`:'已检查GitHub · 与发布快照一致');
-      if(s===subject){await render();}
-    } catch {synced.set(s.id,'GitHub未连通／限流 · 使用发布快照');if(s===subject)$('#sync-state').textContent=synced.get(s.id);}
-  }
+    tab=nextTab||(subject.summaries.some(d=>d.date===date)||!subject.records.some(d=>d.date===date)?'daily':'records');history.replaceState(null,'',`#${subject.id}/${date}/${tab}`);render();}
   async function copyPrompt() {try {await navigator.clipboard.writeText(prompt());notify('本科每日提示词已复制');}catch {tab='handoff';await render();const field=$('#prompt-text');field.focus();field.select();notify('无法自动复制，已选中提示词，请手动复制。');}}
   document.querySelectorAll('[data-tab]').forEach(b=>{b.onclick=()=>select(subject.id,date,b.dataset.tab);b.onkeydown=e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const buttons=[...document.querySelectorAll('[data-tab]')],i=buttons.indexOf(b),n=buttons[(i+(e.key==='ArrowRight'?1:buttons.length-1))%buttons.length];n.click();n.focus();};});
   $('#date').onchange=e=>{if(e.target.value)select(subject.id,e.target.value,tab);};
-  $('#refresh').onclick=()=>syncSubject(true);$('#all-link').onclick=e=>{e.preventDefault();select('all');};$('#bed-link').onclick=e=>{e.preventDefault();select('bed');};$('#copy-prompt').onclick=copyPrompt;
+  $('#all-link').onclick=e=>{e.preventDefault();select('all');};$('#bed-link').onclick=e=>{e.preventDefault();select('bed');};$('#copy-prompt').onclick=copyPrompt;
   $('#reviewed').onclick=()=>{put(key('reviewed'),get(key('reviewed'))==='yes'?'no':'yes');updateChrome();};
   $('#draft').oninput=e=>put(key('draft'),e.target.value);
   $('#clear-draft').onclick=()=>{if(!get(key('draft')))return;if(confirm('清空本日期、本科目的本地草稿？建议先导出。')){put(key('draft'),'');$('#draft').value='';}};
