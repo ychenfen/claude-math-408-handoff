@@ -264,6 +264,43 @@ P.t3={tpl:'T3',name:'两个升序数组合并',when:'出现“两个（三个）
    else{R.S('b',`A[${i}] = ${A[i]} ≥ B[${j}] = ${B[j]}，放 B 的。`,V({ac:{[i]:'cmp'},bc:{[j]:'cmp'}}));C[k++]=B[j++];R.S('b',`C[${k-1}] = ${C[k-1]}，然后 j、k 各加 1。`,V({cc:{[k-1]:'mv'}}))}}
   while(true){if(i<m){C[k++]=A[i++];R.S('w2',`A 还剩，直接接上：C[${k-1}] = ${C[k-1]}。`,V({cc:{[k-1]:'mv'}}))}else{R.S('w2',`i = ${i} = m，A 没剩的。`,V());break}}
   while(true){if(j<n){C[k++]=B[j++];R.S('w3',`B 还剩，直接接上：C[${k-1}] = ${C[k-1]}。`,V({cc:{[k-1]:'mv'}}))}else{R.S('w3',`j = ${j} = n，合并完成：C = ${C.join(' ')}。收尾两个 while 别漏。`,V({cc:Object.fromEntries(C.map((_,t)=>[t,'done']))}));break}}}};
+P.t3c={tpl:'T3',name:'三个递增序列的共同元素（59 题顺序表 11）',when:P.t3.when,
+ idea:['三个序列各放一个指针，三个数相等就输出，三个指针一起后移。','不相等时，先求三个数的最大值 max_num。','比 max_num 小的数不可能是共同元素，它的指针后移；任一序列走完就结束。'],
+ why:{fa:'手册原代码写的是严格大于，两数并列最大（5、5、4）时会返回 4，三个指针都不动，死循环。看“错法”。改成 >= 就没问题。',w:'任一序列走完，后面就不可能再有共同元素了，所以三个条件用 && 连。',mx:'不相等时，比最大值小的那个数一定不是共同元素（它所在序列后面更大，别的序列里没有它），可以放心跳过。',ck:'三个 if 是并列的，不是 else if：比最大值小的指针都要后移。'},
+ blanks:['fa','w','eq','mx','ai','bj','ck'],
+ code:[
+ ['int fmax(int a, int b, int c){','','fn'],
+ ['    if (a >= b && a >= c) return a;','// 用 >=，并列最大也能取到','fa'],
+ ['    else if (b >= c) return b;','','fb'],
+ ['    else return c;','','fc'],
+ ['}',''],
+ ['int i = 0, j = 0, k = 0;','','init'],
+ ['while (i < n && j < n && k < n)','// 任一序列走完就结束','w'],
+ ['    if (A[i] == B[j] && A[i] == C[k]){','','eq'],
+ ['        printf("%d ", A[i]); i++; j++; k++;','// 共同元素：输出，三个一起走','pr'],
+ ['    } else {','',''],
+ ['        int max_num = fmax(A[i], B[j], C[k]);','','mx'],
+ ['        if (A[i] < max_num) i++;','// 比最大值小的都后移','ai'],
+ ['        if (B[j] < max_num) j++;','','bj'],
+ ['        if (C[k] < max_num) k++;','','ck'],
+ ['    }','']],
+ run(R){const A=[1,3,5,7,9],B=[2,3,5,8,9],C=[3,4,5,6,9],n=5,out=[],got={A:new Set(),B:new Set(),C:new Set()};let i=0,j=0,k=0,mx=null;
+  const one=(nm,X,p,key,hl)=>['arr',{name:nm+'[ ]',vals:X,ptrs:{[key]:p},cls:Object.assign(Object.fromEntries(X.map((_,t)=>[t,got[nm[0]].has(t)?'done':t<p?'dim':''])),hl!==undefined&&p<n?{[p]:hl}:{})}];
+  const V=(o={})=>[['vars',Object.assign({i,j,k,n},mx!==null?{max_num:mx}:{},{'输出':out.join(' ')||'—'})],one('A',A,i,'i',o.a),one('B',B,j,'j',o.b),one('C',C,k,'k',o.c)];
+  R.S('init','三个指针都从 0 开始。三个序列都是无重复的递增序列，长度都是 n = 5。',V());
+  let first=true,tie=false;
+  while(true){const go=i<n&&j<n&&k<n;R.S('w',go?`i = ${i}、j = ${j}、k = ${k} 都 < 5，三个序列都没走完。`:`${i>=n?'A':j>=n?'B':'C'} 走完了，循环结束。输出 ${out.join(' ')}。`,go?V({a:'cmp',b:'cmp',c:'cmp'}):V());if(!go)break;
+   const a=A[i],b=B[j],c=C[k];
+   if(a===b&&a===c){R.S('eq',`A[${i}] = B[${j}] = C[${k}] = ${a}，三个相等。`,V({a:'mv',b:'mv',c:'mv'}));got.A.add(i);got.B.add(j);got.C.add(k);out.push(a);i++;j++;k++;R.S('pr',`输出 ${a}，i、j、k 各加 1。`,V());continue}
+   R.S('eq',`(${a}, ${b}, ${c}) 不全相等。`,V({a:'cmp',b:'cmp',c:'cmp'}));
+   if(first){R.Q(`(${a}, ${b}, ${c})：哪些指针要后移？`,['只动最小的 i','i 和 j 都动','三个都动'],1,'最大值是 3。1 和 2 都比 3 小，不可能是共同元素，i、j 都后移；C 的 3 不动。');first=false}
+   if(!tie&&a===b&&a>c){R.Q(`(${a}, ${b}, ${c})：两个 5 并列最大。fmax 返回几？`,['5','4'],0,'用 >= 写的 fmax：a >= b 且 a >= c 成立，返回 5，于是 C 的 4 后移。手册原代码用严格大于，这里会返回 4，指针全不动，死循环（看“错法”）。');tie=true}
+   mx=Math.max(a,b,c);const ln=a>=b&&a>=c?'fa':b>=c?'fb':'fc';R.S(ln,`fmax(${a}, ${b}, ${c})：${ln==='fa'?'a 最大':ln==='fb'?'b 最大':'c 最大'}，返回 ${mx}。`,V());
+   R.S('mx',`max_num = ${mx}。`,V({a:a===mx?'':'cmp',b:b===mx?'':'cmp',c:c===mx?'':'cmp'}));
+   const ad=a<mx;if(ad)i++;R.S('ai',ad?`A 的 ${a} < ${mx}，i 后移。`:`A 的 ${a} 就是最大值，i 不动。`,V());
+   const bd=b<mx;if(bd)j++;R.S('bj',bd?`B 的 ${b} < ${mx}，j 后移。`:`B 的 ${b} 就是最大值，j 不动。`,V());
+   const cd=c<mx;if(cd)k++;R.S('ck',cd?`C 的 ${c} < ${mx}，k 后移。`:`C 的 ${c} 就是最大值，k 不动。`,V());mx=null}
+  R.S('w',`结果 ${out.join(' ')}。每轮至少一个指针后移，最多走 3n 步：时间 O(n)，空间 O(1)。`,V())}};
 /* T4 */
 P.t4={tpl:'T4',name:'求长度 + 转数组（倒数第 2 个）',when:'链表题要“倒数第 k 个”“中间”“两个链表对齐”，需要总长度或随机访问。',
  code:[
@@ -707,6 +744,21 @@ P.bs2x={tpl:'二分',bug:true,name:'错法：L <= R 配 R = mid',when:P.bs1.when
   while(true){R.S('w',`L = ${L} ≤ R = ${Rr}，继续。`,V());mid=(L+Rr)>>1;R.S('mid',`mid = ${mid}。`,V({c:{[mid]:'cmp'}}));const ge=A[mid]>=x;R.S('ge',`A[${mid}] = ${A[mid]} ${ge?'≥':'<'} 3。`,V({c:{[mid]:'cmp'}}));
    if(ge){const same=Rr===mid;Rr=mid;R.S('r',same?`R = mid = ${mid}，L、R 都没变！`:`R = ${Rr}。`,V({c:{[mid]:'mv'}}));if(same&&++rep>=2){R.S('w',`L = R = ${L}，条件 L <= R 永远成立，R = mid 又不缩小区间：死循环。L < R 配 R = mid，L <= R 配 mid ± 1，不能混。`,V({c:{[L]:'mv'}}));return}}
    else{L=mid+1;R.S('l',`L = ${L}。`,V())}}}};
+
+P.t3cx={tpl:'T3',bug:true,name:'错法：fmax 用严格大于',when:P.t3.when,idea:['手册原代码的 fmax 用 >，看两个 5 并列最大时会怎样。'],
+ code:[['int fmax(int a, int b, int c){','','fn'],['    if (a > b && a > c) return a;','// ✗ 严格大于','fa'],['    else if (b > a && b > c) return b;','','fb'],['    else return c;','// 并列时落到这里','fc'],['}',''],
+  ...P.t3c.code.slice(5)],
+ run(R){const A=[1,3,5,7,9],B=[2,3,5,8,9],C=[3,4,5,6,9],n=5,out=[];let i=0,j=0,k=0,mx=null,stuck=0;
+  const one=(nm,X,p,key)=>['arr',{name:nm+'[ ]',vals:X,ptrs:{[key]:p},cls:Object.fromEntries(X.map((_,t)=>[t,t<p?'dim':t===p?'cmp':'']))}];
+  const V=()=>[['vars',Object.assign({i,j,k},mx!==null?{max_num:mx}:{},{'输出':out.join(' ')||'—'})],one('A',A,i,'i'),one('B',B,j,'j'),one('C',C,k,'k')];
+  R.S('init','和正确版一样的数据：A = 1 3 5 7 9，B = 2 3 5 8 9，C = 3 4 5 6 9。',V());
+  while(i<n&&j<n&&k<n){const a=A[i],b=B[j],c=C[k];R.S('w',`(${a}, ${b}, ${c})。`,V());
+   if(a===b&&a===c){out.push(a);i++;j++;k++;R.S('pr',`三个相等，输出 ${a}。`,V());continue}
+   mx=a>b&&a>c?a:b>a&&b>c?b:c;const ln=a>b&&a>c?'fa':b>a&&b>c?'fb':'fc';
+   R.S(ln,ln==='fc'&&c<Math.max(a,b)?`a = b = ${a}：a > b 不成立，b > a 也不成立，落到 else，返回 c = ${c}。这是最小值！`:`fmax 返回 ${mx}。`,V());
+   const ad=a<mx,bd=b<mx,cd=c<mx;if(ad)i++;if(bd)j++;if(cd)k++;
+   R.S('ck',ad||bd||cd?`比 ${mx} 小的指针后移。`:`没有一个数比 ${mx} 小，i、j、k 都不动。`,V());
+   if(!(ad||bd||cd)&&++stuck>=2){R.S('w',`下一轮还是 (${a}, ${b}, ${c})，永远出不去：死循环，只输出了 ${out.join(' ')}。正确答案是 3 5 9。把 fmax 改成 >= 就好了。`,V());return}}}};
 
 /* ---------- 结构体（手册第 4 章）：逐行讲字段，画出内存里的样子 ---------- */
 function box(title,rows,o={}){return `<div class="sbox${o.cls?' '+o.cls:''}"><div class="sbh">${esc(title)}</div>${rows.map(([f,v,c])=>`<div class="sbr ${c||''}"><span>${esc(f)}</span><b>${esc(v)}</b></div>`).join('')||'<div class="sbr"><span>（还没有字段）</span></div>'}</div>`}
