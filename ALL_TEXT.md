@@ -5316,6 +5316,37 @@ A. x y z u − * v / +　B. x y z u − v / * +　C. + x / * y − z u v　D. + 
 
 **来源**：408代码重点59题（必背）.pdf 第 7 页；`演示/数据结构/代码走读.html#t5a`、`#t5b`。
 
+## 14:55　`59题-顺序表14`　交换用的 temp 在哪定义
+
+**题**（原题，取自《408代码重点59题（必背）》顺序表第 14 题）：将数组中所有负数移动到数组最前端，所有非负数移动到数组的最后端。手册代码：
+```c
+void func(int A[], int n){
+    int left = 0, right = n - 1;
+    while(left < right){
+        while(A[left] < 0 && left < right) left++;
+        while(A[right] >= 0 && left < right) right--;
+        if(left < right){
+            int temp = A[left];
+            A[left] = A[right];
+            A[right] = temp;
+        }
+    }
+}
+```
+
+**问**：14 题这个 temp 是临时定义的吗。
+
+**作答**：本条无作答。
+
+**答**：
+- 是。`int temp` 定义在 if 的大括号里，是块内局部变量，出了大括号就失效。
+- 作用是交换时先存住 A[left]，否则 `A[left] = A[right]` 之后原值就丢了。
+- 也可以在函数开头写 `int temp;`，两种写法都对；C99 允许在块内随用随定义。
+
+**核对依据**：对照 PDF 原代码。
+
+**来源**：408代码重点59题（必背）.pdf 第 7 页，顺序表第 14 题。
+
 
 ---
 
