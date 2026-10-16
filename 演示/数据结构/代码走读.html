@@ -694,6 +694,821 @@ const TEACH={
 };
 Object.entries(TEACH).forEach(([k,v])=>Object.assign(P[k],v));
 
+/* ---------- 59 题·树 1–5 ---------- */
+/* trTV：画树（cur 加蓝圈），nodes 用的 id 和 t 分开 */
+function trTV(nodes,root,cls,tags,cur,title,legend){return ['tree',{nodes,root,cls:Object.assign({},cls,cur?{[cur]:'cur'}:{}),tags:Object.assign({},tags),title,legend}]}
+const TR_OUT=s=>s===''?'（还没有）':s;
+/* 树 1：C 只有左孩子 F，不是正则二叉树 */
+const TRT1={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:'D',r:'E'},C:{t:'C',l:'F',r:null},D:{t:'D',l:null,r:null},E:{t:'E',l:null,r:null},F:{t:'F',l:null,r:null}};
+const TR1_Q='【树 1】判断二叉树是不是正则二叉树（即每个结点的度均为 0 或 2）。';
+P.tr1a={tpl:'59树',name:'1 正则二叉树（计算型）',when:TR1_Q+'演示的树：A 的孩子 B、C，B 的孩子 D、E，C 只有左孩子 F，所以不是正则二叉树。',
+ idea:['度为 1 的结点就是“只有一个孩子”：左空右不空，或左不空右空。','碰到这种结点直接返回 0，空树返回 1。','否则左右子树都正则，自己才正则：后序，用返回值 L1 && L2 往上传。'],
+ why:{r1:'空树没有度为 1 的结点，算正则，返回 1。这也是递归出口。',if:'两种“只有一个孩子”的情况用 || 连起来，任意一种成立就是度为 1。',r0:'找到一个度为 1 的结点就能下结论，它的子树不用再看。',ret:'L1、L2 是分两句算的，所以 L1 已经是 0 时 L2 也照样会递归，最后 L1 && L2 才合起来。',call:'返回 1 是正则，返回 0 不是。'},
+ blanks:['nul','r1','if','if2','r0','L','Rr','ret'],
+ code:[['int func(BiTree p) {','','fn'],
+ ['   if (p == NULL)','','nul'],
+ ['       return 1;','// 空树算正则','r1'],
+ ['   if ((p->lchild == NULL && p->rchild != NULL)','// 只有右孩子','if'],
+ ['       ||(p->lchild != NULL && p->rchild == NULL))','// 或只有左孩子','if2'],
+ ['       return 0;','// 度为 1：不是正则','r0'],
+ ['   int L1 = func(p->lchild);','','L'],
+ ['   int L2 = func(p->rchild);','','Rr'],
+ ['    return L1&&L2;','// 后序：两棵子树都正则才正则','ret'],
+ ['}',''],
+ ['// 调用：int ok = func(root);','','call']],
+ run(R){const T=TRT1,st=[],cls={},tags={};const V=(cur,v)=>[['vars',v||{}],['stack',st.slice()],trTV(T,'A',cls,tags,cur,'二叉树（C 只有左孩子）','蓝圈＝正在执行；绿色＝已返回；标签是返回值。')];
+  R.S('call','从根 A 调用 func，返回 1 表示正则。',V());
+  (function go(p){const nm=p?T[p].t:'NULL';st.push(`func(${nm})`);R.S('fn',`进入 func(${nm})。`,V(p));
+   if(p===null){R.S('nul','p == NULL。',V(null));R.S('r1','空树返回 1。',V(null));st.pop();return 1}
+   R.S('nul','p 不空，继续。',V(p));const n=T[p];
+   if(p==='C')R.Q('C 只有左孩子 F。func(C) 会怎样？',['返回 0，不再看 F','先递归 F，再返回 0'],0,'C 的度是 1，第二个 if 成立，直接 return 0，后面的两次递归都不会执行。');
+   if(n.l&&!n.r){R.S('if2',`${n.t} 左孩子不空、右孩子空：度为 1。`,V(p));tags[p]='返回 0';cls[p]='done';R.S('r0',`func(${n.t}) 返回 0，${T[n.l].t} 不用再看。`,V(p));st.pop();return 0}
+   R.S('if',n.l?`${n.t} 左右孩子都在，度为 2，条件不成立。`:`${n.t} 左右孩子都空，度为 0，条件不成立。`,V(p));
+   R.S('L',`递归左子树。`,V(p));const L1=go(n.l);R.S('L',`左子树返回 L1 = ${L1}。`,V(p,{L1}));
+   R.S('Rr',`递归右子树。`,V(p,{L1}));const L2=go(n.r);R.S('Rr',`右子树返回 L2 = ${L2}。`,V(p,{L1,L2}));
+   const r=L1&&L2?1:0;if(p==='A')R.Q(`L1 = ${L1}，L2 = ${L2}。func(A) 返回几？`,['1','0'],r?0:1,'L1 && L2：两棵子树都正则才返回 1，右子树 C 返回了 0，所以是 0。');
+   tags[p]='返回 '+r;cls[p]='done';R.S('ret',`func(${n.t}) 返回 ${L1} && ${L2} = ${r}。`,V(p,{L1,L2}));st.pop();return r})('A');
+  R.S('call','func(A) 返回 <b>0</b>：C 的度为 1，不是正则二叉树。时间 O(n)，空间 O(h)，最坏 O(n)。',V())}};
+
+P.tr1b={tpl:'59树',name:'1 正则二叉树（操作型）',when:TR1_Q+'演示的树和计算型一样：C 只有左孩子 F。',
+ idea:['flag 先置 1，表示“暂时没发现问题”。','先序遍历每个结点，只要它只有一个孩子，就把 *flag 改成 0。','遍历完 flag 还是 1 就是正则二叉树。'],
+ why:{set:'flag 是指针参数，改的是调用者那个变量，所以每一层都能看到。',call:'调用前 flag 一定要置 1；遍历只会把它改成 0，不会改回 1。',if:'两种“只有一个孩子”的情况用 || 连起来。',L:'操作型没有提前返回，发现 C 不合格后 F 也照样遍历。'},
+ blanks:['nul','if','if2','set','L','Rr'],
+ code:[['void func(BiTree p, int *flag){','','fn'],
+ ['   if (p!=NULL){','','nul'],
+ ['       if ((p->lchild==NULL && p->rchild!=NULL)','// 只有右孩子','if'],
+ ['           ||(p->lchild!=NULL && p->rchild==NULL))','// 或只有左孩子','if2'],
+ ['           *flag = 0;','// 发现度为 1 的结点','set'],
+ ['       func(p->lchild, flag);','','L'],
+ ['       func(p->rchild, flag);','','Rr'],
+ ['   }',''],
+ ['} //时空复杂度分别为 O(N)和 O(N)','','end'],
+ ['// 调用：int flag = 1; func(root, &flag);','','call']],
+ run(R){const T=TRT1,st=[],cls={};let flag=1;const V=(cur)=>[['vars',{flag}],['stack',st.slice()],trTV(T,'A',cls,{},cur,'二叉树（C 只有左孩子）','蓝圈＝正在执行；绿色＝已遍历完。')];
+  R.S('call','flag 先置 1，从根 A 调用。',V());
+  (function go(p){const nm=p?T[p].t:'NULL';st.push(`func(${nm}, flag)`);R.S('fn',`进入 func(${nm})。`,V(p));
+   if(p===null){R.S('nul','p == NULL，什么也不做，返回。',V(null));st.pop();return}
+   R.S('nul','p 不空。',V(p));const n=T[p];
+   if(n.l&&!n.r){R.S('if2',`${n.t} 只有左孩子：度为 1。`,V(p));flag=0;R.S('set','*flag = 0：调用者的 flag 变成 0。',V(p));
+    R.Q('flag 已经是 0 了。C 的左孩子 F 还会被遍历吗？',['会','不会'],0,'这个版本没有 return，if 之后照样往下递归，所以 F 也会走一遍。')}
+   else R.S('if',n.l?`${n.t} 有两个孩子，条件不成立。`:`${n.t} 是叶子，条件不成立。`,V(p));
+   R.S('L','递归左子树。',V(p));go(n.l);R.S('Rr','递归右子树。',V(p));go(n.r);
+   cls[p]='done';R.S('end',`${n.t} 遍历完，返回。`,V(p));st.pop()})('A');
+  R.S('call','遍历结束，flag = <b>0</b>：不是正则二叉树。时间 O(n)，空间 O(h)，最坏 O(n)。',V())}};
+
+/* 树 2：2017 真题，(a+b)*(c*(-d)) */
+const TRT2={r:{t:'*',l:'p',r:'m'},p:{t:'+',l:'a',r:'b'},a:{t:'a',l:null,r:null},b:{t:'b',l:null,r:null},m:{t:'*',l:'c',r:'n'},c:{t:'c',l:null,r:null},n:{t:'-',l:null,r:'d'},d:{t:'d',l:null,r:null}};
+P.tr2={tpl:'59树',name:'2 转中缀表达式（2017）',when:'【树 2】将给定的二叉树转化为等价的中缀表达式（2017 年统考题）。演示用真题的第一棵树 (a+b)*(c*(-d))，其中 − 是单目运算，只有右孩子 d。',
+ idea:['中缀表达式就是中序遍历：左子树、根、右子树。','子树外面要套括号：进入结点前输出“(”，出来后输出“)”。','根（deep = 1）和叶子外面不加括号，所以用 deep 记录当前在第几层。'],
+ why:{inc:'deep 是指针参数，进来加 1、出去减 1，保证回到上一层时值是对的。',lp:'PDF 的条件是 lchild && rchild：两个孩子都在才加括号。单目“−”只有右孩子，所以输出 -d 不带括号，gcc 实测得 (a+b)*(c*-d)。2017 标准答案的条件是“不是叶子且 deep > 1”，会输出 (a+b)*(c*(-d))。',pr:'中序位置：左子树输出完再输出自己。',dec:'和 ++(*deep) 成对，漏了 deep 只增不减，后面全会加括号。',call:'deep 初值 0，进根后变 1，根外面不加括号。'},
+ blanks:['nul','inc','lp','lp2','L','pr','Rr','rq','rp','dec'],
+ code:[['void func(BiTree p, int *deep){','','fn'],
+ ['   if (p != NULL){','','nul'],
+ ['       ++(*deep);','// 进入下一层','inc'],
+ ['       if ((p->lchild && p->rchild ) && *deep>1)','// 两个孩子都在、且不是根','lp'],
+ ['           printf("(");','','lp2'],
+ ['       func(p->lchild, deep);','','L'],
+ ['       printf("%c", p->data);','// 中序位置','pr'],
+ ['       func(p->rchild, deep);','','Rr'],
+ ['       if ((p->lchild && p->rchild ) && *deep>1)','// 同样的条件','rq'],
+ ['           printf(")");','// 对应的右括号','rp'],
+ ['       --(*deep);','// 回到上一层','dec'],
+ ['   }',''],
+ ['} //时空复杂度分别为 O(N)和 O(N)',''],
+ ['// 调用：int deep = 0; func(root, &deep);','','call']],
+ run(R){const T=TRT2,st=[],cls={},tags={};let deep=0,out='';const V=(cur)=>[['vars',{deep,'输出':TR_OUT(out)}],['stack',st.slice()],trTV(T,'r',cls,tags,cur,'表达式树 (a+b)*(c*(-d))','蓝圈＝正在执行；绿色＝已输出完；标签是进入时的 deep。')];
+  R.S('call','deep 置 0，从根 * 调用。',V());
+  (function go(p){const n=T[p];st.push(`func(${n.t}, deep)`);const leaf=!n.l&&!n.r,both=n.l&&n.r;
+   deep++;tags[p]='deep '+deep;
+   if(leaf){R.S('inc',`进入叶子 ${n.t}，deep = ${deep}。`,V(p));R.S('lp',`${n.t} 没有孩子，不加括号。`,V(p));out+=n.t;R.S('pr',`左右子树都空（两次调用直接返回），输出 ${n.t}。输出：${out}`,V(p));
+    deep--;cls[p]='done';R.S('dec',`--(*deep)，deep = ${deep}，返回。`,V(p));st.pop();return}
+   R.S('nul',`进入 func(${n.t})，p 不空。`,V(p));R.S('inc',`++(*deep)，deep = ${deep}。`,V(p));
+   if(p==='p')R.Q('现在 deep = 2，+ 有两个孩子 a、b。会先输出“(”吗？',['会','不会'],0,'两个孩子都在且 deep > 1，条件成立，输出“(”。根那一层 deep = 1，所以根外面没有括号。');
+   if(p==='n')R.Q('现在到了单目的“−”，deep = 3，它只有右孩子 d。会输出“(”吗？',['会','不会'],1,'PDF 的条件是 lchild && rchild，“−”没有左孩子，条件不成立，不加括号。');
+   const par=both&&deep>1;if(par){R.S('lp',`${n.t} 有两个孩子且 deep = ${deep} > 1，条件成立。`,V(p));out+='(';R.S('lp2',`输出“(”。输出：${out}`,V(p))}
+   else R.S('lp',deep===1?'deep = 1，是根，不加括号。':`${n.t} 只有一个孩子，条件不成立，不加括号。`,V(p));
+   if(n.l){R.S('L','递归左子树。',V(p));go(n.l)}else R.S('L','左孩子为空，func(NULL) 直接返回。',V(p));
+   out+=n.t;R.S('pr',`回到 ${n.t}，输出 ${n.t}。输出：${out}`,V(p));
+   R.S('Rr','递归右子树。',V(p));go(n.r);
+   if(par){R.S('rq',`回到 ${n.t}，deep 还是 ${deep}，条件同样成立。`,V(p));out+=')';R.S('rp',`输出“)”。输出：${out}`,V(p))}
+   deep--;cls[p]='done';R.S('dec',`--(*deep)，deep = ${deep}，返回。`,V(p));st.pop()})('r');
+  R.S('call',`输出 <b>${out}</b>。PDF 的条件要求两个孩子都在，所以 −d 外面没有括号（标准答案是 (a+b)*(c*(-d))）。时间 O(n)，空间 O(h)，最坏 O(n)。`,V())}};
+
+/* 树 3：(8-(1+3))*(6/2) */
+const TRT3={m:{t:'*',l:'s',r:'v'},s:{t:'-',l:'e8',r:'p'},e8:{t:'8',l:null,r:null},p:{t:'+',l:'e1',r:'e3'},e1:{t:'1',l:null,r:null},e3:{t:'3',l:null,r:null},v:{t:'/',l:'e6',r:'e2'},e6:{t:'6',l:null,r:null},e2:{t:'2',l:null,r:null}};
+P.tr3={tpl:'59树',name:'3 表达式树求值',when:'【树 3】(a-(b+c))*(d/e) 存储在二叉树，求四则运算后的结果。演示把 a～e 换成数字：(8-(1+3))*(6/2)。',
+ idea:['叶子是数字，直接返回 p->data − \'0\'。','运算符结点先算左子树 A、再算右子树 B：后序。','按 p->data 是 + − * / 算出 A 和 B 的结果，往上返回。'],
+ why:{lf:'data 是字符，减去 \'0\' 才是数值：\'8\' − \'0\' = 8。',both:'PDF 只处理了两个孩子都在的情况。若某结点只有一个孩子，两个 if 都不进，函数没有 return 就结束了，返回值不确定（gcc -Wall 会警告 control reaches end of non-void function）。四则运算树每个运算符都有两个孩子，所以不会出事。',dv:'整数除法，6 / 2 = 3；不能整除时会截掉小数。',A:'先拿到两边的值才能算自己，所以是后序。'},
+ blanks:['nul','lf','rl','both','A','B','ia','ra'],
+ code:[['int func(BiTree p){','','fn'],
+ ['   if (p == NULL)','','nul'],
+ ['       return 0;','',''],
+ ['   if (!p->lchild && !p->rchild)','// 叶子：数字','lf'],
+ ['       return p->data - \'0\';','// 字符转数值','rl'],
+ ['   if (p->lchild && p->rchild){','// 运算符：两个孩子都在','both'],
+ ['       int A = func(p->lchild);','// 左边的值','A'],
+ ['       int B = func(p->rchild);','// 右边的值','B'],
+ ['       if (p->data == \'+\')','','ia'],
+ ['           return A + B;','','ra'],
+ ['       else if (p->data == \'-\')','','is'],
+ ['           return A - B;','','rs'],
+ ['       else if (p->data == \'*\')','','im'],
+ ['           return A * B;','','rm'],
+ ['       else if (p->data == \'/\')','','id'],
+ ['           return A / B;','','dv'],
+ ['   }',''],
+ ['} //时空复杂度分别为 O(N)和 O(N)',''],
+ ['// 调用：int res = func(root);','','call']],
+ run(R){const T=TRT3,st=[],cls={},tags={};const V=(cur,v)=>[['vars',v||{}],['stack',st.slice()],trTV(T,'m',cls,tags,cur,'表达式树 (8-(1+3))*(6/2)','蓝圈＝正在执行；绿色＝已返回；标签是返回值。')];
+  const OP={'+':['ia','ra',(a,b)=>a+b],'-':['is','rs',(a,b)=>a-b],'*':['im','rm',(a,b)=>a*b],'/':['id','dv',(a,b)=>Math.trunc(a/b)]};
+  R.S('call','从根 * 调用。',V());
+  (function go(p){const n=T[p];st.push(`func(${n.t})`);R.S('fn',`进入 func(${n.t})，p 不空。`,V(p));
+   if(!n.l&&!n.r){R.S('lf',`${n.t} 是叶子。`,V(p));const x=Number(n.t);tags[p]=String(x);cls[p]='done';R.S('rl',`返回 '${n.t}' − '0' = ${x}。`,V(p));st.pop();return x}
+   R.S('lf',`${n.t} 有孩子，不是叶子。`,V(p));R.S('both',`${n.t} 左右孩子都在，是运算符。`,V(p));
+   R.S('A','先算左子树。',V(p));const A=go(n.l);R.S('A',`左边返回 A = ${A}。`,V(p,{A}));
+   R.S('B','再算右子树。',V(p,{A}));const B=go(n.r);R.S('B',`右边返回 B = ${B}。`,V(p,{A,B}));
+   const [ik,rk,f]=OP[n.t];const r=f(A,B);
+   if(p==='s')R.Q(`A = ${A}，B = ${B}，结点是“−”。func 返回几？`,[String(A-B),String(B-A)],0,'A 是左子树、B 是右子树，减法写 A − B，顺序不能反。');
+   R.S(ik,`p->data 是 '${n.t}'，${n.t==='+'?'第一个 if 就成立':'前面的 if 不成立，走到这个分支'}。`,V(p,{A,B}));
+   tags[p]=String(r);cls[p]='done';R.S(rk,`返回 ${A} ${n.t} ${B} = ${r}。`,V(p,{A,B}));st.pop();return r})('m');
+  R.S('call','func 返回 <b>12</b>：(8 − (1 + 3)) × (6 / 2) = 4 × 3。时间 O(n)，空间 O(h)，最坏 O(n)。',V())}};
+
+/* 树 4：根到每个叶子的路径 */
+const TRT4={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:'D',r:'E'},C:{t:'C',l:null,r:null},D:{t:'D',l:null,r:null},E:{t:'E',l:null,r:null}};
+function mkTr4(rev){const fl=rev?'     for (int i = *top; i >= 0 ; i--)':'       for (int i = 0; i <= *top; i++)';
+ return {tpl:'59树',name:rev?'4 叶子到根的路径':'4 根到叶子的路径',when:'【树 4】输出根结点到每个叶子结点的路径。'+(rev?'PDF 的第二个版本：倒着输出，得到每个叶子到根结点的顺序。':'PDF 的第一个版本：根结点到每个叶子结点的顺序。')+'演示的树：A 的孩子 B、C，B 的孩子 D、E。',
+ idea:['数组 st 当栈，存“从根走到当前结点”的这条路径。','先序进入结点就入栈，遇到叶子就把整个栈'+(rev?'从栈顶到栈底倒着':'从栈底到栈顶')+'输出一遍。','左右子树都走完，结点出栈（--(*top)），回到父结点。'],
+ why:{push:'top 先加 1 再存，所以调用时 top 初值是 −1，根放在 st[0]。',leaf:'只有叶子才输出路径。',for:rev?'从 *top 往下到 0：叶子先输出，根最后输出。':'从 0 到 *top：根先输出，叶子最后输出。',pop:'左右子树都处理完才出栈，这样 st 里永远是根到当前结点的路径。漏了这句，路径会越来越长。',call:'PDF 的 printf 没有输出分隔符，几条路径会连在一起。'},
+ blanks:['nul','push','leaf','for','pr','L','Rr','pop'],
+ code:[['void allpath(BiTree p, char st[], int'+(rev?'* top':' *top')+'){','','fn'],
+ [rev?'  if (p != NULL){':'   if (p != NULL){','','nul'],
+ [rev?'     st[++(*top)] = p->data;':'       st[++(*top)] = p->data;','// 入栈：路径多一个结点','push'],
+ [rev?'     if (!p->lchild && !p->rchild){':'       if (!p->lchild && !p->rchild){','// 叶子','leaf'],
+ [fl,rev?'// 栈顶到栈底':'// 栈底到栈顶','for'],
+ [rev?'           printf("%c", st[i]);':'             printf("%c", st[i]);','','pr'],
+ [rev?'     }':'       }',''],
+ [rev?'     allpath(p->lchild, st, top);':'       allpath(p->lchild, st, top);','','L'],
+ [rev?'     allpath(p->rchild, st, top);':'       allpath(p->rchild, st, top);','','Rr'],
+ [rev?'     (*top)--;':'       --(*top);','// 出栈：回到父结点','pop'],
+ [rev?'   }':'   }',''],
+ [rev?'}//每个叶子到根结点的顺序':'}//根结点到每个叶子点的顺序',''],
+ ['// 调用：char st[maxsize]; int top = -1; allpath(root, st, &top);','','call']],
+ run(R){const T=TRT4,st=[],cls={},S=[null,null,null,null];let top=-1,out='';
+  const V=(cur,v,c)=>[['vars',Object.assign({top},v||{},{'输出':TR_OUT(out)})],['arr',{name:'st[ ]（路径栈）',vals:S.slice(),ptrs:top>=0?{top}:{},cls:Object.assign(Object.fromEntries(S.map((_,i)=>[i,i>top&&S[i]!==null?'dim':''])),c||{})}],['stack',st.slice()],trTV(T,'A',cls,{},cur,'二叉树','蓝圈＝正在执行；绿色＝已出栈。st 里灰色的格子在 top 上面，已经不算路径了。')];
+  R.S('call','top 置 −1，从根 A 调用。',V());let firstPop=true;
+  (function go(p){const n=T[p];st.push(`allpath(${n.t})`);R.S('nul',`进入 allpath(${n.t})，p 不空。`,V(p));
+   if(p==='E')R.Q('D 出栈后 top = 1，但 st[2] 里还留着 D。现在 E 入栈，会放在哪？',['st[2]，盖掉 D','st[3]'],0,'++(*top) 让 top 变成 2，E 直接覆盖 st[2]。top 上面的旧值不用清，因为只输出 0..top。');
+   top++;S[top]=n.t;R.S('push',`st[++(*top)] = ${n.t}，top = ${top}。路径：${S.slice(0,top+1).join(' → ')}。`,V(p,{},{[top]:'mv'}));
+   const leaf=!n.l&&!n.r;R.S('leaf',leaf?`${n.t} 是叶子，输出路径。`:`${n.t} 不是叶子，不输出。`,V(p));
+   if(leaf){const idx=[];for(let i=0;i<=top;i++)idx.push(i);if(rev)idx.reverse();R.S('for',rev?`i 从 ${top} 往下到 0。`:`i 从 0 到 ${top}。`,V(p));
+    idx.forEach(i=>{out+=S[i];R.S('pr',`i = ${i}，输出 st[${i}] = ${S[i]}。输出：${out}`,V(p,{i},{[i]:'cmp'}))});
+    R.S('L','左右孩子都空：两次递归 allpath(NULL) 直接返回。',V(p))}
+   else{R.S('L','递归左子树。',V(p));go(n.l);R.S('Rr','左子树走完，递归右子树。',V(p));go(n.r)}
+   if(firstPop){R.Q(`${n.t} 处理完，执行 --(*top)。top 变成几？`,[String(top-1),String(top)],0,`出栈后 top = ${top-1}，st 里只剩 ${S.slice(0,top).join(' → ')}，回到父结点。`);firstPop=false}
+   top--;cls[p]='done';R.S('pop',`--(*top)，top = ${top}，${n.t} 出栈，返回。`,V(p));st.pop()})('A');
+  R.S('call',`输出 <b>${out}</b>（三条路径 ${rev?'DBA、EBA、CA':'ABD、ABE、AC'} 连在一起）。最后 top 回到 −1。时间 O(n)，空间 O(h)，最坏 O(n)。`,V())}}}
+P.tr4a=mkTr4(false);P.tr4b=mkTr4(true);
+
+/* 树 5：parent 指针 */
+const TRT5={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:null,r:'D'},C:{t:'C',l:null,r:null},D:{t:'D',l:null,r:null}};
+P.tr5={tpl:'59树',name:'5 parent 指针：所有结点到根',when:'【树 5】增加一个指向双亲结点的 parent 指针，输出所有结点到根结点的路径。演示的树：A 的孩子 B、C，B 只有右孩子 D。',
+ idea:['fun 先序遍历：参数 q 是父结点，进入 p 就写 p->parent = q。','根的父结点是 NULL，所以调用 fun(root, NULL)。','allpath 也先序遍历每个结点，从它出发顺着 parent 往上走，边走边输出，走到 NULL 停。'],
+ why:{fp:'先序位置：进入 p 就把父结点记下来。',fq:'q 是值参数，改的是这一层自己的 q。孩子收到的父结点就是 p，回到上一层时上一层的 q 不变。',aw:'根的 parent 是 NULL，所以走到根输出完就停。',aup:'顺着 parent 往上一层。',call:'必须先 fun 把 parent 全部填好，再 allpath。'},
+ blanks:['fp','fq','fL','fR','aq','aw','apr','aup','aL','aR'],
+ code:[['typedef struct BTNode{','',''],
+ ['   char data;','',''],
+ ['   struct BTNode *lchild, *rchild, *parent;','// 多一个双亲指针','st'],
+ ['} BTNode, *BiTree;',''],
+ ['void fun(BiTree p, BiTree q){','// q：p 的父结点','f'],
+ ['   if (p != NULL){','','fn'],
+ ['       p->parent = q ;','// 记下父结点','fp'],
+ ['       q=p;','// 对孩子来说，父结点是 p','fq'],
+ ['       fun(p->lchild, q) ;','','fL'],
+ ['       fun(p->rchild, q) ;','','fR'],
+ ['   }',''],
+ ['}',''],
+ ['void allpath(BiTree p){','','a'],
+ ['   if (p != NULL){','','an'],
+ ['       BiTree q = p;','// 从 p 出发','aq'],
+ ['       while (q != NULL){','','aw'],
+ ['           printf("%c ",q->data);','','apr'],
+ ['           q = q->parent;','// 往上走一层','aup'],
+ ['       }',''],
+ ['       allpath(p->lchild);','','aL'],
+ ['       allpath(p->rchild);','','aR'],
+ ['   }',''],
+ ['} //时空复杂度分别为 O(N)和 O(N)',''],
+ ['// 调用：fun(root, NULL); allpath(root);','','call']],
+ run(R){const T=TRT5,st=[],cls={},tags={},par={};let out='',q=null;const nm=x=>x?T[x].t:'NULL';
+  const V=(cur,v,mv)=>[['vars',Object.assign({},v||{},{'输出':TR_OUT(out)})],['stack',st.slice()],trTV(T,'A',Object.assign({},cls,mv?{[mv]:'mv'}:{}),tags,cur,'二叉树','蓝圈＝当前 p；橙色＝allpath 里的 q；标签是 parent。')];
+  R.S('call','第一步 fun(A, NULL)：根的父结点是 NULL。',V());
+  (function go(p,qq){st.push(`fun(${nm(p)}, ${nm(qq)})`);R.S('fn',`进入 fun(${nm(p)}, q=${nm(qq)})，p 不空。`,V(p,{q:nm(qq)}));
+   par[p]=qq;tags[p]='parent='+nm(qq);R.S('fp',`${T[p].t}->parent = ${nm(qq)}。`,V(p,{q:nm(qq)}));
+   const q2=p;R.S('fq',`q = p，这一层的 q 变成 ${T[p].t}。`,V(p,{q:T[p].t}));
+   const n=T[p];
+   if(n.l){R.S('fL',`递归左孩子，传 q = ${T[p].t}。`,V(p,{q:T[p].t}));go(n.l,q2)}else R.S('fL','左孩子为空，fun(NULL, q) 直接返回。',V(p,{q:T[p].t}));
+   if(p==='A')R.Q('B 那边把 q 改成了 B、D。回到 A 这一层，q 是几？',['A','D'],0,'q 是值参数，每层一份。A 这一层的 q 在 q = p 之后一直是 A，所以 C 的 parent 是 A。');
+   if(n.r){R.S('fR',`递归右孩子，传 q = ${T[p].t}。`,V(p,{q:T[p].t}));go(n.r,q2)}else R.S('fR',`右孩子也为空，返回。`,V(p,{q:T[p].t}));
+   st.pop()})('A',null);
+  R.S('call','parent 全部填好。第二步 allpath(A)。',V());
+  (function go(p){st.push(`allpath(${T[p].t})`);R.S('an',`进入 allpath(${T[p].t})，p 不空。`,V(p));
+   q=p;R.S('aq',`q = p = ${T[p].t}。`,V(p,{q:T[p].t},q));
+   if(p==='D')R.Q('从 D 出发顺着 parent 往上，这次会输出什么？',['D B A','D A','D'],0,'D 的 parent 是 B，B 的 parent 是 A，A 的 parent 是 NULL：输出 D B A。');
+   while(q!==null){out+=T[q].t+' ';R.S('apr',`q 不空，输出“${T[q].t} ”。输出：${out}`,V(p,{q:T[q].t},q));const was=T[q].t;q=par[q];R.S('aup',`q = ${was}->parent = ${nm(q)}。`,V(p,{q:nm(q)},q))}
+   R.S('aw','q == NULL，已经到根上面了，循环结束。',V(p,{q:'NULL'}));cls[p]='done';
+   const n=T[p];if(n.l){R.S('aL','递归左子树。',V(p));go(n.l)}
+   if(n.r){R.S('aR',n.l?'递归右子树。':'左孩子为空直接返回；递归右子树。',V(p));go(n.r)}
+   if(!n.l&&!n.r)R.S('aR','左右孩子都空，两次递归直接返回。',V(p));
+   st.pop()})('A');
+  R.S('call',`输出 <b>${out.trim()}</b>（每个字符后面跟一个空格）：依次是 A、B、D、C 各自到根的路径。时间：fun O(n)，allpath 每个结点往上走 h 步，O(n·h)，最坏 O(n²)（PDF 写 O(N)）；空间 O(h)。`,V())}};
+/* ---------- 59 题·树 6–10：代码原样取自《408代码重点59题（必背）》第 17–18 页 ---------- */
+{
+const TB=(T,root,o={})=>['tree',{nodes:T,root,cls:o.cls||{},tags:o.tags||{},title:o.title||'二叉树',legend:o.legend}];
+const NL=(T,id)=>id===null||id===undefined?'NULL':T[id].t;
+/* 层序用的队列：que[0] 不用，que[++rear] 入队、que[++front] 出队 */
+const QA=(T,que,front,rear,last,len,o={})=>['arr',{name:'que[ ]（que[0] 不用）',vals:Array.from({length:len},(_,k)=>que[k]?T[que[k]].t:null),ptrs:{front,rear,last},
+ cls:Object.assign(Object.fromEntries(que.map((x,k)=>[k,x&&k<=front?'dim':''])),o.qc||{})}];
+const mg=(...a)=>Object.assign({},...a);
+
+/* 6 最近公共祖先（递归） */
+const T6={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:'D',r:'E'},C:{t:'C',l:null,r:'F'},D:{t:'D',l:null,r:null},E:{t:'E',l:'G',r:null},F:{t:'F',l:null,r:null},G:{t:'G',l:null,r:null}};
+P.tr6a={tpl:'59树',name:'6 最近公共祖先（递归）',when:'【树 6】找到 p 和 q 最近公共祖先结点 r。演示：p = D，q = G，答案是 B。',
+ idea:['在 root 这棵树里找 p 或 q：碰到空、p、q 就把 root 原样返回。','左右子树各找一次：两边都找到了，说明 p、q 分在 root 两侧，root 就是答案。','只有一边找到，就把那一边的结果往上传；两边都没有就返回 NULL。'],
+ why:{if:'碰到 p 就直接返回，不再往下找：如果 q 在 p 的子树里，答案就是 p 本身。前提是 p、q 都在树里。',L:'left、right 的意思是“这棵子树里找到的 p、q 或它们的公共祖先”。',rr:'p、q 一个在左一个在右，第一次在这里汇合的就是最近的。',r1:'只有一边不空：答案在那一边，原样往上传。'},
+ blanks:['if','r0','L','Rr','n2','b2','rr','r1'],
+ code:[
+ ['BiTree find_LCA(BiTree root, BiTree p, BiTree q) {','','fn'],
+ ['   if (root==NULL || root == p || root == q)','// 空，或者碰到 p、q','if'],
+ ['       return root;','','r0'],
+ ['   BiTree left = find_LCA(root->lchild, p, q);','// 左子树里找','L'],
+ ['   BiTree right = find_LCA(root->rchild, p, q);','// 右子树里找','Rr'],
+ ['   if (left == NULL && right == NULL)','','n2'],
+ ['       return NULL;','// 两边都没找到','rn'],
+ ['   if (left != NULL && right != NULL)','','b2'],
+ ['       return root;','// 一边一个：root 就是答案','rr'],
+ ['   return left != NULL ? left : right;','// 只有一边找到：往上传','r1'],
+ ['}//递归思想','',''],
+ ['//时空复杂度分别为 O(N)和 O(N)','','end']],
+ run(R){const T=T6,st=[],cls={},ret={};let qn=0;
+  const tg=()=>{const o={};Object.keys(T).forEach(k=>{const a=[];if(k==='D')a.push('p');if(k==='G')a.push('q');if(k in ret)a.push('返回 '+NL(T,ret[k]));if(a.length)o[k]=a.join(' · ')});return o};
+  const V=(cur,v={})=>[['vars',mg({p:'D',q:'G'},v)],['stack',st.slice()],TB(T,'A',{cls:mg(cls,cur?{[cur]:'cur'}:{}),tags:tg(),legend:'蓝圈＝正在执行的 root；绿色＝已经返回；标签是 p、q 和这一层的返回值。'})];
+  R.S('fn','调用 find_LCA(A, D, G)：在整棵树里找 D 和 G 的最近公共祖先。',V(null));
+  const go=(id,from)=>{st.push(`find_LCA(${NL(T,id)})`);
+   if(id===null){R.S('r0',`进入 find_LCA(NULL)${from}：root == NULL，返回 NULL。`,V(null));st.pop();return null}
+   R.S('fn',`进入 find_LCA(${T[id].t})${from}。`,V(id));
+   if(id==='D'&&qn===0){qn++;R.Q('root 就是 p（D）。还要继续到 D 的子树里找 q 吗？',['要，q 可能在 D 下面','不用，直接返回 D'],1,'碰到 p 就返回 p。就算 q 在 D 下面，答案也正是 D；q 不在下面，交给上层去汇合。')}
+   if(id==='D'||id==='G'){R.S('if',`root == ${id==='D'?'p':'q'}：碰到 ${T[id].t} 了。`,V(id));ret[id]=id;cls[id]='done';R.S('r0',`返回 ${T[id].t}。`,V(id));st.pop();return id}
+   R.S('if',`${T[id].t} 不空，也不是 p、q，要到两边去找。`,V(id));
+   R.S('L',`先在 ${T[id].t} 的左子树里找。`,V(id));const left=go(T[id].l,`，${T[id].t} 的左孩子`);R.S('L',`回到 ${T[id].t}：left = ${NL(T,left)}。`,V(id,{left:NL(T,left)}));
+   R.S('Rr','再在右子树里找。',V(id,{left:NL(T,left)}));const right=go(T[id].r,`，${T[id].t} 的右孩子`);const lv={left:NL(T,left),right:NL(T,right)};R.S('Rr',`回到 ${T[id].t}：right = ${NL(T,right)}。`,V(id,lv));
+   let r;if(left===null&&right===null){R.S('n2','left、right 都是 NULL：这棵子树里没有 p，也没有 q。',V(id,lv));r=null;ret[id]=r;cls[id]='done';R.S('rn','返回 NULL。',V(id,lv))}
+   else{R.S('n2','不是两边都空。',V(id,lv));
+    if(id==='B'||id==='A')R.Q(`在 ${T[id].t}：left = ${lv.left}，right = ${lv.right}。find_LCA(${T[id].t}) 返回什么？`,id==='B'?['B','D','G']:['A','B','NULL'],id==='B'?0:1,id==='B'?'D 在左、G 在右，两边都找到了，B 就是最近公共祖先。':'只有左边找到（B），右边什么也没有，把 B 原样往上传。');
+    if(left!==null&&right!==null){R.S('b2',`left 和 right 都不空：p、q 分在 ${T[id].t} 两侧。`,V(id,lv));r=id;ret[id]=r;cls[id]='done';R.S('rr',`返回 root，也就是 ${T[id].t}。`,V(id,lv))}
+    else{R.S('b2','只有一边不空。',V(id,lv));r=left!==null?left:right;ret[id]=r;cls[id]='done';R.S('r1',`返回不空的那一边：${NL(T,r)}。`,V(id,lv))}}
+   st.pop();return r};
+  const ans=go('A','');
+  R.S('end',`最外层返回 <b>${T[ans].t}</b>：D 和 G 的最近公共祖先是 B。时间 O(N)，空间 O(N)（递归栈，深度最坏为 N）。`,V(null))}};
+
+/* 6 最近公共祖先（顺序存储） */
+const AA6=['A','B','C','D','E','F','G','H','#','#','I'];
+const T6b=(()=>{const o={};AA6.forEach((v,k)=>{if(v==='#')return;const l=2*k+1,r=2*k+2;o[k]={t:v,l:l<AA6.length&&AA6[l]!=='#'?String(l):null,r:r<AA6.length&&AA6[r]!=='#'?String(r):null}});return o})();
+P.tr6b={tpl:'59树',name:'6 最近公共祖先（顺序存储）',when:'【树 6】如果二叉树顺序存储呢？（408 必会）找 aa[i] 和 aa[j] 的最近公共祖先。演示：aa[] = A B C D E F G H # # I（下标从 0 开始，# 表示空），i = 7（H），j = 10（I），答案是 B。',
+ idea:['下标从 0 开始时，结点 k 的双亲是 (k − 1) / 2。','编号大的那个不可能是编号小的那个的祖先，所以让编号大的往上走一步。','两个编号相等时，就走到了同一个结点，它就是最近公共祖先。'],
+ why:{if:'j > i 时 j 更深（或同层更靠右），j 往上走；否则 i 往上走。',j:'下标从 0 开始，双亲是 (j − 1) / 2；如果下标从 1 开始，双亲就是 j / 2。',ret:'返回的是 aa[i]，也就是那个结点。每次至少一个往上走一层，所以 O(logN)。'},
+ blanks:['w','if','j','i','ret'],
+ code:[
+ ['BiTree find_LCA(BiTree aa[], int i, int j){','','fn'],
+ ['   while (i != j){','','w'],
+ ['     if (j > i)','// 编号大的往上走','if'],
+ ['         j = (j - 1) / 2;','// j 走到双亲','j'],
+ ['     else','',''],
+ ['         i = (i - 1) / 2;','// i 走到双亲','i'],
+ ['   }',''],
+ ['   return aa[i];','','ret'],
+ ['} //时空复杂度分别为 O(logN)和 O(1)','','end']],
+ run(R){let i=7,j=10,step=0;const pi=[7],pj=[10];
+  const V=()=>{const c={},cl={};pi.forEach(k=>{c[k]='dim';cl[k]='dim'});pj.forEach(k=>{c[k]='dim';cl[k]='dim'});c[i]='cmp';c[j]=i===j?'done':'mv';
+   const tc={};pi.concat(pj).forEach(k=>tc[k]='');tc[i]='cmp';tc[j]=i===j?'done':'mv';
+   return [['vars',{i,j,'aa[i]':AA6[i],'aa[j]':AA6[j]}],['arr',{name:'aa[ ]（顺序存储，# 是空）',vals:AA6,ptrs:{i,j},cls:c}],TB(T6b,'0',{cls:tc,tags:i===j?{[i]:'i j'}:{[i]:'i',[j]:'j'},title:'对应的二叉树（标签是 i、j 现在的位置）',legend:'橙色＝i 所在结点，红色＝j 所在结点，绿色＝相遇。'})]};
+  R.S('fn','i = 7 是 H，j = 10 是 I。下标从 0 开始：k 的左孩子 2k+1，右孩子 2k+2，双亲 (k−1)/2。',V());
+  while(true){
+   if(i===j){R.S('w',`i == j == ${i}，相遇了，退出循环。`,V());break}
+   R.S('w',`i = ${i} ≠ j = ${j}，继续。`,V());
+   if(step===0)R.Q('i = 7，j = 10。这一轮谁往上走？',['i','j'],1,'j 的编号大，j 一定不是 i 的祖先，让 j 往上走。');
+   if(step===1)R.Q(`i = ${i}，j = ${j}。i 往上走一步变成几？`,['3','2','6'],0,'(7 − 1) / 2 = 3：H 的双亲是 D。');
+   step++;
+   if(j>i){R.S('if',`j = ${j} > i = ${i}，j 往上走。`,V());j=Math.floor((j-1)/2);pj.push(j);R.S('j',`j = (j − 1) / 2 = ${j}，到了 ${AA6[j]}。`,V())}
+   else{R.S('if',`j = ${j} 不大于 i = ${i}，走 else，i 往上走。`,V());i=Math.floor((i-1)/2);pi.push(i);R.S('i',`i = (i − 1) / 2 = ${i}，到了 ${AA6[i]}。`,V())}}
+  R.S('ret',`返回 aa[${i}] = <b>${AA6[i]}</b>：H 和 I 的最近公共祖先是 B。时间 O(logN)，空间 O(1)。`,V())}};
+
+/* 7 层序求树高 */
+const T7={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:'D',r:'E'},C:{t:'C',l:null,r:'F'},D:{t:'D',l:null,r:null},E:{t:'E',l:null,r:null},F:{t:'F',l:null,r:null}};
+P.tr7={tpl:'59树',name:'7 层序求树高',when:'【树 7】层次遍历求解二叉树的高度。演示：A 的孩子 B、C，B 的孩子 D、E，C 只有右孩子 F，高 3。',
+ idea:['层序遍历整棵树：用队列从根结点逐层访问所有结点。','last 记录当前层最后一个结点在队列里的下标：front == last 时这一层访问结束，层数加一，更新 last。','最后返回层数，就是树高。不用递归。'],
+ why:{in:'PDF 的队列：que[++rear] 入队、que[++front] 出队，que[0] 不用，根放在 que[1]，所以 last 初值是 1。',out:'bt 被拿来当工作指针，出队的结点直接放回 bt。',chk:'++front 之后 front 就是刚出队结点的下标；等于 last，说明这一层最后一个刚出队。',last:'这一层出完时，下一层的结点刚好全部入队，最后一个在 que[rear]。',end:'PDF 的 return level; 写在 if 里面，bt == NULL 时函数没有返回值（gcc -Wall 会警告），考场上在最后补一句 return 0;。'},
+ blanks:['init','in','w','out','l2','r2','chk','h','last'],
+ code:[
+ ['int level(BiTree bt){','','fn'],
+ ['   BiTree que[maxsize];','',''],
+ ['   int front = 0, rear = 0, last = 1, level = 0;','','init'],
+ ['   if (bt != NULL){','','nul'],
+ ['       que[++rear] = bt;','// 根放在 que[1]','in'],
+ ['       while (front != rear){','// 队不空','w'],
+ ['         bt = que[++front];','// 出队','out'],
+ ['         if (bt->lchild != NULL)','','l'],
+ ['             que[++rear] = bt->lchild;','','l2'],
+ ['         if (bt->rchild != NULL)','','r'],
+ ['             que[++rear] = bt->rchild;','','r2'],
+ ['         if (front == last){','// 本层最后一个刚出队','chk'],
+ ['             level++;','','h'],
+ ['             last = rear;','// 下一层最后一个的下标','last'],
+ ['         }',''],
+ ['       }',''],
+ ['     return level;','','ret'],
+ ['   }',''],
+ ['} //时空复杂度分别为 O(N)和 O(N)','','end']],
+ run(R){const T=T7,que=[null];let front=0,rear=0,last=1,level=0,bt='A',qn=0;const cls={};
+  const V=(o={})=>[['vars',{front,rear,last,level,bt:NL(T,bt)}],QA(T,que,front,rear,last,8,o),TB(T,'A',{cls:mg(cls,bt?{[bt]:'cur'}:{}),legend:'蓝圈＝bt；绿色＝已出队。'})];
+  R.S('fn','bt 是根 A。',V());R.S('init','front、rear 都从 0 开始；last = 1：第 1 层只有根，它会放在 que[1]。',V());R.S('nul','树不空。',V());
+  que[++rear]='A';R.S('in','que[++rear] = bt：rear 先变成 1，根放进 que[1]。',V({qc:{1:'mv'}}));
+  while(true){if(front===rear){R.S('w',`front == rear == ${rear}，队空，结束。`,V());break}R.S('w',`front = ${front} ≠ rear = ${rear}，队不空。`,V());
+   bt=que[++front];cls[bt]='done';R.S('out',`bt = que[++front]：front = ${front}，出队 ${T[bt].t}。`,V({qc:{[front]:'cmp'}}));
+   const n=T[bt];if(n.l){que[++rear]=n.l;R.S('l2',`左孩子 ${T[n.l].t} 入队，放在 que[${rear}]。`,V({qc:{[rear]:'mv'}}))}else R.S('l','左孩子空，不入队。',V());
+   if(n.r){que[++rear]=n.r;R.S('r2',`右孩子 ${T[n.r].t} 入队，放在 que[${rear}]。`,V({qc:{[rear]:'mv'}}))}else R.S('r','右孩子空，不入队。',V());
+   if(qn<2&&(front===1||front===2)){qn++;R.Q(`刚出队 ${n.t}，front = ${front}，last = ${last}。这一层出完了吗？`,['出完了，level++','还没有'],front===last?0:1,front===last?`front 追上 last，第 ${level+1} 层出完了。`:`front 还没到 last = ${last}，这一层还有结点没出队。`)}
+   if(front===last){R.S('chk',`front = ${front} == last：第 ${level+1} 层最后一个刚出队。`,V());level++;R.S('h',`level++，level = ${level}。`,V());
+    if(level===2)R.Q('第 2 层出完了。last 要改成几？',[String(front),String(rear),String(rear+1)],1,`last = rear = ${rear}：第 3 层的结点刚好全部入队，最后一个就在 que[rear]。`);
+    last=rear;R.S('last',`last = rear = ${rear}：下一层是 que[${front+1}..${rear}]。`,V())}
+   else R.S('chk',`front = ${front} ≠ last = ${last}，这一层还没出完。`,V())}
+  bt=null;R.S('ret',`返回 level = <b>${level}</b>，树高 3。时间 O(N)，空间 O(N)。`,V())}};
+
+/* 8 WPL：叶子的权直接存在 data 里（数值） */
+const T8={A:{t:'A',l:'B',r:'w7'},B:{t:'B',l:'w3',r:'E'},E:{t:'E',l:'w2',r:'w6'},w3:{t:'3',l:null,r:null},w2:{t:'2',l:null,r:null},w6:{t:'6',l:null,r:null},w7:{t:'7',l:null,r:null}};
+const W8=id=>Number(T8[id].t);const LEAF8=id=>!T8[id].l&&!T8[id].r;
+const WHEN8='【树 8】计算二叉树的带权路径长度（叶子结点）（2014 统考题）。演示：叶子 3、2、6、7 的权就存在 data 里（数值，不是字符），A、B、E 是分支结点；WPL = 3×2 + 2×3 + 6×3 + 7×1 = 37。';
+P.tr8a={tpl:'59树',name:'8 WPL 法一（层序）',when:WHEN8,
+ idea:['按层序遍历整棵树：用队列做广度优先，同时用 level 记录当前层数。','只算叶子：没有左右孩子的结点，把权值乘以所在层数，累加到 wpl。','level 从 0 开始数，正好等于路径长度；最后返回 wpl。'],
+ why:{init:'level 从 0 开始：根这一层的路径长度是 0，不用再减 1。',add:'叶子的权 × 路径长度。PDF 用 data 当权：data 存的是数值 3，不是字符 \'3\'。',chk:'和第 7 题一样：front == last 时这一层出完，level 加 1。'},
+ blanks:['init','in','out','leaf','add','l2','r2','chk','h','last'],
+ code:[
+ ['int func(BiTree bt){','','fn'],
+ ['   BiTree que[maxsize];','',''],
+ ['   int front=0, rear=0, wpl=0, last = 1, level = 0;','// level = 0：根的路径长度是 0','init'],
+ ['   if (bt != NULL){','','nul'],
+ ['       que[++rear] = bt;','','in'],
+ ['       while (front != rear){','','w'],
+ ['         bt = que[++front];','','out'],
+ ['         if (!bt->lchild && !bt->rchild)','// 叶子','leaf'],
+ ['             wpl += level * (bt->data);','// 权 × 路径长度','add'],
+ ['         if (bt->lchild != NULL)','','l'],
+ ['             que[++rear] = bt->lchild;','','l2'],
+ ['         if (bt->rchild != NULL)','','r'],
+ ['             que[++rear] = bt->rchild;','','r2'],
+ ['         if (front == last){','','chk'],
+ ['             level++;','','h'],
+ ['             last = rear;','','last'],
+ ['         }',''],
+ ['     }',''],
+ ['   }',''],
+ ['   return wpl;','','ret'],
+ ['}//法一，层次遍历思想','','end']],
+ run(R){const T=T8,que=[null];let front=0,rear=0,wpl=0,last=1,level=0,bt='A',qd=false;const cls={},tags={};
+  const V=(o={})=>[['vars',{front,rear,last,level,wpl,bt:NL(T,bt)}],QA(T,que,front,rear,last,8,o),TB(T,'A',{cls:mg(cls,bt?{[bt]:'cur'}:{}),tags,title:'二叉树（数字是叶子的权）',legend:'蓝圈＝bt；绿色＝已出队；标签是叶子加进 wpl 的那一项。'})];
+  R.S('init','wpl = 0；level = 0：根在路径长度 0 的那一层。',V());R.S('nul','树不空。',V());
+  que[++rear]='A';R.S('in','根入队，放在 que[1]。',V({qc:{1:'mv'}}));
+  while(true){if(front===rear){R.S('w','front == rear，队空，结束。',V());break}R.S('w',`front = ${front} ≠ rear = ${rear}，队不空。`,V());
+   bt=que[++front];cls[bt]='done';R.S('out',`出队 ${T[bt].t}，front = ${front}。`,V({qc:{[front]:'cmp'}}));
+   if(LEAF8(bt)){if(!qd&&T[bt].t==='3'){qd=true;R.Q(`叶子 3 出队，此时 level = ${level}。wpl 加多少？`,[`3 × ${level}`,`3 × ${level+1}`,`3 × ${level-1}`],0,'level 从 0 开始数，根那层是 0，所以 level 就是路径长度，不用再减 1。')}
+    R.S('leaf',`${T[bt].t} 左右孩子都空，是叶子。`,V());wpl+=level*W8(bt);tags[bt]=`${T[bt].t}×${level}`;R.S('add',`wpl += ${level} × ${T[bt].t} = ${level*W8(bt)}，wpl = ${wpl}。`,V())}
+   else R.S('leaf',`${T[bt].t} 有孩子，不是叶子，不加。`,V());
+   const n=T[bt];if(n.l){que[++rear]=n.l;R.S('l2',`左孩子 ${T[n.l].t} 入队，que[${rear}]。`,V({qc:{[rear]:'mv'}}))}else R.S('l','左孩子空。',V());
+   if(n.r){que[++rear]=n.r;R.S('r2',`右孩子 ${T[n.r].t} 入队，que[${rear}]。`,V({qc:{[rear]:'mv'}}))}else R.S('r','右孩子空。',V());
+   if(front===last){R.S('chk',`front == last = ${last}：这一层出完了。`,V());level++;R.S('h',`level++，level = ${level}。`,V());last=rear;R.S('last',`last = rear = ${rear}。`,V())}
+   else R.S('chk',`front = ${front} ≠ last = ${last}。`,V())}
+  bt=null;R.S('ret',`返回 wpl = <b>${wpl}</b>（7×1 + 3×2 + 2×3 + 6×3）。时间 O(N)，空间 O(N)。`,V())}};
+
+P.tr8b={tpl:'59树',name:'8 WPL 法二（递归）',when:WHEN8,
+ idea:['先序遍历，用指针 deep 记录当前在第几层：进入结点 ++(*deep)，离开时 --(*deep)。','遇到叶子，把 权 × (*deep − 1) 加到 *wpl。','deep、wpl 都是调用方的变量，传地址进来；调用前都置 0。'],
+ why:{inc:'deep 是指针，所有层共用一个变量：进来加 1，出去必须减回来。',add:'根进来后 *deep = 1，路径长度 = 层数 − 1。',dec:'漏了这一句，*deep 只增不减，后面的叶子层数全算大了。',end:'PDF 这里的注释写的是“第 10 题法二”，是排版错位：它就是第 8 题 WPL 的法二。',call:'deep 从 0 开始，wpl 从 0 开始，传地址。'},
+ blanks:['nul','inc','leaf','add','L','Rr','dec'],
+ code:[
+ ['void func(BiTree bt, int *deep, int *wpl){','','fn'],
+ ['   if (bt != NULL){','','nul'],
+ ['       ++(*deep);','// 进入这一层','inc'],
+ ['       if (!bt->lchild && !bt->rchild)','','leaf'],
+ ['           *wpl += (bt->data) * (*deep - 1);','// 路径长度 = 层数 − 1','add'],
+ ['       func(bt->lchild, deep, wpl);','','L'],
+ ['       func(bt->rchild, deep, wpl);','','Rr'],
+ ['       --(*deep);','// 离开这一层','dec'],
+ ['   }',''],
+ ['} //第 10 题法二，递归遍历思想','','end'],
+ ['// 调用：int deep = 0, wpl = 0; func(root, &deep, &wpl);','','call']],
+ run(R){const T=T8,st=[],cls={},tags={};let deep=0,wpl=0;
+  const V=cur=>[['vars',{'*deep':deep,'*wpl':wpl}],['stack',st.slice()],TB(T,'A',{cls:mg(cls,cur?{[cur]:'cur'}:{}),tags,title:'二叉树（数字是叶子的权）',legend:'蓝圈＝正在执行的 bt；绿色＝已处理完；标签是叶子加进 wpl 的那一项。'})];
+  R.S('call','deep、wpl 先置 0，从根调用。',V(null));
+  const go=(id,from)=>{st.push(`func(${T[id].t})`);R.S('nul',`进入 func(${T[id].t})${from}：bt 不空。`,V(id));
+   deep++;R.S('inc',`++(*deep)，*deep = ${deep}：${T[id].t} 在第 ${deep} 层。`,V(id));
+   const n=T[id];
+   if(LEAF8(id)){if(T[id].t==='2')R.Q(`叶子 2：*deep = ${deep}。*wpl 加多少？`,[`2 × ${deep}`,`2 × ${deep-1}`],1,'根进来时 *deep 已经是 1，所以路径长度是 *deep − 1。');
+    R.S('leaf',`${n.t} 是叶子。`,V(id));wpl+=W8(id)*(deep-1);tags[id]=`${n.t}×${deep-1}`;R.S('add',`*wpl += ${n.t} × (${deep}−1) = ${W8(id)*(deep-1)}，*wpl = ${wpl}。`,V(id));
+    R.S('L','func(NULL, …)：左孩子空，进去 bt == NULL 什么也不做就回来。',V(id));R.S('Rr','右孩子也空，同样直接回来。',V(id))}
+   else{R.S('leaf',`${n.t} 不是叶子。`,V(id));
+    R.S('L',`递归左孩子 ${T[n.l].t}。`,V(id));go(n.l,`，${n.t} 的左孩子`);R.S('L',`左边处理完，回到 ${n.t}，*deep = ${deep}。`,V(id));
+    if(id==='A')R.Q('回到 A，马上去右孩子 7。现在 *deep 是几？',['1','3','4'],0,'每个结点离开时都做了 --(*deep)，回到 A 正好减回 1。deep 是指针，不会像普通参数那样自己恢复。');
+    R.S('Rr',`递归右孩子 ${T[n.r].t}。`,V(id));go(n.r,`，${n.t} 的右孩子`);}
+   deep--;cls[id]='done';R.S('dec',`--(*deep)，*deep = ${deep}：离开 ${n.t}，返回。`,V(id));st.pop()};
+  go('A','');
+  R.S('call',`遍历结束：*deep 回到 ${deep}，*wpl = <b>${wpl}</b>，和法一一样。时间 O(N)，空间 O(N)（递归栈）。`,V(null))}};
+
+/* 9 宽度 */
+const T9={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:'D',r:'E'},C:{t:'C',l:null,r:'F'},D:{t:'D',l:null,r:null},E:{t:'E',l:null,r:'G'},F:{t:'F',l:null,r:null},G:{t:'G',l:null,r:null}};
+const WHEN9='【树 9】求解二叉树的宽度（结点最多的那一层的结点数）。演示：每层结点数是 1、2、3（D、E、F）、1（G），宽度 3。';
+P.tr9a={tpl:'59树',name:'9 宽度 法一（层序）',when:WHEN9,
+ idea:['层序遍历整棵树。','res 数这一层出队了几个：每出队一个就加一。','front == last 时这一层结束：res 和 width 比，大就更新；再把 res 清 0，更新 last。'],
+ why:{fn:'PDF 函数名还叫 level（从第 7 题改来的），求的其实是宽度。',res:'每出队一个结点，本层计数加 1。',cmp:'这一层数完了才比较。',z:'下一层重新从 0 数，漏了会把几层的结点数加在一起。',last:'和第 7 题一样，下一层最后一个结点在 que[rear]。'},
+ blanks:['init','in','out','res','chk','cmp','upd','z','last'],
+ code:[
+ ['int level(BiTree bt){','// 名字叫 level，求的是宽度','fn'],
+ ['   BiTree que[maxsize];','',''],
+ ['   int front=0, rear=0, res=0, last=1, width=0;','','init'],
+ ['   if (bt != NULL){','','nul'],
+ ['       que[++rear] = bt;','','in'],
+ ['       while (front != rear){','','w'],
+ ['         bt = que[++front];','','out'],
+ ['         res++;','// 本层又出队一个','res'],
+ ['         if (bt->lchild != NULL)','','l'],
+ ['             que[++rear] = bt->lchild;','','l2'],
+ ['         if (bt->rchild != NULL)','','r'],
+ ['             que[++rear] = bt->rchild;','','r2'],
+ ['         if (front == last){','// 这一层数完了','chk'],
+ ['             if (res > width)','','cmp'],
+ ['                 width = res;','','upd'],
+ ['             res=0;','// 下一层重新数','z'],
+ ['            last = rear;','','last'],
+ ['        }',''],
+ ['    }',''],
+ ['   }',''],
+ ['   return width;','','ret'],
+ ['} //法一，层次遍历思想','','end']],
+ run(R){const T=T9,que=[null];let front=0,rear=0,res=0,last=1,width=0,bt='A',lv=1;const cls={};
+  const V=(o={})=>[['vars',{front,rear,last,res,width,bt:NL(T,bt)}],QA(T,que,front,rear,last,9,o),TB(T,'A',{cls:mg(cls,bt?{[bt]:'cur'}:{}),legend:'蓝圈＝bt；绿色＝已出队。'})];
+  R.S('init','res：这一层已出队几个；width：目前最大的层宽。',V());R.S('nul','树不空。',V());
+  que[++rear]='A';R.S('in','根入队，放在 que[1]。',V({qc:{1:'mv'}}));
+  while(true){if(front===rear){R.S('w','front == rear，队空，结束。',V());break}
+   bt=que[++front];cls[bt]='done';R.S('out',`队不空，出队 ${T[bt].t}，front = ${front}。`,V({qc:{[front]:'cmp'}}));
+   res++;R.S('res',`res++，第 ${lv} 层已出队 ${res} 个。`,V());
+   const n=T[bt];if(n.l){que[++rear]=n.l;R.S('l2',`左孩子 ${T[n.l].t} 入队，que[${rear}]。`,V({qc:{[rear]:'mv'}}))}else R.S('l','左孩子空。',V());
+   if(n.r){que[++rear]=n.r;R.S('r2',`右孩子 ${T[n.r].t} 入队，que[${rear}]。`,V({qc:{[rear]:'mv'}}))}else R.S('r','右孩子空。',V());
+   if(front===last){R.S('chk',`front == last = ${last}：第 ${lv} 层数完了，共 ${res} 个。`,V());
+    if(lv===3||lv===4)R.Q(`第 ${lv} 层 res = ${res}，width = ${width}。会更新 width 吗？`,['会','不会'],res>width?0:1,res>width?`${res} > ${width}，width = ${res}。`:`${res} 不大于 ${width}，不更新。宽度看的是最多的那一层，不是最后一层。`);
+    if(res>width){R.S('cmp',`${res} > width = ${width}。`,V());width=res;R.S('upd',`width = ${width}。`,V())}else R.S('cmp',`${res} 不大于 width = ${width}，不更新。`,V());
+    res=0;R.S('z','res = 0，下一层重新数。',V());last=rear;lv++;R.S('last',`last = rear = ${rear}。`,V())}
+   else R.S('chk',`front = ${front} ≠ last = ${last}，这一层还没数完。`,V())}
+  bt=null;R.S('ret',`返回 width = <b>${width}</b>。时间 O(N)，空间 O(N)。`,V())}};
+
+P.tr9b={tpl:'59树',name:'9 宽度 法二（递归）',when:WHEN9,
+ idea:['A[k] 记第 k 层有几个结点，*L 记当前在第几层。','先序遍历：进入结点 ++(*L)，A[*L]++；离开时 --(*L)。','遍历完扫一遍 A[]，最大的就是宽度。'],
+ why:{a0:'A[] 要全部清 0，下标从 1 开始用（根在第 1 层）。',inc:'L 是指针，所有层共用：进来加 1，出去减 1。',cnt:'先 ++(*L) 再计数，根记在 A[1]。',dec:'漏了这一句，*L 只增不减，层数全错。',for:'i 从 1 开始：A[0] 没用。',end:'PDF 这里的注释写的是“第 11 题法二”，是排版错位：它是第 9 题宽度的法二。'},
+ blanks:['nul','inc','cnt','Lc','Rc','dec','a0','for','if','upd'],
+ code:[
+ ['void func(BiTree bt, int A[], int *L){','','fn'],
+ ['  if (bt != NULL){','','nul'],
+ ['      ++(*L);','// 进入第 *L 层','inc'],
+ ['      A[(*L)]++;','// 这一层结点数 +1','cnt'],
+ ['      func(bt->lchild, A, L);','','Lc'],
+ ['      func(bt->rchild, A, L);','','Rc'],
+ ['      --(*L);','// 回到上一层','dec'],
+ ['  }',''],
+ ['}',''],
+ ['int max_width(BiTree bt){','','mw'],
+ ['   int A[maxsize] = {0};','// A[k]：第 k 层的结点数','a0'],
+ ['   int L = 0;','','l0'],
+ ['   func(bt, A, &L);','','call'],
+ ['   int width = 0;','','w0'],
+ ['   for (int i = 1; i < maxsize; i++)','','for'],
+ ['      if (A[i] > width)','','if'],
+ ['          width = A[i];','','upd'],
+ ['   return width;','','ret'],
+ ['} //第 11 题法二，递归遍历思想','','end']],
+ run(R){const T=T9,st=[],cls={},tags={},A=[0,0,0,0,0,0];let L=0,width=0,i=null;
+  const V=(cur,o={})=>[['vars',mg({'*L':L},i!==null?{i,width}:{})],['arr',{name:'A[ ]（只画前 6 个，后面都是 0）',vals:A,ptrs:o.p||{},cls:o.c||{}}],['stack',st.slice()],TB(T,'A',{cls:mg(cls,cur?{[cur]:'cur'}:{}),tags,legend:'蓝圈＝正在执行的 bt；绿色＝已处理完；标签是它在第几层。'})];
+  R.S('a0','A[] 全部清 0。',V(null));R.S('l0','L = 0：还没进入任何一层。',V(null));R.S('call','调用 func(A, A, &L)，把 L 的地址传进去。',V(null));
+  const go=(id,from)=>{st.push(`func(${T[id].t})`);R.S('nul',`进入 func(${T[id].t})${from}：bt 不空。`,V(id));
+   if(id==='G')R.Q(`进入 G 之前 *L = ${L}。G 会记在 A 的哪一格？`,[`A[${L}]`,`A[${L+1}]`],1,'先 ++(*L) 再 A[(*L)]++：G 在 E 的下一层，第 4 层。');
+   L++;tags[id]='第 '+L+' 层';R.S('inc',`++(*L)，*L = ${L}。`,V(id,{p:{'*L':L}}));
+   A[L]++;R.S('cnt',`A[${L}]++，第 ${L} 层现在有 ${A[L]} 个。`,V(id,{p:{'*L':L},c:{[L]:'mv'}}));
+   const n=T[id];
+   if(n.l){R.S('Lc',`递归左孩子 ${T[n.l].t}。`,V(id,{p:{'*L':L}}));go(n.l,`，${n.t} 的左孩子`)}else R.S('Lc','左孩子空：func(NULL) 什么也不做就回来。',V(id,{p:{'*L':L}}));
+   if(n.r){R.S('Rc',`${n.l?'回到 '+n.t+'，':''}递归右孩子 ${T[n.r].t}。`,V(id,{p:{'*L':L}}));go(n.r,`，${n.t} 的右孩子`)}else R.S('Rc','右孩子空，同样直接回来。',V(id,{p:{'*L':L}}));
+   L--;cls[id]='done';R.S('dec',`--(*L)，*L = ${L}：离开 ${n.t}。`,V(id,{p:{'*L':L}}));st.pop()};
+  go('A','');
+  R.S('call',`func 结束，*L 回到 0。A[1..4] = ${A.slice(1,5).join('、')}。`,V(null));
+  R.S('w0','width = 0。',V(null));
+  for(i=1;i<=5;i++){
+   if(i===5){R.S('for','i = 5 到 maxsize − 1：A[i] 都是 0，不会更新。',V(null,{p:{i:5}}));break}
+   R.S('for',`i = ${i}。`,V(null,{p:{i},c:{[i]:'cmp'}}));
+   if(A[i]>width){R.S('if',`A[${i}] = ${A[i]} > width = ${width}。`,V(null,{p:{i},c:{[i]:'cmp'}}));width=A[i];R.S('upd',`width = ${width}。`,V(null,{p:{i},c:{[i]:'done'}}))}
+   else R.S('if',`A[${i}] = ${A[i]} 不大于 width = ${width}，不更新。`,V(null,{p:{i},c:{[i]:'cmp'}}))}
+  R.S('ret',`返回 width = <b>${width}</b>，和法一一样。时间 O(N)，空间 O(N)（递归栈和 A[]）。`,V(null))}};
+
+/* 10 判断满二叉树 */
+const T10={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:'D',r:'E'},C:{t:'C',l:null,r:'F'},D:{t:'D',l:null,r:null},E:{t:'E',l:null,r:null},F:{t:'F',l:null,r:null}};
+P.tr10={tpl:'59树',name:'10 判断满二叉树',when:'【树 10】判断二叉树是否为满二叉树。演示：A 的孩子 B、C，B 的孩子 D、E，C 只有右孩子 F：高 3、6 个结点，不是满二叉树。',
+ idea:['递归遍历，统计结点数 n 和最大深度 max_L：进入结点 ++(*L)，更新 max_L，++(*n)。','满二叉树的结点数是 2^高度 − 1。','n 等于 2^max_L − 1 就返回 true，否则返回 false。'],
+ why:{inc:'L、n、max_L 都是指针，三层递归共用同一份变量。',if:'写 >= 和 > 结果一样，只是多赋一次。',dec:'离开结点时层数减回来。',pw:'pow 在 math.h 里，返回 double；bool、true、false 要 stdbool.h（C99）。高 h 的满二叉树有 2^h − 1 个结点。'},
+ blanks:['nul','inc','if','mx','n','Lc','Rc','dec','init','pw'],
+ code:[
+ ['void func(BiTree p, int *n, int *L, int *max_L){','','fn'],
+ ['  if (p != NULL){','','nul'],
+ ['      ++(*L);','// 当前层数','inc'],
+ ['      if ((*L) >= (*max_L))','','if'],
+ ['          *max_L = *L;','// 最大层数','mx'],
+ ['      ++(*n);','// 结点数','n'],
+ ['      func(p->lchild, n, L, max_L);','','Lc'],
+ ['      func(p->rchild, n, L, max_L);','','Rc'],
+ ['      --(*L);','','dec'],
+ ['  }',''],
+ ['}',''],
+ ['bool Is_True(BiTree p){','','it'],
+ ['  int n=0, L=0, max_L = 0;','','init'],
+ ['  func(p, &n, &L, &max_L);','','call'],
+ ['  if (pow(2, max_L) - 1 == n)','// 满二叉树：n = 2^h − 1','pw'],
+ ['      return true;','','t'],
+ ['    else','',''],
+ ['       return false;','','f']],
+ run(R){const T=T10,st=[],cls={},tags={};let n=0,L=0,mx=0;
+  const V=cur=>[['vars',{'*n':n,'*L':L,'*max_L':mx}],['stack',st.slice()],TB(T,'A',{cls:mg(cls,cur?{[cur]:'cur'}:{}),tags,legend:'蓝圈＝正在执行的 p；绿色＝已处理完；标签是它在第几层。'})];
+  R.S('it','Is_True(A)：判断这棵树是不是满二叉树。',V(null));R.S('init','n、L、max_L 都从 0 开始。',V(null));R.S('call','把三个变量的地址传给 func。',V(null));
+  const go=(id,from)=>{st.push(`func(${T[id].t})`);R.S('nul',`进入 func(${T[id].t})${from}：p 不空。`,V(id));
+   L++;tags[id]='第 '+L+' 层';R.S('inc',`++(*L)，*L = ${L}。`,V(id));
+   if(id==='F')R.Q(`F 在第 ${L} 层，*max_L 已经是 ${mx}。(*L) >= (*max_L) 成立吗？`,['成立','不成立'],L>=mx?0:1,'3 >= 3 成立，再赋一次 *max_L = 3，值不变。写成 > 也一样。');
+   const old=mx;if(L>=old){mx=L;R.S('mx',`*L = ${L} >= *max_L = ${old}，*max_L = ${mx}。`,V(id))}else R.S('if',`*L = ${L} < *max_L = ${mx}，不更新。`,V(id));
+   n++;R.S('n',`++(*n)，*n = ${n}。`,V(id));
+   const c=T[id];
+   if(c.l){R.S('Lc',`递归左孩子 ${T[c.l].t}。`,V(id));go(c.l,`，${c.t} 的左孩子`)}else R.S('Lc','左孩子空：func(NULL) 直接回来。',V(id));
+   if(c.r){R.S('Rc',`${c.l?'回到 '+c.t+'，':''}递归右孩子 ${T[c.r].t}。`,V(id));go(c.r,`，${c.t} 的右孩子`)}else R.S('Rc','右孩子空，直接回来。',V(id));
+   L--;cls[id]='done';R.S('dec',`--(*L)，*L = ${L}：离开 ${c.t}。`,V(id));st.pop()};
+  go('A','');
+  R.S('call',`func 结束：n = ${n}，max_L = ${mx}。`,V(null));
+  const full=Math.pow(2,mx)-1===n;
+  R.Q(`n = ${n}，max_L = ${mx}。Is_True 返回什么？`,['true','false'],full?0:1,`2^${mx} − 1 = ${Math.pow(2,mx)-1}，${full?'等于':'不等于'} ${n}。高 3 的满二叉树要 7 个结点，C 缺了左孩子。`);
+  R.S('pw',`pow(2, ${mx}) − 1 = ${Math.pow(2,mx)-1}，n = ${n}，${full?'相等':'不相等'}。`,V(null));
+  R.S(full?'t':'f',`返回 <b>${full?'true':'false'}</b>：不是满二叉树（高 3 应有 7 个结点，这里只有 6 个）。时间 O(N)，空间 O(N)（递归栈）。`,V(null))}};
+}
+/* ---------- 59 题·树 11–14：区间递归、建树、顺序存储 ---------- */
+(()=>{
+const div2=x=>Math.trunc(x/2); // C 的整数除法：向 0 取整
+const rng=(n,L,R,ex)=>{const c={};for(let k=0;k<n;k++)if(k<L||k>R)c[k]='dim';return Object.assign(c,ex||{})};
+const seg=(a,L,R)=>L<=R?a.slice(L,R+1).join(''):'（空）';
+const noTree=t=>['html',`<div><h2>${t}</h2><div class="legend">（还没有结点）</div></div>`];
+const FULL={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:'D',r:'E'},C:{t:'C',l:'F',r:'G'},D:{t:'D',l:null,r:null},E:{t:'E',l:null,r:null},F:{t:'F',l:null,r:null},G:{t:'G',l:null,r:null}};
+const T12={A:{t:'A',l:'B',r:'C'},B:{t:'B',l:'D',r:'E'},C:{t:'C',l:null,r:'F'},D:{t:'D',l:null,r:null},E:{t:'E',l:null,r:null},F:{t:'F',l:null,r:null}};
+const sqNodes=A=>{const nodes={};A.forEach((v,i)=>{if(v!=='#')nodes['n'+i]={t:v,l:null,r:null}});Object.keys(nodes).forEach(k=>{const i=+k.slice(1),l=2*i+1,r=2*i+2;if(l<A.length&&A[l]!=='#')nodes[k].l='n'+l;if(r<A.length&&A[r]!=='#')nodes[k].r='n'+r});return nodes};
+
+/* 11 满二叉树 先序 → 后序 */
+P.tr11a={tpl:'59树',name:'11 满二叉树先序转后序',when:'【树 11】满二叉树先序序列存在于数组中，设计算法将其变成后序序列。演示：满二叉树 A(B(D,E),C(F,G))，先序 ABDECFG。',
+ idea:['先序第一个是根，后序最后一个是根：post[R2] = pre[L1]。','满二叉树左右子树结点数相同，去掉根后各占一半，下标直接算出来。','对左一半、右一半各递归一次，区间为空就停。'],
+ why:{put:'先序“根左右”，根在最前；后序“左右根”，根在最后。',L:'去掉根还剩偶数个，左子树是先序紧跟根的前一半。L1+R1 是偶数，(L1+R1+1)/2 就等于 (L1+R1)/2。',Rr:'后序的根已经放在 R2，所以右子树的后序区间到 R2 − 1 为止。',if:'L1 > R1 说明区间为空，这就是递归出口。只适用于满二叉树：一般二叉树不能靠“对半分”。'},
+ blanks:['if','put'],
+ code:[['void preTopost(char pre[], int L1, int R1, char post[], int L2, int R2){','','fn'],
+  ['   if (L1 <= R1){','// 区间不空才处理','if'],
+  ['       post[R2] = pre[L1];','// 根：先序最前 → 后序最后','put'],
+  ['       preTopost(pre, L1 + 1, (L1 + R1 + 1)/2,','// 左子树：前一半','L'],
+  ['                 post, L2, (L2 + R2 - 1)/2);',''],
+  ['       preTopost(pre, (L1 + R1 + 1)/2 + 1, R1,','// 右子树：后一半','Rr'],
+  ['                 post, (L2 + R2 - 1)/2 + 1, R2 - 1);',''],
+  ['   }',''],
+  ['}//先序转后序','','end'],
+  ['// 调用：preTopost(pre, 0, n - 1, post, 0, n - 1);','','call']],
+ run(R){const n=7,pre='ABDECFG'.split(''),post=Array(n).fill(null),st=[],cls={},tags={};let hot=null;
+  const V=(cur,L1,R1,L2,R2,v)=>{const inR={};if(L1<=R1)for(let k=L1;k<=R1;k++)if(!cls[pre[k]])inR[pre[k]]='cmp';
+   const pc=rng(n,L1,R1,L1<=R1?{[L1]:'mv'}:{});const qc=rng(n,L2,R2);post.forEach((x,k)=>{if(x!==null)qc[k]='done'});if(hot!==null)qc[hot]='mv';
+   return [['vars',v||{}],['stack',st.slice()],['arr',{name:`pre[ ]：本层 [${L1}..${R1}]`,vals:pre,cls:pc,ptrs:{L1,R1}}],['arr',{name:`post[ ]：本层 [${L2}..${R2}]`,vals:post,cls:qc,ptrs:{L2,R2}}],
+    ['tree',{nodes:FULL,root:'A',cls:Object.assign({},inR,cls,cur?{[cur]:'cur'}:{}),tags,title:'满二叉树',legend:'蓝圈＝当前根；橙＝本层区间里的结点；绿＝已转完；标签是它在 post 里的位置。'}]]};
+  R.S('call','pre = ABDECFG，n = 7。从整段 [0..6] 开始。',V(null,0,6,0,6,{n}));
+  let q1=true,q2=true;
+  (function go(L1,R1,L2,R2,who){st.push(`preTopost(${L1}, ${R1}, ${L2}, ${R2})`);const v={L1,R1,L2,R2};
+   R.S('fn',`进入 ${who}：pre[${L1}..${R1}] = ${seg(pre,L1,R1)}，写进 post[${L2}..${R2}]。`,V(L1<=R1?pre[L1]:null,L1,R1,L2,R2,v));
+   if(L1>R1){R.S('if',`L1 = ${L1} > R1 = ${R1}，区间为空，返回。`,V(null,L1,R1,L2,R2,v));st.pop();return}
+   const x=pre[L1];R.S('if',`L1 ≤ R1，区间里有 ${R1-L1+1} 个结点。`,V(x,L1,R1,L2,R2,v));
+   if(q1){R.Q('根 A 是 pre[0]。它该放进 post 的哪一格？',['post[0]','post[3]','post[6]'],2,'后序“左右根”，根在最后：post[R2] = post[6]。');q1=false}
+   post[R2]=x;hot=R2;tags[x]=`post[${R2}]`;R.S('put',`post[${R2}] = pre[${L1}] = ${x}。`,V(x,L1,R1,L2,R2,v));hot=null;
+   const m1=div2(L1+R1+1),m2=div2(L2+R2-1);const w={L1,R1,L2,R2,'(L1+R1+1)/2':m1,'(L2+R2-1)/2':m2};
+   if(q2){R.Q('A 的左子树在 post 里占哪几格？',['post[0..2]','post[1..3]','post[0..3]'],0,'左子树 3 个结点，后序里排在最前：L2 .. (L2+R2−1)/2 = 0 .. 2。');q2=false}
+   R.S('L',`左子树：pre[${L1+1}..${m1}]，post[${L2}..${m2}]。`,V(x,L1,R1,L2,R2,w));go(L1+1,m1,L2,m2,`${x} 的左子树`);
+   R.S('Rr',`右子树：pre[${m1+1}..${R1}]，post[${m2+1}..${R2-1}]。post[${R2}] 已经放了 ${x}，所以到 R2 − 1。`,V(x,L1,R1,L2,R2,w));go(m1+1,R1,m2+1,R2-1,`${x} 的右子树`);
+   cls[x]='done';R.S('end',`${x} 这棵子树转完，返回。`,V(x,L1,R1,L2,R2,v));st.pop()})(0,6,0,6,'preTopost（整棵树）');
+  R.S('call',`结束：post = <b>${post.join('')}</b>。每个结点放一次，时间 O(n)；递归深度是树高，空间 O(log n)。`,V(null,0,6,0,6,{n}))}};
+
+/* 11 拓展 后序 → 先序 */
+P.tr11b={tpl:'59树',name:'11 满二叉树后序转先序',when:'【树 11 拓展】满二叉树后序序列存在于数组中，将其变成先序序列。演示：后序 DEBFGCA。',
+ idea:['后序最后一个是根，先序第一个是根：pre[L2] = post[R1]。','去掉根后左右各一半：后序左一半在前，先序左一半紧跟根。','只剩一个结点时放完就返回。'],
+ why:{put:'后序“左右根”，根在最后；先序“根左右”，根在最前。',one:'C 的 / 向 0 取整：L1 = R1 = 0 时 (0 + 0 − 1)/2 = 0，左递归又是 [0..0]，无穷递归。L1 = R1 = k > 0 时 (2k − 1)/2 = k − 1，区间本来就空。所以这一行是专门防 0 的。',L:'后序的左子树在最前：L1 .. (L1+R1−1)/2。先序的左子树紧跟根：L2+1 .. (L2+R2+1)/2。',Rr:'后序最后一格是根，右子树到 R1 − 1 为止。'},
+ blanks:['if','put','one'],
+ code:[['void postTopre(char post[], int L1, int R1, char pre[], int L2, int R2){','','fn'],
+  ['   if (L1 <= R1){','','if'],
+  ['       pre[L2] = post[R1];','// 根：后序最后 → 先序最前','put'],
+  ['       if (L1 == R1) return;','//防止 L1 和 R1 均为 0 时陷入无穷递归','one'],
+  ['       postTopre(post, L1, (L1 + R1 - 1)/2,','// 左子树：前一半','L'],
+  ['                 pre, L2 + 1, (L2 + R2 + 1)/2);',''],
+  ['       postTopre(post, (L1 + R1 - 1)/2 + 1, R1 - 1,','// 右子树：去掉根的后一半','Rr'],
+  ['                 pre, (L2 + R2 + 1)/2 + 1, R2);',''],
+  ['   }',''],
+  ['}//后序转先序！','','end']],
+ run(R){const n=7,post='DEBFGCA'.split(''),pre=Array(n).fill(null),st=[],cls={},tags={};let hot=null;
+  const V=(cur,L1,R1,L2,R2,v)=>{const inR={};for(let k=L1;k<=R1;k++)if(!cls[post[k]])inR[post[k]]='cmp';
+   const pc=rng(n,L1,R1,{[R1]:'mv'});const qc=rng(n,L2,R2);pre.forEach((x,k)=>{if(x!==null)qc[k]='done'});if(hot!==null)qc[hot]='mv';
+   return [['vars',v||{}],['stack',st.slice()],['arr',{name:`post[ ]：本层 [${L1}..${R1}]`,vals:post,cls:pc,ptrs:{L1,R1}}],['arr',{name:`pre[ ]：本层 [${L2}..${R2}]`,vals:pre,cls:qc,ptrs:{L2,R2}}],
+    ['tree',{nodes:FULL,root:'A',cls:Object.assign({},inR,cls,cur?{[cur]:'cur'}:{}),tags,title:'满二叉树',legend:'蓝圈＝当前根；橙＝本层区间里的结点；绿＝已转完；标签是它在 pre 里的位置。'}]]};
+  let q1=true,q2=true;
+  (function go(L1,R1,L2,R2,who){st.push(`postTopre(${L1}, ${R1}, ${L2}, ${R2})`);const v={L1,R1,L2,R2};const x=post[R1];
+   R.S('fn',`进入 ${who}：post[${L1}..${R1}] = ${seg(post,L1,R1)}，写进 pre[${L2}..${R2}]。`,V(x,L1,R1,L2,R2,v));
+   R.S('if',`L1 ≤ R1，区间里有 ${R1-L1+1} 个结点。`,V(x,L1,R1,L2,R2,v));
+   pre[L2]=x;hot=L2;tags[x]=`pre[${L2}]`;R.S('put',`pre[${L2}] = post[${R1}] = ${x}。`,V(x,L1,R1,L2,R2,v));hot=null;
+   if(L1===R1){if(q1){R.Q('现在 L1 = R1 = 0（结点 D）。如果没有 if (L1 == R1) return; 左递归的右端 (L1+R1−1)/2 是几？',['−1，区间为空，正常结束','0，区间又是 [0..0]，无穷递归'],1,'C 的整数除法向 0 取整：(−1)/2 = 0，不是 −1。于是又调用 postTopre(post, 0, 0, …)，停不下来。');q1=false}
+    cls[x]='done';R.S('one',`L1 == R1，只有 ${x} 一个结点，放完就返回。`+(L1===0?'这里 L1 = R1 = 0，正是注释说的情况。':''),V(x,L1,R1,L2,R2,v));st.pop();return}
+   R.S('one','L1 ≠ R1，还有子树，继续。',V(x,L1,R1,L2,R2,v));
+   const m1=div2(L1+R1-1),m2=div2(L2+R2+1);const w={L1,R1,L2,R2,'(L1+R1-1)/2':m1,'(L2+R2+1)/2':m2};
+   if(q2){R.Q('A 的左子树在 pre 里占哪几格？',['pre[0..2]','pre[1..3]','pre[4..6]'],1,'先序“根左右”，pre[0] 是根，左子树紧跟着：L2+1 .. (L2+R2+1)/2 = 1 .. 3。');q2=false}
+   R.S('L',`左子树：post[${L1}..${m1}]，pre[${L2+1}..${m2}]。`,V(x,L1,R1,L2,R2,w));go(L1,m1,L2+1,m2,`${x} 的左子树`);
+   R.S('Rr',`右子树：post[${m1+1}..${R1-1}]，pre[${m2+1}..${R2}]。`,V(x,L1,R1,L2,R2,w));go(m1+1,R1-1,m2+1,R2,`${x} 的右子树`);
+   cls[x]='done';R.S('end',`${x} 这棵子树转完，返回。`,V(x,L1,R1,L2,R2,v));st.pop()})(0,6,0,6,'postTopre（整棵树）');
+  R.S('end',`结束：pre = <b>${pre.join('')}</b>。时间 O(n)，空间 O(log n)。`,V(null,0,6,0,6,{n}))}};
+
+/* 12 先序 + 中序 建树（及后序 + 中序） */
+function build12(R,kind){const n=6,S=(kind==='pre'?'ABDECF':'DEBFCA').split(''),mid='DBEACF'.split(''),st=[],cls={},nodes={};let root=null,iv=null,sub=null;
+ const nm=kind==='pre'?'pre':'post';
+ const V=(cur,L1,R1,L2,R2,v)=>{const rp=kind==='pre'?L1:R1;const pc=rng(n,L1,R1,{[rp]:'mv'}),mc=rng(n,L2,R2);
+  if(sub){for(let k=sub[0];k<=sub[1];k++)pc[k]='cmp';for(let k=sub[2];k<=sub[3];k++)mc[k]='cmp'}if(iv!==null)mc[iv]='mv';
+  return [['vars',v||{}],['stack',st.slice()],['arr',{name:`${nm}[ ]：本层 [${L1}..${R1}]`,vals:S,cls:pc,ptrs:{L1,R1}}],['arr',{name:`mid[ ]：本层 [${L2}..${R2}]`,vals:mid,cls:mc,ptrs:iv===null?{L2,R2}:{L2,R2,i:iv}}],
+   root?['tree',{nodes,root,cls:Object.assign({},cls,cur?{[cur]:'cur'}:{}),title:'二叉链表',legend:'蓝圈＝当前 root；橙＝已 malloc、还没返回；绿＝已返回并挂到双亲上。橙色段是下一次递归的区间。'}]:noTree('二叉链表')]};
+ let q1=true,q2=true;
+ (function go(L1,R1,L2,R2,par,side,who){st.push(`func(${L1}, ${R1}, ${L2}, ${R2})`);const v={L1,R1,L2,R2};iv=null;sub=null;
+  R.S('fn',`进入 ${who}：${nm}[${L1}..${R1}] = ${seg(S,L1,R1)}，mid[${L2}..${R2}] = ${seg(mid,L2,R2)}。`,V(par,L1,R1,L2,R2,v));
+  const rp=kind==='pre'?L1:R1,x=S[rp];nodes[x]={t:x,l:null,r:null};if(par)nodes[par][side]=x;else root=x;cls[x]='cmp';
+  R.S('dat',`malloc 一个结点，root->data = ${nm}[${rp}] = ${x}。${kind==='pre'?'先序第一个':'后序最后一个'}就是根。`,V(x,L1,R1,L2,R2,v));
+  let i=L2;while(mid[i]!==x)i++;
+  if(q1){R.Q(`在 mid[${L2}..${R2}] = ${seg(mid,L2,R2)} 里找 ${x}，for 循环停在 i = ?`,['0','3','5'],1,`mid[3] = ${x}。中序里根左边 3 个（DBE）是左子树，右边 2 个（CF）是右子树。`);q1=false}
+  iv=i;const w={L1,R1,L2,R2,i};
+  R.S('for',`i 从 L2 = ${L2} 往右找 ${x}，停在 i = ${i}。左边 ${i-L2} 个是左子树，右边 ${R2-i} 个是右子树。`,V(x,L1,R1,L2,R2,w));
+  let a,b,c,d;
+  if(kind==='pre'){a=L1+1;b=L1+i-L2}else{a=L1;b=i-L2+L1-1}
+  if(i>L2){if(q2){R.Q(`A 的左子树有 i − L2 = 3 个结点。它在 ${nm} 里是哪一段？`,kind==='pre'?['pre[0..2]','pre[1..3]','pre[1..4]']:['post[0..2]','post[1..3]','post[3..5]'],kind==='pre'?1:0,kind==='pre'?'先序“根左右”：根后面紧跟 3 个就是左子树，L1+1 .. L1+i−L2 = 1 .. 3。':'后序“左右根”：左子树在最前面 3 个，L1 .. i−L2+L1−1 = 0 .. 2。');q2=false}
+   sub=[a,b,L2,i-1];R.S('L',`i = ${i} > L2 = ${L2}，左边有结点。左子树：${nm}[${a}..${b}]，mid[${L2}..${i-1}]。`,V(x,L1,R1,L2,R2,w));sub=null;
+   go(a,b,L2,i-1,x,'l',`${x} 的左子树`);iv=i;R.S('L',`左子树返回，root->lchild = ${nodes[x].l}。`,V(x,L1,R1,L2,R2,w))}
+  else{if(kind==='pre')R.S('ifl',`i == L2，${x} 左边没有结点。`,V(x,L1,R1,L2,R2,w));R.S('ln',kind==='pre'?'root->lchild = NULL。':`i == L2，${x} 左边没有结点：root->lchild = NULL。`,V(x,L1,R1,L2,R2,w))}
+  if(kind==='pre'){c=L1+i-L2+1;d=R1}else{c=i-L2+L1;d=R1-1}
+  if(i<R2){sub=[c,d,i+1,R2];R.S('Rr',`i = ${i} < R2 = ${R2}，右边有结点。右子树：${nm}[${c}..${d}]，mid[${i+1}..${R2}]。`,V(x,L1,R1,L2,R2,w));sub=null;
+   go(c,d,i+1,R2,x,'r',`${x} 的右子树`);iv=i;R.S('Rr',`右子树返回，root->rchild = ${nodes[x].r}。`,V(x,L1,R1,L2,R2,w))}
+  else{if(kind==='pre')R.S('ifr',`i == R2，${x} 右边没有结点。`,V(x,L1,R1,L2,R2,w));R.S('rn',kind==='pre'?'root->rchild = NULL。':`i == R2，${x} 右边没有结点：root->rchild = NULL。`,V(x,L1,R1,L2,R2,w))}
+  cls[x]='done';R.S('ret',`返回 ${x}。`,V(x,L1,R1,L2,R2,w));st.pop();iv=null})(0,n-1,0,n-1,null,'','func（整棵树）');
+ const other=kind==='pre'?'后序 DEBFCA':'先序 ABDECF';
+ R.S('end',`建好：<b>A(B(D,E),C(−,F))</b>，${other}。手册写“时空 O(N)”；严格说每层都要在 mid 里线性找根，最坏（单支树）时间 O(n²)，平衡时 O(n log n)；空间 O(n)。`,V(null,0,n-1,0,n-1,{n}))}
+
+P.tr12a={tpl:'59树',name:'12 先序 + 中序建二叉链表',when:'【树 12】先序与中序遍历分别存在两个一维数组 A, B 中，试建立二叉链表。演示：先序 ABDECF，中序 DBEACF。',
+ idea:['先序第一个 pre[L1] 是根。','在中序里找到根的位置 i：左边 i − L2 个是左子树，右边是右子树。','按个数切出两边在先序里的区间，各递归一次，结果挂到 lchild、rchild。'],
+ why:{dat:'先序“根左右”，区间第一个就是这棵子树的根。',for:'循环体是空的，分号别漏。题目保证根一定在 mid 里，所以不用判越界。',L:'左子树有 i − L2 个结点，先序里紧跟根：L1+1 .. L1+(i−L2)。',Rr:'右子树在先序里接在左子树后面：L1+i−L2+1 .. R1。',ifl:'i == L2 说明根左边没有结点，左孩子为空；不用再递归。',ret:'返回的 root 由上一层挂到它的 lchild 或 rchild。'},
+ blanks:['mal','dat','i','for','ifl','ifr','ret'],
+ code:[['BiTree func(char pre[], char mid[], int L1, int R1, int L2, int R2){','','fn'],
+  ['   BiTree root = (BiTree)malloc(sizeof(BTNode));','','mal'],
+  ['   root->data = pre[L1];','// 先序第一个是根','dat'],
+  ['   int i = L2;','','i'],
+  ['   for (; mid[i] != pre[L1]; i++);','//注意 for 循环内无内容','for'],
+  ['   if (i > L2)','// 根左边还有结点','ifl'],
+  ['       root->lchild = func(pre, mid, L1 + 1, L1 + i - L2,','// 左子树 i − L2 个','L'],
+  ['                           L2, i - 1);',''],
+  ['   else',''],
+  ['       root->lchild = NULL;','','ln'],
+  ['   if (i < R2)','// 根右边还有结点','ifr'],
+  ['       root->rchild = func(pre, mid, L1 + i - L2 + 1, R1,','','Rr'],
+  ['                           i + 1, R2);',''],
+  ['   else',''],
+  ['       root->rchild = NULL;','','rn'],
+  ['   return root;','','ret'],
+  ['}//先序和中序构建二叉链表','','end']],
+ run(R){build12(R,'pre')}};
+
+P.tr12b={tpl:'59树',name:'12 后序 + 中序建二叉链表',when:'【树 12 拓展】后序与中序遍历分别存在两个一维数组中，建立二叉链表。演示：后序 DEBFCA，中序 DBEACF。',
+ idea:['后序最后一个 post[R1] 是根。','在中序里找到根的位置 i：左边 i − L2 个是左子树。','后序里左子树在最前，右子树紧跟其后、到 R1 − 1 为止，各递归一次。'],
+ why:{dat:'后序“左右根”，区间最后一个就是这棵子树的根。',for:'循环体是空的，分号别漏。',L:'左子树 i − L2 个，在后序最前面：L1 .. L1+(i−L2)−1。',Rr:'右子树接在左子树后面，最后一格是根要去掉：i−L2+L1 .. R1−1。',ret:'返回的 root 由上一层挂上去。'},
+ blanks:['mal','dat','i','for','ln','rn','ret'],
+ code:[['BiTree func(char post[], char mid[], int L1, int R1, int L2, int R2){','','fn'],
+  ['   BiTree root = (BiTree)malloc(sizeof(BTNode));','','mal'],
+  ['   root->data = post[R1];','// 后序最后一个是根','dat'],
+  ['   int i = L2;','','i'],
+  ['   for (; mid[i] != post[R1]; i++);','//注意 for 循环内无内容','for'],
+  ['   if (i > L2)    root->lchild = func(post, mid,','// 左子树：最前 i − L2 个','L'],
+  ['                      L1, i - L2 + L1 - 1, L2, i - 1);',''],
+  ['   else root->lchild = NULL;','','ln'],
+  ['   if (i < R2) root->rchild = func(post, mid,','// 右子树：去掉最后的根','Rr'],
+  ['                      i - L2 + L1, R1 - 1, i + 1, R2);',''],
+  ['   else root->rchild = NULL;','','rn'],
+  ['   return root;','','ret'],
+  ['}','//后序和中序构建二叉链表 //时空复杂度分别为 O(N)和 O(N)','end']],
+ run(R){build12(R,'post')}};
+
+/* 13 二叉链表 → 数组 */
+P.tr13a={tpl:'59树',name:'13 二叉链表存到数组',when:'【树 13】二叉树以二叉链表表示，设计算法存储到一维数组中。演示：A(B(D,E),C(−,F))，根放 A[0]，空位置是 \'#\'。',
+ idea:['按完全二叉树编号：根放 A[0]。','下标 i 的结点，左孩子放 2i+1，右孩子放 2i+2。','先序递归，p 为空就什么也不写。'],
+ why:{put:'先序位置：先把自己放进 A[i]。',L:'根在下标 0：左孩子 2i+1。根在 1 的写法是 2i。',Rr:'根在下标 0：右孩子 2i+2。',call:'PDF 没写：空位置要调用前自己填好（这里填 \'#\'），数组要开到 2^h − 1 那么大，单支树会很浪费。'},
+ blanks:['if','put','L','Rr'],
+ code:[['void create(BiTree p, char A[], int i){','// p 放在 A[i]','fn'],
+  ['   if (p != NULL){','','if'],
+  ['       A[i] = p->data;','','put'],
+  ['       create(p->lchild, A, 2 * i + 1);','// 左孩子 2i+1','L'],
+  ['       create(p->rchild, A, 2 * i + 2);','// 右孩子 2i+2','Rr'],
+  ['   }',''],
+  ['}','//时空复杂度分别为 O(N)和 O(N)','end'],
+  ['// 调用：A[ ] 先全部置 \'#\'，再 create(T, A, 0);','','call']],
+ run(R){const N=7,A=Array(N).fill('#'),st=[],cls={},tags={};let hot=null;
+  const V=(cur,i,v)=>{const c={};A.forEach((x,k)=>{if(x!=='#')c[k]='done'});if(hot!==null)c[hot]='mv';
+   return [['vars',v||{}],['stack',st.slice()],['tree',{nodes:T12,root:'A',cls:Object.assign({},cls,cur?{[cur]:'cur'}:{}),tags,title:'二叉链表',legend:'蓝圈＝当前 p；绿＝已存好；标签是存放的下标。'}],['arr',{name:'A[ ]（7 格）',vals:A,cls:c,ptrs:i!==null&&i<N?{i}:{}}]]};
+  R.S('call','调用前 A 全部填 \'#\'，然后 create(T, A, 0)：根放下标 0。',V(null,null,{}));
+  let q1=true,q2=true;
+  (function go(p,i,who){st.push(`create(${p||'NULL'}, A, ${i})`);
+   if(!p){R.S('if',`${who}：create(NULL, A, ${i})，p == NULL，什么也不写，返回。${i>=N?`（i = ${i} 已在数组外，正好不用写）`:`A[${i}] 保持 '#'。`}`,V(null,i,{i}));st.pop();return}
+   R.S('fn',`进入 create(${p}, A, ${i})${who?'，'+who:''}。`,V(p,i,{i}));
+   if(p==='F'&&q1){R.Q('C 在 A[2]，它没有左孩子。右孩子 F 放在哪一格？',['A[5]','A[6]','A[3]'],1,'右孩子 2i+2 = 2×2+2 = 6。左孩子的位置 A[5] 空着，保持 \'#\'。');q1=false}
+   A[i]=p;hot=i;tags[p]=`A[${i}]`;R.S('put',`p 不空，A[${i}] = ${p}。`,V(p,i,{i}));hot=null;
+   R.S('L',`左孩子放 2×${i}+1 = ${2*i+1}。`,V(p,i,{i,'2i+1':2*i+1}));go(T12[p].l,2*i+1,`${p} 的左孩子`);
+   if(p==='A'&&q2){R.Q('A 的左子树存完了，回到 A。A 的右孩子 C 放在哪？',['A[2]','A[3]','A[4]'],0,'i = 0：2×0+2 = 2。i 是参数，回来还是 0。');q2=false}
+   R.S('Rr',`右孩子放 2×${i}+2 = ${2*i+2}。`,V(p,i,{i,'2i+2':2*i+2}));go(T12[p].r,2*i+2,`${p} 的右孩子`);
+   cls[p]='done';R.S('end',`${p} 这棵子树存完，返回。`,V(p,i,{i}));st.pop()})('A',0,'');
+  R.S('call',`结束：A = <b>${A.join(' ')}</b>。每个结点访问一次，时间 O(n)；数组按完全二叉树开，空间 O(2^h)，递归栈 O(h)。`,V(null,null,{}))}};
+
+/* 13 拓展 数组 → 二叉链表 */
+P.tr13b={tpl:'59树',name:'13 拓展 数组转二叉链表',when:'【树 13 拓展】数组转二叉链表：顺序存储（根在 A[0]，空位置 \'#\'）的二叉树建成二叉链表。演示：A = ABC#DE，n = 6。',
+ idea:['从下标 0 开始建根。','i 越界或 A[i] 是 \'#\'，这里没有结点，返回 NULL。','否则 malloc 一个结点，左孩子用 2i+1、右孩子用 2i+2 递归建好挂上。'],
+ why:{if:'先判 i < n 再读 A[i]：&& 短路，越界时不会读数组外面。',L:'左孩子下标 2i+1，返回的子树直接挂上。',Rr:'右孩子下标 2i+2。',nul:'越界或 \'#\' 都返回 NULL，上一层的孩子指针就是空。'},
+ blanks:['if','mal','dat','L','Rr','ret','nul'],
+ code:[['BiTree create(char A[], int i, int n){','','fn'],
+  ['   if (i < n && A[i] != \'#\'){','// 不越界且不是空位','if'],
+  ['       BiTree t = (BiTree)malloc(sizeof(BTNode));','','mal'],
+  ['       t->data = A[i];','','dat'],
+  ['       t->lchild = create(A, 2 * i + 1, n);','','L'],
+  ['       t->rchild = create(A, 2 * i + 2, n);','','Rr'],
+  ['       return t;','','ret'],
+  ['   }',''],
+  ['   return NULL;','','nul'],
+  ['}','//时空复杂度分别为 O(N)和 O(N)','end']],
+ run(R){const A='ABC#DE'.split(''),n=6,st=[],cls={},nodes={};let root=null;
+  const V=(cur,i,v)=>{const c={};A.forEach((x,k)=>{if(x==='#')c[k]='dim';else if(nodes['n'+k])c[k]='done'});if(i!==null&&i<n&&A[i]!=='#')c[i]='mv';
+   return [['vars',v||{}],['stack',st.slice()],['arr',{name:'A[ ]（n = 6）',vals:A,cls:c,ptrs:i!==null&&i<n?{i}:{}}],root?['tree',{nodes,root,cls:Object.assign({},cls,cur?{[cur]:'cur'}:{}),title:'建出来的二叉链表',legend:'蓝圈＝当前 t；橙＝已 malloc、还没返回；绿＝已返回挂好。'}]:noTree('建出来的二叉链表')]};
+  let q1=true,q2=true;
+  (function go(i,par,side){st.push(`create(A, ${i}, ${n})`);const v={i,n};
+   if(i>=n||A[i]==='#'){
+    if(i===3&&q1){R.Q('B 的左孩子在 i = 3，A[3] = \'#\'。create 返回什么？',['返回 NULL','malloc 一个 data 为 # 的结点'],0,'\'#\' 表示这里没有结点，条件不成立，走到最后 return NULL。');q1=false}
+    if(i===9&&q2){R.Q('D 在 i = 4，左孩子 i = 9，n = 6。会读 A[9] 吗？',['会','不会'],1,'i < n 已经不成立，&& 短路，后面的 A[i] != \'#\' 不再计算，不会越界。');q2=false}
+    R.S('if',`进入 create(A, ${i}, ${n})：${i>=n?`i = ${i} ≥ n，越界`:`A[${i}] = '#'，空位`}，条件不成立。`,V(par,i,v));R.S('nul','return NULL。',V(par,i,v));st.pop();return null}
+   const id='n'+i;R.S('fn',`进入 create(A, ${i}, ${n})。`,V(par,i,v));
+   R.S('if',`i = ${i} < n，A[${i}] = ${A[i]} 不是 '#'，这里有结点。`,V(par,i,v));
+   nodes[id]={t:A[i],l:null,r:null};if(par)nodes[par][side]=id;else root=id;cls[id]='cmp';
+   R.S('dat',`malloc 结点 t，t->data = A[${i}] = ${A[i]}。`,V(id,i,v));
+   R.S('L',`建左孩子：create(A, ${2*i+1}, n)。`,V(id,i,{i,n,'2i+1':2*i+1}));const l=go(2*i+1,id,'l');R.S('L',`t->lchild = ${l?nodes[l].t:'NULL'}。`,V(id,i,v));
+   R.S('Rr',`建右孩子：create(A, ${2*i+2}, n)。`,V(id,i,{i,n,'2i+2':2*i+2}));const r=go(2*i+2,id,'r');R.S('Rr',`t->rchild = ${r?nodes[r].t:'NULL'}。`,V(id,i,v));
+   cls[id]='done';R.S('ret',`return t（${A[i]}）。`,V(id,i,v));st.pop();return id})(0,null,'');
+  R.S('end','建好：<b>A(B(−,D),C(E,−))</b>，先序 ABDCE，中序 BDAEC。每个下标最多看一次，时间 O(n)；空间 O(n)（结点 + 递归栈）。',V(null,null,{}))}};
+
+/* 14 顺序存储统计叶子 */
+P.tr14={tpl:'59树',name:'14 顺序存储统计叶子',when:'【树 14】已知二叉树采用顺序存储结构，编写算法统计该树中所有叶子结点个数。演示：A = ABCDE#F##G，N = 10，根在 A[0]，\'#\' 是空位。',
+ idea:['i 越界或 A[i] 是 \'#\'：没有结点，返回 0。','左孩子 2i+1、右孩子 2i+2 都不存在：叶子，返回 1。','否则叶子数 = 左子树叶子 + 右子树叶子。'],
+ why:{e:'先判 i >= N 再读 A[i]，|| 短路防越界。',lf:'“孩子不存在”有两种：下标越界，或者那格是 \'#\'。两种都要判。',lf2:'左右孩子都不存在才是叶子，中间是 &&。',ret:'后序：先拿到左右子树的结果再相加。'},
+ blanks:['e','r0','r1','n1','n2','ret'],
+ code:[['int count(char A[], int i, int N) {','','fn'],
+  ['   if ( i >= N || A[i] == \'#\')','// 越界或空位','e'],
+  ['       return 0;','','r0'],
+  ['   if ((2 * i + 1 >= N || A[2 * i + 1] == \'#\') &&','// 左孩子不存在','lf'],
+  ['       (2 * i + 2 >= N || A[2 * i + 2] == \'#\'))','// 且右孩子不存在','lf2'],
+  ['       return 1;','// 叶子','r1'],
+  ['   int n1 = count(A, 2 * i + 1, N);','','n1'],
+  ['   int n2 = count(A, 2 * i + 2, N);','','n2'],
+  ['   return n1 + n2;','','ret'],
+  ['}','//时空复杂度分别为 O(N)和 O(N)'],
+  ['//408 近几年爱考顺序存储的树和图，务必掌握！！','']],
+ run(R){const A='ABCDE#F##G'.split(''),N=10,nodes=sqNodes(A),st=[],cls={},tags={};
+  const V=(i,v,c2)=>{const c={};A.forEach((x,k)=>{if(x==='#')c[k]='dim'});Object.assign(c,c2||{});if(i!==null&&i<N)c[i]='mv';const p={};if(i!==null){p.i=i;if(2*i+1<N)p['2i+1']=2*i+1;if(2*i+2<N)p['2i+2']=2*i+2}
+   const cur=i!==null&&nodes['n'+i]?{['n'+i]:'cur'}:{};
+   return [['vars',v||{}],['stack',st.slice()],['arr',{name:'A[ ]（N = 10）',vals:A,cls:c,ptrs:p}],['tree',{nodes,root:'n0',cls:Object.assign({},cls,cur),tags,title:'对应的二叉树',legend:'蓝圈＝当前 i；绿＝叶子；标签是 count 的返回值。'}]]};
+  const ex=k=>k<N&&A[k]!=='#';const ds=k=>k>=N?`${k} ≥ N，越界`:A[k]==='#'?`A[${k}] = '#'`:`A[${k}] = ${A[k]}，存在`;
+  let q1=true,q2=true,q3=true;
+  const go=i=>{st.push(`count(A, ${i}, N)`);
+   R.S('fn',`进入 count(A, ${i}, N)。`,V(i,{i}));
+   if(!ex(i)){if(i===5&&q3){R.Q('C 的左孩子 i = 5，A[5] = \'#\'。count 返回几？',['0','1'],0,'\'#\' 是空位，没有结点，叶子数 0。');q3=false}
+    R.S('e',i>=N?`i = ${i} ≥ N，越界。`:`A[${i}] = '#'，空位。`,V(i,{i}));R.S('r0','没有结点，return 0。',V(i,{i}));st.pop();return 0}
+   R.S('e',`i = ${i} < N，A[${i}] = ${A[i]}，有结点。`,V(i,{i}));const l=2*i+1,r=2*i+2;
+   if(i===3&&q1){R.Q('D 在 i = 3，左右孩子 7、8 都是 \'#\'。count 返回几？',['0','1','2'],1,'两个孩子都不存在，D 是叶子，返回 1。');q1=false}
+   if(i===4&&q2){R.Q('E 在 i = 4：右孩子 10 ≥ N 越界，左孩子 A[9] = G。E 是叶子吗？',['是','不是'],1,'要左右都不存在才是叶子。E 有左孩子 G，往下递归。');q2=false}
+   R.S('lf',`左孩子 2i+1 = ${l}：${ds(l)}。`,V(i,{i,'2i+1':l},{[l]:'cmp'}));
+   if(!ex(l))R.S('lf2',`右孩子 2i+2 = ${r}：${ds(r)}。`,V(i,{i,'2i+2':r},{[r]:'cmp'}));
+   if(!ex(l)&&!ex(r)){cls['n'+i]='done';tags['n'+i]='1';R.S('r1',`左右都不存在，${A[i]} 是叶子，return 1。`,V(i,{i}));st.pop();return 1}
+   R.S('n1',`${ex(l)?'左孩子存在':'右孩子存在'}，不是叶子。先数左子树 count(A, ${l}, N)。`,V(i,{i}));const a=go(l);R.S('n1',`n1 = ${a}。`,V(i,{i,n1:a}));
+   R.S('n2',`再数右子树 count(A, ${r}, N)。`,V(i,{i,n1:a}));const b=go(r);R.S('n2',`n2 = ${b}。`,V(i,{i,n1:a,n2:b}));
+   tags['n'+i]=String(a+b);R.S('ret',`return n1 + n2 = ${a} + ${b} = ${a+b}。`,V(i,{i,n1:a,n2:b}));st.pop();return a+b};
+  const ans=go(0);
+  R.S('fn',`结束：叶子 <b>${ans}</b> 个（D、G、F）。每个结点访问一次，时间 O(N)；空间是递归栈 O(h)，最坏 O(N)。`,V(null,{'叶子数':ans}))}};
+})();
+
 /* ---------- 59 题·链表 12 题：每个结点真实的 next 怎么变 ---------- */
 /* LH：一块“内存”。list 建带头结点的链表；view 按给定起点一条条画出来，没人能走到又没 free 的结点放进“摘下来的结点”。 */
 function LH(){const h={d:{},nx:{},hd:new Set(),fr:new Set(),k:0};
@@ -1190,7 +2005,7 @@ P.uf={tpl:'结构体',name:'并查集（P2）',when:'手册把并查集列为 P2
   R.Q('S[3] 已经改成 1。Find(4) 要往上走几步、返回几？',['走 1 步，返回 3','走 2 步，返回 1'],1,'4 → 3 → 1，S[1] < 0，根是 1。树越来越高 Find 就越慢，这就是“小树并大树”和“路径压缩”要解决的。');
   find(4,'查 4 属于哪个集合：');R.S('use',`最后三个集合：${sets()}。`,V())}};
 
-const TPL=[['结构体','第 4 章'],['T1','多重循环'],['T2','辅助数组'],['T3','有序合并'],['T4','链表转数组'],['T5','二叉树递归'],['T6','邻接矩阵'],['T7','增删'],['T8','层序'],['T9','DFS 拓扑'],['T10','邻接表'],['T11','孩子兄弟'],['快排',''],['二分',''],['归并',''],['59链表','12 题']];
+const TPL=[['结构体','第 4 章'],['T1','多重循环'],['T2','辅助数组'],['T3','有序合并'],['T4','链表转数组'],['T5','二叉树递归'],['T6','邻接矩阵'],['T7','增删'],['T8','层序'],['T9','DFS 拓扑'],['T10','邻接表'],['T11','孩子兄弟'],['快排',''],['二分',''],['归并',''],['59链表','12 题'],['59树','14 题']];
 
 /* ---------- player ---------- */
 let curTpl='T4',curProg=null,frames=[],at=0,timer=null,asking=null,resume=false,dict=false;const answered=new Set();
