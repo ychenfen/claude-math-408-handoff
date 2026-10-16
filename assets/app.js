@@ -162,7 +162,7 @@
   function unsummarized(s){const last=[...s.summaries].map(d=>d.date).sort().pop()||'';return [...new Set(s.records.map(d=>d.date))].filter(d=>d>last).sort();}
   function promptFor(s,d){const keep=[subject,date];subject=s;date=d;try{return prompt();}finally{[subject,date]=keep;}}
   function prompt() {
-    return `你负责【${subject.name}】。请先读交接仓库 ychenfen/claude-math-408-handoff（GitHub 私有仓库，需要授权；没有权限时读 https://wengu-408.pages.dev/ 上的同名文件）的 AGENTS.md、每日复盘/使用说明.md 和该科历史交接。\n\n请按北京时间 ${date}，先看本科最近一份复盘的「题目状态」和「下次先做」，再读取 问答记录/${subject.name}/${date}.md 的真实记录，总结今天实际涉及的内容、逐题状态（仅安排／已讨论／作答待核实／独立做对／隔日重做通过，沿用题目编号，没有作答证据不升级）、知识点及适用条件、我的具体卡点与纠正、3～5个闭卷自测（至少一题迁移）和最多3项下一步动作。引用原问答；没有作答、原图或教材就标未核实，不把计划当完成、不混入其他科目。\n\n按 每日复盘/模板.md 保存到 每日复盘/${subject.name}/${date}.md。后续每次答疑追加到该科当天问答。请先给我核对公开内容；只有我授权上传时再提交GitHub，不覆盖其他助手改动。`;
+    return `你负责【${subject.name}】。请先读交接仓库 ychenfen/claude-math-408-handoff（GitHub 公开仓库；也可以读 https://ychenfen.github.io/claude-math-408-handoff/ 上的同名文件，备用 https://wengu-408.pages.dev/）的 AGENTS.md、每日复盘/使用说明.md 和该科历史交接。\n\n请按北京时间 ${date}，先看本科最近一份复盘的「题目状态」和「下次先做」，再读取 问答记录/${subject.name}/${date}.md 的真实记录，总结今天实际涉及的内容、逐题状态（仅安排／已讨论／作答待核实／独立做对／隔日重做通过，沿用题目编号，没有作答证据不升级）、知识点及适用条件、我的具体卡点与纠正、3～5个闭卷自测（至少一题迁移）和最多3项下一步动作。引用原问答；没有作答、原图或教材就标未核实，不把计划当完成、不混入其他科目。\n\n按 每日复盘/模板.md 保存到 每日复盘/${subject.name}/${date}.md。后续每次答疑追加到该科当天问答。请先给我核对公开内容；只有我授权上传时再提交GitHub，不覆盖其他助手改动。`;
   }
   function summaryDoc() { return subject.summaries.find(d=>d.date===date); }
   function recordDoc() { return subject.records.find(d=>d.date===date); }
