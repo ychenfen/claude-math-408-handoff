@@ -183,7 +183,7 @@ function vList(L){ // L: {nodes:{id:val}, order:[id], next:{id:id|null}, ptrs:{n
   const by={};Object.entries(L.ptrs||{}).forEach(([k,id])=>{if(id!==null&&id!==undefined&&pos[id]!==undefined)(by[id]=by[id]||[]).push(k)});
   Object.entries(by).forEach(([id,ks])=>{s+=`<text x="${pos[id]+W/2}" y="${y0+H+28}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--q)">↑${esc(ks.join(' '))}</text>`});
   Object.entries(L.nullPtrs||{}).forEach(([k,v])=>{if(v)s+=``});
-  return `<div><h2>链表</h2><div class="svgbox">${s}</svg></div>${L.extra?`<div class="legend">${esc(L.extra)}</div>`:''}</div>`}
+  return `<div><h2>${esc(L.title||'链表')}</h2><div class="svgbox">${s}</svg></div>${L.extra?`<div class="legend">${esc(L.extra)}</div>`:''}</div>`}
 function vTree(T){ // T: {nodes:{id:{t,l,r}}, root, cls:{id}, tags:{id:text}, title, edgeL, edgeR}
   const xs={},ds={};let k=0;(function walk(id,d){if(id===null||id===undefined)return;const n=T.nodes[id];walk(n.l,d+1);xs[id]=k++;ds[id]=d;walk(n.r,d+1)})(T.root,0);
   const cnt=k,dx=58,W=Math.max(260,cnt*dx+20),maxd=Math.max(0,...Object.values(ds)),H=(maxd+1)*64+30;
@@ -694,6 +694,236 @@ const TEACH={
 };
 Object.entries(TEACH).forEach(([k,v])=>Object.assign(P[k],v));
 
+/* ---------- 59 题·链表 12 题：每个结点真实的 next 怎么变 ---------- */
+/* LH：一块“内存”。list 建带头结点的链表；view 按给定起点一条条画出来，没人能走到又没 free 的结点放进“摘下来的结点”。 */
+function LH(){const h={d:{},nx:{},hd:new Set(),fr:new Set(),k:0};
+ h.head=nm=>{h.d[nm]=nm;h.nx[nm]=null;h.hd.add(nm);return nm};
+ h.list=(nm,vals)=>{h.head(nm);let t=nm;vals.forEach(v=>{const id='n'+(h.k++);h.d[id]=v;h.nx[id]=null;h.nx[t]=id;t=id});return nm};
+ h.at=(hid,i)=>{let x=hid;for(let t=0;t<=i;t++)x=h.nx[x];return x};
+ h.lab=id=>id===null||id===undefined?'NULL':h.hd.has(id)?id+' 头':String(h.d[id]);
+ h.chain=(s,until)=>{const o=[],seen=new Set();let x=s;while(x!==null&&x!==undefined&&!seen.has(x)&&!h.fr.has(x)){o.push(x);seen.add(x);if(x===until)break;x=h.nx[x]}return o};
+ h.str=(s,until)=>h.chain(s,until).filter(x=>!h.hd.has(x)).map(x=>h.d[x]).join(' ')||'（空）';
+ h.view=(rows,ptrs,cls,o={})=>{const out=[];const v={};Object.entries(ptrs).forEach(([k,id])=>v[k]=h.lab(id));Object.assign(v,o.v||{});out.push(['vars',v]);
+  if(o.arr)out.push(['arr',o.arr]);const seen=new Set();
+  rows.forEach(([title,s,until])=>{if(s===null||s===undefined)return;const ord=h.chain(s,until);ord.forEach(x=>seen.add(x));
+   const last=ord[ord.length-1],tail=until&&last===until&&h.nx[last]!==null&&h.nx[last]!==undefined&&!ord.includes(h.nx[last])?`${h.lab(last)} 的 next 还连着 ${h.lab(h.nx[last])}（在下面那一行）`:'';
+   out.push(['list',{title,nodes:h.d,order:ord,next:until?Object.assign({},h.nx,tail?{[last]:'__out'}:{}):h.nx,head:h.hd.has(s)?s:null,ptrs,cls:cls||{},extra:tail}])});
+  const loose=Object.keys(h.d).filter(x=>!seen.has(x)&&!h.fr.has(x)&&!(o.hide||[]).includes(x));
+  if(loose.length)out.push(['list',{title:'摘下来的结点（暂时没有链连着它）',nodes:h.d,order:loose,next:h.nx,head:null,ptrs,cls:cls||{},
+   extra:loose.map(x=>h.nx[x]!==null&&h.nx[x]!==undefined&&!loose.includes(h.nx[x])?`${h.lab(x)} 的 next 还指着 ${h.lab(h.nx[x])}`:'').filter(Boolean).join('；')}]);
+  return out};
+ return h}
+const L59='59 题链表部分，题目原文和代码取自《408代码重点59题（必背）》第 10–14 页。链表题几乎都是改指针：先找到要动的结点的前驱，摘下来，再接到新位置。';
+
+/* 1 就地逆置：和 T7 的头插法逆置同一份代码 */
+P.l1=Object.assign({},P.t7c,{tpl:'59链表',name:'1 就地逆置',when:'【链表 1】试编写算法将带头结点的单链表就地逆置，即不需要借助辅助空间，保证空间复杂度为 O(1)。'});
+
+/* 2 最小值结点：奇数和后继交换，偶数删后继 */
+function mk2(vals,name){return {tpl:'59链表',name,when:'【链表 2】设有一个由正整数组成的无序单链表，编写程序实现以下功能：1、找出最小值结点（唯一）；2、若该数值是奇数，将其与后继结点交换（注意不是数值交换）；3、若该数值是偶数，则将其后继结点删除。',
+ idea:['删、换结点都要改前驱的 next，所以 pos 记的是最小结点的“前驱”。','最小的是最后一个结点（没有后继）就返回 false。','先把后继 r 摘下来：偶数直接 free，奇数把 r 插回 u 前面。'],
+ why:{init:'p、pos 都从头结点出发，比较时看 ->next，这样 pos 停下时正好是最小结点的前驱。',if:'比的是 p->next 和 pos->next，不是 p 和 pos。',chk:'最小结点后面没有结点了，既没法交换也没法删后继。',cut:'这一句两种情况共用：先把 r 从链上摘下来。',ev:'PDF 写 pos->next->data，这时 pos->next 还是 u，等价于 u->data。',r1:'奇数：r 插到 u 前面，pos → r → u，结点就换了位置。'},
+ blanks:['init','if','pos','chk','cut','r1','r2'],
+ code:[['bool func(LinkList L){','','fn'],['    LinkList p = L, pos = L;','','init'],['    while (p->next != NULL){','','w'],['        if (p->next->data < pos->next->data)','','if'],['            pos = p;','// pos：最小结点的前驱','pos'],['        p = p->next;','','mv'],['    }',''],
+  ['    if (pos->next->next == NULL)','// 最小的是最后一个','chk'],['        return false;','','ret0'],['    LinkList u = pos->next;','// u：最小结点','u'],['    LinkList r = u->next;','// r：它的后继','r'],['    u->next = r->next;','// 先把 r 摘下来','cut'],
+  ['    if (pos->next->data % 2 == 0)','','ev'],['        free(r);','// 偶数：删掉后继','fr'],['    else{','','el'],['        r->next = pos->next;','// 奇数：r 插到 u 前面','r1'],['        pos->next = r;','','r2'],['    }',''],['    return true;','','ret'],['}','']],
+ run(R){const H=LH();H.list('L',vals);let p='L',pos='L',u=null,r=null;const V=(c={})=>H.view([['单链表 L','L']],Object.fromEntries(Object.entries({p,pos,u,r}).filter(x=>x[1]!==null)),c);
+  R.S('init','p、pos 都从头结点出发。pos 记的是“目前最小结点的前驱”。',V());
+  let first=true;while(H.nx[p]!==null){const a=H.nx[p],b=H.nx[pos];R.S('w',`p->next = ${H.lab(a)}，不空，继续。`,V({[a]:'cmp'}));
+   if(H.d[a]<H.d[b]){if(first){R.Q(`p->next 是 ${H.d[a]}，pos->next 是 ${H.d[b]}。pos 改成谁？`,['pos = p（p->next 的前驱）','pos = p->next'],0,'pos 要停在前驱上，后面删、换都要改前驱的 next。');first=false}
+    R.S('if',`${H.d[a]} < ${H.d[b]}，更小。`,V({[a]:'cmp',[b]:'cmp'}));pos=p;R.S('pos',`pos = p，现在 pos->next = ${H.d[a]} 是目前最小的。`,V({[a]:'done'}))}
+   else R.S('if',a===b?`p 和 pos 一样，${H.d[a]} 不比自己小。`:`${H.d[a]} ≥ ${H.d[b]}，不更新。`,V({[a]:'cmp',[b]:'cmp'}));
+   p=H.nx[p];R.S('mv','p 后移。',V())}
+  const mn=H.nx[pos];R.S('w',`p->next == NULL，扫完了。最小值是 ${H.d[mn]}，pos 停在它的前驱 ${H.lab(pos)}。`,V({[mn]:'done'}));p=null;
+  if(H.nx[mn]===null){R.S('chk','最小结点是最后一个，没有后继。',V({[mn]:'done'}));R.S('ret0','返回 false。',V());return}
+  R.S('chk',`最小结点 ${H.d[mn]} 后面还有 ${H.lab(H.nx[mn])}。`,V({[mn]:'done'}));
+  u=mn;R.S('u',`u = pos->next，指着最小结点 ${H.d[u]}。`,V({[u]:'done'}));r=H.nx[u];R.S('r',`r = u->next，指着后继 ${H.d[r]}。`,V({[u]:'done',[r]:'cmp'}));
+  H.nx[u]=H.nx[r];R.S('cut',`u->next = r->next：u 跳过 r 直接连 ${H.lab(H.nx[u])}，r 被摘下来了。`,V({[r]:'mv'}));
+  const odd=H.d[u]%2===1;R.Q(`最小值 ${H.d[u]} 是${odd?'奇':'偶'}数，r 怎么处理？`,['free(r)，删掉','插回 u 前面，完成交换'],odd?1:0,odd?'奇数：结点交换。r 已经摘下来了，插到 u 前面就行。':'偶数：删除后继，r 已经摘下来了，直接 free。');
+  R.S('ev',`pos->next 还是 u，${H.d[u]} % 2 = ${H.d[u]%2}，是${odd?'奇':'偶'}数。`,V({[u]:'done'}));
+  if(!odd){H.fr.add(r);const rv=H.d[r];r=null;R.S('fr',`free(r)：${rv} 被删掉。`,V());R.S('ret',`返回 true。结果：${H.str('L')}。`,V());return}
+  R.S('el','奇数，走 else。',V({[r]:'mv'}));H.nx[r]=H.nx[pos];R.S('r1',`r->next = pos->next：${H.d[r]} 指向 ${H.d[u]}。`,V({[r]:'mv'}));
+  H.nx[pos]=r;R.S('r2',`pos->next = r：前驱改连 ${H.d[r]}。现在是 ${H.lab(pos)} → ${H.d[r]} → ${H.d[u]}，两个结点换了位置。`,V({[r]:'mv',[u]:'done'}));
+  R.S('ret',`返回 true。结果：${H.str('L')}。`,V())}}}
+P.l2a=mk2([5,3,8,6],'2 最小值奇偶（奇数：交换）');
+P.l2b=mk2([5,4,8,6],'2 最小值奇偶（偶数：删后继）');
+
+/* 3 递增链表去重 */
+P.l3={tpl:'59链表',name:'3 递增链表去重',when:'【链表 3】尽可能高效地删除递增链表中重复的结点，仅保留第一个。',
+ idea:['递增链表里重复的值一定挨在一起。','p 和它的后继 q 比：相等就删 q，p 不动接着比新的后继。','不相等 p 才后移。'],
+ why:{p:'p 从第一个数据结点出发。PDF 没判空表：L->next 为 NULL 时 p->next 会出错，考试可以先写 if (L->next == NULL) return;。',if:'只和后继比，因为递增链表里相同的值是连着的。',st:'删完 p 不动：新的后继可能还和 p 相同（比如 3 3 3）。',adv:'不相等才后移，这一句在 else 里。'},
+ blanks:['p','w','q','if','cut','free','adv'],
+ code:[['void del(LinkList L){','','fn'],['    LinkList p = L->next;','','p'],['    while (p->next != NULL){','','w'],['        LinkList q = p->next;','','q'],['        if (p->data == q->data){','','if'],['            p->next = q->next;','// 跳过 q','cut'],['            free(q);','','free'],['        }','','st'],['        else','',''],['            p = p->next;','// 不相等才后移','adv'],['    }',''],['}','','end']],
+ run(R){const H=LH();H.list('L',[1,1,2,3,3,3,4]);let p=H.nx.L,q=null;const V=(c={})=>H.view([['单链表 L','L']],Object.fromEntries(Object.entries({p,q}).filter(x=>x[1]!==null)),c);
+  R.S('p','p 指向第一个数据结点。',V({[p]:'cmp'}));let first=true;
+  while(H.nx[p]!==null){R.S('w','p->next 不空。',V());q=H.nx[p];R.S('q',`q = p->next，q 是 ${H.d[q]}。`,V({[p]:'cmp',[q]:'cmp'}));
+   if(H.d[p]===H.d[q]){R.S('if',`p 和 q 都是 ${H.d[p]}，重复。`,V({[p]:'cmp',[q]:'mv'}));H.nx[p]=H.nx[q];R.S('cut',`p->next = q->next，跳过 q。`,V({[q]:'mv'}));H.fr.add(q);q=null;
+    if(first){R.Q('q 删掉了。p 要不要后移？',['不动，再和新的后继比','后移'],0,'新的后继可能还和 p 一样（3 3 3 就是），所以删完 p 不动。');first=false}
+    R.S('free','free(q)，p 不动。',V({[p]:'cmp'}))}
+   else{R.S('if',`${H.d[p]} ≠ ${H.d[q]}，不重复。`,V({[p]:'cmp',[q]:'cmp'}));q=null;p=H.nx[p];R.S('adv','p 后移。',V({[p]:'cmp'}))}}
+  R.S('end',`p->next == NULL，结束。结果：${H.str('L')}。时间 O(n)，空间 O(1)。`,V())}};
+
+/* 4 绝对值去重（2015） */
+P.l4={tpl:'59链表',name:'4 绝对值去重（2015）',when:'【链表 4】用单链表保存 m 个整数，且 |data| ≤ n，设计时间上尽可能高效的算法，对于 data 绝对值相等的点，仅保留第一次出现的点（2015 统考题）。演示取 n = 5。',
+ idea:['|data| ≤ n，值域有限，开一个 n+1 大的标记数组（T2 辅助数组）。','p 停在前驱上，看 p->next 的绝对值 m：A[m] 是 0 就标记、p 后移。','A[m] 已经是 1，说明出现过，删掉 p->next，p 不动。'],
+ why:{mal:'绝对值是 0..n，共 n+1 种，所以开 n+1 个。',z:'malloc 出来的数组要清零。',p:'p 从头结点出发，因为要删的是 p->next，p 得是前驱。',abs:'负数取相反数得到绝对值，用来当下标。',keep:'没出现过：标记，p 后移。',del:'出现过：删 p->next，p 不动。'},
+ blanks:['mal','z','p','w','abs','chk','keep','r','cut','free'],
+ code:[['void del(LinkList L, int n){','','fn'],['    int *A = (int *)malloc(sizeof(int) * (n + 1));','','mal'],['    for (int i = 0; i < n + 1; ++i)','','z'],['        A[i] = 0;','','z2'],['    LinkList p = L;','','p'],['    int m;','',''],['    while (p->next != NULL){','','w'],
+  ['        if (p->next->data >= 0) m = p->next->data;','','abs'],['        else m = -p->next->data;','','abs2'],['        if (A[m] == 0){','','chk'],['            A[m] = 1; p = p->next;','// 第一次出现：保留','keep'],['        }','',''],['        else{','','del'],['            LinkList r = p->next;','','r'],['            p->next = r->next;','','cut'],['            free(r);','','free'],['        }','',''],['    }',''],['}','','end']],
+ run(R){const n=5,H=LH();H.list('L',[3,-2,-3,5,2]);const A=Array(n+1).fill(null);let p='L',r=null,m=null;
+  const V=(c={},ac={})=>H.view([['单链表 L','L']],Object.fromEntries(Object.entries({p,r}).filter(x=>x[1]!==null)),c,{v:m===null?{n}:{n,m},arr:{name:'A[ ]：A[m] = 1 表示绝对值 m 出现过',vals:A,ptrs:m===null?{}:{m},cls:ac}});
+  R.S('mal','开 n + 1 = 6 个格子，下标 0..5 正好对应绝对值 0..5。',V());A.fill(0);R.S('z','全部清零。',V());R.S('p','p 从头结点出发，它是前驱。',V());let first=true;
+  while(H.nx[p]!==null){const x=H.nx[p];R.S('w',`p->next = ${H.d[x]}，不空。`,V({[x]:'cmp'}));m=Math.abs(H.d[x]);R.S(H.d[x]>=0?'abs':'abs2',`${H.d[x]} 的绝对值 m = ${m}。`,V({[x]:'cmp'},{[m]:'cmp'}));
+   if(A[m]===0){R.S('chk',`A[${m}] = 0，第一次出现。`,V({[x]:'cmp'},{[m]:'cmp'}));A[m]=1;p=x;R.S('keep',`A[${m}] = 1，保留，p 后移。`,V({[x]:'done'},{[m]:'mv'}))}
+   else{if(first){R.Q(`m = ${m}，A[${m}] 已经是 1。这个 ${H.d[x]} 怎么办？`,['删掉','保留'],0,`绝对值 ${m} 前面出现过，只保留第一次出现的，删掉它。`);first=false}
+    R.S('chk',`A[${m}] = 1，绝对值 ${m} 出现过。`,V({[x]:'mv'},{[m]:'cmp'}));R.S('del','删掉它。',V({[x]:'mv'}));r=x;R.S('r',`r = p->next（${H.d[r]}）。`,V({[r]:'mv'}));H.nx[p]=H.nx[r];R.S('cut','p->next = r->next，跳过 r。',V({[r]:'mv'}));H.fr.add(r);r=null;R.S('free','free(r)，p 不动。',V())}}
+  m=null;R.S('end',`结束。结果：${H.str('L')}。时间 O(m)，空间 O(n)（标记数组）。`,V())}};
+
+/* 5 按正负拆成 A、B */
+P.l5={tpl:'59链表',name:'5 按正负拆成 A、B',when:'【链表 5】将一个带头结点的单链表 A 分解成两个带头结点的单链表 A 和 B，使 A 中保留值大于等于 0 的结点，B 中为小于 0 的结点。',
+ idea:['新建 B 的头结点，rb 是 B 的尾指针。','p 停在前驱上看 p->next：≥ 0 留在 A，p 后移。','< 0 就从 A 摘下来，尾插到 B（rb 后面），p 不动。'],
+ why:{mal:'B 要新开一个头结点。',p:'p 从头结点出发，要摘的是 p->next。',stay:'留下的结点 p 才后移。',r:'摘下的结点先用 r 存住。',cut:'A 跳过 r。',ins:'尾插两句：rb->next = r; rb = r;。',nul:'手册丢分点：尾插结束 rb->next = NULL，否则 B 的最后一个结点还连着 A 里的结点。'},
+ blanks:['mal','p','w','if','stay','r','cut','ins','mvb','nul'],
+ code:[['LinkList split(LinkList A){','','fn'],['    LinkList B = (LinkList)malloc(sizeof(LNode));','','mal'],['    LinkList p = A, rb = B;','','p'],['    while (p->next != NULL){','','w'],['        if (p->next->data >= 0)','','if'],['            p = p->next;','// 留在 A','stay'],['        else{','',''],
+  ['            LinkList r = p->next;','','r'],['            p->next = r->next;','// 从 A 摘下','cut'],['            rb->next = r;','// 尾插到 B','ins'],['            rb = r;','','mvb'],['        }','',''],['    }',''],['    rb->next = NULL;','// 封口','nul'],['    return B;','','ret'],['}','']],
+ run(R){const H=LH();H.list('A',[3,-1,4,-5,9,-2]);let p=null,rb=null,r=null;const V=(c={})=>H.view([['A','A'],['B','B']],Object.fromEntries(Object.entries({p,rb,r}).filter(x=>x[1]!==null)),c);
+  H.head('B');R.S('mal','新建 B 的头结点。',V());p='A';rb='B';R.S('p','p 从 A 的头结点出发；rb 是 B 的尾巴，现在就是 B 的头结点。',V());let first=true;
+  while(H.nx[p]!==null){const x=H.nx[p];R.S('w',`p->next = ${H.d[x]}。`,V({[x]:'cmp'}));
+   if(H.d[x]>=0){R.S('if',`${H.d[x]} ≥ 0，留在 A。`,V({[x]:'cmp'}));p=x;R.S('stay','p 后移。',V({[x]:'done'}))}
+   else{R.S('if',`${H.d[x]} < 0，要移到 B。`,V({[x]:'mv'}));r=x;R.S('r',`r = p->next（${H.d[r]}）。`,V({[r]:'mv'}));H.nx[p]=H.nx[r];R.S('cut','p->next = r->next，A 跳过 r。',V({[r]:'mv'}));
+    if(first){R.Q(`${H.d[r]} 接到 B 的哪？`,['rb 后面（尾插）','B 的头结点后面（头插）'],0,'题目没要求倒序，尾插保持原来的相对顺序。');first=false}
+    H.nx[rb]=r;R.S('ins',`rb->next = r：${H.d[r]} 接到 B 的尾部。`,V({[r]:'mv'}));rb=r;r=null;R.S('mvb','rb 跟着挪到新尾巴，p 不动。',V())}}
+  R.S('w','p->next == NULL，A 扫完了。',V());R.Q('B 的最后一个结点 −2 原来就是 A 的最后一个。rb->next = NULL 还要不要写？',['要写','不用写'],0,'要写，这是手册丢分点。这组数据碰巧不影响结果，但如果 B 的最后一个是 −5，它的 next 还连着 A 里的 9。');
+  H.nx[rb]=null;R.S('nul','rb->next = NULL，B 封口。',V());p=null;rb=null;R.S('ret',`A：${H.str('A')}；B：${H.str('B')}。时间 O(n)，空间 O(1)。`,V())}};
+
+/* 6 a1 b1 a2 b2 … 拆开，b 倒序 */
+P.l6={tpl:'59链表',name:'6 拆 a、b（b 倒序）',when:'【链表 6】将一个单链表 {a1, b1, a2, b2, …, an, bn} 拆分成 {a1, a2, …, an} 和 {bn, bn−1, …, b1}。',
+ idea:['pos 记 p->next 是第几个：奇数位置是 a，留在 A。','偶数位置是 b，从 A 摘下来，头插到 B。','B 要倒序，所以用头插。'],
+ why:{mal:'B 新开头结点，头插前先置空。',pos:'pos 是 p->next 的位置，从 1 开始。',odd:'a 留下，p 后移。',h1:'头插第一句：r 先连上 B 原来的第一个。',h2:'头插第二句：B 的头结点再连上 r。',inc:'不管留还是摘，pos 都加 1。'},
+ blanks:['mal','nul','p','pos','w','if','odd','r','cut','h1','h2','inc'],
+ code:[['LinkList split(LinkList A){','','fn'],['    LinkList B = (LinkList)malloc(sizeof(LNode));','','mal'],['    B->next = NULL;','','nul'],['    LinkList p = A;','','p'],['    int pos = 1;','','pos'],['    while (p->next != NULL){','','w'],['        if (pos % 2 == 1)','','if'],['            p = p->next;','// a：留下','odd'],['        else{','',''],
+  ['            LinkList r = p->next;','','r'],['            p->next = r->next;','// 从 A 摘下','cut'],['            r->next = B->next;','// 头插到 B','h1'],['            B->next = r;','','h2'],['        }','',''],['        pos++;','','inc'],['    }',''],['    return B;','','ret'],['}','']],
+ run(R){const H=LH();H.list('A',['a1','b1','a2','b2','a3','b3']);let p=null,r=null,pos=null;const V=(c={})=>H.view([['A','A'],['B','B']],Object.fromEntries(Object.entries({p,r}).filter(x=>x[1]!==null)),c,{v:pos===null?{}:{pos}});
+  H.head('B');R.S('mal','新建 B 的头结点。',V());R.S('nul','B->next = NULL，B 是空表。',V());p='A';R.S('p','p 从 A 的头结点出发。',V());pos=1;R.S('pos','pos = 1：p->next 是第 1 个。',V());let first=true;
+  while(H.nx[p]!==null){const x=H.nx[p];R.S('w',`p->next = ${H.d[x]}，pos = ${pos}。`,V({[x]:'cmp'}));
+   if(pos%2===1){R.S('if',`pos = ${pos} 是奇数，${H.d[x]} 留在 A。`,V({[x]:'cmp'}));p=x;R.S('odd','p 后移。',V({[x]:'done'}))}
+   else{R.S('if',`pos = ${pos} 是偶数，${H.d[x]} 要放进 B。`,V({[x]:'mv'}));r=x;R.S('r',`r = p->next（${H.d[r]}）。`,V({[r]:'mv'}));H.nx[p]=H.nx[r];R.S('cut','p->next = r->next，A 跳过 r。',V({[r]:'mv'}));
+    if(first){R.Q(`${H.d[r]} 放到 B 的哪？`,['B 的头结点后面（头插）','B 的尾部（尾插）'],0,'题目要 B 是 bn, …, b1，倒序，所以头插。');first=false}
+    H.nx[r]=H.nx.B;R.S('h1',`r->next = B->next：${H.d[r]} 先连上 B 原来的第一个（${H.lab(H.nx[r])}）。`,V({[r]:'mv'}));H.nx.B=r;R.S('h2',`B->next = r：${H.d[r]} 成了 B 的第一个。`,V({[r]:'mv'}));r=null}
+   pos++;R.S('inc',`pos = ${pos}。`,V())}
+  p=null;R.S('ret',`A：${H.str('A')}；B：${H.str('B')}。时间 O(n)，空间 O(1)。`,V())}};
+
+/* 7、8 共用：结果链从 A 出发画到 ra 为止，下面两行是 p、q 还没处理的部分 */
+const MGV=(H,ra,p,q,extra={},c={})=>H.view([['结果（从 A 的头结点到 ra）','A',ra],['p 往后：A 里还没处理的',p],['q 往后：B 里还没处理的',q]],Object.fromEntries(Object.entries(Object.assign({ra,p,q},extra)).filter(x=>x[1]!==null)),c,{hide:['B']});
+P.l7={tpl:'59链表',name:'7 有序合并（B 并入 A）',when:'【链表 7】两个递增有序的单链表，设计算法将 B 合并到 A 中，仍保证一个非递减有序的链表（双指针基础，很重要！）。',
+ idea:['就是 T3 的有序合并，C[k++] 换成尾插 ra->next = 结点; ra = 结点;。','p、q 比较，小的接到 ra 后面并后移。','有一边走完，把另一边剩下的整段接上。'],
+ why:{init:'ra 是结果链的尾巴，从 A 的头结点开始。',if:'相等时取 A 的（<=），稳定。',a1:'尾插两句。',a3:'p 后移要在尾插之后，但 p->next 没被改过，所以顺序没关系。',tp:'剩下的整段接上，不用一个个挪。'},
+ blanks:['init','w','if','a1','a2','a3','b1','b2','b3','tp','tq'],
+ code:[['void merge(LinkList A, LinkList B){','','fn'],['    LinkList ra = A, p = A->next, q = B->next;','','init'],['    while (p != NULL && q != NULL){','','w'],['        if (p->data <= q->data){','','if'],['            ra->next = p;','','a1'],['            ra = p;','','a2'],['            p = p->next;','','a3'],['        }','',''],['        else{','','el'],['            ra->next = q;','','b1'],['            ra = q;','','b2'],['            q = q->next;','','b3'],['        }','',''],['    }',''],
+  ['    if (p != NULL)','','ip'],['        ra->next = p;','// 剩下的直接接上','tp'],['    if (q != NULL)','','iq'],['        ra->next = q;','','tq'],['}','','end']],
+ run(R){const H=LH();H.list('A',[1,4,6]);H.list('B',[2,4,9]);let ra='A',p=H.nx.A,q=H.nx.B;const V=c=>MGV(H,ra,p,q,{},c);
+  R.S('init','ra 从 A 的头结点出发，p、q 指向两个表的第一个结点。B 的头结点用不上，不画。',V());let first=true;
+  while(p!==null&&q!==null){R.S('w','p、q 都不空。',V({[p]:'cmp',[q]:'cmp'}));
+   if(first){R.Q(`p 是 ${H.d[p]}，q 是 ${H.d[q]}。哪个接到 ra 后面？`,[`p 的 ${H.d[p]}`,`q 的 ${H.d[q]}`],H.d[p]<=H.d[q]?0:1,'小的先接，相等取 A 的。');first=false}
+   if(H.d[p]<=H.d[q]){R.S('if',`${H.d[p]} ≤ ${H.d[q]}，接 p。`,V({[p]:'cmp',[q]:'cmp'}));H.nx[ra]=p;R.S('a1','ra->next = p。',V({[p]:'mv'}));ra=p;R.S('a2','ra = p。',V({[p]:'mv'}));p=H.nx[p];R.S('a3','p 后移。',V())}
+   else{R.S('if',`${H.d[p]} > ${H.d[q]}。`,V({[p]:'cmp',[q]:'cmp'}));R.S('el','接 q。',V({[q]:'cmp'}));H.nx[ra]=q;R.S('b1','ra->next = q。',V({[q]:'mv'}));ra=q;R.S('b2','ra = q。',V({[q]:'mv'}));q=H.nx[q];R.S('b3','q 后移。',V())}}
+  R.S('w',`${p===null?'p':'q'} 走完了，跳出循环。`,V());
+  if(p!==null){R.S('ip','p 还剩。',V());H.nx[ra]=p;R.S('tp','ra->next = p，A 剩下的整段接上。',V())}else R.S('ip','p 是 NULL。',V());
+  if(q!==null){R.S('iq','q 还剩。',V());H.nx[ra]=q;R.S('tq','ra->next = q，B 剩下的整段接上。',V())}else R.S('iq','q 是 NULL。',V());
+  ra=null;p=null;q=null;R.S('end',`A：${H.str('A')}。时间 O(m + n)，空间 O(1)。`,H.view([['A','A']],{},{},{hide:['B']}))}};
+
+/* 8 有序并集（去重） */
+P.l8={tpl:'59链表',name:'8 有序并集（去重）',when:'【链表 8】A, B 两个单链表递增有序，从 A, B 中找出所有元素后再去重并存放于 A 链表中，且要求利用 A 和 B 的原有空间（并集）。',
+ idea:['和 7 一样的有序合并，ra 尾插。','多一种情况：p、q 相等时只接 p，把 q 删掉。','最后剩下的整段接上。'],
+ why:{init:'B->next = NULL：B 的结点都要并进 A，B 变成空表。',eq:'相等：接 p，q 这个重复的删掉。',fr:'q 先后移，再 free 原来那个 r。'},
+ blanks:['init','bn','w','lt','gt','eq','e1','e2','e3','e4','e5','e6','e7','tp','tq'],
+ code:[['void Union(LinkList A, LinkList B){','','fn'],['    LinkList ra = A, p = A->next, q = B->next;','','init'],['    B->next = NULL;','','bn'],['    while (p != NULL && q != NULL){','','w'],['        if (p->data < q->data){','','lt'],['            ra->next = p; ra = p; p = p->next;','','a'],['        }','',''],['        else if (p->data > q->data){','','gt'],['            ra->next = q; ra = q; q = q->next;','','b'],['        }','',''],['        else{','// 相等：接 p，删 q','eq'],
+  ['            ra->next = p;','','e1'],['            ra = p;','','e2'],['            p = p->next;','','e3'],['            LinkList r = q;','','e4'],['            q = q->next;','','e5'],['            r->next = NULL;','','e6'],['            free(r);','','e7'],['        }','',''],['    }',''],['    if (p != NULL) ra->next = p;','','tp'],['    if (q != NULL) ra->next = q;','','tq'],['}','','end']],
+ run(R){const H=LH();H.list('A',[1,3,5,7]);H.list('B',[2,3,6,7,8]);let ra='A',p=H.nx.A,q=H.nx.B,r=null;const V=c=>MGV(H,ra,p,q,{r},c);
+  R.S('init','ra 从 A 的头结点出发，p、q 指向两个表的第一个结点。',V());H.nx.B=null;R.S('bn','B->next = NULL：B 的结点之后都归 A。B 的头结点不画。',V());let first=true;
+  while(p!==null&&q!==null){R.S('w','p、q 都不空。',V({[p]:'cmp',[q]:'cmp'}));
+   if(H.d[p]<H.d[q]){R.S('lt',`${H.d[p]} < ${H.d[q]}。`,V({[p]:'cmp',[q]:'cmp'}));H.nx[ra]=p;ra=p;p=H.nx[p];R.S('a',`接 p 的 ${H.d[ra]}，ra、p 后移。`,V({[ra]:'mv'}));continue}
+   R.S('lt',`${H.d[p]} 不小于 ${H.d[q]}。`,V({[p]:'cmp',[q]:'cmp'}));
+   if(H.d[p]>H.d[q]){R.S('gt',`${H.d[p]} > ${H.d[q]}。`,V({[p]:'cmp',[q]:'cmp'}));H.nx[ra]=q;ra=q;q=H.nx[q];R.S('b',`接 q 的 ${H.d[ra]}，ra、q 后移。`,V({[ra]:'mv'}));continue}
+   R.S('gt',`也不大于，相等，都是 ${H.d[p]}。`,V({[p]:'cmp',[q]:'cmp'}));if(first){R.Q(`p、q 都是 ${H.d[p]}。怎么处理？`,['接 p，删掉 q','两个都接上'],0,'并集要去重：接一个，另一个 free 掉。');first=false}
+   R.S('eq','相等，接 p 删 q。',V({[p]:'cmp',[q]:'mv'}));H.nx[ra]=p;R.S('e1','ra->next = p。',V({[p]:'mv'}));ra=p;R.S('e2','ra = p。',V());p=H.nx[p];R.S('e3','p 后移。',V());
+   r=q;R.S('e4','r = q，存住要删的结点。',V({[r]:'mv'}));q=H.nx[q];R.S('e5','q 后移。',V({[r]:'mv'}));H.nx[r]=null;R.S('e6','r->next = NULL。',V({[r]:'mv'}));H.fr.add(r);r=null;R.S('e7','free(r)。',V())}
+  R.S('w',`${p===null?'p':'q'} 走完了。`,V());if(p!==null){H.nx[ra]=p;R.S('tp','ra->next = p，A 剩下的接上。',V())}else R.S('tp','p 是 NULL，不接。',V());
+  if(q!==null){H.nx[ra]=q;R.S('tq','ra->next = q，B 剩下的接上。',V())}else R.S('tq','q 是 NULL，不接。',V());
+  ra=p=q=null;R.S('end',`A：${H.str('A')}。时间 O(m + n)，空间 O(1)。`,H.view([['A','A']],{},{},{hide:['B']}))}};
+
+/* 9 共同后缀（2012） */
+P.l9={tpl:'59链表',name:'9 共同后缀（2012）',when:'【链表 9】假定采用带头结点的单链表保存单词，当两个单词有相同的后缀时，可共享相同的后缀存储空间。设 str1 和 str2 分别指向两个单词所在链表的头结点，请设计一个时间上尽可能高效的算法，找出这两个链表的共同后缀的起始位置（2012 年统考题）。演示用题目里的 loading 和 being。',
+ idea:['先各走一遍，数出两条链的长度。','长的那条先走“长度差”步，两个指针离末尾一样远。','再一起走，第一次 p == q（同一个结点，比地址不是比字母）就是共同后缀的起点。'],
+ why:{l1:'第一遍只数长度。',a1:'长的先走差值步。for 里让短的长度加到和长的一样，循环就停了。',eq:'比的是地址 p == q，不是 p->data == q->data：字母相同不代表是同一个结点（比如 loading 前面的 a、d 和别的单词也可能同字母）。',nul:'走到底也没相遇，就没有共同后缀。'},
+ blanks:['init','l1','l2','a1','a2','w','eq','mv','nul'],
+ code:[['LinkList find(LinkList str1, LinkList str2){','','fn'],['    LinkList p = str1->next, q = str2->next;','','init'],['    int len1 = 0, len2 = 0;','','len'],['    while (p != NULL){ p = p->next; len1++; }','// ① 数长度','l1'],['    while (q != NULL){ q = q->next; len2++; }','','l2'],
+  ['    for (p = str1->next; len1 > len2; len2++)','// ② 长的先走差值步','a1'],['        p = p->next;','','a1b'],['    for (q = str2->next; len2 > len1; len1++)','','a2'],['        q = q->next;','','a2b'],['    while (p != NULL && q != NULL){','// ③ 一起走','w'],['        if (p == q)','// 比地址','eq'],['            return p;','','ret'],['        p = p->next;','','mv'],['        q = q->next;','','mv2'],['    }',''],['    return NULL;','','nul'],['}','']],
+ run(R){const H=LH();H.list('str1',['l','o','a','d','i','n','g']);H.list('str2',['b','e']);const shared=H.at('str1',4);H.nx[H.at('str2',1)]=shared;let p=null,q=null,len1=0,len2=0;
+  const sh=H.chain(shared);const base=Object.fromEntries(sh.map(x=>[x,'done']));
+  const V=(c={})=>H.view([['str1：loading','str1'],['str2：being','str2']],Object.fromEntries(Object.entries({p,q}).filter(x=>x[1]!==null)),Object.assign({},base,c),{v:{len1,len2},ex:{'str2：being':'绿色的 i n g 是两个单词共用的同一组结点（两行里画的是同一份内存）。'}});
+  p=H.nx.str1;q=H.nx.str2;R.S('init','p、q 指向两个单词的第一个字母。i n g 三个结点是共用的（绿色）。',V());R.S('len','两个长度从 0 开始。',V());
+  while(p!==null){p=H.nx[p];len1++}R.S('l1',`p 走到底，len1 = ${len1}。`,V());while(q!==null){q=H.nx[q];len2++}R.S('l2',`q 走到底，len2 = ${len2}。`,V());
+  R.Q(`len1 = ${len1}，len2 = ${len2}。p 要先走几步？`,['5','2','7'],0,`长度差 ${len1} − ${len2} = ${len1-len2}。先走 ${len1-len2} 步，p 和 q 离末尾就一样远了。`);
+  p=H.nx.str1;let l2=len2;R.S('a1',`p 回到 str1 的第一个。len1 = ${len1} > len2 = ${len2}，p 要先走。`,V({[p]:'cmp'}));
+  while(len1>len2){p=H.nx[p];len2++;R.S('a1b',`p 后移，len2 加到 ${len2}。`,V({[p]:'cmp'}))}R.S('a1',`len1 = len2 = ${len1}，停。p 停在 ${H.d[p]}，离末尾 ${l2} 个。`,V({[p]:'cmp'}));
+  q=H.nx.str2;R.S('a2','q 回到 str2 的第一个。len2 不大于 len1，q 不用先走。',V({[p]:'cmp',[q]:'cmp'}));
+  while(p!==null&&q!==null){R.S('w','p、q 都不空。',V({[p]:'cmp',[q]:'cmp'}));
+   if(p===q){R.S('eq',`p == q：两个指针指着同一个结点 ${H.d[p]}。`,V({[p]:'mv'}));R.S('ret',`返回 p，共同后缀从 ${H.d[p]} 开始（ing）。时间 O(m + n)，空间 O(1)。`,V({[p]:'mv'}));return}
+   R.S('eq',`p 是 ${H.d[p]}、q 是 ${H.d[q]}，不是同一个结点。`,V({[p]:'cmp',[q]:'cmp'}));p=H.nx[p];R.S('mv','p 后移。',V());q=H.nx[q];R.S('mv2','q 后移。',V({[p]:'cmp',[q]:'cmp'}))}
+  R.S('nul','没有共同后缀，返回 NULL。',V())}};
+
+/* 10 倒数第 k 个（2009）：双指针 */
+P.l10={tpl:'59链表',name:'10 倒数第 k 个（2009，双指针）',when:'【链表 10】查找单链表中倒数第 k 个结点，若查找成功，则输出该结点的 data，并返回 1，否则返回 0（2009 年统考题）。演示 k = 2。PDF 还给了法二暴力解：先求长度，再走到第 n − k + 1 个，就是 T4 的思路。',
+ idea:['q 先走，走够 k 步之后 p 才开始跟着走。','两个指针始终差 k 步。','q 走到 NULL 时，p 正好停在倒数第 k 个。'],
+ why:{init:'p、q 都从头结点出发。',inc:'i 数 q 走了几步。',if:'i > k 以后 p 才动，所以 p 比 q 落后 k 步。',chk:'p 一步都没走（还在头结点），说明链表不够 k 个；k ≤ 0 也非法。'},
+ blanks:['init','i','w','q','inc','if','p','chk'],
+ code:[['int find(LinkList L, int k){','','fn'],['    LinkList p = L, q = L;','','init'],['    int i = 0;','','i'],['    while (q != NULL){','','w'],['        q = q->next;','','q'],['        i++;','','inc'],['        if (i > k)','// 走够 k 步后 p 才动','if'],['            p = p->next;','','p'],['    }',''],['    if (p == L || k <= 0)','','chk'],['        return 0;','','r0'],['    else{','',''],['        printf("%d", p->data);','','pr'],['        return 1;','','r1'],['    }',''],['}','']],
+ run(R){const H=LH();H.list('L',[10,20,30,40,50]);const k=2;let p='L',q='L',i=null;const V=(c={})=>H.view([['单链表 L','L']],Object.fromEntries(Object.entries({p,q}).filter(x=>x[1]!==null)),c,{v:Object.assign({k},i===null?{}:{i},q===null?{q:'NULL'}:{})});
+  R.S('init','p、q 都从头结点出发。',V());i=0;R.S('i','i 记 q 走了几步。',V());let asked=false;
+  while(q!==null){R.S('w','q 不空。',V());q=H.nx[q];R.S('q',q===null?'q 走到 NULL。':`q 后移到 ${H.d[q]}。`,V(q?{[q]:'cmp'}:{}));i++;R.S('inc',`i = ${i}。`,V());
+   if(i>k){if(!asked){R.Q(`i = ${i} > k = ${k}，p 开始跟着走。最后 p 会停在哪个结点？`,['40','30','50'],0,'p 比 q 慢 k = 2 步，q 到 NULL 时 p 在倒数第 2 个，也就是 40。');asked=true}
+    R.S('if',`i = ${i} > k，p 也走。`,V());p=H.nx[p];R.S('p',`p 后移到 ${H.d[p]}。`,V({[p]:'cmp'}))}else R.S('if',`i = ${i} ≤ k，p 还不动。`,V())}
+  R.S('w','q == NULL，循环结束。',V({[p]:'done'}));R.S('chk','p 不是头结点，k 也合法。',V({[p]:'done'}));R.S('pr',`输出 p->data = <b>${H.d[p]}</b>。`,V({[p]:'done'}));R.S('r1','返回 1。时间 O(n)，空间 O(1)，只扫一遍。',V({[p]:'done'}))}};
+
+/* 11 重排 a1 an a2 an-1（2019） */
+P.l11={tpl:'59链表',name:'11 重排 a1 an a2…（2019）',when:'【链表 11】给定一个单链表 L(a1, a2, a3, …, an)，将其重新排列为 (a1, an, a2, an−1, …)（2019 统考题）。演示 n = 5。',
+ idea:['快慢指针找中点：fast 一次走两步，slow 一次走一步，fast 到底时 slow 在中间。','把 slow 后面的后半段原地逆置（头插到 slow 后面）。','前半段和逆置后的后半段一个隔一个穿插起来。'],
+ why:{init:'都从头结点出发。',w:'fast 走两步前要先看 fast->next 不空。',cut:'先断开，后半段靠 p 拿着。',h1:'逆置就是头插：插到 slow 后面（slow 当头结点用）。',mid:'后半段（已逆置）交给 mid，再断开。',m1:'mid 插到 beg 后面。',m3:'beg 跳到 mid 后面那个，也就是前半段的下一个。'},
+ blanks:['init','w','s','f','p','cut','r','h1','h2','adv','mid','cut2','beg','r2','m1','m2','m3','m4'],
+ code:[['void func(LinkList L){','','fn'],['    LinkList slow = L, fast = L;','','init'],['    while (fast != NULL && fast->next != NULL){','// ① 找中点','w'],['        slow = slow->next;','','s'],['        fast = fast->next->next;','','f'],['    }',''],
+  ['    LinkList p = slow->next;','// ② 后半段逆置','p'],['    slow->next = NULL;','','cut'],['    while (p != NULL){','','w2'],['        LinkList r = p->next;','','r'],['        p->next = slow->next;','','h1'],['        slow->next = p;','','h2'],['        p = r;','','adv'],['    }',''],
+  ['    LinkList mid = slow->next;','// ③ 穿插','mid'],['    slow->next = NULL;','','cut2'],['    LinkList beg = L->next;','','beg'],['    while (mid != NULL){','','w3'],['        LinkList r = mid->next;','','r2'],['        mid->next = beg->next;','','m1'],['        beg->next = mid;','','m2'],['        beg = mid->next;','','m3'],['        mid = r;','','m4'],['    }',''],['}','','end']],
+ run(R){const H=LH();H.list('L',['a1','a2','a3','a4','a5']);let slow='L',fast='L',p=null,r=null,mid=null,beg=null;
+  const ptr=()=>Object.fromEntries(Object.entries({slow,fast,p,r,mid,beg}).filter(x=>x[1]!==null));
+  const V=(c={},rows)=>H.view(rows||[['L','L']].concat(p?[['p 往后：还没逆置的',p]]:[]).concat(mid?[['mid 往后：逆置后的后半段',mid]]:[]),ptr(),c);
+  R.S('init','slow、fast 都从头结点出发。',V());
+  while(fast!==null&&H.nx[fast]!==null){R.S('w','fast 和 fast->next 都不空。',V());slow=H.nx[slow];R.S('s','slow 走一步。',V({[slow]:'cmp'}));fast=H.nx[H.nx[fast]];R.S('f',fast?'fast 走两步。':'fast 走两步，变成 NULL。',V({[slow]:'cmp'}))}
+  if(fast===null)fast=null;R.S('w',`fast 走到头了。slow 停在 ${H.d[slow]}：前半段是 a1 a2 a3，后半段是 a4 a5。`,V({[slow]:'done'}));fast=null;
+  p=H.nx[slow];R.S('p','p 拿住后半段的第一个 a4。',V({[slow]:'done'}));H.nx[slow]=null;R.S('cut','slow->next = NULL，前后断开。',V({[slow]:'done'}));
+  R.Q('后半段 a4 a5 要逆置。逆置后接在哪？',['还接在 slow 后面（slow 当头结点，头插）','新开一个头结点'],0,'就地逆置：slow 后面现在是空的，把 p 一个个头插到 slow 后面。');
+  while(p!==null){R.S('w2','p 不空。',V({[p]:'cmp'}));r=H.nx[p];R.S('r','r 存住 p 的后继。',V({[p]:'cmp'}));H.nx[p]=H.nx[slow];R.S('h1','p->next = slow->next。',V({[p]:'mv'}));H.nx[slow]=p;R.S('h2',`slow->next = p：${H.d[p]} 头插到 slow 后面。`,V({[p]:'mv'}));p=r;r=null;R.S('adv','p = r。',V())}
+  R.S('w2',`后半段逆置完：${H.str('L')}。`,V());mid=H.nx[slow];R.S('mid','mid 拿住逆置后的后半段 a5 a4。',V());H.nx[slow]=null;R.S('cut2','slow->next = NULL，再断开。',V());slow=null;
+  beg=H.nx.L;R.S('beg','beg 指前半段的第一个 a1。',V({[beg]:'cmp'}));let first=true;
+  while(mid!==null){R.S('w3','mid 不空。',V({[beg]:'cmp',[mid]:'cmp'}));r=H.nx[mid];R.S('r2','r 存住 mid 的后继。',V({[beg]:'cmp',[mid]:'cmp'}));
+   if(first){R.Q(`${H.d[mid]} 插到哪？`,[`${H.d[beg]} 后面`,`${H.d[beg]} 前面`],0,'a1 后面接 an，所以 mid 插在 beg 后面。');first=false}
+   H.nx[mid]=H.nx[beg];R.S('m1','mid->next = beg->next。',V({[mid]:'mv'}));H.nx[beg]=mid;R.S('m2',`beg->next = mid：${H.d[mid]} 插到 ${H.d[beg]} 后面。`,V({[mid]:'mv'}));beg=H.nx[mid];R.S('m3',`beg 跳到 ${H.lab(beg)}。`,V(beg?{[beg]:'cmp'}:{}));mid=r;r=null;R.S('m4','mid = r。',V())}
+  beg=null;R.S('end',`结果：${H.str('L')}。时间 O(n)，空间 O(1)。`,V())}};
+
+/* 12 判环：快慢指针 */
+P.l12={tpl:'59链表',name:'12 判断有环（快慢指针）',when:'【链表 12】单链表有环，是指单链表的最后一个结点的指针指向了链表中的某个结点，编写算法判断单链表是否有环。演示：6 指回 3。',
+ idea:['slow 一次走一步，fast 一次走两步。','有环时两个都会进环，fast 每轮比 slow 多走一步，一定能追上：slow == fast 就有环。','没环时 fast 先走到 NULL，返回 false。'],
+ why:{w:'fast 走两步前要保证 fast 和 fast->next 都不空，否则会访问 NULL。',eq:'比地址：两个指针指着同一个结点。'},
+ blanks:['init','w','s','f','eq','t','fl'],
+ code:[['bool findloop(LinkList L){','','fn'],['    LinkList fast = L, slow = L;','','init'],['    while (fast != NULL && fast->next != NULL){','','w'],['        slow = slow->next;','','s'],['        fast = fast->next->next;','','f'],['        if (slow == fast)','','eq'],['            return true;','// 有环','t'],['    }',''],['    return false;','// 无环','fl'],['}','']],
+ run(R){const H=LH();H.list('L',[1,2,3,4,5,6]);H.nx[H.at('L',5)]=H.at('L',2);let slow='L',fast='L';const V=(c={})=>H.view([['单链表 L（6 的 next 指回 3）','L']],{slow,fast},c);
+  R.S('init','slow、fast 都从头结点出发。',V());let it=0;
+  while(fast!==null&&H.nx[fast]!==null){R.S('w','fast、fast->next 都不空。',V());slow=H.nx[slow];R.S('s',`slow 走一步到 ${H.d[slow]}。`,V({[slow]:'cmp'}));
+   if(it===2)R.Q('slow 在 3、fast 在 6。fast 走两步会到哪？',['4（6 → 3 → 4）','NULL'],0,'6 的 next 指回 3，再走一步是 4。有环的链表永远走不到 NULL。');
+   fast=H.nx[H.nx[fast]];R.S('f',`fast 走两步到 ${H.d[fast]}。`,V({[slow]:'cmp',[fast]:'cmp'}));it++;
+   if(slow===fast){R.S('eq',`slow == fast，都在 ${H.d[slow]}。`,V({[slow]:'mv'}));R.S('t','返回 true，有环。时间 O(n)，空间 O(1)。没环时 fast 会先走到 NULL，退出循环返回 false。',V({[slow]:'mv'}));return}
+   R.S('eq','还没相遇。',V({[slow]:'cmp',[fast]:'cmp'}))}
+  R.S('fl','返回 false。',V())}};
+
 /* ---------- 错法：把常见写错的版本跑给你看 ---------- */
 P.t7ax={tpl:'T7',bug:true,name:'错法：从前往后挪',when:P.t7a.when,idea:['把循环改成从前往后挪，看 8 去哪了。'],
  code:[['for (int i = pos; i < L->length; i++)','// ✗ 从前往后','f'],['    L->data[i + 1] = L->data[i];','','mv'],['L->data[pos] = x;','','put'],['L->length++;','','len']],
@@ -960,7 +1190,7 @@ P.uf={tpl:'结构体',name:'并查集（P2）',when:'手册把并查集列为 P2
   R.Q('S[3] 已经改成 1。Find(4) 要往上走几步、返回几？',['走 1 步，返回 3','走 2 步，返回 1'],1,'4 → 3 → 1，S[1] < 0，根是 1。树越来越高 Find 就越慢，这就是“小树并大树”和“路径压缩”要解决的。');
   find(4,'查 4 属于哪个集合：');R.S('use',`最后三个集合：${sets()}。`,V())}};
 
-const TPL=[['结构体','第 4 章'],['T1','多重循环'],['T2','辅助数组'],['T3','有序合并'],['T4','链表转数组'],['T5','二叉树递归'],['T6','邻接矩阵'],['T7','增删'],['T8','层序'],['T9','DFS 拓扑'],['T10','邻接表'],['T11','孩子兄弟'],['快排',''],['二分',''],['归并','']];
+const TPL=[['结构体','第 4 章'],['T1','多重循环'],['T2','辅助数组'],['T3','有序合并'],['T4','链表转数组'],['T5','二叉树递归'],['T6','邻接矩阵'],['T7','增删'],['T8','层序'],['T9','DFS 拓扑'],['T10','邻接表'],['T11','孩子兄弟'],['快排',''],['二分',''],['归并',''],['59链表','12 题']];
 
 /* ---------- player ---------- */
 let curTpl='T4',curProg=null,frames=[],at=0,timer=null,asking=null,resume=false,dict=false;const answered=new Set();
