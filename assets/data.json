@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "latestDate": "2026-10-16",
+  "latestDate": "2026-10-17",
   "subjects": [
     {
       "id": "math",
@@ -356,6 +356,14 @@
         }
       ],
       "records": [
+        {
+          "path": "问答记录/数据结构/2026-10-17.md",
+          "title": "2026-10-17 数据结构｜问答记录",
+          "text": "# 2026-10-17 数据结构｜问答记录\n\n科目：数据结构。时间为北京时间。\n\n## 14:23　`408-2024-41`　判断拓扑序列是否唯一（讲解）\n\n**题**（2024 年 408 第 41 题，13 分；题意按 2026-10-12 试卷照片整理）：有向图 G 用邻接矩阵 MGraph 存储，设计 int uniquely(MGraph G)，判断 G 是否存在唯一的拓扑序列，是返回 1，否则返回 0。(1) 设计思想；(2) C 代码。\n\n**问**：「2024年的」「41题」，要讲这道题。\n\n**作答**：本条无新作答。10-12 整卷作答时思想基本对、代码空白，估 3/13（见 [2026-10-12](2026-10-12.md) 20:15）。\n\n**答**：\n- 思想：做拓扑排序（手册 T6 扫矩阵求入度 + T8 队列）。每一轮出队前，队里入度为 0 的顶点必须恰好 1 个：多于 1 个说明下一个输出有两种选法，返回 0；最后输出个数小于顶点数说明有环，没有拓扑序列，也返回 0。\n- 代码就是 TopoCount 加两处：`while` 里第一行加 `if (rear - front > 1) return 0;`，最后 `return count == G.numVertices;`。\n- 复杂度：时间 O(n²)（邻接矩阵每个顶点扫一整行），空间 O(n)。\n\n```c\nint uniquely(MGraph G){\n    int indegree[MAXV] = {0}, que[MAXV];\n    int front = 0, rear = 0, count = 0;\n    for (int i = 0; i < G.numVertices; i++)\n        for (int j = 0; j < G.numVertices; j++)\n            if (G.Edge[i][j] != 0) indegree[j]++;\n    for (int i = 0; i < G.numVertices; i++)\n        if (indegree[i] == 0) que[rear++] = i;\n    while (front != rear){\n        if (rear - front > 1) return 0;\n        int v = que[front++];\n        count++;\n        for (int j = 0; j < G.numVertices; j++)\n            if (G.Edge[v][j] != 0 && --indegree[j] == 0) que[rear++] = j;\n    }\n    return count == G.numVertices;\n}\n```\n\n**核对依据**：gcc 跑拓扑排序代码走读页的三个例子，唯一 / 不唯一 / 有环分别输出 1 0 0。\n\n**来源**：2024 年 408 试卷照片（10-12）；`演示/数据结构/拓扑排序代码走读.html`；408代码题暴力解作战手册v4 第 7 章图 10。\n",
+          "sha256": "d307460b61b12344818b41028d35ed2e0a74a2db24505dae822e0ae6ac8ae70f",
+          "gitSha": "50c6c9863beea88bc766e039d26dadd2d3e40dba",
+          "date": "2026-10-17"
+        },
         {
           "path": "问答记录/数据结构/2026-10-16.md",
           "title": "2026-10-16 数据结构｜问答记录",
