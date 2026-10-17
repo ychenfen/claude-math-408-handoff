@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>以太网帧逐字节拆解</title>
+<style>
+/* Mode tabs, the lecture's key cautions, inputs and presets, then a step player drawing a timeline, a Gantt, a route table or a small topology. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#4d6fa8;
+  --f1:#cfe0f3; --f2:#f3d9bf; --nav:#e3f0d8; --gray:#e4e4de; --f1b:#a9c8ec; --f2b:#ecc092; --navb:#bfe0a8;
+  --cts:#e2b8b8; --ackc:#d6ccf2; --cyan:#dcf1f1; --warn:#f7e3a8; --warnr:#f6d3cc; --twc:#d9534f; --dns:#d9d0f5; --pur:#7b5fd0;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --f1:#24384f; --f2:#4a3624; --nav:#26371f; --gray:#2c322d; --f1b:#2f4d70; --f2b:#644626; --navb:#36502a; --cts:#4d2c2c; --ackc:#352d52; --cyan:#1d3434; --warn:#4a3f1c; --warnr:#4a2620; --twc:#a8423e; --dns:#33294f; --pur:#a990f0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6;
+  --f1:#24384f; --f2:#4a3624; --nav:#26371f; --gray:#2c322d; --f1b:#2f4d70; --f2b:#644626; --navb:#36502a; --cts:#4d2c2c; --ackc:#352d52; --cyan:#1d3434; --warn:#4a3f1c; --warnr:#4a2620; --twc:#a8423e; --dns:#33294f; --pur:#a990f0; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=number],.form input[type=text]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:6.5em}
+.form textarea{font:13px/1.6 var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:4px 6px;width:min(40em,86vw);min-height:6.5em}
+.form .chk{display:flex;gap:6px;align-items:center;cursor:pointer;color:var(--ink)}
+select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.view{overflow-x:auto;margin-top:10px}
+.view svg{display:block;width:100%;min-width:760px;height:auto}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:8px}
+.note .ask{color:var(--q);font-weight:600}
+.note b{color:var(--done)}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.src{font-size:12px;color:var(--muted)}
+svg text{font-family:var(--sans);fill:var(--ink)}
+svg .m{fill:var(--muted)}
+svg .g{fill:var(--done)}
+svg .r{fill:var(--mv)}
+svg .b{fill:var(--q)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a></div>
+  <header>
+    <h1>以太网帧逐字节拆解</h1>
+    <p class="sub">2011-47 给的是主机发出的一帧的前 80 字节十六进制。这一页从第 0 个字节开始，按以太网首部 → IP 首部 → TCP 首部 → HTTP 的格式一段一段切：每切一段，字节在图里亮起来，下面表里写出它在第几行第几个、换算成什么。关键字段先问你再揭晓。也可以粘贴别的题的十六进制自己拆。</p>
+  </header>
+  <div class="modes" id="modes" role="group" aria-label="演示"></div>
+  <section class="panel"><h2>读图要点</h2><ol class="rules" id="rules"></ol></section>
+  <section class="panel">
+    <div class="form" id="form"></div>
+    <div class="presets" id="presets"></div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="2"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+      <label class="chk" style="font-size:13px;display:flex;gap:6px;align-items:center"><input id="guess" type="checkbox" checked> 先猜再看</label>
+    </div>
+    <div class="view" id="view"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <p class="tip">打开会自动播放：每切一段，对应的字节从左到右亮起来。“先猜再看”开着时，关键一步之前先停下来问你（停留时间加倍）。随时可以暂停、单步（键盘 ← →）或拖进度条；空格播放／暂停。</p>
+  </section>
+  <p class="src">来源：2011 年 408 第 47 题（题干与十六进制按用户 2026-10-17 上传的湖科大教书匠 2011 真题解析视频截图转录）；IPv4、TCP 首部格式见王道《计算机网络》第 4、5 章。对应问答：<a href="../../问答记录/计算机网络/2026-10-17.md">计算机网络 2026-10-17</a>。</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=x=>Number.isFinite(x)?(Math.round(x*1000)/1000).toString():'?';
+const T=(x,y,s,a='')=>`<text x="${x}" y="${y}" ${a}>${s}</text>`;
+const R=(x,y,w,h,fill,a='')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="var(--muted)" ${a}/>`;
+const ARW=`<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker><marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker><marker id="ahp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--pur)"/></marker><marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--mv)"/></marker></defs>`;
+const svg=(w,h,body)=>`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="当前步骤示意">${ARW}${body}</svg>`;
+const num=id=>{const v=$(id).value.trim();return v===''?NaN:+v};
+
+/* ---------------- shared drawing helpers ---------------- */
+const TL=(x,y,lines,a='',lh=20)=>lines.map((s,i)=>T(x,y+i*lh,s,a)).join('');
+const LINE=(x1,y1,x2,y2,a='')=>`<path d="M${x1} ${y1}L${x2} ${y2}" ${a}/>`;
+const AR=(x1,y1,x2,y2,w=1.4,col='var(--ink)',dash='')=>`<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${col}" stroke-width="${w}" ${dash?`stroke-dasharray="${dash}"`:''} marker-end="url(#${col==='var(--mv)'?'ahr':'ah'})"/>`;
+/* double-headed span: horizontal (v=false) or vertical (v=true) */
+const SPAN=(a,b,c,v=false,col='var(--ink)')=>v?`<path d="M${c} ${a+2}V${b-2}" stroke="${col}" marker-start="url(#ahs)" marker-end="url(#ah)"/>`:`<path d="M${a+2} ${c}H${b-2}" stroke="${col}" marker-start="url(#ahs)" marker-end="url(#ah)"/>`;
+/* a callout box with wrapped lines */
+const BOX=(x,y,w,lines,fill='var(--hl)',title='',col='')=>{const h=(title?26:8)+lines.length*20+6;return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="${fill}" stroke="var(--line)"/>`+(title?T(x+10,y+19,title,`font-weight="600" ${col?`style="fill:${col}"`:''}`):'')+TL(x+10,y+(title?44:24),lines,'font-size="13"')};
+
+/* ---------------- 以太网帧逐字节拆解 ---------------- */
+const H2=n=>n.toString(16).padStart(2,'0');
+const H4=n=>n.toString(16).padStart(4,'0');
+const PORTS={20:'FTP 数据',21:'FTP 控制',22:'SSH',23:'TELNET',25:'SMTP',53:'DNS',67:'DHCP 服务器',68:'DHCP 客户',69:'TFTP',80:'HTTP',110:'POP3',143:'IMAP',161:'SNMP',443:'HTTPS',520:'RIP',179:'BGP'};
+const PROTO={1:'ICMP',2:'IGMP',6:'TCP',17:'UDP',89:'OSPF'};
+const LAYERS={eth:['以太网首部','var(--f1)','var(--f1b)'],ip:['IP 首部','var(--nav)','var(--navb)'],tcp:['TCP 首部','var(--f2)','var(--f2b)'],udp:['UDP 首部','var(--f2)','var(--f2b)'],app:['应用层数据','var(--ackc)','var(--ackc)']};
+const FRAME={
+  name:'2011-47 帧怎么读',
+  rules:[
+    '图分三列：左边 <b>0000、0010、0020…是偏移量（十六进制）</b>，表示这一行第一个字节是第几个字节（从 0 数）；0010 = 第 16 个，0020 = 第 32 个。',
+    '中间每行 <b>16 个字节</b>，两位十六进制 = 1 字节；中间空开只是分成 8 + 8 方便数。右边是同样的字节按 ASCII 显示，<b>不可打印的显示成“.”</b>，能看出 GET /rfc.html HTTP/1.1，只用来确认，计算看中间。',
+    '题目给的是<b>以太网 MAC 帧</b>，从目的 MAC 开始，没有前导码；只给了前 80 字节，所以看不到尾部的 CRC。',
+    '切法：以太网首部 14B = 目的 MAC 6 + 源 MAC 6 + 类型 2（<b>08 00 = IPv4</b>，08 06 = ARP）。IP 首部从第 14 字节（0x0e）开始。',
+    'IP 首部第一个字节 45：<b>版本 4，首部长度 5 × 4 = 20B</b>（单位是 4B）。源 IP 在首部第 12～15 字节，目的 IP 在第 16～19 字节；换算到帧里要再加 14。',
+    '定位公式：帧内第 n 字节 → 在 <b>⌊n / 16⌋ × 16</b> 那一行（十六进制写），是这一行第 <b>n mod 16 + 1</b> 个。字段可能跨行，例如目的 IP 一半在 0010 行末尾、一半在 0020 行开头。',
+    '数字换算：MAC 直接照抄；IP 每字节转十进制（0a 02 80 64 → 10.2.128.100）；端口、长度是两字节一起转（00 50 → 80）。',
+    '先用题干核对切得对不对：源 MAC 应等于主机 MAC，源 IP 应等于主机 IP。对上了，后面的位置就不会数错。'],
+  form:`<label>十六进制（偏移量可以留着，不要粘 ASCII 列）<textarea id="f_hex"></textarea></label>
+    <label>从哪一层开始<select id="f_from"><option value="eth">以太网帧（目的 MAC 开始）</option><option value="ip">IP 分组（45 开始）</option></select></label>
+    <input id="f_qa" type="hidden">
+    <button class="btn" type="button" data-run>按这组数据重新演示</button>`,
+  presets:[['2011-47（主机 Web 请求帧的前 80 字节）',{f_hex:`0000  00 21 27 21 51 ee 00 15  c5 c1 5e 28 08 00 45 00
+0010  01 ef 11 3b 40 00 80 06  ba 9d 0a 02 80 64 40 aa
+0020  62 20 04 ff 00 50 e0 e2  00 fa 7b f9 f8 05 50 18
+0030  fa f0 1a c4 00 00 47 45  54 20 2f 72 66 63 2e 68
+0040  74 6d 6c 20 48 54 54 50  2f 31 2e 31 0d 0a 41 63`,f_from:'eth',f_qa:'2011'}],['自己粘贴（空白）',{f_hex:'',f_from:'eth',f_qa:''}]],
+  build(){
+    const txt=$('f_hex').value.split('\n').map(l=>l.replace(/^\s*[0-9a-fA-F]{4}[:\s]/,'')).join(' ');
+    const B=(txt.match(/\b[0-9a-fA-F]{2}\b/g)||[]).map(x=>parseInt(x,16));
+    if(B.length<20)return '至少要 20 个字节（两位十六进制一组，用空格隔开）。';
+    const from=$('f_from').value,qa=$('f_qa').value;
+    const F=[];const add=(ly,name,a,len,val,why,q)=>{if(a+len>B.length)return false;F.push({ly,name,a,b:a+len-1,val,why,q});return true};
+    const bytes=(a,b)=>B.slice(a,b+1);const u16=a=>B[a]*256+B[a+1];const u32=a=>((B[a]*256+B[a+1])*256+B[a+2])*256+B[a+3];
+    const mac=a=>bytes(a,a+5).map(H2).join('-').toUpperCase();const ip=a=>bytes(a,a+3).join('.');
+    let s=0;
+    if(from==='eth'){
+      add('eth','目的 MAC',0,6,mac(0),qa==='2011'?'帧要先交给默认网关 R，所以这是 <b>R 的 MAC</b>，不是 Web 服务器的（第 (1) 问）':'下一跳设备的 MAC','目的 MAC 是谁的？是 Web 服务器的吗？');
+      add('eth','源 MAC',6,6,mac(6),qa==='2011'?'和题干主机 MAC 00-15-C5-C1-5E-28 一样 → 切对了':'发送方的 MAC','先核对：源 MAC 和题干给的主机 MAC 一样吗？');
+      const ty=u16(12);add('eth','类型',12,2,'0x'+H4(ty),ty===0x0800?'0800 → 数据部分是 <b>IPv4 分组</b>':ty===0x0806?'0806 → ARP':'其他协议');
+      s=14;if(ty!==0x0800)s=-1}
+    let t=-1,pl='';
+    if(s>=0&&s<B.length){const v=B[s]>>4,ihl=(B[s]&15)*4;
+      add('ip','版本 + 首部长度',s,1,`${v} ｜ ${B[s]&15} × 4 = ${ihl}B`,`高 4 位版本 ${v}；低 4 位首部长度，<b>单位 4B</b>`,'45 这一个字节表示什么？首部多长？');
+      add('ip','区分服务',s+1,1,'0x'+H2(B[s+1]),'一般为 0');
+      add('ip','总长度',s+2,2,`${u16(s+2)}B`,`整个 IP 分组 ${u16(s+2)}B，${u16(s+2)<=1500?'不超过 MTU 1500B，不用分片':'超过 1500B 要分片'}`);
+      add('ip','标识',s+4,2,'0x'+H4(u16(s+4)),'分片时同一分组的片标识相同');
+      const fo=u16(s+6);add('ip','标志 + 片偏移',s+6,2,`DF=${fo>>14&1} MF=${fo>>13&1} 偏移 ${fo&0x1fff}`,`0x${H4(fo)}：${fo>>14&1?'DF=1 不允许分片':'允许分片'}，${fo>>13&1?'后面还有片':'没有后续片'}`);
+      add('ip','生存时间 TTL',s+8,1,`${B[s+8]}`,`0x${H2(B[s+8])} = ${B[s+8]}，<b>每经过一个路由器减 1</b>`,'TTL 是多少？路由器转发时它会怎么变？');
+      const pr=B[s+9];add('ip','协议',s+9,1,`${pr} → ${PROTO[pr]||'其他'}`,`上层是 ${PROTO[pr]||'其他协议'}（6 TCP、17 UDP、1 ICMP）`);
+      add('ip','首部检验和',s+10,2,'0x'+H4(u16(s+10)),'只检验首部；首部任一字段变了就要<b>重算</b>');
+      add('ip','源 IP',s+12,4,ip(s+12),qa==='2011'?'= 主机 10.2.128.100（私有地址）→ 切对了':'发送方 IP','源 IP 在帧里第几到第几字节？转成十进制是多少？');
+      add('ip','目的 IP',s+16,4,ip(s+16),qa==='2011'?'这就是 <b>Web 服务器的 IP</b>（第 (1) 问）':'接收方 IP','目的 IP 跨了两行，四个字节分别是哪几个？');
+      if(ihl>20)add('ip','IP 选项',s+20,ihl-20,`${ihl-20}B`,'首部长度大于 20B，说明有选项');
+      t=s+ihl;
+      if(pr===6&&t<B.length){const sp=u16(t),dp=u16(t+2);
+        add('tcp','源端口',t,2,`${sp}`,sp>=1024?'客户端临时端口（≥1024）':(PORTS[sp]||''));
+        add('tcp','目的端口',t+2,2,`${dp}${PORTS[dp]?' → '+PORTS[dp]:''}`,PORTS[dp]?`熟知端口 ${dp}，说明是 <b>${PORTS[dp]}</b> 请求`:'','目的端口 00 50 是多少？说明是什么应用？');
+        add('tcp','序号',t+4,4,`${u32(t+4)}`,'本报文段数据第一个字节的编号');
+        add('tcp','确认号',t+8,4,`${u32(t+8)}`,'期望收到对方下一个字节的编号');
+        if(t+13<B.length){const off=(B[t+12]>>4)*4,fl=B[t+13];const names=[[0x20,'URG'],[0x10,'ACK'],[0x08,'PSH'],[0x04,'RST'],[0x02,'SYN'],[0x01,'FIN']].filter(([m])=>fl&m).map(x=>x[1]);
+          add('tcp','首部长度 + 标志',t+12,2,`${off}B ｜ ${names.join(' ')||'无'}`,`高 4 位 × 4 = 首部 ${off}B；标志位 0x${H2(fl)}`);
+          add('tcp','窗口',t+14,2,`${u16(t+14)}`,'接收窗口，用于流量控制');add('tcp','检验和',t+16,2,'0x'+H4(u16(t+16)),'要加伪首部计算');add('tcp','紧急指针',t+18,2,`${u16(t+18)}`,'URG=0 时无意义');
+          if(off>20)add('tcp','TCP 选项',t+20,off-20,`${off-20}B`,'');t=t+off}}
+      else if(pr===17&&t<B.length){add('udp','源端口',t,2,`${u16(t)}`,'');const dp=u16(t+2);add('udp','目的端口',t+2,2,`${dp}${PORTS[dp]?' → '+PORTS[dp]:''}`,'');add('udp','长度',t+4,2,`${u16(t+4)}B`,'UDP 首部 + 数据');add('udp','检验和',t+6,2,'0x'+H4(u16(t+6)),'');t+=8}
+      if(t>=0&&t<B.length){pl=bytes(t,B.length-1).map(c=>c===13?'\\r':c===10?'\\n':c>=32&&c<127?String.fromCharCode(c):'·').join('');
+        add('app','应用层数据（前面一段）',t,B.length-t,`“${pl.length>34?pl.slice(0,34)+'…':pl}”`,pl.startsWith('GET')||pl.startsWith('POST')?'HTTP 请求报文，按 ASCII 读':'按 ASCII 读')}}
+    /* geometry */
+    const rows=Math.ceil(B.length/16),top=84,rh=36;const cx=i=>112+i*36+(i>=8?16:0),ax=i=>740+i*17;
+    const at=n=>({r:Math.floor(n/16),c:n%16});const gridH=top+rows*rh;
+    const P0=gridH+46,ph=30;const layerOrder=[];F.forEach(f=>{if(!layerOrder.includes(f.ly))layerOrder.push(f.ly)});
+    const rowY=[];let y=P0;let prevL='';F.forEach((f,i)=>{if(f.ly!==prevL){y+=ph;prevL=f.ly}rowY[i]=y;y+=ph});const Ht=y+30;
+    const fill=(f,i)=>i%2?LAYERS[f.ly][2]:LAYERS[f.ly][1];
+    const where=f=>{const A=at(f.a),Bp=at(f.b);const r1=H4(A.r*16).toUpperCase(),r2=H4(Bp.r*16).toUpperCase();return f.a===f.b?`${r1} 行第 ${A.c+1} 个`:A.r===Bp.r?`${r1} 行第 ${A.c+1}～${Bp.c+1} 个`:`${r1} 行第 ${A.c+1} 个 ～ ${r2} 行第 ${Bp.c+1} 个（跨行）`};
+    const pos=f=>f.a===f.b?`第 ${f.a} 字节（0x${H2(f.a)}）`:`第 ${f.a}～${f.b} 字节（0x${H2(f.a)}～0x${H2(f.b)}）`;
+    const draw=(k,o2={})=>{let o='';
+      o+=T(20,top-26,'偏移','font-weight="600" font-size="13" class="m"')+T(cx(0),top-26,'帧内容：每行 16 字节（8 + 8）','font-weight="600" font-size="13" class="m"')+T(ax(0),top-26,'ASCII（“.”= 不可打印）','font-weight="600" font-size="13" class="m"');
+      for(let i=0;i<16;i++)o+=T(cx(i)+15,top-8,(i+1),'text-anchor="middle" font-size="10" class="m"');
+      /* field highlights (behind text) */
+      F.forEach((f,i)=>{if(i>k)return;for(let n=f.a;n<=f.b;n++){const p=at(n);o+=`<rect x="${cx(p.c)-2}" y="${top+p.r*rh}" width="34" height="${rh-6}" rx="4" fill="${fill(f,i)}"/>`+`<rect x="${ax(p.c)-1}" y="${top+p.r*rh}" width="17" height="${rh-6}" fill="${fill(f,i)}"/>`}
+        const p=at(f.a);o+=`<circle cx="${cx(p.c)-3}" cy="${top+p.r*rh-2}" r="7" fill="var(--paper)" stroke="var(--muted)"/>`+T(cx(p.c)-3,top+p.r*rh+1.5,i+1,'text-anchor="middle" font-size="9" font-weight="600"')});
+      if(k>=0&&k<F.length){const f=F[k];for(let n=f.a;n<=f.b;n++){const p=at(n);o+=`<rect x="${cx(p.c)-2}" y="${top+p.r*rh}" width="34" height="${rh-6}" rx="4" fill="none" stroke="var(--q)" stroke-width="2.5"/>`}}
+      for(let r=0;r<rows;r++){o+=T(20,top+r*rh+20,H4(r*16),'font-family="var(--mono)" font-size="14" font-weight="600" class="b"');
+        for(let c=0;c<16&&r*16+c<B.length;c++){const v=B[r*16+c];o+=T(cx(c)+15,top+r*rh+20,H2(v),'text-anchor="middle" font-family="var(--mono)" font-size="15"')+T(ax(c)+7,top+r*rh+20,v>=32&&v<127?esc(String.fromCharCode(v)):'.','text-anchor="middle" font-family="var(--mono)" font-size="14"')}}
+      o+=LINE(cx(8)-9,top-4,cx(8)-9,gridH-4,'stroke="var(--line)" stroke-dasharray="3 3"');
+      if(o2.cols)o+=BOX(20,gridH+4,1160,['① 左列偏移量是十六进制：0010 = 16、0020 = 32、0030 = 48、0040 = 64，表示这一行第一个字节的序号（从 0 数）。','② 中间一行 16 个字节，两位十六进制 = 1 字节。③ 右列是同样字节的 ASCII，“.”表示不可打印，只用来确认后面是 HTTP 请求。'],'var(--hl)','先认三列','var(--done)');
+      /* decoded panel */
+      let pv='';F.forEach((f,i)=>{if(i>k)return;if(i===0||F[i-1].ly!==f.ly){const ly=LAYERS[f.ly];const len=F.filter(g=>g.ly===f.ly).reduce((a,g)=>Math.max(a,g.b),0)-F.find(g=>g.ly===f.ly).a+1;
+          o+=T(20,rowY[i]-ph+20,`${ly[0]}${f.ly==='app'?'':`（${len}B）`}`,'font-weight="600" font-size="15"')+LINE(20,rowY[i]-ph+27,1180,rowY[i]-ph+27,'stroke="var(--line)"')}
+        const y=rowY[i];o+=`<rect x="20" y="${y+2}" width="22" height="22" rx="4" fill="${fill(f,i)}" stroke="var(--muted)"/>`+T(31,y+18,i+1,'text-anchor="middle" font-size="11" font-weight="600"')+
+          T(52,y+18,f.name,'font-size="14" font-weight="600"')+T(230,y+18,where(f),'font-size="12" class="b"')+T(470,y+18,(f.a===f.b?'0x'+H2(f.a):'0x'+H2(f.a)+'～'+H2(f.b))+'：'+bytes(f.a,f.b).slice(0,6).map(H2).join(' ')+(f.b-f.a>5?' …':''),'font-size="12" font-family="var(--mono)"')+
+          T(700,y+18,'→ '+esc(f.val),'font-size="14" font-weight="600" class="g"')});
+      return svg(1200,Ht,o)};
+    const S=[{s:draw(-1,{cols:1}),t:'先认清这张图的三列：左边偏移量，中间是字节，右边是 ASCII。下面从第 0 个字节开始，按以太网帧、IP 首部、TCP 首部的格式一段一段切。'}];
+    F.forEach((f,i)=>{const t=`<b>${i+1}. ${f.name}</b>：${pos(f)}，在 ${where(f)}。值 ${esc(bytes(f.a,f.b).map(H2).join(' '))} → <b>${esc(f.val)}</b>。${f.why||''}`;S.push({q:f.q||'',s:draw(i),t})});
+    if(qa==='2011'){const ttl=F.find(f=>f.name==='生存时间 TTL');S.push({s:draw(F.length-1),t:`对照四问：(1) Web 服务器 IP = 目的 IP <b>64.170.98.32</b>；默认网关 MAC = 帧的目的 MAC <b>00-21-27-21-51-EE</b>。(2) 用 <b>ARP</b>；ARP 请求是广播，目的 MAC <b>FF-FF-FF-FF-FF-FF</b>。(3) 持续非流水：请求 rfc.html 1 RTT + 5 张图各 1 RTT = <b>6 RTT</b>（连接已建立）。(4) R 转发时改 <b>TTL</b>（${ttl?ttl.val:'128'} → ${ttl?(+ttl.val-1):'127'}）、<b>源 IP</b>（私有地址 10.2.128.100 经 NAT 换成 101.12.123.15）、<b>首部检验和</b>（前两项变了要重算）；总长度 495B ≤ MTU 1500B，不分片。`})}
+    else S.push({s:draw(F.length-1),t:'全部切完。用题干核对：源 MAC、源 IP 是否等于发送主机；再按题目问的字段去表里找。'});
+    return S;}
+};
+
+/* ---------------- player ---------------- */
+const MODES={frame:FRAME};let mode='frame',frames=[],at=0,timer=null;
+let autoplay=true;const SPD=[4200,3200,2400,1800,1300,900,600];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].q)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;let shown=null,anims=[];
+/* Animate only what is new compared with the frame shown before: lines draw from source to target with a moving dot,
+   frames/boxes reveal from left (tall ones from top), text fades in after the line lands. */
+function animateNew(prevSvg){anims.forEach(a=>{try{a()}catch(e){}});anims=[];
+  const svgEl=$('view').querySelector('svg');if(!svgEl||RM||prevSvg==null)return;
+  const tpl=document.createElement('template');tpl.innerHTML=prevSvg;const old=new Map();const ps=tpl.content.querySelector('svg');
+  if(ps)[...ps.children].forEach(c=>{const h=c.outerHTML;old.set(h,(old.get(h)||0)+1)});
+  const dur=Math.max(450,Math.min(1300,(timer?delay():1500)*0.6));let lines=0;
+  [...svgEl.children].forEach(c=>{const h=c.outerHTML;if(old.get(h)){old.set(h,old.get(h)-1);return}const tag=c.tagName.toLowerCase();if(tag==='defs')return;
+    if(tag==='path'&&(c.getAttribute('fill')||'none')==='none'){let L=0;try{L=c.getTotalLength()}catch(e){}if(!L)return;
+      const me=c.getAttribute('marker-end'),ms=c.getAttribute('marker-start'),da=c.getAttribute('stroke-dasharray');const d0=lines++*90;
+      if(me)c.removeAttribute('marker-end');if(ms)c.removeAttribute('marker-start');
+      const a=c.animate([{strokeDasharray:`${L} ${L}`,strokeDashoffset:L},{strokeDasharray:`${L} ${L}`,strokeDashoffset:0}],{duration:dur,delay:d0,easing:'ease-in-out',fill:'backwards'});
+      let dot=null,raf=0;if(me){dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('r','6');dot.setAttribute('fill','var(--cmp)');dot.setAttribute('stroke','var(--paper)');dot.style.opacity=0;svgEl.appendChild(dot);
+        const t0=performance.now()+d0;const stepf=now=>{const t=Math.min(1,Math.max(0,(now-t0)/dur));const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;const pt=c.getPointAtLength(e*L);dot.setAttribute('cx',pt.x);dot.setAttribute('cy',pt.y);dot.style.opacity=now<t0?0:1;if(t<1)raf=requestAnimationFrame(stepf);else dot.remove()};raf=requestAnimationFrame(stepf)}
+      const done=()=>{if(me)c.setAttribute('marker-end',me);if(ms)c.setAttribute('marker-start',ms);if(da)c.setAttribute('stroke-dasharray',da);if(dot)dot.remove();cancelAnimationFrame(raf)};
+      a.onfinish=done;anims.push(()=>{a.cancel();done()});return}
+    if(tag==='polygon'||tag==='rect'){let bb={width:1,height:1};try{bb=c.getBBox()}catch(e){}const tall=bb.height>bb.width*1.5;
+      const a=c.animate([{clipPath:tall?'inset(0 0 100% 0)':'inset(0 100% 0 0)',opacity:.35},{clipPath:'inset(0 0 0 0)',opacity:1}],{duration:dur,easing:'ease-in-out',fill:'backwards'});anims.push(()=>a.cancel());return}
+    const a=c.animate([{opacity:0},{opacity:1}],{duration:dur*0.5,delay:tag==='text'?dur*0.55:dur*0.2,fill:'backwards'});anims.push(()=>a.cancel())});}
+function render(anim){const f=frames[at];if(!f)return;const prev=anim&&shown!=null?shown:null;$('view').innerHTML=f.s;shown=f.s;if(anim)animateNew(prev);else{anims.forEach(a=>{try{a()}catch(e){}});anims=[]}
+  $('note').innerHTML=f.q?`<span class="ask">先想：${esc(f.q)}</span>`:f.t;
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':'播放'}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());render(true)}else{timer=null;render()}}
+function play(){if(timer){stop();$('play').textContent='播放';return}if(at===frames.length-1){at=0;render()}timer=setTimeout(tick,600);$('play').textContent='暂停'}
+function run(){stop();const r=MODES[mode].build();if(typeof r==='string'){$('err').textContent=r;return}$('err').textContent='';
+  frames=[];r.forEach(st=>{if(st.q){const prev=frames.length?frames[frames.length-1].s:st.s;frames.push({s:prev,q:st.q});}frames.push({s:st.s,t:st.t})});at=0;shown=null;render();if(autoplay)play()}
+function applyPreset(v){for(const [k,x] of Object.entries(v)){const el=$(k);if(!el)continue;if(el.type==='checkbox')el.checked=!!x;else el.value=x}run()}
+function setMode(m){mode=m;try{localStorage.setItem('cn-frame-mode',m)}catch(e){}
+  $('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
+  const M=MODES[m];$('rules').innerHTML=M.rules.map(x=>`<li>${x}</li>`).join('');$('form').innerHTML=M.form;
+  $('presets').innerHTML=M.presets.length?'预设：'+M.presets.map(([n],i)=>`<button class="btn" type="button" data-p="${i}">${esc(n)}</button>`).join(''):'';
+  $('presets').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>applyPreset(M.presets[+b.dataset.p][1]));
+  const rb=$('form').querySelector('[data-run]');if(rb)rb.onclick=run;
+  if(M.presets.length)applyPreset(M.presets[0][1]);else run()}
+$('modes').innerHTML=Object.entries(MODES).map(([k,v])=>`<button class="chip" type="button" data-m="${k}">${v.name}</button>`).join('');
+$('modes').querySelectorAll('.chip').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+$('first').onclick=()=>{stop();at=0;render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};$('next').onclick=()=>{stop();const j=nextIdx(at);const fw=j===at+1||(frames[at]&&frames[at].q);at=j;render(fw)};
+$('play').onclick=play;$('scrub').oninput=e=>{stop();at=+e.target.value;render()};$('speed').oninput=showSpd;$('guess').onchange=()=>{if(frames[at]&&frames[at].q&&!$('guess').checked){at=nextIdx(at-1);render()}};
+document.addEventListener('keydown',e=>{const t=e.target.tagName;if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA'||(t==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+showSpd();let saved='frame';try{saved=localStorage.getItem('cn-frame-mode')||'frame'}catch(e){}setMode(MODES[saved]?saved:'frame');
+</script>
+</body>
+</html>
