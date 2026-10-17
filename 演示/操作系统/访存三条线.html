@@ -63,6 +63,9 @@ table.res th,table.res td{border:1px solid var(--line);padding:4px 8px;text-alig
 table.res th{background:var(--hl);font-weight:600}
 table.res td.ans{font:14px var(--mono);font-weight:700;color:var(--done);white-space:nowrap}
 table.res td.ln{white-space:nowrap;font-weight:600}
+.gl td.sv{color:var(--pur);font-weight:600;white-space:nowrap}.gl td.sp{color:var(--done);font-weight:600}.gl td.sb{color:var(--q);font-weight:600}
+.gl td:first-child{white-space:nowrap}
+details.panel summary{cursor:pointer;list-style-position:outside}
 .tip{font-size:12px;color:var(--muted);margin:6px 0 0}
 .src{font-size:12px;color:var(--muted)}
 svg text{font-family:var(--sans);fill:var(--ink)}
@@ -81,9 +84,30 @@ svg .mono{font-family:var(--mono)}
     <h1>页表项地址的三条线</h1>
     <p class="sub">接 2024-45。画法照讲解板书的三种颜色：<b style="color:var(--mv)">红线</b>算页表项的虚拟地址，<b style="color:var(--q)">蓝线</b>把这个虚拟地址再查一次页表得到页表项的物理地址，<b style="color:var(--pur)">紫线</b>是操作数本身的地址变换。10-12 丢分在把页表项的物理地址当成了数据的物理地址。后两页把它串到一次访存的全流程（TLB、缺页、谁用哪种地址），再拓展到两级页表的自映射。</p>
   </header>
+  <details class="panel" id="gloss" open><summary><h2 style="display:inline">基础概念对照表（数值都取 2024-45）</h2></summary>
+    <p class="tip" style="margin:4px 0 8px">一句话：<b>虚拟那边按“页”切，物理那边按“页框”切，两边一样大；页表就是“第几页放在第几个页框”的登记表。</b>页内偏移两边一样，变换时照抄。</p>
+    <div class="tally"><table class="res gl">
+      <tr><th>名词</th><th>也叫</th><th>属于哪边</th><th>是什么</th><th>2024-45 里</th></tr>
+      <tr><td><b>虚拟地址</b></td><td>逻辑地址</td><td class="sv">虚拟</td><td>程序（包括操作系统）发出的地址</td><td><code>1234 5678H</code>、<code>B8C0 0120H</code></td></tr>
+      <tr><td><b>物理地址</b></td><td>主存地址、实地址</td><td class="sp">物理</td><td>内存条上真正的地址</td><td><code>BAB4 5678H</code>、<code>6540 0120H</code></td></tr>
+      <tr><td><b>页</b></td><td>页面、虚拟页</td><td class="sv">虚拟</td><td>进程的虚拟地址空间按页大小切出的一格</td><td>每页 4MB，共 2<sup>10</sup> = 1024 页</td></tr>
+      <tr><td><b>页号</b></td><td>虚页号</td><td class="sv">虚拟</td><td>页的编号 = 虚拟地址的高位</td><td>高 10 位：<code>048H</code></td></tr>
+      <tr><td><b>页内偏移</b></td><td>页内地址</td><td class="sb">两边一样</td><td>在一页（一个页框）里的第几个字节 = 低位，变换时<b>照抄</b></td><td>低 22 位：<code>34 5678H</code></td></tr>
+      <tr><td><b>页框</b></td><td>页帧、物理块、内存块、物理页</td><td class="sp">物理</td><td>物理内存按同样大小切出的一格</td><td>每个 4MB</td></tr>
+      <tr><td><b>页框号</b></td><td>物理块号、帧号</td><td class="sp">物理</td><td>页框的编号 = 物理地址的高位</td><td>数据在 <code>2EAH</code>，页表在 <code>195H</code></td></tr>
+      <tr><td><b>页表</b></td><td>（内存里的）慢表</td><td class="sb">放在物理内存，本题也映射进虚拟空间</td><td>一个进程一张；第 i 项记录“页 i 在哪个页框”</td><td>1024 项 × 4B = 4KB；物理 <code>6540 0000H</code> 起（页框 195H），虚拟 <code>B8C0 0000H</code> 起（页 2E3H）</td></tr>
+      <tr><td><b>页表项</b></td><td>PTE</td><td>—</td><td>页表里的一行，存页框号、有效位（存在位）等</td><td>每项 4B，第 048H 项在表内偏移 <code>+120H</code></td></tr>
+      <tr><td>页表项的<b>内容</b></td><td></td><td class="sp">物理</td><td>这一行里存的页框号</td><td><code>2EAH</code></td></tr>
+      <tr><td>页表项的<b>地址</b></td><td></td><td class="sb">虚拟、物理各一个</td><td>这 4 个字节自己放在哪；MMU 用物理地址读，OS 用虚拟地址写</td><td>虚拟 <code>B8C0 0120H</code>，物理 <code>6540 0120H</code></td></tr>
+      <tr><td><b>页表基址寄存器</b></td><td>页表寄存器 PTR、PTBR</td><td class="sp">物理</td><td>CPU 里的寄存器，存当前进程页表的<b>物理</b>起始地址（PTR 还存页表长度）；进程切换时换掉</td><td><code>6540 0000H</code>（按题意推出）</td></tr>
+      <tr><td><b>TLB</b></td><td>快表</td><td>—</td><td>页表项的高速缓存：页号 → 页框号，命中就不用读内存里的页表</td><td><code>048H → 2EAH</code></td></tr>
+      <tr><td><b>有效位</b></td><td>存在位、状态位 P</td><td>—</td><td>页表项里的一位：1 = 这页在内存，0 = 不在，访问就缺页</td><td>第 048H 项起初为 0，缺页</td></tr>
+      <tr><td><b>页目录</b></td><td>外层页表、顶级页表、页目录表</td><td class="sb">放在物理内存</td><td><b>两级页表才有</b>：页表太大时切成很多张一页大小的页表，页目录记录每张页表在哪个页框</td><td>本题是一级页表，<b>没有</b></td></tr>
+    </table></div>
+  </details>
   <div class="modes" id="modes" role="group" aria-label="演示"></div>
   <section class="panel"><h2>注意点</h2><ol class="rules" id="rules"></ol></section>
-  <section class="panel">
+  <section class="panel" id="fpanel">
     <div class="form" id="form"></div>
     <div class="presets" id="presets"></div>
     <div class="err" id="err" role="alert"></div>
@@ -146,6 +170,57 @@ function COL(x,y0,w,title,items,rh=50){let o=T(x,y0-12,title,'font-size="14" fon
     pos[it.id]=y+rh/2;y+=rh});
   if(items.length&&items[items.length-1].last===false){o+=T(x+w/2,y+16,'⋮','text-anchor="middle" font-size="16" class="m"');y+=24}
   return {s:`<g>${o}</g>`,pos,bottom:y}}
+
+/* ---------------- mode 0: basic concepts, one per step ---------------- */
+const BASE={
+  name:'基础概念',
+  rules:[
+    '先分清两边：<b>虚拟</b>那边是页、页号；<b>物理</b>那边是页框、页框号。页和页框一样大，页内偏移两边一样。',
+    '页表是“页号 → 页框号”的登记表。页表项的<b>内容</b>是页框号；页表项自己也有<b>地址</b>（放在哪）。',
+    '页表基址寄存器存的是页表的<b>物理</b>起始地址；TLB 是页表项的缓存；页目录只有两级页表才有。',
+    '上面的对照表可以收起；这一页按顺序一个概念画一步，下一页再讲 2024-45 的三条线。'],
+  form:'',presets:[],
+  build(){const c={w:32,p:22,e:4,pv:parseHex('B8C00000'),pp:parseHex('65400000'),va:parseHex('12345678'),pa:parseHex('BAB45678')};return framesBase(c,calc1(c))}
+};
+function drawBase(c,R,st){let o='';const nb=R.nb,p=c.p,W=R.W;const y0=180;const ids=a=>[...new Set(a)].sort((x,y)=>x-y);
+  if(st.bar){const B=st.bar==='pa'?[c.pa,'物理地址','g',[{bits:nb,name:`页框号 ${hx(R.frame,nb)}（物理那边的编号）`,col:'var(--done)',fill:'var(--fg)'},{bits:p,name:`页内偏移 ${hx(R.off,p)}（照抄）`,col:'var(--muted)',fill:'var(--gray)'}]]:[c.va,'虚拟地址','',[{bits:nb,name:`页号 ${hx(R.vpn,nb)}（高 ${nb} 位）`,col:'var(--pur)',fill:'var(--fp)'},{bits:p,name:`页内偏移 ${hx(R.off,p)}（低 ${p} 位）`,col:'var(--muted)',fill:'var(--gray)'}]];o+=BAR(14,B[0],W,B[3],B[1],B[2])}
+  const sub=(x,t1,t2)=>`<g>${T(x,y0-34,t1,'font-size="15" font-weight="700"')}${T(x,y0-14,t2,'font-size="12" class="m"')}</g>`;
+  let L=null,M=null,P=null;
+  if(st.va){o+=sub(24,'虚拟地址空间：切成“页”','每页 4MB，编号叫页号');
+    const vp=ids([0,R.vpn,R.tpg,R.N-1]).map(id=>({id,a:`页 ${hx(id,nb)}`,b:id===R.vpn?'数据所在的页':id===R.tpg&&st.loc?'页表也映射在这页':'',fill:id===R.vpn&&st.hv?'var(--fp)':id===R.tpg&&st.loc?'var(--fb)':'',stroke:id===R.vpn&&st.hv?'var(--pur)':id===R.tpg&&st.loc?'var(--q)':''}));vp[vp.length-1].last=true;
+    L=COL(24,y0,236,'',vp);o+=L.s}
+  if(st.pm){o+=sub(770,'物理内存：切成“页框”','也叫页帧、物理块；编号叫页框号');
+    const fr=ids([R.tframe,R.frame]).map(id=>({id,a:`页框 ${hx(id,nb)}`,b:id===R.frame?(st.pt?'装着页 '+hx(R.vpn,nb):''):(st.loc?'装着页表':''),fill:id===R.frame&&st.pt?'var(--fg)':id===R.tframe&&st.loc?'var(--fb)':'',stroke:id===R.frame&&st.pt?'var(--done)':id===R.tframe&&st.loc?'var(--q)':''}));fr[fr.length-1].last=true;
+    P=COL(770,y0,210,'',fr);o+=P.s}
+  if(st.pt){o+=sub(392,'页表：第 i 项 = 页 i 在哪个页框','一行叫页表项（PTE），本题每项 4B');
+    const ent=ids([0,R.vpn,R.tpg,R.N-1]).map(id=>({id,a:`第 ${hx(id,nb)} 项`,b:st.addr&&id===R.vpn?`表内偏移 +${hx(R.idx,p)}`:'',c:id===R.vpn?`页框号 ${hx(R.frame,nb)}`:id===R.tpg&&st.loc?`页框号 ${hx(R.tframe,nb)}`:'',cc:id===R.vpn?'g':'b',fill:id===R.vpn&&st.addr?'var(--fr)':'',stroke:id===R.vpn&&st.addr?'var(--mv)':''}));ent[ent.length-1].last=false;
+    M=COL(392,y0,256,'',ent);o+=M.s;
+    o+=CURVE(260,L.pos[R.vpn],392,M.pos[R.vpn],'p',2.4);o+=CURVE(648,M.pos[R.vpn],770,P.pos[R.frame],'g',2.4)}
+  const yb=Math.max(L?L.bottom:0,M?M.bottom:0,P?P.bottom:0)+24;let H=yb+10;
+  if(st.addr){o+=PATH(`M520 ${yb+4}V${M.pos[R.vpn]+26}`,'r',2,'5 4');
+    o+=`<g><rect x="300" y="${yb+8}" width="440" height="78" rx="6" fill="var(--fr)" stroke="var(--mv)"/>${T(314,yb+30,`第 ${hx(R.vpn,nb)} 项（一个页表项，4 个字节）`,'font-size="14" font-weight="700"')}${T(314,yb+52,`内容：页框号 ${hx(R.frame,nb)}　← 存的是什么`,'font-size="13" class="g"')}${T(314,yb+74,`地址：虚拟 ${hx(R.pteV,W)}／物理 ${hx(R.pteP,W)}　← 放在哪`,'font-size="13" class="r"')}</g>`;H=yb+100}
+  if(st.loc){o+=PATH(`M648 ${M.pos[R.tpg]}C 710 ${M.pos[R.tpg]} 710 ${P.pos[R.tframe]} 770 ${P.pos[R.tframe]}`,'b',2.4);
+    o+=CURVE(260,L.pos[R.tpg],392,M.pos[R.tpg],'b',2.4)}
+  if(st.ptbr){const y=P.bottom+30;o+=`<g><rect x="770" y="${y}" width="210" height="60" rx="6" fill="var(--fb)" stroke="var(--q)" stroke-width="2"/>${T(780,y+22,'页表基址寄存器（CPU 里）','font-size="13" font-weight="700" class="b"')}${T(780,y+46,`${hx(c.pp,W)}（物理）`,'font-size="14" font-weight="700" class="mono"')}</g>`;
+    o+=PATH(`M980 ${y+30}H1004V${P.pos[R.tframe]}H984`,'b',2.4);H=Math.max(H,y+76)}
+  if(st.tlb){const y=L.bottom+20;o+=`<g><rect x="24" y="${y}" width="236" height="60" rx="6" fill="var(--hl)" stroke="var(--done)" stroke-width="2"/>${T(34,y+22,'TLB（快表，CPU 里）','font-size="13" font-weight="700" class="g"')}${T(34,y+46,`页号 ${hx(R.vpn,nb)} → 页框号 ${hx(R.frame,nb)}`,'font-size="14" font-weight="700" class="mono"')}</g>`;H=Math.max(H,y+76)}
+  if(st.dir){const y=H+20;o+=`<g><rect x="24" y="${y}" width="956" height="120" rx="8" fill="var(--paper)" stroke="var(--muted)" stroke-dasharray="6 4"/>${T(40,y+24,'两级页表才有（2024-45 没有）：页表太大放不下一页，就切成很多张小页表，再用“页目录”登记每张小页表在哪个页框','font-size="13" font-weight="600"')}</g>`;
+    const bx=(x,yy,w,t,f)=>`<g><rect x="${x}" y="${yy}" width="${w}" height="40" rx="5" fill="${f}" stroke="var(--muted)"/>${T(x+w/2,yy+25,t,'text-anchor="middle" font-size="13" font-weight="600"')}</g>`;
+    o+=bx(60,y+52,170,'页目录（外层页表）','var(--fb)')+bx(330,y+40,150,'页表 0','var(--paper)')+bx(330,y+72,150,'页表 1 …','var(--paper)')+bx(580,y+52,170,'页框（数据）','var(--fg)');
+    o+=PATH(`M230 ${y+72}H326`,'k',2)+PATH(`M480 ${y+72}H576`,'k',2)+T(760,y+77,'先查页目录，再查页表','font-size="13" class="m"');H=y+136}
+  return svg(1024,H,o)}
+function framesBase(c,R){const st={};const F=[];const add=(o,t,q)=>{Object.assign(st,o);F.push({q,s:drawBase(c,R,st),t,tal:[]})};const nb=R.nb,p=c.p,W=R.W;
+  add({va:1},'<b>页</b>：进程看到的虚拟地址空间，按页大小（本题 4MB）切成一格一格，每格叫一页，编号叫<b>页号</b>。32 位地址、4MB 一页，共 2<sup>10</sup> = 1024 页。');
+  add({bar:'va',hv:1},`<b>虚拟地址 = 页号 | 页内偏移</b>。${hx(c.va,W)} 的高 ${nb} 位是页号 ${hx(R.vpn,nb)}，低 ${p} 位是页内偏移 ${hx(R.off,p)}，表示在这一页里的第几个字节。`,`${hx(c.va,W)} 在第几页？`);
+  add({pm:1},'<b>页框</b>：物理内存也按<b>同样大小</b>切成格子，每格叫页框（也叫页帧、物理块、内存块），编号叫<b>页框号</b>。页在虚拟这边，页框在物理这边。');
+  add({pt:1},`<b>页表</b>：一个进程一张，登记“第几页放在第几个页框”。第 ${hx(R.vpn,nb)} 项写着页框号 ${hx(R.frame,nb)}，意思是页 ${hx(R.vpn,nb)} 放在页框 ${hx(R.frame,nb)}。表里的一行叫<b>页表项</b>。`,'怎么知道页 '+hx(R.vpn,nb)+' 放在哪个页框？');
+  add({addr:1},`<b>页表项的内容和地址是两回事</b>。内容是页框号 ${hx(R.frame,nb)}（物理那边的编号）；这 4 个字节自己也放在内存里，所以它有地址：第 ${hx(R.vpn,nb)} 项在表内偏移 ${hx(R.vpn,nb)} × 4 = ${hx(R.idx,p)}，虚拟地址 ${hx(R.pteV,W)}，物理地址 ${hx(R.pteP,W)}。`);
+  add({loc:1},`<b>页表自己放在哪</b>：页表也要占内存。本题它装在物理页框 ${hx(R.tframe,nb)}（${hx(c.pp,W)} 起），同时映射在虚拟页 ${hx(R.tpg,nb)}（${hx(c.pv,W)} 起），所以页表第 ${hx(R.tpg,nb)} 项写的是 ${hx(R.tframe,nb)}，指回它自己。`,'页表自己放在哪？');
+  add({ptbr:1},`<b>页表基址寄存器</b>（王道叫页表寄存器 PTR）：CPU 里的一个寄存器，存当前进程页表的<b>物理</b>起始地址 ${hx(c.pp,W)}。MMU 查表时从这里出发，所以 MMU 读页表项用的是物理地址。进程切换时要换掉它。`);
+  add({tlb:1},`<b>TLB（快表）</b>：页表在内存里，每次查都要多访存一次。TLB 是 CPU 里的小缓存，存最近用过的“页号 → 页框号”。命中就不用读内存里的页表。`);
+  add({bar:'pa'},`<b>物理地址 = 页框号 | 页内偏移</b>。页框号 ${hx(R.frame,nb)} 拼上照抄的偏移 ${hx(R.off,p)}，得 ${hx(c.pa,W)}。偏移不加不乘。`,'物理地址怎么拼？');
+  add({dir:1},'<b>页目录</b>：只有<b>两级页表</b>才有。页表太大放不下一页时，切成很多张一页大小的页表，再用页目录登记每张页表在哪个页框；查表先查页目录，再查页表。2024-45 是一级页表，没有页目录。');
+  return F}
 
 /* ---------------- mode 1: the three lines ---------------- */
 function calc1(c){const W=c.w,p=c.p,nb=W-p,PS=P2(p),N=P2(nb);
@@ -376,7 +451,7 @@ function framesTwo(k,va){const d=Math.floor(va/P2(22)),pg=Math.floor(va/P2(12))%
   return F}
 
 /* ---------------- player ---------------- */
-const MODES={lines:LINES,flow:FLOW,two:TWO};let mode='lines',frames=[],at=0,timer=null;
+const MODES={base:BASE,lines:LINES,flow:FLOW,two:TWO};let mode='lines',frames=[],at=0,timer=null;
 let autoplay=true;const SPD=[4200,3200,2400,1800,1300,900,600];const delay=()=>SPD[+$('speed').value];
 function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
 function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
@@ -411,7 +486,7 @@ function run(){stop();const r=MODES[mode].build();if(typeof r==='string'){$('err
 function applyPreset(v){for(const [k,x] of Object.entries(v)){const el=$(k);if(!el)continue;if(el.type==='checkbox')el.checked=!!x;else el.value=x}run()}
 function setMode(m){mode=m;try{localStorage.setItem('os-lines-mode',m)}catch(e){}
   $('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
-  const M=MODES[m];$('rules').innerHTML=M.rules.map(x=>`<li>${x}</li>`).join('');$('form').innerHTML=M.form;
+  const M=MODES[m];$('rules').innerHTML=M.rules.map(x=>`<li>${x}</li>`).join('');$('form').innerHTML=M.form;$('fpanel').hidden=!M.form&&!M.presets.length;
   $('presets').innerHTML=M.presets.length?'预设：'+M.presets.map(([n],i)=>`<button class="btn" type="button" data-p="${i}">${esc(n)}</button>`).join(''):'';
   $('presets').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>applyPreset(M.presets[+b.dataset.p][1]));
   const rb=$('form').querySelector('[data-run]');if(rb)rb.onclick=run;
@@ -421,7 +496,7 @@ $('modes').querySelectorAll('.chip').forEach(b=>b.onclick=()=>setMode(b.dataset.
 $('first').onclick=()=>{stop();at=0;render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};$('next').onclick=()=>{stop();const j=nextIdx(at);const fw=j===at+1||(frames[at]&&frames[at].q);at=j;render(fw)};
 $('play').onclick=play;$('scrub').oninput=e=>{stop();at=+e.target.value;render()};$('speed').oninput=showSpd;$('guess').onchange=()=>{if(frames[at]&&frames[at].q&&!$('guess').checked){at=nextIdx(at-1);render()}};
 document.addEventListener('keydown',e=>{const t=e.target.tagName;if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA'||(t==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
-showSpd();let saved='lines';try{saved=localStorage.getItem('os-lines-mode')||'lines'}catch(e){}setMode(MODES[saved]?saved:'lines');
+showSpd();let saved='base';try{saved=localStorage.getItem('os-lines-mode')||'base'}catch(e){}setMode(MODES[saved]?saved:'base');
 </script>
 </body>
 </html>
