@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>页表项地址的三条线</title>
+<style>
+/* Three modes: the red/blue/purple lines of 2024-45, the whole access flow (TLB, page table, page fault, who uses which address), and the two-level self-map extension. */
+:root{
+  --bg:#f3f2eb; --paper:#fffef9; --ink:#252d25; --muted:#6c7166; --line:#dddfd4; --green:#243e31;
+  --accent:#86a951; --hl:#eef3dc; --cmp:#d99a1e; --mv:#c8553d; --done:#3f7d4f; --q:#3d64a8; --pur:#7b4fc0;
+  --fr:#f6d8d0; --fb:#d5e2f5; --fp:#e6dbf6; --fg:#dcebd2; --gray:#e9e9e3;
+  --serif:"Iowan Old Style","Songti SC","Noto Serif CJK SC",serif; --sans:"Avenir Next","PingFang SC","Microsoft YaHei",sans-serif; --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b394f0;
+  --fr:#4a2a24; --fb:#22344f; --fp:#352a4f; --fg:#263a22; --gray:#2a302b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a16; --paper:#1c231e; --ink:#e3e8df; --muted:#9aa294; --line:#2f3a31; --green:#a9c98a;
+  --accent:#8fb85a; --hl:#2a3a24; --cmp:#e8b13d; --mv:#ef7a5f; --done:#5fbf7a; --q:#86a8e6; --pur:#b394f0;
+  --fr:#4a2a24; --fb:#22344f; --fp:#352a4f; --fg:#263a22; --gray:#2a302b; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--sans)}
+a{color:var(--green);text-underline-offset:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:18px 48px;display:grid;gap:14px}
+.top{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}
+h1{font:30px/1.3 var(--serif);font-weight:600;margin:4px 0 2px;letter-spacing:1px}
+.sub{color:var(--muted);font-size:13px;margin:0;max-width:78ch}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:14px;min-width:0}
+h2{font:15px var(--serif);font-weight:600;margin:0 0 8px}
+.modes{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:3px 12px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg);font-weight:600}
+.rules{display:grid;gap:4px;font-size:14px;margin:0;padding-left:1.3em}
+.rules b{color:var(--mv)}
+.rules .lr{color:var(--mv);font-weight:600}.rules .lb{color:var(--q);font-weight:600}.rules .lp{color:var(--pur);font-weight:600}
+.form{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:end;font-size:13px}
+.form label{display:grid;gap:2px;color:var(--muted)}
+.form input[type=number],.form input[type=text]{font:14px var(--mono);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px;width:7.5em}
+select{font:13px var(--sans);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:3px 6px}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:5px;padding:4px 12px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--bg);border-color:var(--green);font-weight:600;min-width:64px}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted);margin-top:8px}
+.err{color:var(--mv);font-size:13px;min-height:1em}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctrl input[type=range]{accent-color:var(--green);min-width:0}
+#scrub{flex:1 1 160px}
+.spd{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex:1 1 200px;min-width:0}
+.spd input{flex:1;min-width:0}
+.count{font:12px var(--mono);color:var(--muted)}
+.view{overflow-x:auto;margin-top:10px}
+.view svg{display:block;width:100%;min-width:760px;height:auto}
+.note{padding:10px 12px;border-left:3px solid var(--accent);background:var(--hl);font-size:15px;min-height:3.4em;margin-top:8px}
+.note .ask{color:var(--q);font-weight:600}
+.note b{color:var(--done)}
+.note .lr{color:var(--mv);font-weight:600}.note .lb{color:var(--q);font-weight:600}.note .lp{color:var(--pur);font-weight:600}
+.note code,.res code{font-family:var(--mono)}
+.tally{overflow-x:auto;margin-top:10px}
+table.res{border-collapse:collapse;font-size:13px;width:100%;min-width:560px}
+table.res th,table.res td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+table.res th{background:var(--hl);font-weight:600}
+table.res td.ans{font:14px var(--mono);font-weight:700;color:var(--done);white-space:nowrap}
+table.res td.ln{white-space:nowrap;font-weight:600}
+.tip{font-size:12px;color:var(--muted);margin:6px 0 0}
+.src{font-size:12px;color:var(--muted)}
+svg text{font-family:var(--sans);fill:var(--ink)}
+svg .m{fill:var(--muted)}
+svg .g{fill:var(--done)}
+svg .r{fill:var(--mv)}
+svg .b{fill:var(--q)}
+svg .p{fill:var(--pur)}
+svg .mono{font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="页表自映射.html">2024-45 页表项两个地址</a><a href="地址转换.html">地址转换演示台（TLB 时间、多级页表）</a><a href="IO全链路.html">I/O 全链路（缺页换入）</a></div>
+  <header>
+    <h1>页表项地址的三条线</h1>
+    <p class="sub">接 2024-45。画法照讲解板书的三种颜色：<b style="color:var(--mv)">红线</b>算页表项的虚拟地址，<b style="color:var(--q)">蓝线</b>把这个虚拟地址再查一次页表得到页表项的物理地址，<b style="color:var(--pur)">紫线</b>是操作数本身的地址变换。10-12 丢分在把页表项的物理地址当成了数据的物理地址。后两页把它串到一次访存的全流程（TLB、缺页、谁用哪种地址），再拓展到两级页表的自映射。</p>
+  </header>
+  <div class="modes" id="modes" role="group" aria-label="演示"></div>
+  <section class="panel"><h2>注意点</h2><ol class="rules" id="rules"></ol></section>
+  <section class="panel">
+    <div class="form" id="form"></div>
+    <div class="presets" id="presets"></div>
+    <div class="err" id="err" role="alert"></div>
+  </section>
+  <section class="panel">
+    <div class="ctrl">
+      <button class="btn" id="first" type="button">⏮ 重来</button>
+      <button class="btn" id="prev" type="button">◀ 上一步</button>
+      <button class="btn primary" id="play" type="button">播放</button>
+      <button class="btn" id="next" type="button">下一步 ▶</button>
+      <label class="spd" for="speed">速度 <input id="speed" type="range" min="0" max="6" step="1" value="2"> <span id="spdv"></span></label>
+      <input id="scrub" type="range" min="0" max="0" value="0" aria-label="进度">
+      <span class="count" id="count"></span>
+      <label class="chk" style="font-size:13px;display:flex;gap:6px;align-items:center"><input id="guess" type="checkbox" checked> 先猜再看</label>
+    </div>
+    <div class="view" id="view"></div>
+    <div class="note" id="note" role="status" aria-live="polite"></div>
+    <div class="tally" id="tally"></div>
+    <p class="tip">选好一页会自动播放，新画的箭头带着小圆点从起点走到终点。“先猜再看”开着时，每一小问先停下来问你（停留时间加倍）。随时可以暂停、单步（键盘 ← →）或拖进度条；空格播放／暂停。图不按比例。</p>
+  </section>
+  <p class="src">来源：2024-45 题目和答案对照王道 2026 第 3.2 节综合题 21（10-13 核过）；三色画法照用户 2026-10-17 上传的 B 站讲解板书截图；“一次访存”的时间算法照 2009-46（TLB 10ns、访存 100ns、缺页处理 10⁸ns，缺页处理含更新页表和 TLB，处理完重新执行该指令）。“缺页处理程序用页表项的虚拟地址改页表”是按 2024-45 的设定推出的；两级页表自映射是拓展，408 没考过，按两级页表的拆分规则推出，预设数据仿 x86 32 位（页目录第 300H 项指向自己）。对应问答：<a href="../../问答记录/操作系统/2026-10-17.md">操作系统 2026-10-17</a>。</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const T=(x,y,s,a='')=>`<text x="${x}" y="${y}" ${a}>${s}</text>`;
+const ARW=`<defs>${[['ah','var(--ink)'],['ahr','var(--mv)'],['ahb','var(--q)'],['ahp','var(--pur)'],['ahg','var(--done)'],['ahm','var(--muted)']].map(([id,c])=>`<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0L10 5L0 10z" fill="${c}"/></marker>`).join('')}</defs>`;
+const svg=(w,h,body)=>`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="当前步骤示意">${ARW}${body}</svg>`;
+const MK={r:['var(--mv)','ahr'],b:['var(--q)','ahb'],p:['var(--pur)','ahp'],g:['var(--done)','ahg'],m:['var(--muted)','ahm'],k:['var(--ink)','ah']};
+const PATH=(d,c='k',w=2.4,dash='')=>`<path d="${d}" fill="none" stroke="${MK[c][0]}" stroke-width="${w}" ${dash?`stroke-dasharray="${dash}"`:''} marker-end="url(#${MK[c][1]})"/>`;
+const CURVE=(x1,y1,x2,y2,c,w,dash)=>{const mx=(x1+x2)/2;return PATH(`M${x1} ${y1}C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`,c,w,dash)};
+const TAG=(x,y,s,c)=>`<g><circle cx="${x}" cy="${y}" r="11" fill="var(--paper)" stroke="${MK[c][0]}" stroke-width="2"/>${T(x,y+5,s,`text-anchor="middle" font-size="13" font-weight="700" style="fill:${MK[c][0]}"`)}</g>`;
+
+/* ---------- number helpers (plain Numbers, addresses up to 32 bits) ---------- */
+const P2=n=>2**n;
+const grpR=s=>{const o=[];while(s.length>4){o.unshift(s.slice(-4));s=s.slice(0,-4)}o.unshift(s);return o.join(' ')};
+const hx=(v,bits)=>grpR(Math.floor(v).toString(16).toUpperCase().padStart(Math.max(1,Math.ceil(bits/4)),'0'))+'H';
+const parseHex=s=>{s=String(s).replace(/\s+/g,'').replace(/h$/i,'');return /^[0-9a-f]+$/i.test(s)?parseInt(s,16):NaN};
+const bin=(v,bits)=>Math.floor(v).toString(2).padStart(bits,'0');
+const log2=n=>Math.log2(n);
+
+/* An address drawn as bit cells, grouped by hex digit, with coloured fields from the high end. */
+function BAR(y,v,w,fields,title,titleCls=''){
+  const cw=21,gp=5,x0=160,xb=i=>x0+i*cw+Math.floor(i/4)*gp;const b=bin(v,w);let o='';
+  o+=T(20,y+28,title,`font-size="13" ${titleCls?`class="${titleCls}"`:'class="m"'}`)+T(20,y+50,hx(v,w),'font-size="15" font-weight="700" class="mono"');
+  if(fields){let i=0;fields.forEach(f=>{const x1=xb(i)-2,x2=xb(i+f.bits-1)+cw+2;o+=`<rect x="${x1}" y="${y+12}" width="${x2-x1}" height="34" rx="4" fill="${f.fill}" stroke="${f.col}" stroke-width="1.6"/>`;
+    o+=T((x1+x2)/2,y+66,f.name,`text-anchor="middle" font-size="13" font-weight="600" style="fill:${f.col}"`);i+=f.bits})}
+  for(let i=0;i<w;i++)o+=T(xb(i)+cw/2,y+35,b[i],'text-anchor="middle" font-size="14" class="mono"');
+  for(let g=0;g<w/4;g++)o+=T(xb(g*4)+2*cw,y+8,b.slice(g*4,g*4+4)==='' ? '' : parseInt(b.slice(g*4,g*4+4),2).toString(16).toUpperCase(),'text-anchor="middle" font-size="12" class="m mono"');
+  return `<g>${o}</g>`}
+const BARX=(i)=>160+i*21+Math.floor(i/4)*5;
+
+/* A column of rows (pages, entries, frames) with "⋮" between non-adjacent ids. Returns svg and centre y of each id. */
+function COL(x,y0,w,title,items,rh=50){let o=T(x,y0-12,title,'font-size="14" font-weight="600"');const pos={};let y=y0;
+  items.forEach((it,k)=>{if(k>0&&it.id-items[k-1].id>1){o+=T(x+w/2,y+16,'⋮','text-anchor="middle" font-size="16" class="m"');y+=24}
+    else if(k===0&&it.id>0){o+=T(x+w/2,y+16,'⋮','text-anchor="middle" font-size="16" class="m"');y+=24}
+    o+=`<rect x="${x}" y="${y}" width="${w}" height="${rh}" fill="${it.fill||'var(--paper)'}" stroke="${it.stroke||'var(--muted)'}" stroke-width="${it.stroke?2.2:1}"/>`;
+    o+=T(x+10,y+21,it.a,'font-size="15" font-weight="700"');if(it.b)o+=T(x+10,y+40,it.b,'font-size="12" class="m"');
+    if(it.c)o+=T(x+w-10,y+21,it.c,`text-anchor="end" font-size="14" font-weight="700" class="mono ${it.cc||''}"`);
+    pos[it.id]=y+rh/2;y+=rh});
+  if(items.length&&items[items.length-1].last===false){o+=T(x+w/2,y+16,'⋮','text-anchor="middle" font-size="16" class="m"');y+=24}
+  return {s:`<g>${o}</g>`,pos,bottom:y}}
+
+/* ---------------- mode 1: the three lines ---------------- */
+function calc1(c){const W=c.w,p=c.p,nb=W-p,PS=P2(p),N=P2(nb);
+  const vpn=Math.floor(c.va/PS),off=c.va%PS,idx=vpn*c.e,pteV=c.pv+idx,pteP=c.pp+idx,tpg=Math.floor(c.pv/PS),tframe=Math.floor(c.pp/PS),frame=Math.floor(c.pa/PS),tIdx=tpg*c.e,tpteV=c.pv+tIdx,tpteP=c.pp+tIdx;
+  return {W,p,nb,PS,N,vpn,off,idx,pteV,pteP,tpg,tframe,frame,tIdx,tpteV,tpteP}}
+const LINES={
+  name:'2024-45 三条线',
+  rules:[
+    '先定格式：页大小 2^p 字节，低 p 位是页内偏移，其余高位是页号。<b>页号不一定是整数个十六进制位</b>，4MB 页的页号是高 10 位，要转成二进制再切。',
+    '<span class="lr">红线</span>：页表项的虚拟地址 = 页表起始虚拟地址 + 页号 × 页表项大小。操作系统（缺页处理程序）改页表时用它。',
+    '<span class="lb">蓝线</span>：页表项的虚拟地址也是一个普通虚拟地址，切成“页号 + 页内偏移”，查页表得页框号，拼上偏移就是页表项的物理地址。MMU 读页表项用物理地址。',
+    '捷径：整张页表连续放在一个页框里时，页表项物理地址 = 页表起始物理地址 + 页号 × 页表项大小，和蓝线结果相同。',
+    '<span class="lp">紫线</span>：操作数虚拟地址 → 取页表项里的页框号 → <b>页框号拼页内偏移</b>得操作数物理地址 → 取操作数。偏移照抄，不加不乘。',
+    '页表所在的那一页也要一个页表项，它指向装页表自己的页框，这就是<b>自映射</b>。第 (2) 问考的就是这一项。'],
+  form:`<label>地址位数<input id="a_w" type="number" min="16" max="32" step="4"></label>
+    <label>页内偏移位数<input id="a_p" type="number" min="4" max="28" step="1"></label>
+    <label>页表项（B）<input id="a_e" type="number" min="1" max="8" step="1"></label>
+    <label>页表起始虚拟地址<input id="a_pv" type="text"></label>
+    <label>页表起始物理地址<input id="a_pp" type="text"></label>
+    <label>访问的虚拟地址<input id="a_va" type="text"></label>
+    <label>缺页处理后的物理地址<input id="a_pa" type="text"></label>
+    <button class="btn primary" type="button" data-run>演示</button>`,
+  presets:[['2024-45 原题',{a_w:32,a_p:22,a_e:4,a_pv:'B8C0 0000',a_pp:'6540 0000',a_va:'1234 5678',a_pa:'BAB4 5678'}]],
+  build(){const c={w:+$('a_w').value,p:+$('a_p').value,e:+$('a_e').value,pv:parseHex($('a_pv').value),pp:parseHex($('a_pp').value),va:parseHex($('a_va').value),pa:parseHex($('a_pa').value)};
+    if(![c.w,c.p,c.e].every(Number.isInteger)||c.w%4||c.w<16||c.w>32)return '地址位数填 16～32 之间 4 的倍数。';
+    if(c.p<4||c.p>=c.w-2)return '页内偏移位数要比地址位数少至少 3 位。';
+    if(![c.pv,c.pp,c.va,c.pa].every(Number.isFinite))return '地址用十六进制填，例如 B8C0 0000。';
+    const LIM=P2(c.w);if([c.pv,c.pp,c.va,c.pa].some(v=>v>=LIM))return `地址超过 ${c.w} 位了。`;
+    const R=calc1(c);
+    if(R.N*c.e>R.PS)return `这组数一级页表要 ${R.N*c.e} B，超过一页（${R.PS} B），不是 2024-45 的情形。换一组，或看“两级页表自映射”那页。`;
+    if(c.pv%R.PS||c.pp%R.PS)return '页表起始地址要按页对齐（低位偏移全 0）。';
+    if(c.pa%R.PS!==R.off)return `缺页处理后的物理地址低 ${c.p} 位应等于访问地址的偏移 ${hx(R.off,c.p)}。`;
+    if(R.vpn===R.tpg)return '访问的地址落在页表自己那一页里，换一个地址。';
+    if(R.frame===R.tframe)return '数据页和页表不能在同一个页框。';
+    return frames1(c,R)}
+};
+function draw1(c,R,st){const W=1024;let o='';const nbH=R.nb,pH=c.p;
+  /* address bar */
+  const bars={va:[c.va,'操作数虚拟地址','',[{bits:R.nb,name:`页号 ${hx(R.vpn,nbH)}（${R.nb} 位）`,col:'var(--pur)',fill:'var(--fp)'},{bits:c.p,name:`页内偏移 ${hx(R.off,pH)}（${c.p} 位）`,col:'var(--muted)',fill:'var(--gray)'}]],
+    pte:[R.pteV,'页表项虚拟地址','r',[{bits:R.nb,name:`页号 ${hx(R.tpg,nbH)}：页表所在页`,col:'var(--q)',fill:'var(--fb)'},{bits:c.p,name:`页内偏移 ${hx(R.idx,pH)}`,col:'var(--muted)',fill:'var(--gray)'}]],
+    pa:[c.pa,'处理后的物理地址','g',[{bits:R.nb,name:`页框号 ${hx(R.frame,nbH)}`,col:'var(--done)',fill:'var(--fg)'},{bits:c.p,name:`页内偏移 ${hx(R.off,pH)}`,col:'var(--muted)',fill:'var(--gray)'}]],
+    tpte:[R.tpteV,'该页表项虚拟地址','r',[{bits:R.nb,name:`页号 ${hx(R.tpg,nbH)}`,col:'var(--q)',fill:'var(--fb)'},{bits:c.p,name:`页内偏移 ${hx(R.tIdx,pH)}`,col:'var(--muted)',fill:'var(--gray)'}]]};
+  const bk=st.bar||'va';const B=bars[bk];o+=BAR(14,B[0],R.W,st.split?B[3]:null,B[1],B[2]);
+  if(st.trap){const x1=BARX(0)-4,x2=BARX(11)+21+4;o+=`<rect x="${x1}" y="${22}" width="${x2-x1}" height="${42}" rx="5" fill="none" stroke="var(--mv)" stroke-width="2.4" stroke-dasharray="6 4"/>`;
+    o+=`<g>${T(160,104,'✗ 把前 3 个十六进制位 '+hx(Math.floor(c.va/P2(R.W-12)),12)+' 当页号',`font-size="14" font-weight="700" class="r"`)}${T(160,124,`页号只有 ${R.nb} 位，竖线切在 ${hx(Math.floor(c.va/P2(R.W-12))%16,4).replace("H","")} 中间`,'font-size="13" class="r"')}</g>`}
+  const y0=150;const ids=a=>[...new Set(a)].sort((x,y)=>x-y);
+  /* virtual space */
+  const vp=ids([0,R.vpn,R.tpg,R.N-1]).map(id=>({id,a:`页 ${hx(id,nbH)}`,b:id===R.vpn?`${hx(id*R.PS,R.W)} 起 · 操作数所在页`:id===R.tpg?`${hx(id*R.PS,R.W)} 起 · 页表所在页`:`${hx(id*R.PS,R.W)} 起`,
+    fill:id===R.tpg&&st.hlT?'var(--fb)':id===R.vpn&&st.hlV?'var(--fp)':'',stroke:id===R.tpg&&st.hlT?'var(--q)':id===R.vpn&&st.hlV?'var(--pur)':''}));
+  vp[vp.length-1].last=R.N-1>vp[vp.length-1].id;
+  const L=COL(24,y0,236,'虚拟地址空间（按页）',vp);o+=L.s;
+  /* page table */
+  const ent=ids([0,R.vpn,R.tpg,R.N-1]).map(id=>{const it={id,a:`第 ${hx(id,nbH)} 项`,b:`表内偏移 +${hx(id*c.e,pH)}`};
+    if(id===R.vpn){it.c=st.fill?`页框 ${hx(R.frame,nbH)}`:'缺页（无效）';it.cc=st.fill?'g':'r';if(st.hlE){it.fill='var(--fr)';it.stroke='var(--mv)'}}
+    if(id===R.tpg){it.c=st.tframeShown?`页框 ${hx(R.tframe,nbH)}`:'页框 ?';it.cc='b';if(st.hlTE){it.fill='var(--fb)';it.stroke='var(--q)'}}return it});
+  const M=COL(392,y0,256,`页表（放大）：整张 ${R.N*c.e} B，只占一页`,ent);o+=M.s;
+  /* physical memory */
+  const fr=ids([R.tframe,R.frame]).map(id=>({id,a:`页框 ${hx(id,nbH)}`,b:id===R.tframe?`${hx(id*R.PS,R.W)} 起 · 装着页表`:`${hx(id*R.PS,R.W)} 起 · ${st.fill?'装页 '+hx(R.vpn,nbH):'空闲，等调入'}`,
+    fill:id===R.tframe&&st.hlTF?'var(--fb)':id===R.frame&&st.hlF?'var(--fg)':'',stroke:id===R.tframe&&st.hlTF?'var(--q)':id===R.frame&&st.hlF?'var(--done)':''}));
+  fr[fr.length-1].last=true;
+  const Rt=COL(770,y0,210,'物理内存（按页框）',fr);o+=Rt.s;
+  const yB=Math.max(L.bottom,M.bottom,Rt.bottom);
+  /* lines */
+  if(st.red1){o+=CURVE(260,L.pos[R.tpg],392,M.pos[R.vpn]-8,'r',2.6);o+=TAG(276,L.pos[R.tpg]-16,'①','r')}
+  if(st.red2){o+=CURVE(260,L.pos[R.tpg]+8,392,M.pos[R.tpg]+8,'r',2.6);o+=TAG(276,L.pos[R.tpg]+26,'④','r')}
+  if(st.blue){o+=CURVE(648,M.pos[R.tpg],770,Rt.pos[R.tframe],'b',2.6);o+=TAG(664,M.pos[R.tpg]-16,'②','b')}
+  if(st.loop){const yl=yB+26;o+=PATH(`M980 ${Rt.pos[R.tframe]}C 1010 ${Rt.pos[R.tframe]} 1010 ${yl} 970 ${yl}H520V${M.bottom+4}`,'b',2,'7 5');
+    o+=T(560,yl+22,'这个页框里装的就是页表自己：页表映射它自己','font-size="13" font-weight="600" class="b"')}
+  if(st.pur1){o+=CURVE(260,L.pos[R.vpn],392,M.pos[R.vpn]+8,'p',2.6);o+=TAG(276,L.pos[R.vpn]+18,'③','p')}
+  if(st.pur2){o+=CURVE(648,M.pos[R.vpn],770,Rt.pos[R.frame],'p',2.6)}
+  let H=yB+(st.loop?60:30);
+  if(st.pur3){const yy=Rt.pos[R.frame]+25;o+=PATH(`M820 ${yy}V${yy+40}`,'p',2.6);o+=`<g><rect x="770" y="${yy+44}" width="190" height="34" rx="6" fill="var(--fp)" stroke="var(--pur)"/>${T(865,yy+66,`取操作数 ${hx(c.pa,R.W)}`,'text-anchor="middle" font-size="14" font-weight="700" class="p mono"')}</g>`;H=Math.max(H,yy+96)}
+  return svg(W,H,o)}
+function frames1(c,R){const W=R.W,nb=R.nb,p=c.p;const st={};const S=()=>draw1(c,R,st);const F=[];let tal=[];
+  const add=(o,t,q)=>{Object.assign(st,o);F.push({q,s:S(),t,tal:tal.slice()})};
+  const vaH=hx(c.va,W),hiBits=bin(c.va,W).slice(0,nb),hi12=hx(Math.floor(c.va/P2(W-12)),12);
+  add({},`页大小 2^${p} B，所以低 <b>${p} 位</b>是页内偏移，高 <b>${nb} 位</b>是页号，一共 ${R.N} 页。一级页表 ${R.N} 项 × ${c.e} B = ${R.N*c.e} B，${R.N*c.e===R.PS?'正好一页':'不到一页'}，整张页表在一页里。页表从虚拟地址 ${hx(c.pv,W)} 开始，装在物理地址 ${hx(c.pp,W)} 开始的页框。`);
+  add({split:1,hlV:1},`高 ${nb} 位 ${hiBits} = 页号 <b>${hx(R.vpn,nb)}</b>，低 ${p} 位 = 偏移 <b>${hx(R.off,p)}</b>。`+(p%4?`${p} 不是 4 的倍数，所以有一个十六进制位被切开了。`:''),`${vaH} 的页号和页内偏移各是多少？`);
+  tal.push(['操作数的页号',`${vaH} 的高 ${nb} 位`,hx(R.vpn,nb),'—']);
+  if(p%4&&nb>8&&nb<12){add({trap:1},`<span style="color:var(--mv);font-weight:600">常见错</span>：看到 ${vaH} 就把前 3 位 ${hi12} 当页号。页号是高 ${nb} 位，${hi12} 有 12 位，多出来的低 ${12-nb} 位属于偏移，所以偏移是 ${hx(R.off,p)}，不是 ${hx(c.va%P2(W-12),W-12)}。`);st.trap=0}
+  add({red1:1,hlT:1,hlE:1},`<span class="lr">红线 ①</span>：页表项的虚拟地址 = 页表起始虚拟地址 + 页号 × ${c.e} = ${hx(c.pv,W)} + ${hx(R.vpn,nb)} × ${c.e} = ${hx(c.pv,W)} + ${hx(R.idx,p)} = <b>${hx(R.pteV,W)}</b>。缺页处理程序是操作系统的代码，它用这个地址去写页表项。`,'页 '+hx(R.vpn,nb)+' 的页表项的虚拟地址是多少？（红线）');
+  tal.push(['页表项的虚拟地址',`${hx(c.pv,W)} + ${hx(R.vpn,nb)} × ${c.e}`,hx(R.pteV,W),'红 ①']);
+  add({bar:'pte',split:1},`<span class="lb">蓝线</span>先把 ${hx(R.pteV,W)} 当普通虚拟地址切开：高 ${nb} 位 = 页号 <b>${hx(R.tpg,nb)}</b>，正是页表自己所在的页；低 ${p} 位 = 偏移 ${hx(R.idx,p)}，就是表内偏移。`,`${hx(R.pteV,W)} 再切开，页号是几？`);
+  add({blue:1,hlTE:1,tframeShown:1,hlTF:1},`<span class="lb">蓝线 ②</span>：查第 ${hx(R.tpg,nb)} 项，得页框号 <b>${hx(R.tframe,nb)}</b>；页框号拼偏移 ${hx(R.idx,p)}，页表项的物理地址 = <b>${hx(R.pteP,W)}</b>。捷径：页表起始物理地址 ${hx(c.pp,W)} + ${hx(R.idx,p)}，结果一样。`,'页表项的物理地址是多少？（蓝线）');
+  tal.push(['页表项的物理地址',`查第 ${hx(R.tpg,nb)} 项得 ${hx(R.tframe,nb)}，拼 ${hx(R.idx,p)}（或 ${hx(c.pp,W)} + ${hx(R.idx,p)}）`,hx(R.pteP,W),'蓝 ②']);
+  add({loop:1},`第 ${hx(R.tpg,nb)} 项指向的页框 ${hx(R.tframe,nb)}，正是装着页表自己的那个页框。所以“改页表”这件事本身也要经过页表：操作系统用虚拟地址 ${hx(R.pteV,W)}，MMU 把它转成 ${hx(R.pteP,W)}。`);
+  add({bar:'pa',split:1,hlE:0},`缺页处理后访问的是 ${hx(c.pa,W)}。去掉低 ${p} 位，高 ${nb} 位就是页框号 <b>${hx(R.frame,nb)}</b>；低 ${p} 位 ${hx(R.off,p)} 和原来的偏移一样，可以拿来核对。`,'缺页处理后，页表项里的页框号改成多少？');
+  tal.push(['更新后的页框号',`${hx(c.pa,W)} 的高 ${nb} 位`,hx(R.frame,nb),'紫']);
+  add({fill:1,hlF:1},`页表第 ${hx(R.vpn,nb)} 项填入 <b>${hx(R.frame,nb)}</b>，页 ${hx(R.vpn,nb)} 就映射到页框 ${hx(R.frame,nb)}。`);
+  add({bar:'va',pur1:1,pur2:1,pur3:1,hlV:1},`<span class="lp">紫线 ③</span>：重新执行指令。${vaH} 页号 ${hx(R.vpn,nb)} → 查第 ${hx(R.vpn,nb)} 项（MMU 用页表项物理地址 ${hx(R.pteP,W)} 读）→ 页框号 ${hx(R.frame,nb)} → 拼偏移 ${hx(R.off,p)} → 操作数物理地址 <b>${hx(c.pa,W)}</b> → 取操作数。<span style="color:var(--mv)">${hx(R.pteP,W)} 是页表项的地址，不是数据的地址。</span>`);
+  add({bar:'tpte',split:1,red2:1,hlT:1},`第 (2) 问：页表在虚拟地址 ${hx(c.pv,W)}，高 ${nb} 位 = 页号 <b>${hx(R.tpg,nb)}</b>。它的页表项虚拟地址照红线算：${hx(c.pv,W)} + ${hx(R.tpg,nb)} × ${c.e} = ${hx(c.pv,W)} + ${hx(R.tIdx,p)} = <b>${hx(R.tpteV,W)}</b>；这一项里的页框号是 ${hx(c.pp,W)} 的高 ${nb} 位 = <b>${hx(R.tframe,nb)}</b>。`,'页表所在页的页号、它的页表项虚拟地址、里面的页框号？');
+  tal.push(['页表所在页的页号',`${hx(c.pv,W)} 的高 ${nb} 位`,hx(R.tpg,nb),'—'],['该页的页表项虚拟地址',`${hx(c.pv,W)} + ${hx(R.tpg,nb)} × ${c.e}`,hx(R.tpteV,W),'红 ④'],['该页表项中的页框号',`${hx(c.pp,W)} 的高 ${nb} 位`,hx(R.tframe,nb),'蓝']);
+  add({},`做完。三条线：<span class="lr">红</span> 起始虚拟地址 + 页号 × ${c.e}；<span class="lb">蓝</span> 把它再切开查表（或起始物理地址 + 同一偏移）；<span class="lp">紫</span> 页框号拼偏移。分两栏写：左栏“查表用的地址”（红、蓝），右栏“最终访问的地址”（紫）。`);
+  return F}
+
+/* ---------------- mode 2: one access, who uses which address ---------------- */
+const FLOW={
+  name:'一次访存全流程',
+  rules:[
+    'CPU 发出的是虚拟地址；<b>MMU</b> 查 TLB、读页表项都用<b>物理地址</b>（页表基址寄存器里存的是物理地址）。',
+    '页表项有效位为 0 → 缺页中断，进内核。缺页处理程序找页框（空闲或置换）、从磁盘调入，再<b>用页表项的虚拟地址</b>改页表（2024-45 的设定），这次写本身也经蓝线转换。',
+    '2009-46 的约定：缺页处理时间里已经含了更新页表和 TLB；处理完<b>回到原指令重新执行</b>，所以重新执行时 TLB 命中。',
+    '时间按流程逐项加：TLB 命中 = 查 TLB + 访存；未命中 = 查 TLB + 读页表项 + 访存；缺页 = 查 TLB + 读页表项 + 缺页处理 + 查 TLB + 访存。漏掉最后一次访存是 2009-46 的老错。'],
+  form:`<label>情况<select id="f_s"><option value="hit">TLB 命中</option><option value="miss">TLB 未命中，页在内存</option><option value="fault">缺页</option></select></label>
+    <label>查 TLB（ns）<input id="f_t" type="number" min="0" step="any"></label>
+    <label>访存（ns）<input id="f_m" type="number" min="0" step="any"></label>
+    <label>缺页处理（ns）<input id="f_f" type="number" min="0" step="any"></label>
+    <button class="btn primary" type="button" data-run>演示</button>`,
+  presets:[['缺页（2024-45 数据）',{f_s:'fault',f_t:10,f_m:100,f_f:1e8}],['TLB 未命中',{f_s:'miss',f_t:10,f_m:100,f_f:1e8}],['TLB 命中',{f_s:'hit',f_t:10,f_m:100,f_f:1e8}]],
+  build(){const sc=$('f_s').value,t=+$('f_t').value,m=+$('f_m').value,pf=+$('f_f').value;if(![t,m,pf].every(x=>Number.isFinite(x)&&x>=0))return '时间填非负数。';
+    return framesFlow(sc,t,m,pf)}
+};
+const NODES={
+  A:[20,40,180,62,'CPU 给出虚拟地址','1234 5678H','k'],
+  B:[250,40,150,62,'查 TLB','页号 048H','k'],
+  C:[460,40,170,62,'得页框号','2EAH','g'],
+  D:[680,40,150,62,'拼物理地址','BAB4 5678H','g'],
+  E:[870,40,130,62,'访存','取操作数','p'],
+  F:[230,180,200,70,'读页表项（MMU，物理地址）','6540 0000H + 120H','b'],
+  G:[480,190,130,50,'有效位？','','k'],
+  H:[680,190,150,50,'写入 TLB','048H → 2EAH','k'],
+  I:[460,310,170,56,'缺页中断，进内核','','r'],
+  J:[680,310,210,56,'找页框，从磁盘调入','页 048H → 页框 2EAH','r'],
+  K:[680,410,210,66,'OS 改页表项（虚拟地址）','B8C0 0120H ← 2EAH','r'],
+  L:[680,520,210,70,'这次写也要转换（蓝线）','页 2E3H → 页框 195H','b'],
+  M:[20,310,180,62,'返回，重新执行','这条指令','k']};
+function drawFlow(st){let o='';const col={k:'var(--ink)',g:'var(--done)',p:'var(--pur)',b:'var(--q)',r:'var(--mv)'};
+  Object.entries(NODES).forEach(([k,[x,y,w,h,a,b,c]])=>{const on=(st.on||[]).includes(k);
+    o+=`<g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${k==='G'?24:7}" fill="var(--paper)" stroke="var(--line)" stroke-width="1.2"/>${T(x+w/2,y+(b?26:31),a,`text-anchor="middle" font-size="14" font-weight="600" ${on?'':'class="m"'}`)}${b?T(x+w/2,y+48,b,`text-anchor="middle" font-size="13" class="mono ${on?'':'m'}"`):''}</g>`;
+    if(on)o+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${k==='G'?24:7}" fill="none" stroke="${col[c]}" stroke-width="2.6"/>`});
+  const E=(id,d,c,lab,lx,ly,dash)=>(st.e||[]).includes(id)?PATH(d,c,2.4,dash)+(lab?T(lx,ly,lab,`font-size="13" font-weight="600" style="fill:${MK[c][0]}"`):''):'';
+  o+=E('AB','M200 71H246','k');
+  o+=E('BC','M400 71H456','g','命中',410,62);
+  o+=E('BF','M325 102V176','b','未命中',334,140);
+  o+=E('FG','M430 215H476','b');
+  o+=E('GH','M610 215H676','g','1',636,206);
+  o+=E('HC','M755 190V150H545V106','g');
+  o+=E('GI','M545 240V306','r','0',554,280);
+  o+=E('CD','M630 71H676','g');
+  o+=E('DE','M830 71H866','p');
+  o+=E('IJ','M630 338H676','r');
+  o+=E('JK','M785 366V406','r');
+  o+=E('KL','M785 476V516','b','',0,0,'6 4');
+  o+=E('KM','M680 443H110V376','k','含更新 TLB',380,436);
+  o+=E('MB','M110 310V140H300V106','k','再查 TLB',120,160);
+  /* counters */
+  const y=620;o+=`<g><rect x="20" y="${y}" width="980" height="${st.sum?92:60}" rx="8" fill="var(--hl)" stroke="var(--line)"/>${T(36,y+26,`这条指令访存 ${st.mem||0} 次（读页表项 ${st.pte||0} 次 + 取操作数 ${st.data||0} 次），查 TLB ${st.tlb||0} 次${st.pf?'，缺页 1 次':''}`,'font-size="14" font-weight="600"')}${T(36,y+48,'只数这条指令自己，缺页处理程序内部的访存算在“缺页处理时间”里','font-size="12" class="m"')}${st.sum?T(36,y+76,st.sum,'font-size="15" font-weight="700" class="g mono"'):''}</g>`;
+  return svg(1020,y+(st.sum?104:72),o)}
+function framesFlow(sc,t,m,pf){const st={on:[],e:[]};const F=[];const add=(on,e,o,t2,q)=>{st.on=st.on.concat(on);st.e=st.e.concat(e);Object.assign(st,o);F.push({q,s:drawFlow(st),t:t2,tal:[]})};
+  const fmt=x=>Number.isInteger(x)?String(x):String(+x.toFixed(3));
+  add(['A'],[],{},'CPU 执行指令，要读虚拟地址 <b>1234 5678H</b>（2024-45 的数据：页号 048H，偏移 34 5678H）。');
+  add(['B'],['AB'],{tlb:1},'MMU 先拿页号 048H 查 TLB（快表）。','页号 048H 在不在 TLB 里？');
+  if(sc==='hit'){
+    add(['C'],['BC'],{},'TLB 命中，直接得到页框号 <b>2EAH</b>，不用读页表。');
+    add(['D','E'],['CD','DE'],{mem:1,data:1},'页框号 2EAH 拼偏移 34 5678H = <b>BAB4 5678H</b>，访存取操作数。');
+    add([],[],{sum:`时间 = 查 TLB ${fmt(t)} + 访存 ${fmt(m)} = ${fmt(t+m)} ns`},`合计 <b>${fmt(t+m)} ns</b>。2009-46 的 25A5H 就是这种情况（110ns）。`);return F}
+  add(['F'],['BF'],{mem:1,pte:1},'TLB 未命中。MMU 用<span class="lb">页表项的物理地址</span>读页表：页表基址 6540 0000H + 048H × 4 = <b>6540 0120H</b>，这是一次访存。','未命中时，MMU 用哪个地址读页表项？');
+  add(['G'],['FG'],{},'看页表项的有效位（存在位）。');
+  if(sc==='miss'){
+    add(['H','C'],['GH','HC'],{},'有效位为 1，把“048H → 2EAH”写入 TLB，得到页框号 <b>2EAH</b>。');
+    add(['D','E'],['CD','DE'],{mem:2,data:1},'拼成 BAB4 5678H，访存取操作数。');
+    add([],[],{sum:`时间 = 查 TLB ${fmt(t)} + 读页表项 ${fmt(m)} + 访存 ${fmt(m)} = ${fmt(t+2*m)} ns`},`合计 <b>${fmt(t+2*m)} ns</b>。2009-46 的 2362H 就是这种情况（210ns）。`);return F}
+  add(['I'],['GI'],{pf:1},'有效位为 0，产生<b>缺页中断</b>，CPU 转去执行内核里的缺页处理程序。这条指令还没执行完。','有效位为 0 会怎样？');
+  add(['J'],['IJ'],{},'找一个页框（有空闲用空闲，没有就按置换算法淘汰一页），把页 048H 从磁盘调入页框 <b>2EAH</b>。');
+  add(['K'],['JK'],{},'操作系统改页表项。它运行在虚拟地址空间里，用的是<span class="lr">页表项的虚拟地址</span> <b>B8C0 0120H</b>（红线），把页框号 2EAH 写进去。','操作系统用哪个地址改页表项？');
+  add(['L'],['KL'],{},'这次写本身也要地址转换：B8C0 0120H 的页号 2E3H → 第 2E3H 项 → 页框 195H → <b>6540 0120H</b>（<span class="lb">蓝线</span>）。写到的正是 MMU 刚才读的那个页表项。');
+  add(['M'],['KM'],{},'同时更新 TLB（2009-46 把这些都算进缺页处理时间）。中断返回，<b>重新执行</b>刚才那条指令。');
+  add(['C'],['MB','BC'],{tlb:2},'重新执行时再查 TLB，这次<b>命中</b>，得页框号 2EAH。');
+  add(['D','E'],['CD','DE'],{mem:2,data:1},'拼成 BAB4 5678H，访存取操作数（<span class="lp">紫线</span>）。');
+  add([],[],{sum:`时间 = TLB ${fmt(t)} + 页表 ${fmt(m)} + 缺页 ${fmt(pf)} + TLB ${fmt(t)} + 访存 ${fmt(m)} = ${fmt(2*t+2*m+pf)} ns`},`合计 <b>${fmt(2*t+2*m+pf)} ns</b>。2009-46 的 1565H 就是这种情况（100 000 220ns）。不要漏最后的查 TLB 和访存。`);
+  return F}
+
+/* ---------------- mode 3: two-level self-map ---------------- */
+const TWO={
+  name:'拓展：两级页表自映射',
+  rules:[
+    '32 位地址、4KB 页、页表项 4B：一页放 1024 项，地址切成 <b>10 位页目录号 | 10 位页号 | 12 位偏移</b>。',
+    '自映射：页目录第 k 项填页目录自己的页框号。于是 1024 张页表在虚拟地址里连成一块 4MB，起点 = k × 4MB。',
+    '页表项虚拟地址 = 页表区起点 + <b>（高 20 位整体）× 4</b>。高 20 位就是“页目录号:页号”拼成的完整页号，和 2024-45 一级页表的红线是同一个式子。',
+    '页目录项虚拟地址 = 页表区起点 + k × 4KB + 页目录号 × 4。页目录自己在页表区里第 k 个 4KB。',
+    '本页是拓展，408 没考过；用来理解“页表本身也在虚拟地址空间里”。'],
+  form:`<label>自映射的页目录项 k<input id="t_k" type="text"></label>
+    <label>访问的虚拟地址<input id="t_va" type="text"></label>
+    <button class="btn primary" type="button" data-run>演示</button>`,
+  presets:[['仿 x86：k = 300H',{t_k:'300',t_va:'1234 5678'}]],
+  build(){const k=parseHex($('t_k').value),va=parseHex($('t_va').value);if(!Number.isFinite(k)||k>1023)return 'k 填 0～3FFH。';if(!Number.isFinite(va)||va>=P2(32))return '虚拟地址填 32 位十六进制。';
+    const d=Math.floor(va/P2(22)),pg=Math.floor(va/P2(12))%1024;if(d===k)return '访问地址落在页表区里了，换一个地址。';return framesTwo(k,va)}
+};
+function drawTwo(k,va,st){const d=Math.floor(va/P2(22)),pg=Math.floor(va/P2(12))%1024,off=va%4096,base=k*P2(22);let o='';
+  const v=st.bar==='pte'?base+Math.floor(va/4096)*4:st.bar==='pde'?base+k*4096+d*4:va;
+  const dd=Math.floor(v/P2(22)),pp=Math.floor(v/4096)%1024,oo=v%4096;
+  const nm=st.bar==='pte'?['页目录号','“页号”','偏移']:st.bar==='pde'?['页目录号','“页号”','偏移']:['页目录号','页号','页内偏移'];
+  o+=BAR(14,v,32,st.split?[{bits:10,name:`${nm[0]} ${hx(dd,10)}`,col:dd===k?'var(--q)':'var(--pur)',fill:dd===k?'var(--fb)':'var(--fp)'},{bits:10,name:`${nm[1]} ${hx(pp,10)}`,col:pp===k?'var(--q)':'var(--done)',fill:pp===k?'var(--fb)':'var(--fg)'},{bits:12,name:`${nm[2]} ${hx(oo,12)}`,col:'var(--muted)',fill:'var(--gray)'}]:null,st.bar==='pte'?'页表项虚拟地址':st.bar==='pde'?'页目录项虚拟地址':'访问的虚拟地址',st.bar?'r':'');
+  const y0=150;
+  /* VA space */
+  const items=[{id:0,a:'用户空间',b:`含 ${hx(va,32)} 所在页`},{id:2,a:`页表区 ${hx(base,32)} 起`,b:'4MB = 1024 张页表连在一起',fill:st.hlR?'var(--fb)':'',stroke:st.hlR?'var(--q)':''},{id:3,a:`  页表 ${hx(d,10)}`,b:`${hx(base+d*4096,32)} 起`,fill:st.hlPT?'var(--fg)':'',stroke:st.hlPT?'var(--done)':''},{id:5,a:`  页表 ${hx(k,10)} = 页目录`,b:`${hx(base+k*4096,32)} 起`,fill:st.hlPD?'var(--fb)':'',stroke:st.hlPD?'var(--q)':''}];
+  if(d>k){items[2].id=5;items[3].id=3}items.sort((a,b)=>a.id-b.id);items[items.length-1].last=true;
+  const L=COL(24,y0,250,'虚拟地址空间（示意）',items,50);o+=L.s;
+  /* page directory */
+  const ids=[...new Set([0,d,k,1023])].sort((a,b)=>a-b);
+  const ent=ids.map(id=>({id,a:`第 ${hx(id,10)} 项`,b:`偏移 +${hx(id*4,12)}`,c:id===k?'自己的页框':id===d?'页表 '+hx(d,10)+' 的页框':'',cc:id===k?'b':'g',fill:(id===k&&st.hk)?'var(--fb)':(id===d&&st.hd)?'var(--fg)':'',stroke:(id===k&&st.hk)?'var(--q)':(id===d&&st.hd)?'var(--done)':''}));
+  ent[ent.length-1].last=false;
+  const M=COL(390,y0,250,'页目录（一页，1024 项）',ent);o+=M.s;
+  const pids=[...new Set([0,pg,1023])].sort((a,b)=>a-b);
+  const pent=pids.map(id=>({id,a:`第 ${hx(id,10)} 项`,b:`偏移 +${hx(id*4,12)}`,c:id===pg?'数据页框':'',cc:'p',fill:(id===pg&&st.hp)?'var(--fp)':'',stroke:(id===pg&&st.hp)?'var(--pur)':''}));
+  pent[pent.length-1].last=false;
+  const P=COL(750,y0,230,`页表 ${hx(d,10)}（一页）`,pent);o+=P.s;
+  const yB=Math.max(L.bottom,M.bottom,P.bottom);let H=yB+30;
+  if(st.walkD)o+=CURVE(274,L.pos[0],390,M.pos[d]-6,'p',2.4);
+  if(st.walkP)o+=CURVE(640,M.pos[d],750,P.pos[pg],'g',2.4);
+  if(st.self){const yk=M.pos[k];o+=PATH(`M640 ${yk}C 700 ${yk} 700 ${y0-40} 600 ${y0-26}`,'b',2.4,'7 5');o+=T(702,yk+36,'自映射','font-size="13" font-weight="600" class="b"')}
+  if(st.region){o+=CURVE(390,M.pos[k]+6,274,L.pos[items.find(x=>x.a.startsWith('页表区')).id],'b',2.4,'7 5')}
+  if(st.note){o+=`<g><rect x="24" y="${yB+16}" width="956" height="${st.note.length*22+16}" rx="6" fill="var(--hl)" stroke="var(--line)"/>${st.note.map((s,i)=>T(40,yB+40+i*22,s,'font-size="14"')).join('')}</g>`;H=yB+st.note.length*22+44}
+  return svg(1000,H,o)}
+function framesTwo(k,va){const d=Math.floor(va/P2(22)),pg=Math.floor(va/P2(12))%1024,off=va%4096,base=k*P2(22),vpn=Math.floor(va/4096),pteV=base+vpn*4,pdeV=base+k*4096+d*4;
+  const st={};const F=[];let tal=[];const add=(o,t,q)=>{Object.assign(st,o);F.push({q,s:drawTwo(k,va,st),t,tal:tal.slice()})};
+  add({},`两级页表：页目录 1024 项占一页，每张页表也占一页。自映射：页目录<b>第 ${hx(k,10)} 项</b>填页目录自己所在的页框号。`);
+  add({split:1,walkD:1,walkP:1,hd:1,hp:1,hlPT:0},`${hx(va,32)} = 页目录号 <b>${hx(d,10)}</b> | 页号 <b>${hx(pg,10)}</b> | 偏移 <b>${hx(off,12)}</b>。正常访问：页目录第 ${hx(d,10)} 项 → 页表 ${hx(d,10)} → 第 ${hx(pg,10)} 项 → 数据页框。`,`${hx(va,32)} 怎么切？`);
+  tal.push(['拆分','10 | 10 | 12',`${hx(d,10)} | ${hx(pg,10)} | ${hx(off,12)}`,'—']);
+  add({self:1,hk:1},`MMU 查到第 ${hx(k,10)} 项时，以为找到了一张“页表”，其实拿到的是页目录自己。`);
+  add({region:1,hlR:1},`所以虚拟地址 ${hx(k,10)} × 4MB = <b>${hx(base,32)}</b> 起的 4MB 里，第 i 个 4KB 就是页表 i；第 ${hx(k,10)} 个 4KB 是页目录本身。`,'页表在虚拟地址空间里放在哪？');
+  tal.push(['页表区起点',`${hx(k,10)} × 4MB`,hx(base,32),'—']);
+  add({bar:'pte',split:1,hlPT:1,hlR:0},`页表项虚拟地址 = ${hx(base,32)} + 完整页号 ${hx(vpn,20)} × 4 = <b>${hx(pteV,32)}</b>（<span class="lr">红线</span>，和 2024-45 同一个式子）。切开看：页目录号 ${hx(k,10)} 走回页目录自己，“页号” ${hx(d,10)} 取到页表 ${hx(d,10)} 的页框，偏移 ${hx(d===d?pg*4:0,12)} = ${hx(pg,10)} × 4 正好是页表项。`,'这个地址的页表项虚拟地址？');
+  tal.push(['页表项虚拟地址',`${hx(base,32)} + ${hx(vpn,20)} × 4`,hx(pteV,32),'红']);
+  add({bar:'pde',split:1,hlPD:1,hlPT:0},`页目录项虚拟地址 = ${hx(base,32)} + ${hx(k,10)} × 4KB + ${hx(d,10)} × 4 = <b>${hx(pdeV,32)}</b>。切开是 ${hx(k,10)} | ${hx(k,10)} | ${hx(d*4,12)}：走两次自映射项，落到页目录本身，偏移 ${hx(d,10)} × 4。`,'它的页目录项的虚拟地址？');
+  tal.push(['页目录项虚拟地址',`${hx(base,32)} + ${hx(k,10)} × 4KB + ${hx(d,10)} × 4`,hx(pdeV,32),'红']);
+  add({note:[`一级（2024-45）：页表只有一页，页表所在页的那一项指向自己。`,`两级：页目录的第 k 项指向自己，页表区 = k × 4MB 起的 4MB，页目录 = 页表区里的第 k 页。`,`两种都是“表项地址 = 表的起始虚拟地址 + 编号 × 项大小”，再切开查表就得到它的物理地址（蓝线）。`]},`做完。和 2024-45 对照：表项地址都是“起始 + 编号 × 4”。`);
+  return F}
+
+/* ---------------- player ---------------- */
+const MODES={lines:LINES,flow:FLOW,two:TWO};let mode='lines',frames=[],at=0,timer=null;
+let autoplay=true;const SPD=[4200,3200,2400,1800,1300,900,600];const delay=()=>SPD[+$('speed').value];
+function showSpd(){$('spdv').textContent=(delay()/1000)+' 秒/步'}
+function nextIdx(k){let j=k+1;if(!$('guess').checked)while(j<frames.length-1&&frames[j].q)j++;return Math.min(j,frames.length-1)}
+function prevIdx(k){let j=k-1;if(!$('guess').checked)while(j>0&&frames[j].q)j--;return Math.max(j,0)}
+function stop(){if(timer){clearTimeout(timer);timer=null}}
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;let shown=null,anims=[];
+function animateNew(prevSvg){anims.forEach(a=>{try{a()}catch(e){}});anims=[];
+  const svgEl=$('view').querySelector('svg');if(!svgEl||RM||prevSvg==null)return;
+  const tpl=document.createElement('template');tpl.innerHTML=prevSvg;const old=new Map();const ps=tpl.content.querySelector('svg');
+  if(ps)[...ps.children].forEach(c=>{const h=c.outerHTML;old.set(h,(old.get(h)||0)+1)});
+  const dur=Math.max(450,Math.min(1300,(timer?delay():1500)*0.6));let lines=0;
+  [...svgEl.children].forEach(c=>{const h=c.outerHTML;if(old.get(h)){old.set(h,old.get(h)-1);return}const tag=c.tagName.toLowerCase();if(tag==='defs')return;
+    if(tag==='path'&&(c.getAttribute('fill')||'none')==='none'){let L=0;try{L=c.getTotalLength()}catch(e){}if(!L)return;
+      const me=c.getAttribute('marker-end'),da=c.getAttribute('stroke-dasharray');const d0=lines++*90;
+      if(me)c.removeAttribute('marker-end');
+      const a=c.animate([{strokeDasharray:`${L} ${L}`,strokeDashoffset:L},{strokeDasharray:`${L} ${L}`,strokeDashoffset:0}],{duration:dur,delay:d0,easing:'ease-in-out',fill:'backwards'});
+      let dot=null,raf=0;if(me){dot=document.createElementNS('http://www.w3.org/2000/svg','circle');dot.setAttribute('r','6');dot.setAttribute('fill','var(--cmp)');dot.setAttribute('stroke','var(--paper)');dot.style.opacity=0;svgEl.appendChild(dot);
+        const t0=performance.now()+d0;const stepf=now=>{const t=Math.min(1,Math.max(0,(now-t0)/dur));const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;const pt=c.getPointAtLength(e*L);dot.setAttribute('cx',pt.x);dot.setAttribute('cy',pt.y);dot.style.opacity=now<t0?0:1;if(t<1)raf=requestAnimationFrame(stepf);else dot.remove()};raf=requestAnimationFrame(stepf)}
+      const done=()=>{if(me)c.setAttribute('marker-end',me);if(da)c.setAttribute('stroke-dasharray',da);else c.removeAttribute('stroke-dasharray');if(dot)dot.remove();cancelAnimationFrame(raf)};
+      a.onfinish=done;anims.push(()=>{a.cancel();done()});return}
+    if(tag==='polygon'||tag==='rect'){let bb={width:1,height:1};try{bb=c.getBBox()}catch(e){}const tall=bb.height>bb.width*1.5;
+      const a=c.animate([{clipPath:tall?'inset(0 0 100% 0)':'inset(0 100% 0 0)',opacity:.35},{clipPath:'inset(0 0 0 0)',opacity:1}],{duration:dur,easing:'ease-in-out',fill:'backwards'});anims.push(()=>a.cancel());return}
+    const a=c.animate([{opacity:0},{opacity:1}],{duration:dur*0.5,delay:tag==='text'?dur*0.55:dur*0.2,fill:'backwards'});anims.push(()=>a.cancel())});}
+function render(anim){const f=frames[at];if(!f)return;const prev=anim&&shown!=null?shown:null;$('view').innerHTML=f.s;shown=f.s;if(anim)animateNew(prev);else{anims.forEach(a=>{try{a()}catch(e){}});anims=[]}
+  $('note').innerHTML=f.q?`<span class="ask">先想：${esc(f.q)}</span>`:f.t;
+  const tl=f.tal||[];$('tally').innerHTML=tl.length?`<table class="res"><tr><th>问</th><th>算式</th><th>答案</th><th>哪条线</th></tr>${tl.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="ans">${r[2]}</td><td class="ln">${r[3]}</td></tr>`).join('')}</table>`:'';
+  $('scrub').max=frames.length-1;$('scrub').value=at;$('count').textContent=`${at+1} / ${frames.length}`;$('play').textContent=timer?'暂停':'播放'}
+function tick(){if(at<frames.length-1){at=nextIdx(at);timer=setTimeout(tick,frames[at].q?delay()*2:delay());render(true)}else{timer=null;render()}}
+function play(){if(timer){stop();$('play').textContent='播放';return}if(at===frames.length-1){at=0;render()}timer=setTimeout(tick,600);$('play').textContent='暂停'}
+function run(){stop();const r=MODES[mode].build();if(typeof r==='string'){$('err').textContent=r;return}$('err').textContent='';
+  frames=[];r.forEach(st=>{if(st.q){const prev=frames.length?frames[frames.length-1]:{s:st.s,tal:[]};frames.push({s:prev.s,q:st.q,tal:prev.tal});}frames.push({s:st.s,t:st.t,tal:st.tal})});at=0;shown=null;render();if(autoplay)play()}
+function applyPreset(v){for(const [k,x] of Object.entries(v)){const el=$(k);if(!el)continue;if(el.type==='checkbox')el.checked=!!x;else el.value=x}run()}
+function setMode(m){mode=m;try{localStorage.setItem('os-lines-mode',m)}catch(e){}
+  $('modes').querySelectorAll('.chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
+  const M=MODES[m];$('rules').innerHTML=M.rules.map(x=>`<li>${x}</li>`).join('');$('form').innerHTML=M.form;
+  $('presets').innerHTML=M.presets.length?'预设：'+M.presets.map(([n],i)=>`<button class="btn" type="button" data-p="${i}">${esc(n)}</button>`).join(''):'';
+  $('presets').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>applyPreset(M.presets[+b.dataset.p][1]));
+  const rb=$('form').querySelector('[data-run]');if(rb)rb.onclick=run;
+  if(M.presets.length)applyPreset(M.presets[0][1]);else run()}
+$('modes').innerHTML=Object.entries(MODES).map(([k,v])=>`<button class="chip" type="button" data-m="${k}">${v.name}</button>`).join('');
+$('modes').querySelectorAll('.chip').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+$('first').onclick=()=>{stop();at=0;render()};$('prev').onclick=()=>{stop();at=prevIdx(at);render()};$('next').onclick=()=>{stop();const j=nextIdx(at);const fw=j===at+1||(frames[at]&&frames[at].q);at=j;render(fw)};
+$('play').onclick=play;$('scrub').oninput=e=>{stop();at=+e.target.value;render()};$('speed').oninput=showSpd;$('guess').onchange=()=>{if(frames[at]&&frames[at].q&&!$('guess').checked){at=nextIdx(at-1);render()}};
+document.addEventListener('keydown',e=>{const t=e.target.tagName;if(t==='INPUT'||t==='SELECT'||t==='TEXTAREA'||(t==='BUTTON'&&e.key===' '))return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();play()}});
+showSpd();let saved='lines';try{saved=localStorage.getItem('os-lines-mode')||'lines'}catch(e){}setMode(MODES[saved]?saved:'lines');
+</script>
+</body>
+</html>

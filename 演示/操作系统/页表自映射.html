@@ -107,7 +107,7 @@ svg text{font-family:var(--mono)}
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="地址转换.html">地址转换</a><a href="CPU调度.html">CPU 调度</a><a href="磁盘调度.html">磁盘调度</a></div>
+  <div class="top"><a href="../index.html">← 可视化目录</a><a href="../../index.html">温故复习网站</a><a href="地址转换.html">地址转换</a><a href="CPU调度.html">CPU 调度</a><a href="磁盘调度.html">磁盘调度</a><a href="访存三条线.html">页表项地址的三条线</a></div>
   <header>
     <h1>页表项的两个地址（2024-45）</h1>
     <p class="sub">2024-45 新在一点：页表本身也放在进程的虚拟地址空间里，所以<b>同一个页表项有两个地址</b>。操作系统改页表时用它的虚拟地址，MMU 查页表时用它的物理地址。页表所在的那一页，也要靠页表里的一项来映射，这一项就指向页表自己。题目和答案对照王道 2026 第 3.2 节综合题 21。</p>
